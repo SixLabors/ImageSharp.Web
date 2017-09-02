@@ -1,12 +1,8 @@
 
 # <img src="https://raw.githubusercontent.com/SixLabors/ImageSharp.Web/master/build/icons/imagesharp-logo-256.png" alt="ImageSharp" width="52"/> ImageSharp.Web
 
-**ImageSharp.Web** is a new, fully featured, fully managed, cross-platform, 2D graphics API designed to allow the processing of images without the use of `System.Drawing`. 
+**ImageSharp.Web** is piece of aspnetcore middleware leverage the ImageSharp graphics library.
 
-Built against .Net Standard 1.1 ImageSharp can be used in device, cloud, and embedded/IoT scenarios. 
-
-> **ImageSharp** has made excellent progress and contains many great features but is still considered by us to be still in early stages (alpha). As such, we cannot support its use on production environments until the library reaches release candidate status.
->
 > Pre-release downloads are available from the [MyGet package repository](https://www.myget.org/gallery/imagesharp).
 
 [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/SixLabors/ImageSharp.Web/master/APACHE-2.0-LICENSE.txt)
