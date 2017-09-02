@@ -1,5 +1,4 @@
 language: csharp
-solution: ImageSharp.sln
 
 matrix:
   include:
@@ -34,7 +33,7 @@ before_install:
 addons:
   coverity_scan:
     project:
-      name: "SixLabors/ImageSharp"
+      name: "SixLabors/ImageSharp.Web"
       description: "Build submitted via Travis CI"
     notification_email: james_south@hotmail.com
     build_command_prepend: "dotnet restore"
