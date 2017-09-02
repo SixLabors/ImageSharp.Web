@@ -15,7 +15,7 @@ if not "%errorlevel%"=="0" goto failure
 
 if not "%CI%" == "True"  (
     ECHO NOT on CI server running tests
-    dotnet test ./tests/ImageSharp.Web.Tests/ImageSharp.Tests.csproj --no-build -c Release
+    dotnet test ./tests/ImageSharp.Web.Tests/ImageSharp.Web.Tests.csproj --no-build -c Release
 )
 if not "%errorlevel%"=="0" goto failure
 

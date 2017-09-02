@@ -66,9 +66,11 @@ namespace SixLabors.ImageSharp.Web.Commands
             ULong
         };
 
-        /// <summary>
-        /// The <see cref="ImageSharp.Rgba32"/> type
-        /// </summary>
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+                              /// <summary>
+                              /// The <see cref="ImageSharp.Rgba32"/> type
+                              /// </summary>
         public static readonly Type Rgba32 = typeof(Rgba32);
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     }
 }
