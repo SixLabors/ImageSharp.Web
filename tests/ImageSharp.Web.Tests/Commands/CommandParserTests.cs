@@ -1,14 +1,16 @@
-﻿namespace SixLabors.ImageSharp.Web.Tests.Commands
+﻿// Copyright (c) Six Labors and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using global::ImageSharp;
+using global::ImageSharp.Processing;
+using SixLabors.ImageSharp.Web.Commands;
+using Xunit;
+
+namespace SixLabors.ImageSharp.Web.Tests.Commands
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using global::ImageSharp;
-    using global::ImageSharp.Processing;
-    using ImageSharp.Web.Commands;
-
-    using Xunit;
-
     public class CommandParserTests
     {
         [Fact]
