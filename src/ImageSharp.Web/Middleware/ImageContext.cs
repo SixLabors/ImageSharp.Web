@@ -132,12 +132,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="statusCode">The status code</param>
         /// <param name="contentType">The content type</param>
         /// <returns>The <see cref="Task"/></returns>
-        public async Task SendStatusAsync(int statusCode, string contentType)
+        public Task SendStatusAsync(int statusCode, string contentType)
         {
             this.ApplyResponseHeaders(statusCode, contentType);
 
             // this.logger.LogHandled(statusCode, SubPath);
-            await ResponseConstants.CompletedTask;
+            return ResponseConstants.CompletedTask;
         }
 
         /// <summary>

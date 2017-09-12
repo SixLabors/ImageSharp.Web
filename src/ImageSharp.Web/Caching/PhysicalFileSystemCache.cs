@@ -75,7 +75,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         }
 
         /// <inheritdoc/>
-        public async Task<CachedInfo> IsExpiredAsync(string key, DateTime minDateUtc)
+        public Task<CachedInfo> IsExpiredAsync(string key, DateTime minDateUtc)
         {
             // TODO do we use an in memory cache to reduce IO?
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
@@ -86,8 +86,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             long length = exists ? fileInfo.Length : 0;
             bool expired = !exists || fileInfo.LastModified.UtcDateTime < minDateUtc;
 
-            // TODO: Task.FromResult ok?
-            return await Task.FromResult(new CachedInfo(expired, lastModified, length));
+            return Task.FromResult(new CachedInfo(expired, lastModified, length));
         }
 
         /// <inheritdoc/>

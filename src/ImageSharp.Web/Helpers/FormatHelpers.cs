@@ -12,7 +12,7 @@ namespace SixLabors.ImageSharp.Web.Helpers
     /// <summary>
     /// Helper utilities for image formats
     /// </summary>
-    internal class FormatHelpers
+    public class FormatHelpers
     {
         /// <summary>
         /// Returns the correct content type (mimetype) for the given cached image key.
@@ -23,8 +23,7 @@ namespace SixLabors.ImageSharp.Web.Helpers
         public static string GetContentType(Configuration configuration, string key)
         {
             string extension = Path.GetExtension(key).Replace(".", string.Empty);
-            IImageFormat format = configuration.FindFormatByFileExtensions(extension);
-            return format.DefaultMimeType;
+            return configuration.ImageFormats.First(f => f.FileExtensions.Contains(extension)).DefaultMimeType;
         }
 
         /// <summary>
@@ -63,7 +62,7 @@ namespace SixLabors.ImageSharp.Web.Helpers
         /// <returns>The <see cref="string"/></returns>
         public static string GetExtensionOrDefault(Configuration configuration, string uri)
         {
-            return GetExtension(configuration, uri) ?? configuration.ImageFormats.First(x => x.FileExtensions.Any()).FileExtensions.First();
+            return GetExtension(configuration, uri) ?? configuration.ImageFormats.First().FileExtensions.First();
         }
     }
 }
