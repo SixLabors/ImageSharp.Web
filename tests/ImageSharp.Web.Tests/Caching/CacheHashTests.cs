@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.IO;
-using global::ImageSharp;
+using global::SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Web.Caching;
 using Xunit;
 

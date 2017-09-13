@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
-using ImageSharp;
+using SixLabors.ImageSharp;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.Web.Commands;
 
@@ -34,7 +34,7 @@ namespace SixLabors.ImageSharp.Web.Processors
 
             if (background != default(Rgba32))
             {
-                image.Image.BackgroundColor(background);
+                image.Image.Mutate(x => x.BackgroundColor(background));
             }
 
             return image;

@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using ImageSharp;
-using ImageSharp.Formats;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Commands;
@@ -52,7 +52,7 @@ namespace SixLabors.ImageSharp.Web.Processors
 
             if (!string.IsNullOrWhiteSpace(extension))
             {
-                IImageFormat format = this.options.Configuration.FindFormatByFileExtensions(extension);
+                IImageFormat format = this.options.Configuration.FindFormatByFileExtension(extension);
 
                 if (format != null)
                 {

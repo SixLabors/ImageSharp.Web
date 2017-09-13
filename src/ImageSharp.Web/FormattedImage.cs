@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using ImageSharp;
-using ImageSharp.Formats;
-using ImageSharp.PixelFormats;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.PixelFormats;
 using ISImage = ImageSharp.Image;
 
 namespace SixLabors.ImageSharp.Web

@@ -3,7 +3,7 @@
 
 using System.Buffers;
 
-namespace ImageSharp.Memory
+namespace SixLabors.ImageSharp.Memory
 {
     /// <summary>
     /// Provides a resource pool that enables reusing instances of value type arrays for image data <see cref="T:Byte[]"/>.
