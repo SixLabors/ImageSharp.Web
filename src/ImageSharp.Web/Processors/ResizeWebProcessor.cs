@@ -2,9 +2,9 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
-using ImageSharp;
-using ImageSharp.Processing;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.Primitives;
 
@@ -72,7 +72,7 @@ namespace SixLabors.ImageSharp.Web.Processors
 
             if (options != null)
             {
-                image.Image.Resize(options);
+                image.Image.Mutate(x => x.Resize(options));
             }
 
             return image;

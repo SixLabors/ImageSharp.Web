@@ -6,8 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using ImageSharp;
-using ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace SixLabors.ImageSharp.Web.Commands.Converters
 {

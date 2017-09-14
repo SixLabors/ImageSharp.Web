@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using global::ImageSharp;
-using global::ImageSharp.Processing;
+using global::SixLabors.ImageSharp;
+using global::SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Web.Commands;
 using Xunit;
 

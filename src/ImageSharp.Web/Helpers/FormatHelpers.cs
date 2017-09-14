@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 using System.Linq;
-using ImageSharp;
-using ImageSharp.Formats;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 
 namespace SixLabors.ImageSharp.Web.Helpers
 {

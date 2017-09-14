@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
-using ImageSharp;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Web.Middleware;
 
 namespace SixLabors.ImageSharp.Web.DependencyInjection

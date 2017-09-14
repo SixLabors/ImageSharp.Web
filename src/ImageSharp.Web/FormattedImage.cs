@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using ImageSharp;
-using ImageSharp.Formats;
-using ImageSharp.PixelFormats;
-using ISImage = ImageSharp.Image;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace SixLabors.ImageSharp.Web
 {
@@ -69,7 +68,7 @@ namespace SixLabors.ImageSharp.Web
         /// <returns>A formatted image</returns>
         public static FormattedImage Load(Configuration configuation, byte[] source)
         {
-            var image = ISImage.Load(configuation, source, out IImageFormat format);
+            var image = ImageSharp.Image.Load(configuation, source, out IImageFormat format);
             return new FormattedImage(image, format);
         }
     }

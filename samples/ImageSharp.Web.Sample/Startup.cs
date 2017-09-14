@@ -10,11 +10,11 @@ using Microsoft.Extensions.Logging;
 
 namespace SixLabors.ImageSharp.Web.Sample
 {
-    using ImageSharp.Web.Caching;
-    using ImageSharp.Web.Commands;
-    using ImageSharp.Web.DependencyInjection;
-    using ImageSharp.Web.Processors;
-    using ImageSharp.Web.Resolvers;
+    using SixLabors.ImageSharp.Web.Caching;
+    using SixLabors.ImageSharp.Web.Commands;
+    using SixLabors.ImageSharp.Web.DependencyInjection;
+    using SixLabors.ImageSharp.Web.Processors;
+    using SixLabors.ImageSharp.Web.Resolvers;
 
     public class Startup
     {
