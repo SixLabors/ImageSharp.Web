@@ -38,7 +38,7 @@
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="0.1.0-pullrequest0299-4410" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="0.1.0-ci4417" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
