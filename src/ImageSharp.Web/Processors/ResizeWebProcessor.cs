@@ -2,9 +2,9 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
-using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.Primitives;
 

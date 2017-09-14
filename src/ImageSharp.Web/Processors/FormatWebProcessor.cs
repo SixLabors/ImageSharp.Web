@@ -3,10 +3,10 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Middleware;
 

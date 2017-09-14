@@ -2,8 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
-using SixLabors.ImageSharp;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 
 namespace SixLabors.ImageSharp.Web.Processors
 {

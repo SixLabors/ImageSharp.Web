@@ -67,7 +67,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         };
 
         /// <summary>
-        /// The <see cref="global::ImageSharp.Rgba32"/> type
+        /// The <see cref="global::SixLabors.ImageSharp.Rgba32"/> type
         /// </summary>
         public static readonly Type Rgba32 = typeof(Rgba32);
     }
