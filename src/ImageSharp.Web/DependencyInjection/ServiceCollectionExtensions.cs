@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
@@ -26,8 +27,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpBuilder AddImageSharp(this IServiceCollection services)
         {
             Guard.NotNull(services, nameof(services));
-
-            services.AddSingleton<IConfigureOptions<ImageSharpMiddlewareOptions>, ImageSharpConfiguration>();
 
             IImageSharpCoreBuilder builder = AddImageSharpCore(services);
 
@@ -65,7 +64,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         {
             Guard.NotNull(services, nameof(services));
 
-            services.AddSingleton<IConfigureOptions<ImageSharpMiddlewareOptions>, ImageSharpConfiguration>();
+            services.TryAddTransient<IConfigureOptions<ImageSharpMiddlewareOptions>, ImageSharpConfiguration>();
 
             return new ImageSharpCoreBuilder(services);
         }
