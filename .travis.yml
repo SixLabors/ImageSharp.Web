@@ -5,11 +5,11 @@ matrix:
     - os: linux # Ubuntu 14.04
       dist: trusty
       sudo: required
-      dotnet: 1.0.1
+      dotnet: 2.0.0
       mono: latest
 #    - os: osx # OSX 10.11
 #      osx_image: xcode7.3.1
-#      dotnet: 1.0.0-preview2-003121
+#      dotnet: 2.0.0
 #      mono: latest
 
 branches:
@@ -19,6 +19,7 @@ branches:
 
 script:
   - dotnet restore
+  - dotnet test tests/ImageSharp.Web.Tests/ImageSharp.Web.Tests.csproj -c Release -f "netcoreapp2.0"
   - dotnet test tests/ImageSharp.Web.Tests/ImageSharp.Web.Tests.csproj -c Release -f "netcoreapp1.1"
 
 env:
@@ -39,3 +40,10 @@ addons:
     build_command_prepend: "dotnet restore"
     build_command:   "dotnet build -c Release"
     branch_pattern: coverity_scan
+  apt:
+    # Install framework 1.1.2 in order to run tests on netcoreapp1.1, see https://codeblog.jonskeet.uk/2017/08/15/using-net-core-2-0-sdk-on-travis/
+    sources:
+    - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-trusty-prod trusty main'
+      key_url: 'https://packages.microsoft.com/keys/microsoft.asc'
+    packages:
+    - dotnet-sharedframework-microsoft.netcore.app-1.1.2
