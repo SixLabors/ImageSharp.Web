@@ -174,6 +174,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 using (var image = FormattedImage.Load(this.options.Configuration, inBuffer))
                 {
                     image.Process(this.logger, this.processors, commands);
+                    this.options.OnBeforeSave(image);
                     image.Save(outStream);
                 }
 
