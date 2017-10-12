@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ImageSharp.Web.Tests
+namespace SixLabors.ImageSharp.Web.Tests
 {
     public static class StaticFilesTestServer
     {
