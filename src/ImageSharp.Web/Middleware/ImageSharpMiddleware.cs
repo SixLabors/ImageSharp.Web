@@ -118,7 +118,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public async Task Invoke(HttpContext context)
         {
             IDictionary<string, string> commands = this.uriParser.ParseUriCommands(context);
-            this.options.OnValidate(new ImageValidationContext(context, commands, CommandParser.Instance));
+            this.options.OnValidate?.Invoke(new ImageValidationContext(context, commands, CommandParser.Instance));
 
             if (!commands.Any() || !commands.Keys.Intersect(this.knownCommands).Any())
             {
@@ -174,13 +174,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 using (var image = FormattedImage.Load(this.options.Configuration, inBuffer))
                 {
                     image.Process(this.logger, this.processors, commands);
-                    this.options.OnBeforeSave(image);
+                    this.options.OnBeforeSave?.Invoke(image);
                     image.Save(outStream);
                 }
 
                 // Allow for any further optimization of the image. Always reset the position just in case.
                 outStream.Position = 0;
-                this.options.OnProcessed(new ImageProcessingContext(context, outStream, Path.GetExtension(key)));
+                this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, Path.GetExtension(key)));
                 outStream.Position = 0;
                 int outLength = (int)outStream.Length;
 
