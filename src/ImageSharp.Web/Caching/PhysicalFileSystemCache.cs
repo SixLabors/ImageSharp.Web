@@ -85,7 +85,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             DateTimeOffset lastModified = exists ? fileInfo.LastModified : DateTimeOffset.MinValue;
             long length = exists ? fileInfo.Length : 0;
             bool expired;
-            if (exists && fileInfo.LastModified.UtcDateTime < minDateUtc)
+            if (exists && fileInfo.LastModified.UtcDateTime > minDateUtc)
             {
                 expired = false;
             }
