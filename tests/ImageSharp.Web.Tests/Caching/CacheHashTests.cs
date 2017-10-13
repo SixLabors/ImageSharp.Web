@@ -2,9 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.IO;
-using global::SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Web.Caching;
 using Xunit;
+using SixLabors.ImageSharp.Web.Caching;
 
 namespace SixLabors.ImageSharp.Web.Tests.Caching
 {

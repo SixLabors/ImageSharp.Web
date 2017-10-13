@@ -51,6 +51,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
             };
 
         /// <summary>
+        /// Gets or sets the additional method that can be used for final manipulation before the image is saved.
+        /// This is called after image has been processed, but before the image has been saved to the output stream for caching.
+        /// This can be used to alter the metadata of the resultant image.
+        /// </summary>
+        public Action<FormattedImage> OnBeforeSave { get; set; } = _ => { };
+
+        /// <summary>
         /// Gets or sets the additional processing method.
         /// This is called after image has been processed, but before the result has been cached.
         /// This can be used to further optimize the resultant image.

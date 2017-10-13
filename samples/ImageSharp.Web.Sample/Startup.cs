@@ -33,6 +33,7 @@ namespace SixLabors.ImageSharp.Web.Sample
             //            options.MaxBrowserCacheDays = 7;
             //            options.MaxCacheDays = 365;
             //            options.OnValidate = _ => { };
+            //            options.OnBeforeSave = _ => { };
             //            options.OnProcessed = _ => { };
             //            options.OnPrepareResponse = _ => { };
             //        });
@@ -53,6 +54,7 @@ namespace SixLabors.ImageSharp.Web.Sample
             //                options.MaxBrowserCacheDays = 7;
             //                options.MaxCacheDays = 365;
             //                options.OnValidate = _ => { };
+            //                options.OnBeforeSave = _ => { };
             //                options.OnProcessed = _ => { };
             //                options.OnPrepareResponse = _ => { };
             //            })

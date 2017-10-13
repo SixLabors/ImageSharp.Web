@@ -4,8 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using global::SixLabors.ImageSharp;
-using global::SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Web.Commands;
 using Xunit;
 
@@ -28,17 +27,18 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         };
 
         const double Pi = 3.14159265358979;
-        static string PiString = Pi.ToString(CultureInfo.InvariantCulture);
-        static double RoundedPI = Math.Round(Pi, MidpointRounding.AwayFromZero);
+        static readonly string PiString = Pi.ToString(CultureInfo.InvariantCulture);
+        static readonly double RoundedPi = Math.Round(Pi, MidpointRounding.AwayFromZero);
+
         public static TheoryData<object, string> RealValues = new TheoryData<object, string> {
-            { (sbyte)RoundedPI, PiString },
-            { (byte)RoundedPI, PiString},
-            { (short)RoundedPI, PiString },
-            { (ushort)RoundedPI, PiString },
-            { (int)RoundedPI, PiString },
-            { (uint)RoundedPI, PiString },
-            { (long)RoundedPI, PiString },
-            { (ulong)RoundedPI, PiString },
+            { (sbyte)RoundedPi, PiString },
+            { (byte)RoundedPi, PiString},
+            { (short)RoundedPi, PiString },
+            { (ushort)RoundedPi, PiString },
+            { (int)RoundedPi, PiString },
+            { (uint)RoundedPi, PiString },
+            { (long)RoundedPi, PiString },
+            { (ulong)RoundedPi, PiString },
             { (float)Pi, PiString },
             { (double)Pi, PiString},
             { (decimal)Pi, PiString},
@@ -46,7 +46,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
 
         public static TheoryData<object, string> EnumValues = new TheoryData<object, string> {
             { ResizeMode.Max, "max" },
-            { ResizeMode.Crop, "this is not an enum value" }, // unknown returns defualt
+            { ResizeMode.Crop, "this is not an enum value" }, // Unknown returns default
         };
 
         public static TheoryData<object, string> IntegralArrays = new TheoryData<object, string> {
@@ -54,7 +54,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         };
 
         public static TheoryData<object, string> RealArrays = new TheoryData<object, string> {
-            { new float[] { 1.667F, 2.667F, 3.667F, 4.667F }, "1.667,2.667,3.667,4.667" },
+            { new[] { 1.667F, 2.667F, 3.667F, 4.667F }, "1.667,2.667,3.667,4.667" },
         };
 
         public static TheoryData<object, string> IntegralLists = new TheoryData<object, string> {

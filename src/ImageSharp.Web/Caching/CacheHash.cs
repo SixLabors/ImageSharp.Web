@@ -3,7 +3,6 @@
 
 using System.Security.Cryptography;
 using System.Text;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Web.Helpers;
 
 namespace SixLabors.ImageSharp.Web.Caching
