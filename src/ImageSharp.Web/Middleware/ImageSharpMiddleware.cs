@@ -27,7 +27,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// The keylock used for limiting identical requests
         /// </summary>
-        private readonly AsyncKeyLock keyLock = new AsyncKeyLock();
+        private readonly IAsyncKeyLock asyncKeyLock;
 
         /// <summary>
         /// The function processing the Http request.
@@ -79,6 +79,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="resolvers">A collection of <see cref="IImageResolver"/> instances used to resolve images</param>
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images</param>
         /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images</param>
+        /// <param name="asyncKeyLock">An <see cref="IAsyncKeyLock"/> instance used for providing locking during processing</param>
         public ImageSharpMiddleware(
             RequestDelegate next,
             IOptions<ImageSharpMiddlewareOptions> options,
@@ -86,7 +87,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IUriParser uriParser,
             IEnumerable<IImageResolver> resolvers,
             IEnumerable<IImageWebProcessor> processors,
-            IImageCache cache)
+            IImageCache cache,
+            IAsyncKeyLock asyncKeyLock)
         {
             Guard.NotNull(next, nameof(next));
             Guard.NotNull(options, nameof(options));
@@ -95,6 +97,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             Guard.NotNull(resolvers, nameof(resolvers));
             Guard.NotNull(processors, nameof(processors));
             Guard.NotNull(cache, nameof(cache));
+            Guard.NotNull(asyncKeyLock, nameof(asyncKeyLock));
 
             this.next = next;
             this.options = options.Value;
@@ -102,6 +105,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.resolvers = resolvers;
             this.processors = processors;
             this.cache = cache;
+            this.asyncKeyLock = asyncKeyLock;
 
             var commands = new List<string>();
             foreach (IImageWebProcessor processor in this.processors)
@@ -137,7 +141,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             // Prevent identical requests from running at the same time
             // This reduces the overheads of unnecessary processing plus avoids file locks
-            using (await this.keyLock.LockAsync(key))
+            using (await this.asyncKeyLock.LockAsync(key))
             {
                 // Get the correct service for the request.
                 IImageResolver resolver = this.resolvers.FirstOrDefault(r => r.Match(context));

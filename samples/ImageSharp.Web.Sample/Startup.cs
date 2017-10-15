@@ -7,15 +7,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp.Web.Caching;
+using SixLabors.ImageSharp.Web.Commands;
+using SixLabors.ImageSharp.Web.DependencyInjection;
+using SixLabors.ImageSharp.Web.Processors;
+using SixLabors.ImageSharp.Web.Resolvers;
 
 namespace SixLabors.ImageSharp.Web.Sample
 {
-    using SixLabors.ImageSharp.Web.Caching;
-    using SixLabors.ImageSharp.Web.Commands;
-    using SixLabors.ImageSharp.Web.DependencyInjection;
-    using SixLabors.ImageSharp.Web.Processors;
-    using SixLabors.ImageSharp.Web.Resolvers;
-
     public class Startup
     {
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -42,6 +41,7 @@ namespace SixLabors.ImageSharp.Web.Sample
             //services.AddImageSharpCore()
             //        .SetUriParser<QueryCollectionUriParser>()
             //        .SetCache<PhysicalFileSystemCache>()
+            //        .SetAsyncKeyLock<AsyncKeyLock>()
             //        .AddResolver<PhysicalFileSystemResolver>()
             //        .AddProcessor<ResizeWebProcessor>();
 
@@ -60,6 +60,7 @@ namespace SixLabors.ImageSharp.Web.Sample
             //            })
             //        .SetUriParser<QueryCollectionUriParser>()
             //        .SetCache<PhysicalFileSystemCache>()
+            //        .SetAsyncKeyLock<AsyncKeyLock>()
             //        .AddResolver<PhysicalFileSystemResolver>()
             //        .AddProcessor<ResizeWebProcessor>();
 

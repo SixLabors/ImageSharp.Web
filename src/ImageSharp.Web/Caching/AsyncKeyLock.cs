@@ -6,32 +6,18 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SixLabors.ImageSharp.Web.Helpers
+namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
     /// The async key lock prevents multiple asynchronous threads acting upon the same object with the given key at the same time.
     /// It is designed so that it does not block unique requests allowing a high throughput.
     /// </summary>
-    internal sealed class AsyncKeyLock
+    public sealed class AsyncKeyLock : IAsyncKeyLock
     {
         /// <summary>
         /// A collection of doorman counters used for tracking references to the same key.
         /// </summary>
         private static readonly Dictionary<string, Doorman> Keys = new Dictionary<string, Doorman>();
-
-        /// <summary>
-        /// Locks the current thread asynchronously.
-        /// </summary>
-        /// <param name="key">The key identifying the specific object to lock against.</param>
-        /// <returns>
-        /// The <see cref="IDisposable"/> that will release the lock.
-        /// </returns>
-        public IDisposable Lock(string key)
-        {
-            string lowerKey = key.ToLowerInvariant();
-            GetOrCreate(lowerKey).Wait();
-            return new Releaser(lowerKey);
-        }
 
         /// <summary>
         /// Locks the current thread asynchronously.

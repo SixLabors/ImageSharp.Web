@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
+using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -65,6 +66,33 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetCache<TCache>(this IImageSharpCoreBuilder builder, Func<IServiceProvider, TCache> implementationFactory)
             where TCache : class, IImageCache
+        {
+            builder.Services.AddSingleton(implementationFactory);
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the given <see cref="IAsyncKeyLock"/> adding it to the service collection
+        /// </summary>
+        /// <typeparam name="TLock">The type of class implementing <see cref="IAsyncKeyLock"/>to add.</typeparam>
+        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
+        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
+        public static IImageSharpCoreBuilder SetAsyncKeyLock<TLock>(this IImageSharpCoreBuilder builder)
+            where TLock : class, IAsyncKeyLock
+        {
+            builder.Services.AddSingleton<IAsyncKeyLock, TLock>();
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the given <see cref="IAsyncKeyLock"/> adding it to the service collection
+        /// </summary>
+        /// <typeparam name="TLock">The type of class implementing <see cref="IImageCache"/>to add.</typeparam>
+        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageCache"/>"/></param>
+        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
+        public static IImageSharpCoreBuilder SetAsyncKeyLock<TLock>(this IImageSharpCoreBuilder builder, Func<IServiceProvider, TLock> implementationFactory)
+            where TLock : class, IAsyncKeyLock
         {
             builder.Services.AddSingleton(implementationFactory);
             return builder;

@@ -1,7 +1,7 @@
-﻿using SixLabors.ImageSharp.Web.Helpers;
+﻿using SixLabors.ImageSharp.Web.Caching;
 using Xunit;
 
-namespace SixLabors.ImageSharp.Web.Tests.Helpers
+namespace SixLabors.ImageSharp.Web.Tests.Caching
 {
     public class DoormanTests
     {

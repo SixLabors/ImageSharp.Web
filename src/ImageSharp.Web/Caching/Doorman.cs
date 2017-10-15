@@ -4,7 +4,7 @@
 using System;
 using System.Threading;
 
-namespace SixLabors.ImageSharp.Web.Helpers
+namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
     /// A wrapper around <see cref="SemaphoreSlim"/> that operates a one-in-one out policy

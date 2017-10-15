@@ -3,7 +3,7 @@
 
 using System.Collections.Concurrent;
 
-namespace SixLabors.ImageSharp.Web.Helpers
+namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
     /// Provides a resource pool that enables reusing instances of <see cref="Doorman"/>
