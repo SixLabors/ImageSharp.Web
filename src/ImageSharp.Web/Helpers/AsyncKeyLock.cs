@@ -28,8 +28,9 @@ namespace SixLabors.ImageSharp.Web.Helpers
         /// </returns>
         public IDisposable Lock(string key)
         {
-            GetOrCreate(key).Wait();
-            return new Releaser(key);
+            string lowerKey = key.ToLowerInvariant();
+            GetOrCreate(lowerKey).Wait();
+            return new Releaser(lowerKey);
         }
 
         /// <summary>
