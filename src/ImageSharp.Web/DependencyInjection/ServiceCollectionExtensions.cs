@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
-using SixLabors.ImageSharp.Web.Commands.Converters;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
@@ -94,6 +93,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             builder.SetUriParser<QueryCollectionUriParser>();
 
             builder.SetCache<PhysicalFileSystemCache>();
+
+            builder.SetAsyncKeyLock<AsyncKeyLock>();
 
             builder.AddResolver<PhysicalFileSystemResolver>();
 

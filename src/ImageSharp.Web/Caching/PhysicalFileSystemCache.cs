@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
 using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.Web.Memory;
 
 namespace SixLabors.ImageSharp.Web.Caching
 {

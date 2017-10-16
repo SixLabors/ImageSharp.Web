@@ -42,6 +42,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                         })
                     .SetUriParser<QueryCollectionUriParser>()
                     .SetCache<PhysicalFileSystemCache>()
+                    .SetAsyncKeyLock<AsyncKeyLock>()
                     .AddResolver<PhysicalFileSystemResolver>()
                     .AddProcessor<ResizeWebProcessor>();
         };
@@ -67,6 +68,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                 })
                 .SetUriParser<QueryCollectionUriParser>()
                 .SetCache<PhysicalFileSystemCache>()
+                .SetAsyncKeyLock<AsyncKeyLock>()
                 .AddResolver<PhysicalFileSystemResolver>()
                 .AddProcessor<ResizeWebProcessor>();
 

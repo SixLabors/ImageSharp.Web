@@ -10,11 +10,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Helpers;
+using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -25,6 +24,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
     /// </summary>
     public class ImageSharpMiddleware
     {
+        /// <summary>
+        /// The keylock used for limiting identical requests
+        /// </summary>
+        private readonly IAsyncKeyLock asyncKeyLock;
+
         /// <summary>
         /// The function processing the Http request.
         /// </summary>
@@ -75,6 +79,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="resolvers">A collection of <see cref="IImageResolver"/> instances used to resolve images</param>
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images</param>
         /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images</param>
+        /// <param name="asyncKeyLock">An <see cref="IAsyncKeyLock"/> instance used for providing locking during processing</param>
         public ImageSharpMiddleware(
             RequestDelegate next,
             IOptions<ImageSharpMiddlewareOptions> options,
@@ -82,7 +87,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IUriParser uriParser,
             IEnumerable<IImageResolver> resolvers,
             IEnumerable<IImageWebProcessor> processors,
-            IImageCache cache)
+            IImageCache cache,
+            IAsyncKeyLock asyncKeyLock)
         {
             Guard.NotNull(next, nameof(next));
             Guard.NotNull(options, nameof(options));
@@ -91,6 +97,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             Guard.NotNull(resolvers, nameof(resolvers));
             Guard.NotNull(processors, nameof(processors));
             Guard.NotNull(cache, nameof(cache));
+            Guard.NotNull(asyncKeyLock, nameof(asyncKeyLock));
 
             this.next = next;
             this.options = options.Value;
@@ -98,6 +105,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.resolvers = resolvers;
             this.processors = processors;
             this.cache = cache;
+            this.asyncKeyLock = asyncKeyLock;
 
             var commands = new List<string>();
             foreach (IImageWebProcessor processor in this.processors)
@@ -127,81 +135,99 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 return;
             }
 
-            // Get the correct service for the request.
-            IImageResolver resolver = this.resolvers.FirstOrDefault(r => r.Match(context));
-
-            if (resolver == null || !await resolver.IsValidRequestAsync(context, this.logger))
-            {
-                // Nothing to do. call the next delegate/middleware in the pipeline
-                await this.next(context);
-                return;
-            }
-
             // Create a cache key based on all the components of the requested url
             string uri = $"{context.Request.Host.ToString().ToLowerInvariant()}/{context.Request.PathBase.ToString().ToLowerInvariant()}/{context.Request.Path}{QueryString.Create(commands)}";
-
             string key = CacheHash.Create(uri, this.options.Configuration);
 
-            CachedInfo info = await this.cache.IsExpiredAsync(key, DateTime.UtcNow.AddDays(-this.options.MaxCacheDays));
-
-            var imageContext = new ImageContext(context, this.options);
-
-            if (!info.Expired)
+            // Prevent identical requests from running at the same time
+            // This reduces the overheads of unnecessary processing plus avoids file locks
+            bool processRequest = true;
+            using (await this.asyncKeyLock.LockAsync(key))
             {
-                // Image is a cached image. Return the correct response now.
-                await this.SendResponse(imageContext, key, info.LastModifiedUtc, null, (int)info.Length);
-                return;
-            }
+                // Get the correct service for the request.
+                IImageResolver resolver = this.resolvers.FirstOrDefault(r => r.Match(context));
 
-            // Not cached? Let's get it from the image resolver.
-            byte[] inBuffer = null;
-            byte[] outBuffer = null;
-            MemoryStream outStream = null;
-            try
-            {
-                inBuffer = await resolver.ResolveImageAsync(context, this.logger);
-                if (inBuffer == null || inBuffer.Length == 0)
+                if (resolver == null || !await resolver.IsValidRequestAsync(context, this.logger))
                 {
-                    // Log the error but let the pipeline handle the 404
-                    this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
-                    await this.next(context);
-                    return;
+                    // Nothing to do. Call the next delegate/middleware in the pipeline
+                    processRequest = false;
                 }
 
-                // No allocations here for inStream since we are passing the buffer.
-                // TODO: How to prevent the allocation in outStream? Passing a pooled buffer won't let stream grow if needed.
-                outStream = new MemoryStream();
-                using (var image = FormattedImage.Load(this.options.Configuration, inBuffer))
+                if (processRequest)
                 {
-                    image.Process(this.logger, this.processors, commands);
-                    this.options.OnBeforeSave?.Invoke(image);
-                    image.Save(outStream);
+                    CachedInfo info = await this.cache.IsExpiredAsync(key, DateTime.UtcNow.AddDays(-this.options.MaxCacheDays));
+
+                    var imageContext = new ImageContext(context, this.options);
+
+                    if (!info.Expired)
+                    {
+                        // Image is a cached image. Return the correct response now.
+                        await this.SendResponse(imageContext, key, info.LastModifiedUtc, null, (int)info.Length);
+                        return;
+                    }
+
+                    // Not cached? Let's get it from the image resolver.
+                    byte[] inBuffer = null;
+                    byte[] outBuffer = null;
+                    MemoryStream outStream = null;
+                    try
+                    {
+                        inBuffer = await resolver.ResolveImageAsync(context, this.logger);
+                        if (inBuffer == null || inBuffer.Length == 0)
+                        {
+                            // Log the error but let the pipeline handle the 404
+                            this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
+                            processRequest = false;
+                        }
+
+                        if (processRequest)
+                        {
+                            // No allocations here for inStream since we are passing the buffer.
+                            // TODO: How to prevent the allocation in outStream? Passing a pooled buffer won't let stream grow if needed.
+                            outStream = new MemoryStream();
+                            using (var image = FormattedImage.Load(this.options.Configuration, inBuffer))
+                            {
+                                image.Process(this.logger, this.processors, commands);
+                                this.options.OnBeforeSave?.Invoke(image);
+                                image.Save(outStream);
+                            }
+
+                            // Allow for any further optimization of the image. Always reset the position just in case.
+                            outStream.Position = 0;
+                            this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, Path.GetExtension(key)));
+                            outStream.Position = 0;
+                            int outLength = (int)outStream.Length;
+
+                            // Copy the outstream to the pooled buffer.
+                            outBuffer = BufferDataPool.Rent(outLength);
+                            await outStream.ReadAsync(outBuffer, 0, outLength);
+
+                            DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer, outLength);
+                            await this.SendResponse(imageContext, key, cachedDate, outBuffer, outLength);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the error internally then rethrow.
+                        // We don't call next here, the pipeline will automatically handle it
+                        this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
+                        throw;
+                    }
+                    finally
+                    {
+                        outStream?.Dispose();
+
+                        // Buffer should have been rented in IImageResolver
+                        BufferDataPool.Return(inBuffer);
+                        BufferDataPool.Return(outBuffer);
+                    }
                 }
-
-                // Allow for any further optimization of the image. Always reset the position just in case.
-                outStream.Position = 0;
-                this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, Path.GetExtension(key)));
-                outStream.Position = 0;
-                int outLength = (int)outStream.Length;
-
-                // Copy the outstream to the pooled buffer.
-                outBuffer = BufferDataPool.Rent(outLength);
-                await outStream.ReadAsync(outBuffer, 0, outLength);
-
-                DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer, outLength);
-                await this.SendResponse(imageContext, key, cachedDate, outBuffer, outLength);
             }
-            catch (Exception ex)
-            {
-                this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
-            }
-            finally
-            {
-                outStream?.Dispose();
 
-                // Buffer should have been rented in IImageResolver
-                BufferDataPool.Return(inBuffer);
-                BufferDataPool.Return(outBuffer);
+            if (!processRequest)
+            {
+                // Call the next delegate/middleware in the pipeline
+                await this.next(context);
             }
         }
 
