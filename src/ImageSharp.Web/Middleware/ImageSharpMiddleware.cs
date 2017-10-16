@@ -176,9 +176,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         if (inBuffer == null || inBuffer.Length == 0)
                         {
                             // Log the error but let the pipeline handle the 404
-                            // TODO: How does the other middleware detect this?
-                            // Does it simply check the response content?
-                            // Will it work for other non-file based resolvers?
                             this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
                             processRequest = false;
                         }
@@ -211,7 +208,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     }
                     catch (Exception ex)
                     {
-                        // Log the error internally then rethrow. We don't pass to the next middleware
+                        // Log the error internally then rethrow.
+                        // We don't call next here, the pipeline will automatically handle it
                         this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
                         throw;
                     }
