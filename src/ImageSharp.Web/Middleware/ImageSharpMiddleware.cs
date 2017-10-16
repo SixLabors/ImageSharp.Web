@@ -131,7 +131,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             if (!commands.Any() || !commands.Keys.Intersect(this.knownCommands).Any())
             {
                 // Nothing to do. call the next delegate/middleware in the pipeline
-                await this.Next(context);
+                await this.next(context);
                 return;
             }
 
@@ -176,6 +176,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         if (inBuffer == null || inBuffer.Length == 0)
                         {
                             // Log the error but let the pipeline handle the 404
+                            // TODO: How does the other middleware detect this?
+                            // Does it simply check the response content?
+                            // Will it work for other non-file based resolvers?
                             this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
                             processRequest = false;
                         }
@@ -208,7 +211,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     }
                     catch (Exception ex)
                     {
+                        // Log the error internally then rethrow. We don't pass to the next middleware
                         this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
+                        throw;
                     }
                     finally
                     {
@@ -223,18 +228,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             if (!processRequest)
             {
-                await this.Next(context);
+                // Call the next delegate/middleware in the pipeline
+                await this.next(context);
             }
-        }
-
-        /// <summary>
-        /// Calls the request delegate to transfer the request to the next middleware in the pipeline.
-        /// </summary>
-        /// <param name="context">The current HTTP request context</param>
-        /// <returns>The <see cref="Task"/></returns>
-        private async Task Next(HttpContext context)
-        {
-            await this.next(context);
         }
 
         private async Task SendResponse(ImageContext imageContext, string key, DateTimeOffset lastModified, byte[] buffer, int length)
