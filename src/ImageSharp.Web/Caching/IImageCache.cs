@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace SixLabors.ImageSharp.Web.Caching
 {
@@ -28,13 +29,14 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Returns a value indicating whether the current cached item is expired.
         /// </summary>
+        /// <param name="context">The current HTTP request context</param>
         /// <param name="key">The cache key</param>
         /// <param name="minDateUtc">
         /// The minimum allowable date and time in coordinated universal time (UTC) since the file was last modified.
         /// Calculated as the current datetime minus the maximum allowable cached days.
         /// </param>
         /// <returns>The <see cref="Task{ImageCacheInfo}"/></returns>
-        Task<CachedInfo> IsExpiredAsync(string key, DateTime minDateUtc);
+        Task<CachedInfo> IsExpiredAsync(HttpContext context, string key, DateTime minDateUtc);
 
         /// <summary>
         /// Sets the value associated with the specified key.

@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
-using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Memory;
 
 namespace SixLabors.ImageSharp.Web.Caching
@@ -21,6 +21,16 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// The configuration key for determining the cache folder.
         /// </summary>
         public const string Folder = "CacheFolder";
+
+        /// <summary>
+        /// The default cache folder name.
+        /// </summary>
+        public const string DefaultCacheFolder = "is-cache";
+
+        /// <summary>
+        /// The configuration key for checking whether changes in source images should be accounted for when checking the cache.
+        /// </summary>
+        public const string CheckSourceChanged = "CheckSourceChanged";
 
         /// <summary>
         /// The hosting environment the application is running in.
@@ -46,7 +56,8 @@ namespace SixLabors.ImageSharp.Web.Caching
         public IDictionary<string, string> Settings { get; set; }
             = new Dictionary<string, string>
             {
-                { Folder, "is-cache" }
+                { Folder, DefaultCacheFolder },
+                { CheckSourceChanged, "false" }
             };
 
         /// <inheritdoc/>
@@ -76,23 +87,42 @@ namespace SixLabors.ImageSharp.Web.Caching
         }
 
         /// <inheritdoc/>
-        public Task<CachedInfo> IsExpiredAsync(string key, DateTime minDateUtc)
+        public Task<CachedInfo> IsExpiredAsync(HttpContext context, string key, DateTime minDateUtc)
         {
-            // TODO do we use an in memory cache to reduce IO?
-            IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
+            bool.TryParse(this.Settings[CheckSourceChanged], out bool checkSource);
 
-            // Check if the file exists and whether the last modified date is less than the min date.
-            bool exists = fileInfo.Exists;
-            DateTimeOffset lastModified = exists ? fileInfo.LastModified : DateTimeOffset.MinValue;
-            long length = exists ? fileInfo.Length : 0;
-            bool expired;
-            if (exists && fileInfo.LastModified.UtcDateTime > minDateUtc)
+            IFileInfo cachedFileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
+            bool exists = cachedFileInfo.Exists;
+            DateTimeOffset lastModified = exists ? cachedFileInfo.LastModified : DateTimeOffset.MinValue;
+            long length = exists ? cachedFileInfo.Length : 0;
+            bool expired = true;
+
+            // Checking the source adds overhead but is configurable. Defaults to false
+            if (checkSource)
             {
-                expired = false;
+                IFileInfo sourceFileInfo = this.fileProvider.GetFileInfo(context.Request.Path);
+
+                if (!sourceFileInfo.Exists)
+                {
+                    return Task.FromResult(default(CachedInfo));
+                }
+
+                // Check if the file exists and whether the last modified date is less than the min date.
+                if (exists && lastModified.UtcDateTime > minDateUtc)
+                {
+                    // If it's newer than the cached file then it must be an update.
+                    if (sourceFileInfo.LastModified.UtcDateTime < lastModified.UtcDateTime)
+                    {
+                        expired = false;
+                    }
+                }
             }
             else
             {
-                expired = true;
+                if (exists && lastModified.UtcDateTime > minDateUtc)
+                {
+                    expired = false;
+                }
             }
 
             return Task.FromResult(new CachedInfo(expired, lastModified, length));
