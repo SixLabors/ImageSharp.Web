@@ -47,7 +47,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            return obj is CachedInfo && this.Equals((CachedInfo)obj);
+            return obj is CachedInfo info && this.Equals(info);
         }
 
         /// <inheritdoc/>

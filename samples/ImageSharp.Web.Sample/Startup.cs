@@ -46,25 +46,32 @@ namespace SixLabors.ImageSharp.Web.Sample
             //        .AddProcessor<ResizeWebProcessor>();
 
 
-            //// Or we can fine-grain control adding custom options and configure all other services.
+            //// Or we can fine-grain control adding custom options and configure all other services
+            //// There are also factory methods for each builder that will allow building from configuration files.
             //services.AddImageSharpCore(
-            //        options =>
+            //    options =>
+            //        {
+            //            options.Configuration = Configuration.Default;
+            //            options.MaxBrowserCacheDays = 7;
+            //            options.MaxCacheDays = 365;
+            //            options.OnValidate = _ => { };
+            //            options.OnBeforeSave = _ => { };
+            //            options.OnProcessed = _ => { };
+            //            options.OnPrepareResponse = _ => { };
+            //        })
+            //    .SetUriParser<QueryCollectionUriParser>()
+            //    .SetCache(
+            //        provider => new PhysicalFileSystemCache(provider.GetRequiredService<IHostingEnvironment>())
+            //        {
+            //            Settings =
             //            {
-            //                options.Configuration = Configuration.Default;
-            //                options.MaxBrowserCacheDays = 7;
-            //                options.MaxCacheDays = 365;
-            //                options.OnValidate = _ => { };
-            //                options.OnBeforeSave = _ => { };
-            //                options.OnProcessed = _ => { };
-            //                options.OnPrepareResponse = _ => { };
-            //            })
-            //        .SetUriParser<QueryCollectionUriParser>()
-            //        .SetCache<PhysicalFileSystemCache>()
-            //        .SetAsyncKeyLock<AsyncKeyLock>()
-            //        .AddResolver<PhysicalFileSystemResolver>()
-            //        .AddProcessor<ResizeWebProcessor>();
-
-            // There are also factory methods for each builder that will allow building from configuration files.
+            //                new KeyValuePair<string, string>( PhysicalFileSystemCache.Folder, PhysicalFileSystemCache.DefaultCacheFolder),
+            //                new KeyValuePair<string, string>( PhysicalFileSystemCache.CheckSourceChanged, "true")
+            //            }
+            //        })
+            //    .SetAsyncKeyLock<AsyncKeyLock>()
+            //    .AddResolver<PhysicalFileSystemResolver>()
+            //    .AddProcessor<ResizeWebProcessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

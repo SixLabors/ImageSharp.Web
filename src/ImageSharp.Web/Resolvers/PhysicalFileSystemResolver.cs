@@ -24,9 +24,9 @@ namespace SixLabors.ImageSharp.Web.Resolvers
     public class PhysicalFileSystemResolver : IImageResolver
     {
         /// <summary>
-        /// The hosting environment the application is running in.
+        /// The file provider abstraction.
         /// </summary>
-        private readonly IHostingEnvironment environment;
+        private readonly IFileProvider fileProvider;
 
         /// <summary>
         /// The middleware configuration options.
@@ -40,7 +40,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// <param name="options">The middleware configuration options</param>
         public PhysicalFileSystemResolver(IHostingEnvironment environment, IOptions<ImageSharpMiddlewareOptions> options)
         {
-            this.environment = environment;
+            this.fileProvider = environment.WebRootFileProvider;
             this.options = options.Value;
         }
 
@@ -60,8 +60,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         public async Task<byte[]> ResolveImageAsync(HttpContext context, ILogger logger)
         {
             // Path has already been correctly parsed before here.
-            IFileProvider fileProvider = this.environment.WebRootFileProvider;
-            IFileInfo fileInfo = fileProvider.GetFileInfo(context.Request.Path);
+            IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path);
             byte[] buffer;
 
             // Check to see if the file exists.
