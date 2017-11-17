@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +12,6 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
@@ -60,7 +60,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         public async Task<byte[]> ResolveImageAsync(HttpContext context, ILogger logger)
         {
             // Path has already been correctly parsed before here.
-            IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path);
+            IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
             byte[] buffer;
 
             // Check to see if the file exists.

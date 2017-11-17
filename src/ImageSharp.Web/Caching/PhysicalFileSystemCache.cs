@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -100,7 +101,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             // Checking the source adds overhead but is configurable. Defaults to false
             if (checkSource)
             {
-                IFileInfo sourceFileInfo = this.fileProvider.GetFileInfo(context.Request.Path);
+                IFileInfo sourceFileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
 
                 if (!sourceFileInfo.Exists)
                 {
