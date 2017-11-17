@@ -60,7 +60,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         public async Task<byte[]> ResolveImageAsync(HttpContext context, ILogger logger)
         {
             // Path has already been correctly parsed before here.
-            IFileInfo fileInfo = this.fileProvider.GetFileInfo(WebUtility.UrlDecode(context.Request.Path));
+            IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
             byte[] buffer;
 
             // Check to see if the file exists.
