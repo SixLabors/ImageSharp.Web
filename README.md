@@ -35,7 +35,7 @@ The **ImageSharp** library is made up of multiple packages.
 
 Packages include:
 - **ImageSharp.Web**
-  - Contains the middleware to intergrate a dynamic image manipulation workflro into an aspnetcore application.
+  - Contains the middleware to intergrate a dynamic image manipulation workflow into an aspnetcore application.
 
 ### Manual build
 
