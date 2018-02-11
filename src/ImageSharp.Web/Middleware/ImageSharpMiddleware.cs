@@ -125,10 +125,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <returns>The <see cref="Task"/></returns>
         public async Task Invoke(HttpContext context)
         {
-            IDictionary<string, string> commands = this.uriParser.ParseUriCommands(context);
+            IDictionary<string, string> commands = this.uriParser.ParseUriCommands(context)
+                .Where(kvp => this.knownCommands.Contains(kvp.Key))
+                .ToDictionary(p => p.Key, p => p.Value);
+
             this.options.OnValidate?.Invoke(new ImageValidationContext(context, commands, CommandParser.Instance));
 
-            if (!commands.Any() || !commands.Keys.Intersect(this.knownCommands).Any())
+            if (!commands.Any())
             {
                 // Nothing to do. call the next delegate/middleware in the pipeline
                 await this.next(context);
