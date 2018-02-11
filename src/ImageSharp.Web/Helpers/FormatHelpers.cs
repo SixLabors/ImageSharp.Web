@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 using System.Linq;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 
@@ -34,14 +36,25 @@ namespace SixLabors.ImageSharp.Web.Helpers
         /// <returns>The <see cref="string"/></returns>
         public static string GetExtension(Configuration configuration, string uri)
         {
+            string[] parts = uri.Split('?');
+            if (parts.Length > 1)
+            {
+                StringValues ext;
+                if (QueryHelpers.ParseQuery(parts[1]).TryGetValue("format", out ext))
+                {
+                    return ext;
+                }
+            }
+
+            string path = parts[0];
             string extension = null;
             int index = 0;
             foreach (IImageFormat format in configuration.ImageFormats)
             {
                 foreach (string ext in format.FileExtensions)
                 {
-                    int i = uri.LastIndexOf(ext, StringComparison.OrdinalIgnoreCase);
-                    if (i <= index)
+                    int i = path.LastIndexOf("." + ext, StringComparison.OrdinalIgnoreCase);
+                    if (i < index)
                     {
                         continue;
                     }
@@ -49,6 +62,11 @@ namespace SixLabors.ImageSharp.Web.Helpers
                     index = i;
                     extension = ext;
                 }
+            }
+
+            if (extension != null && !path.EndsWith(extension))
+            {
+                return null;
             }
 
             return extension;
