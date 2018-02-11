@@ -64,11 +64,6 @@ namespace SixLabors.ImageSharp.Web.Helpers
                 }
             }
 
-            if (extension != null && !path.EndsWith(extension))
-            {
-                return null;
-            }
-
             return extension;
         }
 
