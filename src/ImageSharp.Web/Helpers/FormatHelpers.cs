@@ -6,8 +6,8 @@ using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Web.Processors;
 
 namespace SixLabors.ImageSharp.Web.Helpers
 {
@@ -39,8 +39,7 @@ namespace SixLabors.ImageSharp.Web.Helpers
             string[] parts = uri.Split('?');
             if (parts.Length > 1)
             {
-                StringValues ext;
-                if (QueryHelpers.ParseQuery(parts[1]).TryGetValue("format", out ext))
+                if (QueryHelpers.ParseQuery(parts[1]).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
                 {
                     return ext;
                 }
