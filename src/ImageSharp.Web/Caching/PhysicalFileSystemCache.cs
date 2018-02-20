@@ -4,12 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Memory;
+using SixLabors.ImageSharp.Web.Middleware;
 
 namespace SixLabors.ImageSharp.Web.Caching
 {
@@ -44,17 +45,24 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly IFileProvider fileProvider;
 
         /// <summary>
+        /// The middleware configuration options.
+        /// </summary>
+        private readonly ImageSharpMiddlewareOptions options;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
         /// <param name="environment">The hosting environment the application is running in</param>
-        public PhysicalFileSystemCache(IHostingEnvironment environment)
+        /// <param name="options">The middleware configuration options</param>
+        public PhysicalFileSystemCache(IHostingEnvironment environment, IOptions<ImageSharpMiddlewareOptions> options)
         {
             this.environment = environment;
             this.fileProvider = this.environment.WebRootFileProvider;
+            this.options = options.Value;
         }
 
         /// <inheritdoc/>
-        public IDictionary<string, string> Settings { get; set; }
+        public IDictionary<string, string> Settings { get; }
             = new Dictionary<string, string>
             {
                 { Folder, DefaultCacheFolder },
@@ -132,6 +140,11 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <inheritdoc/>
         public async Task<DateTimeOffset> SetAsync(string key, byte[] value, int length)
         {
+            Guard.NotNullOrEmpty(
+                this.environment.WebRootPath,
+                nameof(this.environment.WebRootPath),
+                "The folder 'wwwroot' that contains the web-servable application content files is missing. Please add this folder to the application root to allow caching.");
+
             string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
             string directory = Path.GetDirectoryName(path);
 
@@ -155,7 +168,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <returns>The <see cref="string"/></returns>
         private string ToFilePath(string key)
         {
-            return $"{this.Settings[Folder]}/{string.Join("/", key.Substring(0, 8).ToCharArray())}/{key}";
+            return $"{this.Settings[Folder]}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
         }
     }
 }

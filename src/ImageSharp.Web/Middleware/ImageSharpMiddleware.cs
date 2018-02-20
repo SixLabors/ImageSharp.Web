@@ -65,6 +65,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private readonly IImageCache cache;
 
         /// <summary>
+        /// The hashing implementation to use when generating cached file names.
+        /// </summary>
+        private readonly ICacheHash cacheHash;
+
+        /// <summary>
         /// The collection of known commands gathered from the processors.
         /// </summary>
         private readonly IEnumerable<string> knownCommands;
@@ -79,6 +84,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="resolvers">A collection of <see cref="IImageResolver"/> instances used to resolve images</param>
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images</param>
         /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images</param>
+        /// <param name="cacheHash">An <see cref="ICacheHash"/>instance used for calculating cached file names</param>
         /// <param name="asyncKeyLock">An <see cref="IAsyncKeyLock"/> instance used for providing locking during processing</param>
         public ImageSharpMiddleware(
             RequestDelegate next,
@@ -88,6 +94,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IEnumerable<IImageResolver> resolvers,
             IEnumerable<IImageWebProcessor> processors,
             IImageCache cache,
+            ICacheHash cacheHash,
             IAsyncKeyLock asyncKeyLock)
         {
             Guard.NotNull(next, nameof(next));
@@ -97,6 +104,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             Guard.NotNull(resolvers, nameof(resolvers));
             Guard.NotNull(processors, nameof(processors));
             Guard.NotNull(cache, nameof(cache));
+            Guard.NotNull(cache, nameof(cacheHash));
             Guard.NotNull(asyncKeyLock, nameof(asyncKeyLock));
 
             this.next = next;
@@ -105,6 +113,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.resolvers = resolvers;
             this.processors = processors;
             this.cache = cache;
+            this.cacheHash = cacheHash;
             this.asyncKeyLock = asyncKeyLock;
 
             var commands = new List<string>();
@@ -140,7 +149,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             // Create a cache key based on all the components of the requested url
             string uri = $"{context.Request.Host.ToString().ToLowerInvariant()}/{context.Request.PathBase.ToString().ToLowerInvariant()}/{context.Request.Path}{QueryString.Create(commands)}";
-            string key = CacheHash.Create(uri, this.options.Configuration);
+            string key = this.cacheHash.Create(uri, this.options.CachedNameLength);
 
             // Prevent identical requests from running at the same time
             // This reduces the overheads of unnecessary processing plus avoids file locks
