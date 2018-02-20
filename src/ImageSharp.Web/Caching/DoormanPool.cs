@@ -16,7 +16,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Retrieves a <see cref="Doorman"/> from the pool or a new one if the pool is empty
         /// </summary>
         /// <returns>Tre <see cref="Doorman"/></returns>
-        public static Doorman Rent() => Pool.TryTake(out var doorman) ? doorman : new Doorman();
+        public static Doorman Rent() => Pool.TryTake(out Doorman doorman) ? doorman : new Doorman();
 
         /// <summary>
         /// Returns an doorman to the pool that was previously obtained using the <see cref="Rent"></see>

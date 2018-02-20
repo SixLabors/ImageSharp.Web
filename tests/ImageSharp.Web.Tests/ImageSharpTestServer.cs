@@ -35,6 +35,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                             options.Configuration = Configuration.Default;
                             options.MaxBrowserCacheDays = -1;
                             options.MaxCacheDays = -1;
+                            options.CachedNameLength = 12;
                             options.OnValidate = _ => { };
                             options.OnBeforeSave = _ => { };
                             options.OnProcessed = _ => { };
@@ -42,6 +43,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                         })
                     .SetUriParser<QueryCollectionUriParser>()
                     .SetCache<PhysicalFileSystemCache>()
+                    .SetCacheHash<CacheHash>()
                     .SetAsyncKeyLock<AsyncKeyLock>()
                     .AddResolver<PhysicalFileSystemResolver>()
                     .AddProcessor<ResizeWebProcessor>();
@@ -68,6 +70,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                 })
                 .SetUriParser<QueryCollectionUriParser>()
                 .SetCache<PhysicalFileSystemCache>()
+                .SetCacheHash<CacheHash>()
                 .SetAsyncKeyLock<AsyncKeyLock>()
                 .AddResolver<PhysicalFileSystemResolver>()
                 .AddProcessor<ResizeWebProcessor>();

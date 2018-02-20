@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.AspNetCore.Http;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
@@ -18,17 +17,22 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Gets or sets the base library configuration
         /// </summary>
-        public Configuration Configuration { get; set; }
+        public Configuration Configuration { get; set; } = Configuration.Default;
 
         /// <summary>
         /// Gets or sets the number of days to store images in the browser cache.
         /// </summary>
-        public int MaxBrowserCacheDays { get; set; }
+        public int MaxBrowserCacheDays { get; set; } = 7;
 
         /// <summary>
         /// Gets or sets the number of days to store images in the image cache.
         /// </summary>
-        public int MaxCacheDays { get; set; }
+        public int MaxCacheDays { get; set; } = 365;
+
+        /// <summary>
+        /// Gets or sets the length of the filename to use (minus the extension) when storing images in the image cache.
+        /// </summary>
+        public uint CachedNameLength { get; set; } = 12;
 
         /// <summary>
         /// Gets or sets the additional validation method.

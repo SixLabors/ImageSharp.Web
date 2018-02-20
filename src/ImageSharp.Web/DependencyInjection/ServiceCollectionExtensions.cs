@@ -94,6 +94,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
 
             builder.SetCache<PhysicalFileSystemCache>();
 
+            builder.SetCacheHash<CacheHash>();
+
             builder.SetAsyncKeyLock<AsyncKeyLock>();
 
             builder.AddResolver<PhysicalFileSystemResolver>();

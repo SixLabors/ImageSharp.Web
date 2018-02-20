@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
+using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -31,6 +33,7 @@ namespace SixLabors.ImageSharp.Web.Sample
             //            options.Configuration = Configuration.Default;
             //            options.MaxBrowserCacheDays = 7;
             //            options.MaxCacheDays = 365;
+            //            options.CacheDepth = 8;
             //            options.OnValidate = _ => { };
             //            options.OnBeforeSave = _ => { };
             //            options.OnProcessed = _ => { };
@@ -41,6 +44,7 @@ namespace SixLabors.ImageSharp.Web.Sample
             //services.AddImageSharpCore()
             //        .SetUriParser<QueryCollectionUriParser>()
             //        .SetCache<PhysicalFileSystemCache>()
+            //        .SetCacheHash<CacheHash>()
             //        .SetAsyncKeyLock<AsyncKeyLock>()
             //        .AddResolver<PhysicalFileSystemResolver>()
             //        .AddProcessor<ResizeWebProcessor>();
@@ -54,6 +58,7 @@ namespace SixLabors.ImageSharp.Web.Sample
             //            options.Configuration = Configuration.Default;
             //            options.MaxBrowserCacheDays = 7;
             //            options.MaxCacheDays = 365;
+            //            options.CachedNameLength = 8;
             //            options.OnValidate = _ => { };
             //            options.OnBeforeSave = _ => { };
             //            options.OnProcessed = _ => { };
@@ -61,14 +66,17 @@ namespace SixLabors.ImageSharp.Web.Sample
             //        })
             //    .SetUriParser<QueryCollectionUriParser>()
             //    .SetCache(
-            //        provider => new PhysicalFileSystemCache(provider.GetRequiredService<IHostingEnvironment>())
-            //        {
-            //            Settings =
+            //        provider => new PhysicalFileSystemCache(
+            //            provider.GetRequiredService<IHostingEnvironment>(),
+            //            provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>())
             //            {
-            //                new KeyValuePair<string, string>( PhysicalFileSystemCache.Folder, PhysicalFileSystemCache.DefaultCacheFolder),
-            //                new KeyValuePair<string, string>( PhysicalFileSystemCache.CheckSourceChanged, "true")
-            //            }
-            //        })
+            //                Settings =
+            //                {
+            //                    new KeyValuePair<string, string>( PhysicalFileSystemCache.Folder, PhysicalFileSystemCache.DefaultCacheFolder),
+            //                    new KeyValuePair<string, string>( PhysicalFileSystemCache.CheckSourceChanged, "true")
+            //                }
+            //            })
+            //    .SetCacheHash<CacheHash>()
             //    .SetAsyncKeyLock<AsyncKeyLock>()
             //    .AddResolver<PhysicalFileSystemResolver>()
             //    .AddProcessor<ResizeWebProcessor>();

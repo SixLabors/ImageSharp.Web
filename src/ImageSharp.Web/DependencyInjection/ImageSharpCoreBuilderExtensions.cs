@@ -71,6 +71,33 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
+        /// Sets the given <see cref="ICacheHash"/> adding it to the service collection
+        /// </summary>
+        /// <typeparam name="TCacheHash">The type of class implementing <see cref="ICacheHash"/>to add.</typeparam>
+        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
+        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
+        public static IImageSharpCoreBuilder SetCacheHash<TCacheHash>(this IImageSharpCoreBuilder builder)
+            where TCacheHash : class, ICacheHash
+        {
+            builder.Services.AddSingleton<ICacheHash, TCacheHash>();
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the given <see cref="ICacheHash"/> adding it to the service collection
+        /// </summary>
+        /// <typeparam name="TCacheHash">The type of class implementing <see cref="ICacheHash"/>to add.</typeparam>
+        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="ICacheHash"/>"/></param>
+        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
+        public static IImageSharpCoreBuilder SetCacheHash<TCacheHash>(this IImageSharpCoreBuilder builder, Func<IServiceProvider, TCacheHash> implementationFactory)
+            where TCacheHash : class, ICacheHash
+        {
+            builder.Services.AddSingleton(implementationFactory);
+            return builder;
+        }
+
+        /// <summary>
         /// Sets the given <see cref="IAsyncKeyLock"/> adding it to the service collection
         /// </summary>
         /// <typeparam name="TLock">The type of class implementing <see cref="IAsyncKeyLock"/>to add.</typeparam>

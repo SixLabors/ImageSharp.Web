@@ -6,18 +6,18 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
+// TODO: Do we add cleanup to this? Scalable caches probably shouldn't do so.
 namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
     /// Specifies the contract for caching images.
-    /// TODO: Do we add cleanup to this? Scalable caches probably shouldn't do so.
     /// </summary>
     public interface IImageCache
     {
         /// <summary>
-        /// Gets or sets any additional settings.
+        /// Gets any additional settings.
         /// </summary>
-        IDictionary<string, string> Settings { get; set; }
+        IDictionary<string, string> Settings { get; }
 
         /// <summary>
         /// Gets the value associated with the specified key.
