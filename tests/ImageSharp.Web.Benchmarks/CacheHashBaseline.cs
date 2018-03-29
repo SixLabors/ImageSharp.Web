@@ -1,21 +1,17 @@
-﻿// Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
-
-using System.Buffers;
+﻿using System;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Middleware;
 
-namespace SixLabors.ImageSharp.Web.Caching
+namespace ImageSharp.Web.Benchmarks
 {
     /// <summary>
-    /// Creates hashed keys for the given inputs hashing them to string of length ranging from 2 to 64.
-    /// Hashed keys are the result of the SHA256 computation of the input value for the given length.
-    /// This ensures low collision rates with a shorter file name.
+    /// A baseline naive SHA256 hashing implementation
     /// </summary>
-    public sealed class CacheHash : ICacheHash
+    public class CacheHashBaseline : ICacheHash
     {
         private readonly ImageSharpMiddlewareOptions options;
 
@@ -23,7 +19,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Initializes a new instance of the <see cref="CacheHash"/> class.
         /// </summary>
         /// <param name="options">The middleware configuration options</param>
-        public CacheHash(IOptions<ImageSharpMiddlewareOptions> options)
+        public CacheHashBaseline(IOptions<ImageSharpMiddlewareOptions> options)
         {
             this.options = options.Value;
         }
@@ -31,19 +27,16 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <inheritdoc/>
         public string Create(string value, uint length)
         {
-            Guard.MustBeBetweenOrEqualTo<uint>(length, 2, 64, nameof(length));
+            if (length.CompareTo(2) < 0 || length.CompareTo(64) > 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(length), $"Value must be greater than or equal to {2} and less than or equal to {64}.");
+            }
 
             using (var hashAlgorithm = SHA256.Create())
             {
-                int len = (int)length;
-
                 // Concatenate the hash bytes into one long string.
-                int byteCount = Encoding.ASCII.GetByteCount(value);
-                byte[] buffer = ArrayPool<byte>.Shared.Rent(byteCount);
-                Encoding.ASCII.GetBytes(value, 0, value.Length, buffer, 0);
-                byte[] hash = hashAlgorithm.ComputeHash(buffer, 0, byteCount);
-                ArrayPool<byte>.Shared.Return(buffer);
-
+                int len = (int)length;
+                byte[] hash = hashAlgorithm.ComputeHash(Encoding.ASCII.GetBytes(value));
                 var sb = new StringBuilder(len);
                 for (int i = 0; i < len / 2; i++)
                 {
