@@ -17,7 +17,7 @@ namespace SixLabors.ImageSharp.Web.Helpers
     public class FormatHelpers
     {
         /// <summary>
-        /// Returns the correct content type (mimetype) for the given cached image key.
+        /// Returns the correct content type (mime-type) for the given cached image key.
         /// </summary>
         /// <param name="configuration">The library configuration</param>
         /// <param name="key">The cache key</param>
@@ -52,7 +52,7 @@ namespace SixLabors.ImageSharp.Web.Helpers
             {
                 foreach (string ext in format.FileExtensions)
                 {
-                    int i = path.LastIndexOf("." + ext, StringComparison.OrdinalIgnoreCase);
+                    int i = path.LastIndexOf($".{ext}", StringComparison.OrdinalIgnoreCase);
                     if (i < index)
                     {
                         continue;

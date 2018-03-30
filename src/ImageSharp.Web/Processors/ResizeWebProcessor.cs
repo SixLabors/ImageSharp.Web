@@ -3,8 +3,9 @@
 
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Transforms;
+using SixLabors.ImageSharp.Processing.Transforms.Resamplers;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.Primitives;
 
@@ -103,11 +104,7 @@ namespace SixLabors.ImageSharp.Web.Processors
             };
 
             // Defaults to Bicubic if not set.
-            IResampler sampler = GetSampler(commands);
-            if (sampler != null)
-            {
-                options.Sampler = sampler;
-            }
+            options.Sampler = GetSampler(commands);
 
             return options;
         }
@@ -131,9 +128,9 @@ namespace SixLabors.ImageSharp.Web.Processors
             return parser.ParseValue<ResizeMode>(commands.GetValueOrDefault(Mode));
         }
 
-        private static AnchorPosition GetAnchor(IDictionary<string, string> commands, CommandParser parser)
+        private static AnchorPositionMode GetAnchor(IDictionary<string, string> commands, CommandParser parser)
         {
-            return parser.ParseValue<AnchorPosition>(commands.GetValueOrDefault(Anchor));
+            return parser.ParseValue<AnchorPositionMode>(commands.GetValueOrDefault(Anchor));
         }
 
         private static bool GetCompandMode(IDictionary<string, string> commands, CommandParser parser)
@@ -149,21 +146,24 @@ namespace SixLabors.ImageSharp.Web.Processors
             {
                 switch (sampler.ToLowerInvariant())
                 {
-                    case "nearest": return new NearestNeighborResampler();
-                    case "box": return new BoxResampler();
-                    case "mitchell": return new MitchellNetravaliResampler();
-                    case "catmull": return new CatmullRomResampler();
-                    case "lanczos2": return new Lanczos2Resampler();
-                    case "lanczos3": return new Lanczos3Resampler();
-                    case "lanczos5": return new Lanczos5Resampler();
-                    case "lanczos8": return new Lanczos8Resampler();
-                    case "welch": return new WelchResampler();
-                    case "triangle": return new TriangleResampler();
-                    case "hermite": return new HermiteResampler();
+                    case "nearest": return KnownResamplers.NearestNeighbor;
+                    case "box": return KnownResamplers.Box;
+                    case "mitchell": return KnownResamplers.MitchellNetravali;
+                    case "catmull": return KnownResamplers.CatmullRom;
+                    case "lanczos2": return KnownResamplers.Lanczos2;
+                    case "lanczos3": return KnownResamplers.Lanczos3;
+                    case "lanczos5": return KnownResamplers.Lanczos5;
+                    case "lanczos8": return KnownResamplers.Lanczos8;
+                    case "welch": return KnownResamplers.Welch;
+                    case "robidoux": return KnownResamplers.Robidoux;
+                    case "robidouxsharp": return KnownResamplers.RobidouxSharp;
+                    case "spline": return KnownResamplers.Spline;
+                    case "triangle": return KnownResamplers.Triangle;
+                    case "hermite": return KnownResamplers.Hermite;
                 }
             }
 
-            return null;
+            return KnownResamplers.Bicubic;
         }
     }
 }

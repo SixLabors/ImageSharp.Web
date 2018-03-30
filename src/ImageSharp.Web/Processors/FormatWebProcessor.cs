@@ -2,10 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Middleware;
@@ -52,7 +50,7 @@ namespace SixLabors.ImageSharp.Web.Processors
 
             if (!string.IsNullOrWhiteSpace(extension))
             {
-                IImageFormat format = this.options.Configuration.FindFormatByFileExtension(extension);
+                IImageFormat format = this.options.Configuration.ImageFormatsManager.FindFormatByFileExtension(extension);
 
                 if (format != null)
                 {
