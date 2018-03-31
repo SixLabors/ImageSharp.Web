@@ -12,10 +12,10 @@ namespace SixLabors.ImageSharp.Web.Commands
     /// <summary>
     /// Parses commands from the request querystring.
     /// </summary>
-    public class QueryCollectionUriParser : IUriParser
+    public class QueryCollectionRequestParser : IRequestParser
     {
         /// <inheritdoc/>
-        public IDictionary<string, string> ParseUriCommands(HttpContext context)
+        public IDictionary<string, string> ParseRequestCommands(HttpContext context)
         {
             if (!context.Request.Query.Any())
             {

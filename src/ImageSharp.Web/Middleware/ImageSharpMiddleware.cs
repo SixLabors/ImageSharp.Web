@@ -20,12 +20,12 @@ using SixLabors.ImageSharp.Web.Resolvers;
 namespace SixLabors.ImageSharp.Web.Middleware
 {
     /// <summary>
-    /// Middleware for handling the processing of images via a URI querystring API.
+    /// Middleware for handling the processing of images via image requests.
     /// </summary>
     public class ImageSharpMiddleware
     {
         /// <summary>
-        /// The keylock used for limiting identical requests
+        /// The key-lock used for limiting identical requests
         /// </summary>
         private readonly IAsyncKeyLock asyncKeyLock;
 
@@ -45,9 +45,14 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private readonly ILogger logger;
 
         /// <summary>
-        /// The URI parser for parsing commands from the current request.
+        /// The buffer data pool.
         /// </summary>
-        private readonly IUriParser uriParser;
+        private readonly IBufferDataPool bufferDataPool;
+
+        /// <summary>
+        /// The parser for parsing commands from the current request.
+        /// </summary>
+        private readonly IRequestParser requestParser;
 
         /// <summary>
         /// The collection of image resolvers.
@@ -80,7 +85,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="next">The next middleware in the pipeline</param>
         /// <param name="options">The middleware configuration options</param>
         /// <param name="loggerFactory">An <see cref="ILoggerFactory"/> instance used to create loggers</param>
-        /// <param name="uriParser">An <see cref="IUriParser"/> instance used to parse URI's for commands</param>
+        /// <param name="bufferDataPool">An <see cref="IBufferDataPool"/> instance used to enable reusing arrays transporting encoded image data</param>
+        /// <param name="requestParser">An <see cref="IRequestParser"/> instance used to parse image requests for commands</param>
         /// <param name="resolvers">A collection of <see cref="IImageResolver"/> instances used to resolve images</param>
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images</param>
         /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images</param>
@@ -90,7 +96,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
             RequestDelegate next,
             IOptions<ImageSharpMiddlewareOptions> options,
             ILoggerFactory loggerFactory,
-            IUriParser uriParser,
+            IBufferDataPool bufferDataPool,
+            IRequestParser requestParser,
             IEnumerable<IImageResolver> resolvers,
             IEnumerable<IImageWebProcessor> processors,
             IImageCache cache,
@@ -100,7 +107,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
             Guard.NotNull(next, nameof(next));
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
-            Guard.NotNull(uriParser, nameof(uriParser));
+            Guard.NotNull(bufferDataPool, nameof(bufferDataPool));
+            Guard.NotNull(requestParser, nameof(requestParser));
             Guard.NotNull(resolvers, nameof(resolvers));
             Guard.NotNull(processors, nameof(processors));
             Guard.NotNull(cache, nameof(cache));
@@ -109,7 +117,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             this.next = next;
             this.options = options.Value;
-            this.uriParser = uriParser;
+            this.bufferDataPool = bufferDataPool;
+            this.requestParser = requestParser;
             this.resolvers = resolvers;
             this.processors = processors;
             this.cache = cache;
@@ -134,7 +143,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <returns>The <see cref="Task"/></returns>
         public async Task Invoke(HttpContext context)
         {
-            IDictionary<string, string> commands = this.uriParser.ParseUriCommands(context)
+            IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context)
                 .Where(kvp => this.knownCommands.Contains(kvp.Key))
                 .ToDictionary(p => p.Key, p => p.Value);
 
@@ -216,12 +225,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                                 // Allow for any further optimization of the image. Always reset the position just in case.
                                 outStream.Position = 0;
-                                this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, Path.GetExtension(key)));
+                                this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, Path.GetExtension(key)));
                                 outStream.Position = 0;
                                 int outLength = (int)outStream.Length;
 
-                                // Copy the outstream to the pooled buffer.
-                                outBuffer = BufferDataPool.Rent(outLength);
+                                // Copy the out-stream to the pooled buffer.
+                                outBuffer = this.bufferDataPool.Rent(outLength);
                                 await outStream.ReadAsync(outBuffer, 0, outLength);
 
                                 DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer, outLength);
@@ -240,8 +249,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             outStream?.Dispose();
 
                             // Buffer should have been rented in IImageResolver
-                            BufferDataPool.Return(inBuffer);
-                            BufferDataPool.Return(outBuffer);
+                            this.bufferDataPool.Return(inBuffer);
+                            this.bufferDataPool.Return(outBuffer);
                         }
                     }
                 }
@@ -275,7 +284,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         // We're pulling the buffer from the cache. This should be pooled.
                         CachedBuffer cachedBuffer = await this.cache.GetAsync(key);
                         await imageContext.SendAsync(contentType, cachedBuffer.Buffer, cachedBuffer.Length);
-                        BufferDataPool.Return(cachedBuffer.Buffer);
+                        this.bufferDataPool.Return(cachedBuffer.Buffer);
                     }
                     else
                     {

@@ -6,9 +6,9 @@ using System.Buffers;
 namespace SixLabors.ImageSharp.Web.Memory
 {
     /// <summary>
-    /// Provides a resource pool that enables reusing instances of value type arrays for image data <see cref="T:Byte[]"/>.
+    /// Provides a resource pool that enables reusing arrays for transporting encoded image data.
     /// </summary>
-    public class BufferDataPool
+    public class BufferDataPool : IBufferDataPool
     {
         /// <summary>
         /// The maximum length of each array in the pool (2^21).
@@ -20,21 +20,14 @@ namespace SixLabors.ImageSharp.Web.Memory
         /// </summary>
         private static readonly ArrayPool<byte> ArrayPool = ArrayPool<byte>.Create(MaxLength, 50);
 
-        /// <summary>
-        /// Rents the pixel array from the pool.
-        /// </summary>
-        /// <param name="minimumLength">The minimum length of the array to return.</param>
-        /// <returns>The <see cref="T:Byte[]"/></returns>
-        public static byte[] Rent(int minimumLength)
+        /// <inheritdoc />
+        public byte[] Rent(int minimumLength)
         {
             return ArrayPool.Rent(minimumLength);
         }
 
-        /// <summary>
-        /// Returns the rented pixel array back to the pool.
-        /// </summary>
-        /// <param name="array">The array to return to the buffer pool.</param>
-        public static void Return(byte[] array)
+        /// <inheritdoc />
+        public void Return(byte[] array)
         {
             try
             {

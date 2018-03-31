@@ -28,6 +28,11 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         private readonly IFileProvider fileProvider;
 
         /// <summary>
+        /// The buffer data pool.
+        /// </summary>
+        private readonly IBufferDataPool bufferDataPool;
+
+        /// <summary>
         /// The middleware configuration options.
         /// </summary>
         private readonly ImageSharpMiddlewareOptions options;
@@ -36,10 +41,16 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// Initializes a new instance of the <see cref="PhysicalFileSystemResolver"/> class.
         /// </summary>
         /// <param name="environment">The <see cref="IHostingEnvironment"/> used by this middleware</param>
+        /// <param name="bufferDataPool">An <see cref="IBufferDataPool"/> instance used to enable reusing arrays transporting encoded image data</param>
         /// <param name="options">The middleware configuration options</param>
-        public PhysicalFileSystemResolver(IHostingEnvironment environment, IOptions<ImageSharpMiddlewareOptions> options)
+        public PhysicalFileSystemResolver(IHostingEnvironment environment, IBufferDataPool bufferDataPool, IOptions<ImageSharpMiddlewareOptions> options)
         {
+            Guard.NotNull(environment, nameof(environment));
+            Guard.NotNull(bufferDataPool, nameof(bufferDataPool));
+            Guard.NotNull(options, nameof(options));
+
             this.fileProvider = environment.WebRootFileProvider;
+            this.bufferDataPool = bufferDataPool;
             this.options = options.Value;
         }
 
@@ -71,7 +82,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
             using (Stream stream = fileInfo.CreateReadStream())
             {
                 // Buffer is returned to the pool in the middleware
-                buffer = BufferDataPool.Rent((int)stream.Length);
+                buffer = this.bufferDataPool.Rent((int)stream.Length);
                 await stream.ReadAsync(buffer, 0, (int)stream.Length);
             }
 

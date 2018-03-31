@@ -21,7 +21,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             };
 
             HttpContext context = TestHelpers.CreateHttpContext();
-            IDictionary<string, string> actual = new QueryCollectionUriParser().ParseUriCommands(context);
+            IDictionary<string, string> actual = new QueryCollectionRequestParser().ParseRequestCommands(context);
 
             Assert.Equal(expected, actual);
         }

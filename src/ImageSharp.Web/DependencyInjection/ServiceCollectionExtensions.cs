@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
+using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
@@ -90,7 +91,9 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/> that can be used to further configure the ImageSharp services</param>
         private static void AddDefaultServices(IImageSharpCoreBuilder builder)
         {
-            builder.SetUriParser<QueryCollectionUriParser>();
+            builder.SetRequestParser<QueryCollectionRequestParser>();
+
+            builder.SetBufferDataPool<BufferDataPool>();
 
             builder.SetCache<PhysicalFileSystemCache>();
 

@@ -35,6 +35,11 @@ namespace SixLabors.ImageSharp.Web.Caching
         public const string CheckSourceChanged = "CheckSourceChanged";
 
         /// <summary>
+        /// The default value for determining whether to check for changes in the source.
+        /// </summary>
+        public const string DefaultCheckSourceChanged = "false";
+
+        /// <summary>
         /// The hosting environment the application is running in.
         /// </summary>
         private readonly IHostingEnvironment environment;
@@ -45,6 +50,11 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly IFileProvider fileProvider;
 
         /// <summary>
+        /// The buffer data pool.
+        /// </summary>
+        private readonly IBufferDataPool bufferDataPool;
+
+        /// <summary>
         /// The middleware configuration options.
         /// </summary>
         private readonly ImageSharpMiddlewareOptions options;
@@ -53,11 +63,17 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
         /// <param name="environment">The hosting environment the application is running in</param>
+        /// <param name="bufferDataPool">An <see cref="IBufferDataPool"/> instance used to enable reusing arrays transporting encoded image data</param>
         /// <param name="options">The middleware configuration options</param>
-        public PhysicalFileSystemCache(IHostingEnvironment environment, IOptions<ImageSharpMiddlewareOptions> options)
+        public PhysicalFileSystemCache(IHostingEnvironment environment, IBufferDataPool bufferDataPool, IOptions<ImageSharpMiddlewareOptions> options)
         {
+            Guard.NotNull(environment, nameof(environment));
+            Guard.NotNull(bufferDataPool, nameof(bufferDataPool));
+            Guard.NotNull(options, nameof(options));
+
             this.environment = environment;
             this.fileProvider = this.environment.WebRootFileProvider;
+            this.bufferDataPool = bufferDataPool;
             this.options = options.Value;
         }
 
@@ -66,7 +82,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             = new Dictionary<string, string>
             {
                 { Folder, DefaultCacheFolder },
-                { CheckSourceChanged, "false" }
+                { CheckSourceChanged, DefaultCheckSourceChanged }
             };
 
         /// <inheritdoc/>
@@ -88,7 +104,7 @@ namespace SixLabors.ImageSharp.Web.Caching
                 length = stream.Length;
 
                 // Buffer is returned to the pool in the middleware
-                buffer = BufferDataPool.Rent((int)length);
+                buffer = this.bufferDataPool.Rent((int)length);
                 await stream.ReadAsync(buffer, 0, (int)length);
             }
 

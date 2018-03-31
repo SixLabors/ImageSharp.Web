@@ -34,7 +34,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         {
             Rgba32 background = CommandParser.Instance.ParseValue<Rgba32>(commands.GetValueOrDefault(Color));
 
-            if (background != default(Rgba32))
+            if (background != default)
             {
                 image.Image.Mutate(x => x.BackgroundColor(background));
             }
