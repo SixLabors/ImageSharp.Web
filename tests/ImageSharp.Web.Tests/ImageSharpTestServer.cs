@@ -71,6 +71,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                     options.OnPrepareResponse = onPrepareResponse;
                 })
                 .SetRequestParser<QueryCollectionRequestParser>()
+                .SetBufferDataPool<BufferDataPool>()
                 .SetCache<PhysicalFileSystemCache>()
                 .SetCacheHash<CacheHash>()
                 .SetAsyncKeyLock<AsyncKeyLock>()
