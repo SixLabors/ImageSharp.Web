@@ -93,7 +93,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         {
             builder.SetRequestParser<QueryCollectionRequestParser>();
 
-            builder.SetBufferDataPool<BufferDataPool>();
+            builder.SetBufferManager<PooledBufferManager>();
 
             builder.SetCache<PhysicalFileSystemCache>();
 

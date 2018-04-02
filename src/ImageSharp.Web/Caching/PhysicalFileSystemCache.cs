@@ -50,9 +50,9 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly IFileProvider fileProvider;
 
         /// <summary>
-        /// The buffer data pool.
+        /// The buffer manager.
         /// </summary>
-        private readonly IBufferDataPool bufferDataPool;
+        private readonly IBufferManager bufferManager;
 
         /// <summary>
         /// The middleware configuration options.
@@ -63,17 +63,17 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
         /// <param name="environment">The hosting environment the application is running in</param>
-        /// <param name="bufferDataPool">An <see cref="IBufferDataPool"/> instance used to enable reusing arrays transporting encoded image data</param>
+        /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data</param>
         /// <param name="options">The middleware configuration options</param>
-        public PhysicalFileSystemCache(IHostingEnvironment environment, IBufferDataPool bufferDataPool, IOptions<ImageSharpMiddlewareOptions> options)
+        public PhysicalFileSystemCache(IHostingEnvironment environment, IBufferManager bufferManager, IOptions<ImageSharpMiddlewareOptions> options)
         {
             Guard.NotNull(environment, nameof(environment));
-            Guard.NotNull(bufferDataPool, nameof(bufferDataPool));
+            Guard.NotNull(bufferManager, nameof(bufferManager));
             Guard.NotNull(options, nameof(options));
 
             this.environment = environment;
             this.fileProvider = this.environment.WebRootFileProvider;
-            this.bufferDataPool = bufferDataPool;
+            this.bufferManager = bufferManager;
             this.options = options.Value;
         }
 
@@ -86,29 +86,28 @@ namespace SixLabors.ImageSharp.Web.Caching
             };
 
         /// <inheritdoc/>
-        public async Task<CachedBuffer> GetAsync(string key)
+        public async Task<IByteBuffer> GetAsync(string key)
         {
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
 
-            byte[] buffer;
+            IByteBuffer buffer;
 
             // Check to see if the file exists.
             if (!fileInfo.Exists)
             {
-                return default(CachedBuffer);
+                return default;
             }
 
-            long length;
             using (Stream stream = fileInfo.CreateReadStream())
             {
-                length = stream.Length;
+                int length = (int)stream.Length;
 
-                // Buffer is returned to the pool in the middleware
-                buffer = this.bufferDataPool.Rent((int)length);
-                await stream.ReadAsync(buffer, 0, (int)length);
+                // Buffer is disposed of in the middleware
+                buffer = this.bufferManager.Allocate(length);
+                await stream.ReadAsync(buffer.Array, 0, length);
             }
 
-            return new CachedBuffer(buffer, length);
+            return buffer;
         }
 
         /// <inheritdoc/>
@@ -154,7 +153,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         }
 
         /// <inheritdoc/>
-        public async Task<DateTimeOffset> SetAsync(string key, byte[] value, int length)
+        public async Task<DateTimeOffset> SetAsync(string key, IByteBuffer value)
         {
             Guard.NotNullOrEmpty(
                 this.environment.WebRootPath,
@@ -171,7 +170,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             using (FileStream fileStream = File.Create(path))
             {
-                await fileStream.WriteAsync(value, 0, length);
+                await fileStream.WriteAsync(value.Array, 0, value.Length);
             }
 
             return File.GetLastWriteTimeUtc(path);

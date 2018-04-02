@@ -47,7 +47,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// The buffer data pool.
         /// </summary>
-        private readonly IBufferDataPool bufferDataPool;
+        private readonly IBufferManager bufferManager;
 
         /// <summary>
         /// The parser for parsing commands from the current request.
@@ -85,7 +85,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="next">The next middleware in the pipeline</param>
         /// <param name="options">The middleware configuration options</param>
         /// <param name="loggerFactory">An <see cref="ILoggerFactory"/> instance used to create loggers</param>
-        /// <param name="bufferDataPool">An <see cref="IBufferDataPool"/> instance used to enable reusing arrays transporting encoded image data</param>
+        /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data</param>
         /// <param name="requestParser">An <see cref="IRequestParser"/> instance used to parse image requests for commands</param>
         /// <param name="resolvers">A collection of <see cref="IImageResolver"/> instances used to resolve images</param>
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images</param>
@@ -96,7 +96,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             RequestDelegate next,
             IOptions<ImageSharpMiddlewareOptions> options,
             ILoggerFactory loggerFactory,
-            IBufferDataPool bufferDataPool,
+            IBufferManager bufferManager,
             IRequestParser requestParser,
             IEnumerable<IImageResolver> resolvers,
             IEnumerable<IImageWebProcessor> processors,
@@ -107,7 +107,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             Guard.NotNull(next, nameof(next));
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
-            Guard.NotNull(bufferDataPool, nameof(bufferDataPool));
+            Guard.NotNull(bufferManager, nameof(bufferManager));
             Guard.NotNull(requestParser, nameof(requestParser));
             Guard.NotNull(resolvers, nameof(resolvers));
             Guard.NotNull(processors, nameof(processors));
@@ -117,7 +117,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             this.next = next;
             this.options = options.Value;
-            this.bufferDataPool = bufferDataPool;
+            this.bufferManager = bufferManager;
             this.requestParser = requestParser;
             this.resolvers = resolvers;
             this.processors = processors;
@@ -180,7 +180,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                     var imageContext = new ImageContext(context, this.options);
 
-                    if (info.Equals(default(CachedInfo)))
+                    if (info.Equals(default))
                     {
                         // Cache has tried to resolve the source image and failed
                         // Log the error but let the pipeline handle the 404
@@ -192,19 +192,24 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     {
                         if (!info.Expired)
                         {
-                            // Image is a cached image. Return the correct response now.
-                            await this.SendResponse(imageContext, key, info.LastModifiedUtc, null, (int)info.Length);
+                            // We're pulling the buffer from the cache. This should be cleaned up after.
+                            using (IByteBuffer cachedBuffer = await this.cache.GetAsync(key))
+                            {
+                                // Image is a cached image. Return the correct response now.
+                                await this.SendResponse(imageContext, key, info.LastModifiedUtc, cachedBuffer);
+                            }
+
                             return;
                         }
 
                         // Not cached? Let's get it from the image resolver.
-                        byte[] inBuffer = null;
-                        byte[] outBuffer = null;
+                        IByteBuffer inBuffer = null;
+                        IByteBuffer outBuffer = null;
                         MemoryStream outStream = null;
                         try
                         {
                             inBuffer = await resolver.ResolveImageAsync(context, this.logger);
-                            if (inBuffer == null || inBuffer.Length == 0)
+                            if (inBuffer == null || inBuffer.Array.Length == 0)
                             {
                                 // Log the error but let the pipeline handle the 404
                                 this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
@@ -216,7 +221,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 // No allocations here for inStream since we are passing the buffer.
                                 // TODO: How to prevent the allocation in outStream? Passing a pooled buffer won't let stream grow if needed.
                                 outStream = new MemoryStream();
-                                using (var image = FormattedImage.Load(this.options.Configuration, inBuffer))
+                                using (var image = FormattedImage.Load(this.options.Configuration, inBuffer.Array))
                                 {
                                     image.Process(this.logger, this.processors, commands);
                                     this.options.OnBeforeSave?.Invoke(image);
@@ -230,11 +235,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 int outLength = (int)outStream.Length;
 
                                 // Copy the out-stream to the pooled buffer.
-                                outBuffer = this.bufferDataPool.Rent(outLength);
-                                await outStream.ReadAsync(outBuffer, 0, outLength);
+                                outBuffer = this.bufferManager.Allocate(outLength);
+                                await outStream.ReadAsync(outBuffer.Array, 0, outLength);
 
-                                DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer, outLength);
-                                await this.SendResponse(imageContext, key, cachedDate, outBuffer, outLength);
+                                DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer);
+                                await this.SendResponse(imageContext, key, cachedDate, outBuffer);
                             }
                         }
                         catch (Exception ex)
@@ -247,10 +252,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         finally
                         {
                             outStream?.Dispose();
-
-                            // Buffer should have been rented in IImageResolver
-                            this.bufferDataPool.Return(inBuffer);
-                            this.bufferDataPool.Return(outBuffer);
+                            inBuffer?.Dispose();
+                            outBuffer?.Dispose();
                         }
                     }
                 }
@@ -263,9 +266,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
         }
 
-        private async Task SendResponse(ImageContext imageContext, string key, DateTimeOffset lastModified, byte[] buffer, int length)
+        private async Task SendResponse(ImageContext imageContext, string key, DateTimeOffset lastModified, IByteBuffer buffer)
         {
-            imageContext.ComprehendRequestHeaders(lastModified, length);
+            imageContext.ComprehendRequestHeaders(lastModified, buffer.Length);
 
             string contentType = FormatHelpers.GetContentType(this.options.Configuration, key);
 
@@ -279,17 +282,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     }
 
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
-                    if (buffer == null)
-                    {
-                        // We're pulling the buffer from the cache. This should be pooled.
-                        CachedBuffer cachedBuffer = await this.cache.GetAsync(key);
-                        await imageContext.SendAsync(contentType, cachedBuffer.Buffer, cachedBuffer.Length);
-                        this.bufferDataPool.Return(cachedBuffer.Buffer);
-                    }
-                    else
-                    {
-                        await imageContext.SendAsync(contentType, buffer, length);
-                    }
+                    await imageContext.SendAsync(contentType, buffer, buffer.Length);
 
                     break;
 

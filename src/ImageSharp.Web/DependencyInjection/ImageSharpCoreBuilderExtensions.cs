@@ -43,25 +43,25 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="IBufferDataPool"/> adding it to the service collection
+        /// Sets the given <see cref="IBufferManager"/> adding it to the service collection
         /// </summary>
-        /// <typeparam name="TBufferDataPool">The type of class implementing <see cref="IBufferDataPool"/>to add.</typeparam>
+        /// <typeparam name="TBufferManager">The type of class implementing <see cref="IBufferManager"/>to add.</typeparam>
         /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
-        public static IImageSharpCoreBuilder SetBufferDataPool<TBufferDataPool>(this IImageSharpCoreBuilder builder)
-            where TBufferDataPool : class, IBufferDataPool
+        public static IImageSharpCoreBuilder SetBufferManager<TBufferManager>(this IImageSharpCoreBuilder builder)
+            where TBufferManager : class, IBufferManager
         {
-            builder.Services.AddSingleton<IBufferDataPool, TBufferDataPool>();
+            builder.Services.AddSingleton<IBufferManager, TBufferManager>();
             return builder;
         }
 
         /// <summary>
-        /// Sets the given <see cref="IBufferDataPool"/> adding it to the service collection
+        /// Sets the given <see cref="IBufferManager"/> adding it to the service collection
         /// </summary>
         /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="IBufferDataPool"/>"/></param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="IBufferManager"/>"/></param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
-        public static IImageSharpCoreBuilder SetBufferDataPool(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IBufferDataPool> implementationFactory)
+        public static IImageSharpCoreBuilder SetBufferManager(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IBufferManager> implementationFactory)
         {
             builder.Services.AddSingleton(implementationFactory);
             return builder;

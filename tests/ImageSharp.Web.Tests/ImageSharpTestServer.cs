@@ -43,7 +43,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                             options.OnPrepareResponse = _ => { };
                         })
                     .SetRequestParser<QueryCollectionRequestParser>()
-                    .SetBufferDataPool<BufferDataPool>()
+                    .SetBufferManager<PooledBufferManager>()
                     .SetCache<PhysicalFileSystemCache>()
                     .SetCacheHash<CacheHash>()
                     .SetAsyncKeyLock<AsyncKeyLock>()
@@ -71,7 +71,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                     options.OnPrepareResponse = onPrepareResponse;
                 })
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetBufferDataPool<BufferDataPool>()
+                .SetBufferManager<PooledBufferManager>()
                 .SetCache<PhysicalFileSystemCache>()
                 .SetCacheHash<CacheHash>()
                 .SetAsyncKeyLock<AsyncKeyLock>()

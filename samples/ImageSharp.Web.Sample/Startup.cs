@@ -26,10 +26,10 @@ namespace SixLabors.ImageSharp.Web.Sample
         {
             services.AddImageSharpCore()
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetBufferDataPool<BufferDataPool>()
+                .SetBufferManager<PooledBufferManager>()
                 .SetCache(provider => new PhysicalFileSystemCache(
                     provider.GetRequiredService<IHostingEnvironment>(),
-                    provider.GetRequiredService<IBufferDataPool>(),
+                    provider.GetRequiredService<IBufferManager>(),
                     provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>())
                 {
                     Settings =
@@ -65,7 +65,7 @@ namespace SixLabors.ImageSharp.Web.Sample
             //// Or we can fine-grain control adding the default options and configure all other services.
             //services.AddImageSharpCore()
             //        .SetRequestParser<QueryCollectionUriParser>()
-            //        .SetBufferDataPool<BufferDataPool>()
+            //        .SetBufferManager<PooledBufferManager>()
             //        .SetCache<PhysicalFileSystemCache>()
             //        .SetCacheHash<CacheHash>()
             //        .SetAsyncKeyLock<AsyncKeyLock>()
@@ -90,12 +90,12 @@ namespace SixLabors.ImageSharp.Web.Sample
             //            options.OnPrepareResponse = _ => { };
             //        })
             //    .SetRequestParser<QueryCollectionUriParser>()
-            //    .SetBufferDataPool<BufferDataPool>()
+            //    .SetBufferManager<PooledBufferManager>()
             //    .SetCache(provider =>
             //      {
             //          var p = new PhysicalFileSystemCache(
             //              provider.GetRequiredService<IHostingEnvironment>(),
-            //              provider.GetRequiredService<IBufferDataPool>(),
+            //              provider.GetRequiredService<IBufferManager>(),
             //              provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
             //
             //          p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
