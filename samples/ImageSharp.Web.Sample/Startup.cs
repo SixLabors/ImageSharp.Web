@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
+using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
@@ -23,8 +24,29 @@ namespace SixLabors.ImageSharp.Web.Sample
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add the default service and options.
-            services.AddImageSharp();
+            services.AddImageSharpCore()
+                .SetRequestParser<QueryCollectionRequestParser>()
+                .SetBufferManager<PooledBufferManager>()
+                .SetCache(provider => new PhysicalFileSystemCache(
+                    provider.GetRequiredService<IHostingEnvironment>(),
+                    provider.GetRequiredService<IBufferManager>(),
+                    provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>())
+                {
+                    Settings =
+                    {
+                        [PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder,
+                        [PhysicalFileSystemCache.CheckSourceChanged] = "true"
+                    }
+                })
+                .SetCacheHash<CacheHash>()
+                .SetAsyncKeyLock<AsyncKeyLock>()
+                .AddResolver<PhysicalFileSystemResolver>()
+                .AddProcessor<ResizeWebProcessor>()
+                .AddProcessor<FormatWebProcessor>()
+                .AddProcessor<BackgroundColorWebProcessor>();
+
+            //// Add the default service and options.
+            // services.AddImageSharp();
 
             //// Or add the default service and custom options.
             //services.AddImageSharp(
@@ -42,12 +64,15 @@ namespace SixLabors.ImageSharp.Web.Sample
 
             //// Or we can fine-grain control adding the default options and configure all other services.
             //services.AddImageSharpCore()
-            //        .SetUriParser<QueryCollectionUriParser>()
+            //        .SetRequestParser<QueryCollectionUriParser>()
+            //        .SetBufferManager<PooledBufferManager>()
             //        .SetCache<PhysicalFileSystemCache>()
             //        .SetCacheHash<CacheHash>()
             //        .SetAsyncKeyLock<AsyncKeyLock>()
             //        .AddResolver<PhysicalFileSystemResolver>()
-            //        .AddProcessor<ResizeWebProcessor>();
+            //        .AddProcessor<ResizeWebProcessor>()
+            //        .AddProcessor<FormatWebProcessor>()
+            //        .AddProcessor<BackgroundColorWebProcessor>();
 
 
             //// Or we can fine-grain control adding custom options and configure all other services
@@ -64,22 +89,26 @@ namespace SixLabors.ImageSharp.Web.Sample
             //            options.OnProcessed = _ => { };
             //            options.OnPrepareResponse = _ => { };
             //        })
-            //    .SetUriParser<QueryCollectionUriParser>()
-            //    .SetCache(
-            //        provider => new PhysicalFileSystemCache(
-            //            provider.GetRequiredService<IHostingEnvironment>(),
-            //            provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>())
-            //            {
-            //                Settings =
-            //                {
-            //                    new KeyValuePair<string, string>( PhysicalFileSystemCache.Folder, PhysicalFileSystemCache.DefaultCacheFolder),
-            //                    new KeyValuePair<string, string>( PhysicalFileSystemCache.CheckSourceChanged, "true")
-            //                }
-            //            })
+            //    .SetRequestParser<QueryCollectionUriParser>()
+            //    .SetBufferManager<PooledBufferManager>()
+            //    .SetCache(provider =>
+            //      {
+            //          var p = new PhysicalFileSystemCache(
+            //              provider.GetRequiredService<IHostingEnvironment>(),
+            //              provider.GetRequiredService<IBufferManager>(),
+            //              provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
+            //
+            //          p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
+            //          p.Settings[PhysicalFileSystemCache.CheckSourceChanged] = "true";
+            //
+            //          return p;
+            //      })
             //    .SetCacheHash<CacheHash>()
             //    .SetAsyncKeyLock<AsyncKeyLock>()
             //    .AddResolver<PhysicalFileSystemResolver>()
-            //    .AddProcessor<ResizeWebProcessor>();
+            //    .AddProcessor<ResizeWebProcessor>()
+            //    .AddProcessor<FormatWebProcessor>()
+            //    .AddProcessor<BackgroundColorWebProcessor>();;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

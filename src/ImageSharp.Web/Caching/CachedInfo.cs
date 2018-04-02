@@ -8,8 +8,23 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// <summary>
     /// Contains information about a cached image instance
     /// </summary>
-    public struct CachedInfo : IEquatable<CachedInfo>
+    public readonly struct CachedInfo : IEquatable<CachedInfo>
     {
+        /// <summary>
+        /// Gets a value indicating whether the cached image is expired
+        /// </summary>
+        public readonly bool Expired;
+
+        /// <summary>
+        /// Gets the date and time, in coordinated universal time (UTC), the cached image was last written to
+        /// </summary>
+        public readonly DateTimeOffset LastModifiedUtc;
+
+        /// <summary>
+        /// Gets the length, in bytes, of the cached image
+        /// </summary>
+        public readonly long Length;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CachedInfo"/> struct.
         /// </summary>
@@ -22,21 +37,6 @@ namespace SixLabors.ImageSharp.Web.Caching
             this.LastModifiedUtc = lastModified;
             this.Length = length;
         }
-
-        /// <summary>
-        /// Gets a value indicating whether the cached image is expired
-        /// </summary>
-        public bool Expired { get; }
-
-        /// <summary>
-        /// Gets the date and time, in coordinated universal time (UTC), the cached image was last written to
-        /// </summary>
-        public DateTimeOffset LastModifiedUtc { get; }
-
-        /// <summary>
-        /// Gets the length, in bytes, of the cached image
-        /// </summary>
-        public long Length { get; }
 
         /// <inheritdoc/>
         public bool Equals(CachedInfo other)

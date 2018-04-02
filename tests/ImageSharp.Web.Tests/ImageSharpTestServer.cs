@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
+using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
@@ -41,7 +42,8 @@ namespace SixLabors.ImageSharp.Web.Tests
                             options.OnProcessed = _ => { };
                             options.OnPrepareResponse = _ => { };
                         })
-                    .SetUriParser<QueryCollectionUriParser>()
+                    .SetRequestParser<QueryCollectionRequestParser>()
+                    .SetBufferManager<PooledBufferManager>()
                     .SetCache<PhysicalFileSystemCache>()
                     .SetCacheHash<CacheHash>()
                     .SetAsyncKeyLock<AsyncKeyLock>()
@@ -68,7 +70,8 @@ namespace SixLabors.ImageSharp.Web.Tests
                     options.OnProcessed = onProcessed;
                     options.OnPrepareResponse = onPrepareResponse;
                 })
-                .SetUriParser<QueryCollectionUriParser>()
+                .SetRequestParser<QueryCollectionRequestParser>()
+                .SetBufferManager<PooledBufferManager>()
                 .SetCache<PhysicalFileSystemCache>()
                 .SetCacheHash<CacheHash>()
                 .SetAsyncKeyLock<AsyncKeyLock>()

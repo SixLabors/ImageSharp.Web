@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp;
 
 namespace SixLabors.ImageSharp.Web.Processors
 {
@@ -18,7 +17,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <param name="source">The image to resize.</param>
         /// <param name="logger">The type used for performing logging</param>
         /// <param name="processors">The collection of available processors</param>
-        /// <param name="commands">The querystring collection containing the processing commands</param>
+        /// <param name="commands">The parsed collection of processing commands</param>
         /// <returns>The <see cref="Image{Rgba32}"/></returns>
         /// <remarks>Passing zero for one of height or width will automatically preserve the aspect ratio of the original image</remarks>
         public static FormattedImage Process(this FormattedImage source, ILogger logger, IEnumerable<IImageWebProcessor> processors, IDictionary<string, string> commands)

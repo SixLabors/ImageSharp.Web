@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.Net.Http.Headers;
+using SixLabors.ImageSharp.Web.Memory;
 
 namespace SixLabors.ImageSharp.Web.Middleware
 {
@@ -118,7 +119,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         }
 
         /// <summary>
-        /// Gets a value indicating whther this request is a head request
+        /// Gets a value indicating whether this request is a head request
         /// </summary>
         /// <returns>THe <see cref="bool"/></returns>
         public bool IsHeadRequest()
@@ -147,12 +148,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="buffer">The cached image buffer</param>
         /// <param name="length">The The length, in bytes, of the cached image buffer</param>
         /// <returns>The <see cref="Task"/></returns>
-        public async Task SendAsync(string contentType, byte[] buffer, long length)
+        public async Task SendAsync(string contentType, IByteBuffer buffer, long length)
         {
             this.ApplyResponseHeaders(ResponseConstants.Status200Ok, contentType);
 
             // We don't need to directly cancel this, if the client disconnects it will fail silently.
-            await this.response.Body.WriteAsync(buffer, 0, (int)length, CancellationToken.None);
+            await this.response.Body.WriteAsync(buffer.Array, 0, (int)length, CancellationToken.None);
             if (this.response.Body.CanSeek)
             {
                 this.response.Body.Position = 0;
