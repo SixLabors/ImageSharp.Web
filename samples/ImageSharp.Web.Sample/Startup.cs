@@ -46,7 +46,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                 .AddProcessor<BackgroundColorWebProcessor>();
 
             //// Add the default service and options.
-            // services.AddImageSharp();
+            //services.AddImageSharp();
 
             //// Or add the default service and custom options.
             //services.AddImageSharp(
@@ -55,7 +55,7 @@ namespace SixLabors.ImageSharp.Web.Sample
             //            options.Configuration = Configuration.Default;
             //            options.MaxBrowserCacheDays = 7;
             //            options.MaxCacheDays = 365;
-            //            options.CacheDepth = 8;
+            //            options.CachedNameLength = 8;
             //            options.OnValidate = _ => { };
             //            options.OnBeforeSave = _ => { };
             //            options.OnProcessed = _ => { };
@@ -64,7 +64,7 @@ namespace SixLabors.ImageSharp.Web.Sample
 
             //// Or we can fine-grain control adding the default options and configure all other services.
             //services.AddImageSharpCore()
-            //        .SetRequestParser<QueryCollectionUriParser>()
+            //        .SetRequestParser<QueryCollectionRequestParser>()
             //        .SetBufferManager<PooledBufferManager>()
             //        .SetCache<PhysicalFileSystemCache>()
             //        .SetCacheHash<CacheHash>()
@@ -89,7 +89,7 @@ namespace SixLabors.ImageSharp.Web.Sample
             //            options.OnProcessed = _ => { };
             //            options.OnPrepareResponse = _ => { };
             //        })
-            //    .SetRequestParser<QueryCollectionUriParser>()
+            //    .SetRequestParser<QueryCollectionRequestParser>()
             //    .SetBufferManager<PooledBufferManager>()
             //    .SetCache(provider =>
             //      {
@@ -97,10 +97,10 @@ namespace SixLabors.ImageSharp.Web.Sample
             //              provider.GetRequiredService<IHostingEnvironment>(),
             //              provider.GetRequiredService<IBufferManager>(),
             //              provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
-            //
+
             //          p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
             //          p.Settings[PhysicalFileSystemCache.CheckSourceChanged] = "true";
-            //
+
             //          return p;
             //      })
             //    .SetCacheHash<CacheHash>()
@@ -108,7 +108,7 @@ namespace SixLabors.ImageSharp.Web.Sample
             //    .AddResolver<PhysicalFileSystemResolver>()
             //    .AddProcessor<ResizeWebProcessor>()
             //    .AddProcessor<FormatWebProcessor>()
-            //    .AddProcessor<BackgroundColorWebProcessor>();;
+            //    .AddProcessor<BackgroundColorWebProcessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
