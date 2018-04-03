@@ -1,9 +1,9 @@
 ### Prerequisites
 
 - [ ] I have written a descriptive issue title
-- [ ] I have verified that I am running the latest version of ImageSharp
+- [ ] I have verified that I am running the latest version of ImageSharp.Web
 - [ ] I have verified if the problem exist in both `DEBUG` and `RELEASE` mode
-- [ ] I have searched [open](https://github.com/JimBobSquarePants/ImageSharp/issuess) and [closed](https://github.com/JimBobSquarePants/ImageSharp/issues?q=is%3Aissue+is%3Aclosed) issues to ensure it has not already been reported
+- [ ] I have searched [open](https://github.com/SixLabors/ImageSharp.Web/issues) and [closed](https://github.com/SixLabors/ImageSharp.Web/issues?q=is%3Aissue+is%3Aclosed) issues to ensure it has not already been reported
 
 ### Description
 <!-- A description of the bug or feature -->
@@ -14,8 +14,8 @@
 ### System Configuration
 <!-- Tell us about the environment where you are experiencing the bug -->
 
-- ImageSharp version:
-- Other ImageSharp packages and versions:
+- ImageSharp.Web version:
+- Other SixLabors packages and versions:
 - Environment (Operating system, version and so on):
 - .NET Framework version:
 - Additional information:
