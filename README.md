@@ -44,9 +44,90 @@ Install stable releases via Nuget; development releases are available via MyGet.
 - **ImageSharp.Web**
   - Contains the middleware to integrate a dynamic image manipulation workflow into an aspnetcore application.
 
+Once installed you will need to add the following code  to `ConfigureServices` in your `Startup.cs` file. 
+
+This installs the the default service and options.
+
+``` c#
+// Add the default service and options.
+services.AddImageSharp();
+```
+
+Or add the default service and custom options.
+
+``` c#
+// Add the default service and custom options.
+services.AddImageSharp(
+    options =>
+        {
+            options.Configuration = Configuration.Default;
+            options.MaxBrowserCacheDays = 7;
+            options.MaxCacheDays = 365;
+            options.CachedNameLength = 8;
+            options.OnValidate = _ => { };
+            options.OnBeforeSave = _ => { };
+            options.OnProcessed = _ => { };
+            options.OnPrepareResponse = _ => { };
+        });
+```
+
+Or you can fine-grain control adding the default options and configure all other services.
+
+``` c#
+// Fine-grain control adding the default options and configure all other services.
+services.AddImageSharpCore()
+        .SetRequestParser<QueryCollectionRequestParser>()
+        .SetBufferManager<PooledBufferManager>()
+        .SetCache<PhysicalFileSystemCache>()
+        .SetCacheHash<CacheHash>()
+        .SetAsyncKeyLock<AsyncKeyLock>()
+        .AddResolver<PhysicalFileSystemResolver>()
+        .AddProcessor<ResizeWebProcessor>()
+        .AddProcessor<FormatWebProcessor>()
+        .AddProcessor<BackgroundColorWebProcessor>();
+```
+
+There are also factory methods for each builder that will allow building from configuration files.
+
+``` c#
+// Use the factory methods to configure the PhysicalFileSystemCache
+services.AddImageSharpCore(
+    options =>
+        {
+            options.Configuration = Configuration.Default;
+            options.MaxBrowserCacheDays = 7;
+            options.MaxCacheDays = 365;
+            options.CachedNameLength = 8;
+            options.OnValidate = _ => { };
+            options.OnBeforeSave = _ => { };
+            options.OnProcessed = _ => { };
+            options.OnPrepareResponse = _ => { };
+        })
+    .SetRequestParser<QueryCollectionRequestParser>()
+    .SetBufferManager<PooledBufferManager>()
+    .SetCache(provider =>
+      {
+          var p = new PhysicalFileSystemCache(
+              provider.GetRequiredService<IHostingEnvironment>(),
+              provider.GetRequiredService<IBufferManager>(),
+              provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
+
+          p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
+          p.Settings[PhysicalFileSystemCache.CheckSourceChanged] = "true";
+
+          return p;
+      })
+    .SetCacheHash<CacheHash>()
+    .SetAsyncKeyLock<AsyncKeyLock>()
+    .AddResolver<PhysicalFileSystemResolver>()
+    .AddProcessor<ResizeWebProcessor>()
+    .AddProcessor<FormatWebProcessor>()
+    .AddProcessor<BackgroundColorWebProcessor>();
+```
+
 ### Manual build
 
-If you prefer, you can compile ImageSharp yourself (please do and help!), you'll need:
+If you prefer, you can compile ImageSharp.Web yourself (please do and help!), you'll need:
 
 - [Visual Studio 2017 (or above)](https://www.visualstudio.com/en-us/news/releasenotes/vs2017-relnotes)
 - The [.NET Core SDK Installer](https://www.microsoft.com/net/core#windows) - Non VSCode link.
@@ -66,7 +147,7 @@ git clone https://github.com/SixLabors/ImageSharp.Web
 
 Please... Spread the word, contribute algorithms, submit performance improvements, unit tests, no input is too little. Make sure to read our [Contribution Guide](https://github.com/SixLabors/ImageSharp.Web/blob/master/.github/CONTRIBUTING.md) before opening a PR.
 
-### The ImageSharp Team
+### The ImageSharp.Web Team
 
 Grand High Eternal Dictator
 - [James Jackson-South](https://github.com/jimbobsquarepants)
