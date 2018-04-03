@@ -19,7 +19,7 @@ SixLabors.ImageSharp.Web
 
 </div>
 
-### **ImageSharp.Web** is a new high-performance aspnetcore middleware leveraging the ImageSharp graphics library.
+### **ImageSharp.Web** is a new high-performance ASP.NET Core middleware leveraging the ImageSharp graphics library.
 
 > Pre-release downloads are available from the [MyGet package repository](https://www.myget.org/gallery/imagesharp).
 
@@ -42,7 +42,7 @@ Install stable releases via Nuget; development releases are available via MyGet.
 ### Packages
 
 - **ImageSharp.Web**
-  - Contains the middleware to integrate a dynamic image manipulation workflow into an aspnetcore application.
+  - Contains the middleware to integrate a dynamic image manipulation workflow into an ASP.NET Core application.
 
 Once installed you will need to add the following code  to `ConfigureServices` in your `Startup.cs` file. 
 
@@ -60,6 +60,7 @@ Or add the default service and custom options.
 services.AddImageSharp(
     options =>
         {
+            You only need to set the options you want to change here.
             options.Configuration = Configuration.Default;
             options.MaxBrowserCacheDays = 7;
             options.MaxCacheDays = 365;
@@ -74,7 +75,7 @@ services.AddImageSharp(
 Or you can fine-grain control adding the default options and configure all other services.
 
 ``` c#
-// Fine-grain control adding the default options and configure all other services.
+// Fine-grain control adding the default options and configure all other services. Setting all services is required.
 services.AddImageSharpCore()
         .SetRequestParser<QueryCollectionRequestParser>()
         .SetBufferManager<PooledBufferManager>()
