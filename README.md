@@ -1,39 +1,46 @@
+<h1 align="center">
 
-# <img src="https://raw.githubusercontent.com/SixLabors/ImageSharp.Web/master/build/icons/imagesharp-logo-256.png" alt="ImageSharp" width="52"/> ImageSharp.Web
+<img src="https://raw.githubusercontent.com/SixLabors/Branding/master/icons/imagesharp/sixlabors.imagesharp.512.png" alt="SixLabors.ImageSharp.Web" width="256"/>
+<br/>
+SixLabors.ImageSharp.Web
+</h1>
 
-**ImageSharp.Web** is piece of aspnetcore middleware leverage the ImageSharp graphics library.
-
-> Pre-release downloads are available from the [MyGet package repository](https://www.myget.org/gallery/imagesharp).
+<div align="center">
 
 [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/SixLabors/ImageSharp.Web/master/APACHE-2.0-LICENSE.txt)
 [![GitHub issues](https://img.shields.io/github/issues/SixLabors/ImageSharp.Web.svg)](https://github.com/SixLabors/ImageSharp.Web/issues)
 [![GitHub stars](https://img.shields.io/github/stars/SixLabors/ImageSharp.Web.svg)](https://github.com/SixLabors/ImageSharp.Web/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/SixLabors/ImageSharp.Web.svg)](https://github.com/SixLabors/ImageSharp.Web/network)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ImageSharp/General?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Twitter](https://img.shields.io/twitter/url/https/github.com/SixLabors/ImageSharp.Web.svg?style=social)](https://twitter.com/intent/tweet?hashtags=imagesharp,dotnet,oss&text=ImageSharp.+A+new+cross-platform+2D+graphics+API+in+C%23&url=https%3a%2f%2fgithub.com%2fSixLabors%2fImageSharp&via=sixlabors)
+
+[![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=flat&logo=twitter)](https://twitter.com/intent/tweet?hashtags=imagesharp,dotnet,oss&text=ImageSharp.+A+new+cross-platform+2D+graphics+API+in+C%23&url=https%3a%2f%2fgithub.com%2fSixLabors%2fImageSharp&via=sixlabors)
 [![OpenCollective](https://opencollective.com/imagesharp/backers/badge.svg)](#backers) 
 [![OpenCollective](https://opencollective.com/imagesharp/sponsors/badge.svg)](#sponsors)
 
+</div>
 
-<!--
-|             |Build Status|Code Coverage|
-|-------------|:----------:|:-----------:|
-|**Linux/Mac**|[![Build Status](https://travis-ci.org/SixLabors/ImageSharp.svg)](https://travis-ci.org/SixLabors/ImageSharp)|[![Code coverage](https://codecov.io/gh/SixLabors/ImageSharp/branch/master/graph/badge.svg)](https://codecov.io/gh/SixLabors/ImageSharp)|
-|**Windows**  |[![Build Status](https://ci.appveyor.com/api/projects/status/m9pn907xdah3ca39/branch/master?svg=true)](https://ci.appveyor.com/project/six-labors/imagesharp/branch/master)|[![Code coverage](https://codecov.io/gh/SixLabors/ImageSharp/branch/master/graph/badge.svg)](https://codecov.io/gh/SixLabors/ImageSharp)|
--->
+### **ImageSharp.Web** is a new high-performance aspnetcore middleware leveraging the ImageSharp graphics library.
+
+> Pre-release downloads are available from the [MyGet package repository](https://www.myget.org/gallery/imagesharp).
+
+
+
+|             |Build Status|
+|-------------|:----------:|
+|**Linux/Mac**|[![Build Status](https://travis-ci.org/SixLabors/ImageSharp.Web.svg)](https://travis-ci.org/SixLabors/ImageSharp.Web)|
+|**Windows**  |[![Build status](https://ci.appveyor.com/api/projects/status/hdxihg1x58uo8wab/branch/master?svg=true)](https://ci.appveyor.com/project/six-labors/imagesharp-web/branch/master)|
 
 ### Installation
-At present the code is pre-release but when ready it will be available on [Nuget](http://www.nuget.org). 
 
-**Pre-release downloads**
+Install stable releases via Nuget; development releases are available via MyGet.
 
-We already have a [MyGet package repository](https://www.myget.org/gallery/imagesharp) - for bleeding-edge / development NuGet releases.
+| Package Name                   | Release (NuGet) | Nightly (MyGet) |
+|--------------------------------|-----------------|-----------------|
+| `SixLabors.ImageSharp.Web`         | [![NuGet](https://img.shields.io/nuget/v/SixLabors.ImageSharp.Web.svg)](https://www.nuget.org/packages/SixLabors.ImageSharp.Web/) | [![MyGet](https://img.shields.io/myget/sixlabors/v/SixLabors.ImageSharp.Web.svg)](https://www.myget.org/feed/sixlabors/package/nuget/SixLabors.ImageSharp.Web) |
+
 
 ### Packages
 
-The **ImageSharp** library is made up of multiple packages.
-
-Packages include:
 - **ImageSharp.Web**
   - Contains the middleware to integrate a dynamic image manipulation workflow into an aspnetcore application.
 
@@ -55,9 +62,9 @@ To clone it locally click the "Clone in Windows" button above or run the followi
 git clone https://github.com/SixLabors/ImageSharp.Web
 ```
 
-### Features
+### How can you help?
 
-There's plenty there and more coming. Check out the [current features](features.md)!
+Please... Spread the word, contribute algorithms, submit performance improvements, unit tests, no input is too little. Make sure to read our [Contribution Guide](https://github.com/SixLabors/ImageSharp.Web/blob/master/.github/CONTRIBUTING.md) before opening a PR.
 
 ### The ImageSharp Team
 
