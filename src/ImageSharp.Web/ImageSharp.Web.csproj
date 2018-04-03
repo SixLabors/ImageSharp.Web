@@ -11,7 +11,7 @@
     <AssemblyName>SixLabors.ImageSharp.Web</AssemblyName>
     <PackageId>SixLabors.ImageSharp.Web</PackageId>
     <PackageTags>Image Middleware Resize Crop Gif Jpg Jpeg Bitmap Png Core Cache</PackageTags>
-    <PackageIconUrl>https://raw.githubusercontent.com/SixLabors/ImageSharp.Web/master/build/icons/imagesharp-logo-128.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/SixLabors/Branding/master/icons/imagesharp/sixlabors.imagesharp.128.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/SixLabors/ImageSharp.Web</PackageProjectUrl>
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
