@@ -116,7 +116,7 @@ namespace SixLabors.ImageSharp.Web.Sample
         {
             loggerFactory.AddConsole();
 
-            app.UseExceptionHandler();
+            //app.UseExceptionHandler();
             app.UseDeveloperExceptionPage();
             app.UseDefaultFiles();
             app.UseImageSharp();
