@@ -60,7 +60,7 @@ Or add the default service and custom options.
 services.AddImageSharp(
     options =>
         {
-            You only need to set the options you want to change here.
+            // You only need to set the options you want to change here.
             options.Configuration = Configuration.Default;
             options.MaxBrowserCacheDays = 7;
             options.MaxCacheDays = 365;
