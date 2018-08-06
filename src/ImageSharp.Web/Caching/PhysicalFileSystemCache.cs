@@ -62,9 +62,9 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
-        /// <param name="environment">The hosting environment the application is running in</param>
-        /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data</param>
-        /// <param name="options">The middleware configuration options</param>
+        /// <param name="environment">The hosting environment the application is running in.</param>
+        /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data.</param>
+        /// <param name="options">The middleware configuration options.</param>
         public PhysicalFileSystemCache(IHostingEnvironment environment, IBufferManager bufferManager, IOptions<ImageSharpMiddlewareOptions> options)
         {
             Guard.NotNull(environment, nameof(environment));
@@ -180,7 +180,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Converts the key into a nested file path.
         /// </summary>
         /// <param name="key">The cache key.</param>
-        /// <returns>The <see cref="string"/></returns>
+        /// <returns>The <see cref="string"/>.</returns>
         private string ToFilePath(string key)
         {
             return $"{this.Settings[Folder]}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";

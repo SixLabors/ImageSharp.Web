@@ -15,7 +15,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
     public class ImageSharpMiddlewareOptions
     {
         /// <summary>
-        /// Gets or sets the base library configuration
+        /// Gets or sets the base library configuration.
         /// </summary>
         public Configuration Configuration { get; set; } = Configuration.Default;
 

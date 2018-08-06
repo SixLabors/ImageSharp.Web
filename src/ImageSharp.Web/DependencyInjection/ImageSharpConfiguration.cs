@@ -7,7 +7,7 @@ using SixLabors.ImageSharp.Web.Middleware;
 namespace SixLabors.ImageSharp.Web.DependencyInjection
 {
     /// <summary>
-    /// Provides default configuration settings to be consumed by the middleware
+    /// Provides default configuration settings to be consumed by the middleware.
     /// </summary>
     public class ImageSharpConfiguration : IConfigureOptions<ImageSharpMiddlewareOptions>
     {

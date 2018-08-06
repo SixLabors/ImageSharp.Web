@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing.Transforms;
+using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Web.Commands;
 using Xunit;
 
@@ -68,7 +68,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
 
         public static TheoryData<object, string> Rgba32Values = new TheoryData<object, string> {
             {Rgba32.White , "255,255,255" },
-            {Rgba32.Transparent , "255,255,255,0" }, // ??is this right??
+            {Rgba32.Transparent , "255,255,255,0" },
             {Rgba32.Orange , "orange" },
             {Rgba32.Lime , "00FF00" },
         };

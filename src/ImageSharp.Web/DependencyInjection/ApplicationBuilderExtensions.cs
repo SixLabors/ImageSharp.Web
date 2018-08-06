@@ -14,8 +14,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Registers the ImageSharp middleware.
         /// </summary>
-        /// <param name="app">The application with the mechanism to configure a request pipeline</param>
-        /// <returns><see cref="IApplicationBuilder"/></returns>
+        /// <param name="app">The application with the mechanism to configure a request pipeline.</param>
+        /// <returns><see cref="IApplicationBuilder"/>.</returns>
         public static IApplicationBuilder UseImageSharp(this IApplicationBuilder app)
         {
             Guard.NotNull(app, nameof(app));

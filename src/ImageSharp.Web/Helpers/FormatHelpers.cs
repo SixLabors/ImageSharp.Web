@@ -12,16 +12,16 @@ using SixLabors.ImageSharp.Web.Processors;
 namespace SixLabors.ImageSharp.Web.Helpers
 {
     /// <summary>
-    /// Helper utilities for image formats
+    /// Helper utilities for image formats.
     /// </summary>
     public class FormatHelpers
     {
         /// <summary>
         /// Returns the correct content type (mime-type) for the given cached image key.
         /// </summary>
-        /// <param name="configuration">The library configuration</param>
-        /// <param name="key">The cache key</param>
-        /// <returns>The <see cref="string"/></returns>
+        /// <param name="configuration">The library configuration.</param>
+        /// <param name="key">The cache key.</param>
+        /// <returns>The <see cref="string"/>.</returns>
         public static string GetContentType(Configuration configuration, string key)
         {
             string extension = Path.GetExtension(key).Replace(".", string.Empty);
@@ -29,11 +29,11 @@ namespace SixLabors.ImageSharp.Web.Helpers
         }
 
         /// <summary>
-        /// Gets the file extension for the given image uri
+        /// Gets the file extension for the given image uri.
         /// </summary>
-        /// <param name="configuration">The library configuration</param>
-        /// <param name="uri">The full request uri</param>
-        /// <returns>The <see cref="string"/></returns>
+        /// <param name="configuration">The library configuration.</param>
+        /// <param name="uri">The full request uri.</param>
+        /// <returns>The <see cref="string"/>.</returns>
         public static string GetExtension(Configuration configuration, string uri)
         {
             string[] parts = uri.Split('?');
@@ -69,9 +69,9 @@ namespace SixLabors.ImageSharp.Web.Helpers
         /// <summary>
         /// Gets the file extension for the given image uri or a default extension from the first available format.
         /// </summary>
-        /// <param name="configuration">The library configuration</param>
-        /// <param name="uri">The full request uri</param>
-        /// <returns>The <see cref="string"/></returns>
+        /// <param name="configuration">The library configuration.</param>
+        /// <param name="uri">The full request uri.</param>
+        /// <returns>The <see cref="string"/>.</returns>
         public static string GetExtensionOrDefault(Configuration configuration, string uri)
         {
             return GetExtension(configuration, uri) ?? configuration.ImageFormats.First().FileExtensions.First();

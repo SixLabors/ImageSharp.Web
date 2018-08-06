@@ -49,7 +49,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// </summary>
         /// <param name="input">The input string to split.</param>
         /// <param name="culture">A <see cref="CultureInfo"/>. The current culture to split string by.</param>
-        /// <returns>The <see cref="T:String[]"/></returns>
+        /// <returns>The <see cref="T:String[]"/>.</returns>
         protected string[] GetStringArray(string input, CultureInfo culture)
         {
             char separator = culture.TextInfo.ListSeparator[0];

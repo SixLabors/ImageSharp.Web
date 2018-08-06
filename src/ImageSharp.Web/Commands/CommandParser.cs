@@ -115,7 +115,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         }
 
         /// <summary>
-        /// Add the generic converters
+        /// Add the generic converters.
         /// </summary>
         private void AddSimpleConverters()
         {
@@ -189,7 +189,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         }
 
         /// <summary>
-        /// Adds the default color converters
+        /// Adds the default color converters.
         /// </summary>
         private void AddColorConverters()
         {

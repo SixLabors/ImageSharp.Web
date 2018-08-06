@@ -13,7 +13,7 @@ namespace SixLabors.ImageSharp.Web.Memory
         byte[] Array { get; }
 
         /// <summary>
-        /// Gets the expected length of the buffer
+        /// Gets the expected length of the buffer.
         /// </summary>
         int Length { get; }
     }

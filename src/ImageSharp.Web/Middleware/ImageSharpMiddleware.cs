@@ -25,7 +25,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
     public class ImageSharpMiddleware
     {
         /// <summary>
-        /// The key-lock used for limiting identical requests
+        /// The key-lock used for limiting identical requests.
         /// </summary>
         private readonly IAsyncKeyLock asyncKeyLock;
 
@@ -35,7 +35,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private readonly RequestDelegate next;
 
         /// <summary>
-        /// The configuration options
+        /// The configuration options.
         /// </summary>
         private readonly ImageSharpMiddlewareOptions options;
 
@@ -82,16 +82,16 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageSharpMiddleware"/> class.
         /// </summary>
-        /// <param name="next">The next middleware in the pipeline</param>
-        /// <param name="options">The middleware configuration options</param>
-        /// <param name="loggerFactory">An <see cref="ILoggerFactory"/> instance used to create loggers</param>
-        /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data</param>
-        /// <param name="requestParser">An <see cref="IRequestParser"/> instance used to parse image requests for commands</param>
-        /// <param name="resolvers">A collection of <see cref="IImageResolver"/> instances used to resolve images</param>
-        /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images</param>
-        /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images</param>
-        /// <param name="cacheHash">An <see cref="ICacheHash"/>instance used for calculating cached file names</param>
-        /// <param name="asyncKeyLock">An <see cref="IAsyncKeyLock"/> instance used for providing locking during processing</param>
+        /// <param name="next">The next middleware in the pipeline.</param>
+        /// <param name="options">The middleware configuration options.</param>
+        /// <param name="loggerFactory">An <see cref="ILoggerFactory"/> instance used to create loggers.</param>
+        /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data.</param>
+        /// <param name="requestParser">An <see cref="IRequestParser"/> instance used to parse image requests for commands.</param>
+        /// <param name="resolvers">A collection of <see cref="IImageResolver"/> instances used to resolve images.</param>
+        /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images.</param>
+        /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images.</param>
+        /// <param name="cacheHash">An <see cref="ICacheHash"/>instance used for calculating cached file names.</param>
+        /// <param name="asyncKeyLock">An <see cref="IAsyncKeyLock"/> instance used for providing locking during processing.</param>
         public ImageSharpMiddleware(
             RequestDelegate next,
             IOptions<ImageSharpMiddlewareOptions> options,
@@ -139,8 +139,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Performs operations upon the current request.
         /// </summary>
-        /// <param name="context">The current HTTP request context</param>
-        /// <returns>The <see cref="Task"/></returns>
+        /// <param name="context">The current HTTP request context.</param>
+        /// <returns>The <see cref="Task"/>.</returns>
         public async Task Invoke(HttpContext context)
         {
             IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context)

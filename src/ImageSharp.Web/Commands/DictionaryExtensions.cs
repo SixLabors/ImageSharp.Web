@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace SixLabors.ImageSharp.Web.Commands
 {
     /// <summary>
-    /// Extension methods for <see cref="IDictionary{TKey, TValue}"/>
+    /// Extension methods for <see cref="IDictionary{TKey, TValue}"/>.
     /// </summary>
     public static class DictionaryExtensions
     {

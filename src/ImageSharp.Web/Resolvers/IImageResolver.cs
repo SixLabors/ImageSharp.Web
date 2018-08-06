@@ -28,7 +28,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// <summary>
         /// Gets a value indicating whether the current request passes sanitizing rules.
         /// </summary>
-        /// <param name="context">The current HTTP request context</param>
+        /// <param name="context">The current HTTP request context.</param>
         /// <returns>
         /// <returns>The <see cref="Task{Boolean}"/></returns>
         /// </returns>
@@ -37,8 +37,8 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// <summary>
         /// Resolves the image in an asynchronous manner.
         /// </summary>
-        /// <param name="context">The current HTTP request context</param>
-        /// <returns>The <see cref="T:Task{IByteBuffer}"/></returns>
+        /// <param name="context">The current HTTP request context.</param>
+        /// <returns>The <see cref="T:Task{IByteBuffer}"/>.</returns>
         Task<IByteBuffer> ResolveImageAsync(HttpContext context);
     }
 }

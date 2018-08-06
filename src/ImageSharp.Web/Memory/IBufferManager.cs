@@ -12,7 +12,7 @@ namespace SixLabors.ImageSharp.Web.Memory
         /// Allocates a buffer with a backing array of size <paramref name="length"/>.
         /// </summary>
         /// <param name="length">The minimum length of the array to return.</param>
-        /// <returns>The <see cref="IByteBuffer"/></returns>
+        /// <returns>The <see cref="IByteBuffer"/>.</returns>
         IByteBuffer Allocate(int length);
     }
 }

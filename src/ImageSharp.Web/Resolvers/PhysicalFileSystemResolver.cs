@@ -40,9 +40,9 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemResolver"/> class.
         /// </summary>
-        /// <param name="options">The middleware configuration options</param>
-        /// <param name="environment">The <see cref="IHostingEnvironment"/> used by this middleware</param>
-        /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data</param>
+        /// <param name="options">The middleware configuration options.</param>
+        /// <param name="environment">The <see cref="IHostingEnvironment"/> used by this middleware.</param>
+        /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data.</param>
         public PhysicalFileSystemResolver(IOptions<ImageSharpMiddlewareOptions> options, IHostingEnvironment environment, IBufferManager bufferManager)
         {
             Guard.NotNull(options, nameof(options));

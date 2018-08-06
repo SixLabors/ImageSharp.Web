@@ -18,10 +18,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
     public static class ImageSharpCoreBuilderExtensions
     {
         /// <summary>
-        /// Sets the given <see cref="IRequestParser"/> adding it to the service collection
+        /// Sets the given <see cref="IRequestParser"/> adding it to the service collection.
         /// </summary>
         /// <typeparam name="TParser">The type of class implementing <see cref="IRequestParser"/>to add.</typeparam>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
+        /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetRequestParser<TParser>(this IImageSharpCoreBuilder builder)
             where TParser : class, IRequestParser
@@ -31,10 +31,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="IRequestParser"/> adding it to the service collection
+        /// Sets the given <see cref="IRequestParser"/> adding it to the service collection.
         /// </summary>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="IRequestParser"/>"/></param>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="IRequestParser"/>.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetRequestParser(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IRequestParser> implementationFactory)
         {
@@ -43,10 +43,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="IBufferManager"/> adding it to the service collection
+        /// Sets the given <see cref="IBufferManager"/> adding it to the service collection.
         /// </summary>
         /// <typeparam name="TBufferManager">The type of class implementing <see cref="IBufferManager"/>to add.</typeparam>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
+        /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetBufferManager<TBufferManager>(this IImageSharpCoreBuilder builder)
             where TBufferManager : class, IBufferManager
@@ -56,10 +56,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="IBufferManager"/> adding it to the service collection
+        /// Sets the given <see cref="IBufferManager"/> adding it to the service collection.
         /// </summary>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="IBufferManager"/>"/></param>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="IBufferManager"/>.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetBufferManager(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IBufferManager> implementationFactory)
         {
@@ -68,10 +68,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="IImageCache"/> adding it to the service collection
+        /// Sets the given <see cref="IImageCache"/> adding it to the service collection.
         /// </summary>
         /// <typeparam name="TCache">The type of class implementing <see cref="IImageCache"/>to add.</typeparam>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
+        /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetCache<TCache>(this IImageSharpCoreBuilder builder)
             where TCache : class, IImageCache
@@ -81,10 +81,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="IImageCache"/> adding it to the service collection
+        /// Sets the given <see cref="IImageCache"/> adding it to the service collection.
         /// </summary>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageCache"/>"/></param>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageCache"/>.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetCache(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IImageCache> implementationFactory)
         {
@@ -93,10 +93,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="ICacheHash"/> adding it to the service collection
+        /// Sets the given <see cref="ICacheHash"/> adding it to the service collection.
         /// </summary>
         /// <typeparam name="TCacheHash">The type of class implementing <see cref="ICacheHash"/>to add.</typeparam>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
+        /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetCacheHash<TCacheHash>(this IImageSharpCoreBuilder builder)
             where TCacheHash : class, ICacheHash
@@ -106,10 +106,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="ICacheHash"/> adding it to the service collection
+        /// Sets the given <see cref="ICacheHash"/> adding it to the service collection.
         /// </summary>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="ICacheHash"/>"/></param>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="ICacheHash"/>.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetCacheHash(this IImageSharpCoreBuilder builder, Func<IServiceProvider, ICacheHash> implementationFactory)
         {
@@ -118,10 +118,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="IAsyncKeyLock"/> adding it to the service collection
+        /// Sets the given <see cref="IAsyncKeyLock"/> adding it to the service collection.
         /// </summary>
         /// <typeparam name="TLock">The type of class implementing <see cref="IAsyncKeyLock"/>to add.</typeparam>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
+        /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetAsyncKeyLock<TLock>(this IImageSharpCoreBuilder builder)
             where TLock : class, IAsyncKeyLock
@@ -131,10 +131,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="IAsyncKeyLock"/> adding it to the service collection
+        /// Sets the given <see cref="IAsyncKeyLock"/> adding it to the service collection.
         /// </summary>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageCache"/>"/></param>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageCache"/>.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetAsyncKeyLock(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IAsyncKeyLock> implementationFactory)
         {
@@ -143,10 +143,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Adds the given <see cref="IImageResolver"/> to the resolver collection within the service collection
+        /// Adds the given <see cref="IImageResolver"/> to the resolver collection within the service collection.
         /// </summary>
         /// <typeparam name="TResolver">The type of class implementing <see cref="IImageResolver"/>to add.</typeparam>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
+        /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder AddResolver<TResolver>(this IImageSharpCoreBuilder builder)
             where TResolver : class, IImageResolver
@@ -156,10 +156,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Adds the given <see cref="IImageResolver"/> to the resolver collection within the service collection
+        /// Adds the given <see cref="IImageResolver"/> to the resolver collection within the service collection.
         /// </summary>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageResolver"/>"/></param>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageResolver"/>.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder AddResolver(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IImageResolver> implementationFactory)
         {
@@ -168,10 +168,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Adds the given <see cref="IImageWebProcessor"/> to the processor collection within the service collection
+        /// Adds the given <see cref="IImageWebProcessor"/> to the processor collection within the service collection.
         /// </summary>
         /// <typeparam name="TProcessor">The type of class implementing <see cref="IImageWebProcessor"/>to add.</typeparam>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
+        /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder AddProcessor<TProcessor>(this IImageSharpCoreBuilder builder)
             where TProcessor : class, IImageWebProcessor
@@ -181,10 +181,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Adds the given <see cref="IImageWebProcessor"/> to the processor collection within the service collection
+        /// Adds the given <see cref="IImageWebProcessor"/> to the processor collection within the service collection.
         /// </summary>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/></param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageResolver"/>"/></param>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageResolver"/>.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder AddProcessor(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IImageWebProcessor> implementationFactory)
         {

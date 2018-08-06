@@ -15,7 +15,7 @@ using SixLabors.ImageSharp.Web.Memory;
 namespace SixLabors.ImageSharp.Web.Middleware
 {
     /// <summary>
-    /// Provides information and methods regarding the current image request
+    /// Provides information and methods regarding the current image request.
     /// </summary>
     internal struct ImageContext
     {
@@ -38,8 +38,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageContext"/> struct.
         /// </summary>
-        /// <param name="context">The current HTTP request context</param>
-        /// <param name="options">The middleware options</param>
+        /// <param name="context">The current HTTP request context.</param>
+        /// <param name="options">The middleware options.</param>
         public ImageContext(HttpContext context, ImageSharpMiddlewareOptions options)
         {
             this.context = context;
@@ -62,7 +62,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         }
 
         /// <summary>
-        /// Enumerates the possible precondition states
+        /// Enumerates the possible precondition states.
         /// </summary>
         internal enum PreconditionState
         {
@@ -88,16 +88,16 @@ namespace SixLabors.ImageSharp.Web.Middleware
         }
 
         /// <summary>
-        /// Returns the current HTTP request display url
+        /// Returns the current HTTP request display url.
         /// </summary>
-        /// <returns>The </returns>
+        /// <returns>The. </returns>
         public string GetDisplayUrl() => this.request.GetDisplayUrl();
 
         /// <summary>
         /// Analyzes the headers for the current request.
         /// </summary>
         /// <param name="lastModified">The point in time when the cached file was last modified.</param>
-        /// <param name="length">The length of the cached file in bytes</param>
+        /// <param name="length">The length of the cached file in bytes.</param>
         public void ComprehendRequestHeaders(DateTimeOffset lastModified, long length)
         {
             this.fileLastModified = lastModified;
@@ -112,27 +112,27 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Gets the preconditioned state of the request.
         /// </summary>
-        /// <returns>The <see cref="PreconditionState"/></returns>
+        /// <returns>The <see cref="PreconditionState"/>.</returns>
         public PreconditionState GetPreconditionState()
         {
             return GetMaxPreconditionState(this.ifMatchState, this.ifNoneMatchState, this.ifModifiedSinceState, this.ifUnmodifiedSinceState);
         }
 
         /// <summary>
-        /// Gets a value indicating whether this request is a head request
+        /// Gets a value indicating whether this request is a head request.
         /// </summary>
-        /// <returns>THe <see cref="bool"/></returns>
+        /// <returns>THe <see cref="bool"/>.</returns>
         public bool IsHeadRequest()
         {
             return string.Equals("HEAD", this.request.Method, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
-        /// Set the response status headers
+        /// Set the response status headers.
         /// </summary>
-        /// <param name="statusCode">The status code</param>
-        /// <param name="contentType">The content type</param>
-        /// <returns>The <see cref="Task"/></returns>
+        /// <param name="statusCode">The status code.</param>
+        /// <param name="contentType">The content type.</param>
+        /// <returns>The <see cref="Task"/>.</returns>
         public Task SendStatusAsync(int statusCode, string contentType)
         {
             this.ApplyResponseHeaders(statusCode, contentType);
@@ -142,12 +142,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
         }
 
         /// <summary>
-        /// Set the response content
+        /// Set the response content.
         /// </summary>
-        /// <param name="contentType">The content type</param>
-        /// <param name="buffer">The cached image buffer</param>
-        /// <param name="length">The The length, in bytes, of the cached image buffer</param>
-        /// <returns>The <see cref="Task"/></returns>
+        /// <param name="contentType">The content type.</param>
+        /// <param name="buffer">The cached image buffer.</param>
+        /// <param name="length">The The length, in bytes, of the cached image buffer.</param>
+        /// <returns>The <see cref="Task"/>.</returns>
         public async Task SendAsync(string contentType, IByteBuffer buffer, long length)
         {
             this.ApplyResponseHeaders(ResponseConstants.Status200Ok, contentType);

@@ -10,9 +10,9 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="PooledByteBuffer"/> class.
         /// </summary>
-        /// <param name="manager">The buffer manager</param>
-        /// <param name="array">The byte array</param>
-        /// <param name="length">The expected minimum length of the buffer</param>
+        /// <param name="manager">The buffer manager.</param>
+        /// <param name="array">The byte array.</param>
+        /// <param name="length">The expected minimum length of the buffer.</param>
         public PooledByteBuffer(PooledBufferManager manager, byte[] array, int length)
         {
             this.manager = manager;

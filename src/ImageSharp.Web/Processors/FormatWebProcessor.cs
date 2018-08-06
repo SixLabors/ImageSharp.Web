@@ -16,25 +16,25 @@ namespace SixLabors.ImageSharp.Web.Processors
     public class FormatWebProcessor : IImageWebProcessor
     {
         /// <summary>
-        /// The command constant for format
+        /// The command constant for format.
         /// </summary>
         public const string Format = "format";
 
         /// <summary>
-        /// The reusable collection of commands
+        /// The reusable collection of commands.
         /// </summary>
         private static readonly IEnumerable<string> FormatCommands
             = new[] { Format };
 
         /// <summary>
-        /// The middleware configuration options
+        /// The middleware configuration options.
         /// </summary>
         private readonly ImageSharpMiddlewareOptions options;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FormatWebProcessor"/> class.
         /// </summary>
-        /// <param name="options">The middleware configuration options</param>
+        /// <param name="options">The middleware configuration options.</param>
         public FormatWebProcessor(IOptions<ImageSharpMiddlewareOptions> options)
         {
             this.options = options.Value;

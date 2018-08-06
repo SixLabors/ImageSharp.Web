@@ -21,7 +21,7 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="target">The target object, which cannot be null.</param>
         /// <param name="parameterName">The name of the parameter that is to be checked.</param>
         /// <param name="message">The error message, if any to add to the exception.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="target"/> is null</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="target"/> is null.</exception>
         public static void NotNull<T>(T target, string parameterName, string message = "")
             where T : class
         {
@@ -64,7 +64,7 @@ namespace SixLabors.ImageSharp.Web
         /// <summary>
         /// Verifies, that the enumeration is not null and not empty.
         /// </summary>
-        /// <typeparam name="T">The type of objects in the <paramref name="target"/></typeparam>
+        /// <typeparam name="T">The type of objects in the <paramref name="target"/>.</typeparam>
         /// <param name="target">The target enumeration, which should be checked against being null or empty.</param>
         /// <param name="parameterName">Name of the parameter.</param>
         /// <param name="message">The error message, if any to add to the exception.</param>
@@ -180,7 +180,7 @@ namespace SixLabors.ImageSharp.Web
         /// The error message, if any to add to the exception.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// <paramref name="value"/> is false
+        /// <paramref name="value"/> is false.
         /// </exception>
         public static void IsTrue(bool value, string parameterName, string message)
         {

@@ -11,9 +11,9 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Returns the hashed file name for the cached image file.
         /// </summary>
-        /// <param name="value">The input value to hash</param>
-        /// <param name="length">The length of the returned hash without any extensions</param>
-        /// <returns>The <see cref="string"/></returns>
+        /// <param name="value">The input value to hash.</param>
+        /// <param name="length">The length of the returned hash without any extensions.</param>
+        /// <returns>The <see cref="string"/>.</returns>
         string Create(string value, uint length);
     }
 }

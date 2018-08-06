@@ -86,9 +86,9 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Adds the default service to the service collection
+        /// Adds the default service to the service collection.
         /// </summary>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/> that can be used to further configure the ImageSharp services</param>
+        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/> that can be used to further configure the ImageSharp services.</param>
         private static void AddDefaultServices(IImageSharpCoreBuilder builder)
         {
             builder.SetRequestParser<QueryCollectionRequestParser>();
