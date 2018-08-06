@@ -29,18 +29,16 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// Gets a value indicating whether the current request passes sanitizing rules.
         /// </summary>
         /// <param name="context">The current HTTP request context</param>
-        /// <param name="logger">The type used for performing logging.</param>
         /// <returns>
         /// <returns>The <see cref="Task{Boolean}"/></returns>
         /// </returns>
-        Task<bool> IsValidRequestAsync(HttpContext context, ILogger logger);
+        Task<bool> IsValidRequestAsync(HttpContext context);
 
         /// <summary>
         /// Resolves the image in an asynchronous manner.
         /// </summary>
         /// <param name="context">The current HTTP request context</param>
-        /// <param name="logger">The type used for performing logging.</param>
         /// <returns>The <see cref="T:Task{IByteBuffer}"/></returns>
-        Task<IByteBuffer> ResolveImageAsync(HttpContext context, ILogger logger);
+        Task<IByteBuffer> ResolveImageAsync(HttpContext context);
     }
 }

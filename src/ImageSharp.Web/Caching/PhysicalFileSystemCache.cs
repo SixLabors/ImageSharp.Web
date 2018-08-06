@@ -71,6 +71,11 @@ namespace SixLabors.ImageSharp.Web.Caching
             Guard.NotNull(bufferManager, nameof(bufferManager));
             Guard.NotNull(options, nameof(options));
 
+            Guard.NotNullOrWhiteSpace(
+              environment.WebRootPath,
+              nameof(environment.WebRootPath),
+              "The folder 'wwwroot' that contains the web-servable application content files is missing. Please add this folder to the application root to allow caching.");
+
             this.environment = environment;
             this.fileProvider = this.environment.WebRootFileProvider;
             this.bufferManager = bufferManager;
@@ -155,11 +160,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <inheritdoc/>
         public async Task<DateTimeOffset> SetAsync(string key, IByteBuffer value)
         {
-            Guard.NotNullOrEmpty(
-                this.environment.WebRootPath,
-                nameof(this.environment.WebRootPath),
-                "The folder 'wwwroot' that contains the web-servable application content files is missing. Please add this folder to the application root to allow caching.");
-
             string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
             string directory = Path.GetDirectoryName(path);
 

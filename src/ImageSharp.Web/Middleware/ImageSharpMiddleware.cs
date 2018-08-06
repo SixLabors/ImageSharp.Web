@@ -168,7 +168,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 // Get the correct service for the request.
                 IImageResolver resolver = this.resolvers.FirstOrDefault(r => r.Match(context));
 
-                if (resolver == null || !await resolver.IsValidRequestAsync(context, this.logger))
+                if (resolver == null || !await resolver.IsValidRequestAsync(context))
                 {
                     // Nothing to do. Call the next delegate/middleware in the pipeline
                     processRequest = false;
@@ -208,7 +208,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         MemoryStream outStream = null;
                         try
                         {
-                            inBuffer = await resolver.ResolveImageAsync(context, this.logger);
+                            inBuffer = await resolver.ResolveImageAsync(context);
                             if (inBuffer == null || inBuffer.Array.Length == 0)
                             {
                                 // Log the error but let the pipeline handle the 404

@@ -40,18 +40,18 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemResolver"/> class.
         /// </summary>
+        /// <param name="options">The middleware configuration options</param>
         /// <param name="environment">The <see cref="IHostingEnvironment"/> used by this middleware</param>
         /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data</param>
-        /// <param name="options">The middleware configuration options</param>
-        public PhysicalFileSystemResolver(IHostingEnvironment environment, IBufferManager bufferManager, IOptions<ImageSharpMiddlewareOptions> options)
+        public PhysicalFileSystemResolver(IOptions<ImageSharpMiddlewareOptions> options, IHostingEnvironment environment, IBufferManager bufferManager)
         {
+            Guard.NotNull(options, nameof(options));
             Guard.NotNull(environment, nameof(environment));
             Guard.NotNull(bufferManager, nameof(bufferManager));
-            Guard.NotNull(options, nameof(options));
 
+            this.options = options.Value;
             this.fileProvider = environment.WebRootFileProvider;
             this.bufferManager = bufferManager;
-            this.options = options.Value;
         }
 
         /// <inheritdoc/>
@@ -61,13 +61,13 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         public IDictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
 
         /// <inheritdoc/>
-        public Task<bool> IsValidRequestAsync(HttpContext context, ILogger logger)
+        public Task<bool> IsValidRequestAsync(HttpContext context)
         {
             return Task.FromResult(FormatHelpers.GetExtension(this.options.Configuration, context.Request.GetDisplayUrl()) != null);
         }
 
         /// <inheritdoc/>
-        public async Task<IByteBuffer> ResolveImageAsync(HttpContext context, ILogger logger)
+        public async Task<IByteBuffer> ResolveImageAsync(HttpContext context)
         {
             // Path has already been correctly parsed before here.
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
