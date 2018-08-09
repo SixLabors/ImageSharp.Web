@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.Net.Http.Headers;
-using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Middleware

@@ -9,10 +9,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Helpers;
-using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.Memory;
 
@@ -31,7 +29,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// <summary>
         /// The buffer manager.
         /// </summary>
-        private readonly IBufferManager bufferManager;
+        private readonly MemoryAllocator bufferManager;
 
         /// <summary>
         /// The middleware configuration options.
@@ -43,8 +41,8 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// </summary>
         /// <param name="options">The middleware configuration options.</param>
         /// <param name="environment">The <see cref="IHostingEnvironment"/> used by this middleware.</param>
-        /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data.</param>
-        public PhysicalFileSystemResolver(IOptions<ImageSharpMiddlewareOptions> options, IHostingEnvironment environment, IBufferManager bufferManager)
+        /// <param name="bufferManager">An <see cref="MemoryAllocator"/> instance used to allocate arrays transporting encoded image data.</param>
+        public PhysicalFileSystemResolver(IOptions<ImageSharpMiddlewareOptions> options, IHostingEnvironment environment, MemoryAllocator bufferManager)
         {
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(environment, nameof(environment));
@@ -83,7 +81,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
             using (Stream stream = fileInfo.CreateReadStream())
             {
                 // Buffer is returned to the pool in the middleware
-                buffer = this.bufferManager.Allocate((int)stream.Length);
+                buffer = this.bufferManager.AllocateManagedByteBuffer((int)stream.Length);
                 await stream.ReadAsync(buffer.Array, 0, (int)stream.Length);
             }
 

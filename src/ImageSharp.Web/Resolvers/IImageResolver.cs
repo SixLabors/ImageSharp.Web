@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Resolvers

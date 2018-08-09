@@ -7,10 +7,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
-using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.DependencyInjection
 {
@@ -93,7 +93,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         {
             builder.SetRequestParser<QueryCollectionRequestParser>();
 
-            builder.SetBufferManager<PooledBufferManager>();
+            builder.UseMemoryAllocatorFromMiddlewareOptions();
 
             builder.SetCache<PhysicalFileSystemCache>();
 

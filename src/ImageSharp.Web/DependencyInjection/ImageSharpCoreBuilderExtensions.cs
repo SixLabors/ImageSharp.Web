@@ -4,11 +4,13 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
-using SixLabors.ImageSharp.Web.Memory;
+using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.DependencyInjection
 {
@@ -43,27 +45,27 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="IBufferManager"/> adding it to the service collection.
+        /// Sets the given <see cref="MemoryAllocator"/> adding it to the service collection.
         /// </summary>
-        /// <typeparam name="TBufferManager">The type of class implementing <see cref="IBufferManager"/>to add.</typeparam>
         /// <param name="builder">The core builder.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="MemoryAllocator"/>.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
-        public static IImageSharpCoreBuilder SetBufferManager<TBufferManager>(this IImageSharpCoreBuilder builder)
-            where TBufferManager : class, IBufferManager
+        public static IImageSharpCoreBuilder SetMemoryAllocator(this IImageSharpCoreBuilder builder, Func<IServiceProvider, MemoryAllocator> implementationFactory)
         {
-            builder.Services.AddSingleton<IBufferManager, TBufferManager>();
+            builder.Services.AddSingleton(implementationFactory);
             return builder;
         }
 
         /// <summary>
-        /// Sets the given <see cref="IBufferManager"/> adding it to the service collection.
+        /// Sets the the memory allocator configured in <see cref="Configuration.MemoryAllocator"/> of <see cref="ImageSharpMiddlewareOptions.Configuration"/>.
         /// </summary>
         /// <param name="builder">The core builder.</param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="IBufferManager"/>.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
-        public static IImageSharpCoreBuilder SetBufferManager(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IBufferManager> implementationFactory)
+        public static IImageSharpCoreBuilder UseMemoryAllocatorFromMiddlewareOptions(this IImageSharpCoreBuilder builder)
         {
-            builder.Services.AddSingleton(implementationFactory);
+            MemoryAllocator AllocatorResolver(IServiceProvider s) => s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration.MemoryAllocator;
+
+            builder.SetMemoryAllocator(AllocatorResolver);
             return builder;
         }
 

@@ -11,10 +11,10 @@ using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
-using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Sample
 {
@@ -26,10 +26,10 @@ namespace SixLabors.ImageSharp.Web.Sample
         {
             services.AddImageSharpCore()
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetBufferManager<PooledBufferManager>()
+                .UseMemoryAllocatorFromMiddlewareOptions()
                 .SetCache(provider => new PhysicalFileSystemCache(
                     provider.GetRequiredService<IHostingEnvironment>(),
-                    provider.GetRequiredService<IBufferManager>(),
+                    provider.GetRequiredService<MemoryAllocator>(),
                     provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>())
                 {
                     Settings =

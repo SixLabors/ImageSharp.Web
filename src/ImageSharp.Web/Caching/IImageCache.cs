@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.Memory;
 
 // TODO: Do we add cleanup to this? Scalable caches probably shouldn't do so.

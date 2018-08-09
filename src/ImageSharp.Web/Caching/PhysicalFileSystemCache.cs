@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.Memory;
 
@@ -53,7 +52,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// The buffer manager.
         /// </summary>
-        private readonly IBufferManager bufferManager;
+        private readonly MemoryAllocator bufferManager;
 
         /// <summary>
         /// The middleware configuration options.
@@ -64,9 +63,9 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
         /// <param name="environment">The hosting environment the application is running in.</param>
-        /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data.</param>
+        /// <param name="bufferManager">An <see cref="MemoryAllocator"/> instance used to allocate arrays transporting encoded image data.</param>
         /// <param name="options">The middleware configuration options.</param>
-        public PhysicalFileSystemCache(IHostingEnvironment environment, IBufferManager bufferManager, IOptions<ImageSharpMiddlewareOptions> options)
+        public PhysicalFileSystemCache(IHostingEnvironment environment, MemoryAllocator bufferManager, IOptions<ImageSharpMiddlewareOptions> options)
         {
             Guard.NotNull(environment, nameof(environment));
             Guard.NotNull(bufferManager, nameof(bufferManager));
@@ -109,7 +108,7 @@ namespace SixLabors.ImageSharp.Web.Caching
                 int length = (int)stream.Length;
 
                 // Buffer is disposed of in the middleware
-                buffer = this.bufferManager.Allocate(length);
+                buffer = this.bufferManager.AllocateManagedByteBuffer(length);
                 await stream.ReadAsync(buffer.Array, 0, length);
             }
 
