@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Memory;
+using SixLabors.Memory;
 
 // TODO: Do we add cleanup to this? Scalable caches probably shouldn't do so.
 namespace SixLabors.ImageSharp.Web.Caching
@@ -25,7 +26,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <returns>The <see cref="Task{IByteBuffer}"/>.</returns>
-        Task<IByteBuffer> GetAsync(string key);
+        Task<IManagedByteBuffer> GetAsync(string key);
 
         /// <summary>
         /// Returns a value indicating whether the current cached item is expired.
@@ -46,6 +47,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="key">The cache key.</param>
         /// <param name="value">The value to store.</param>
         /// <returns>The <see cref="Task{DateTimeOffset}"/>.</returns>
-        Task<DateTimeOffset> SetAsync(string key, IByteBuffer value);
+        Task<DateTimeOffset> SetAsync(string key, IManagedByteBuffer value);
     }
 }

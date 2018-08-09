@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
+using SixLabors.Memory;
+
 namespace SixLabors.ImageSharp.Web.Memory
 {
     /// <summary>
@@ -13,6 +15,6 @@ namespace SixLabors.ImageSharp.Web.Memory
         /// </summary>
         /// <param name="length">The minimum length of the array to return.</param>
         /// <returns>The <see cref="IByteBuffer"/>.</returns>
-        IByteBuffer Allocate(int length);
+        IManagedByteBuffer Allocate(int length);
     }
 }

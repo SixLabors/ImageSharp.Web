@@ -5,6 +5,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using SixLabors.ImageSharp.Web.Memory;
+using SixLabors.Memory;
 using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.Memory
@@ -36,12 +37,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Memory
         [Theory]
         [InlineData(32)]
         [InlineData(512)]
+        [InlineData(123)]
         [InlineData(PooledBufferManager.DefaultMaxLength - 1)]
         public void BufferLengthIsCorrect(int size)
         {
-            using (IByteBuffer buffer = this.manager.Allocate(size))
+            using (IManagedByteBuffer buffer = this.manager.Allocate(size))
             {
-                Assert.Equal(size, buffer.Length);
+                Assert.Equal(size, buffer.Memory.Length);
             }
         }
 
@@ -51,7 +53,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Memory
         private bool CheckIsRentingPooledBuffer<T>(int length)
             where T : struct
         {
-            IByteBuffer buffer = this.manager.Allocate(length);
+            IManagedByteBuffer buffer = this.manager.Allocate(length);
             ref byte ptrToPreviousPosition0 = ref MemoryMarshal.GetReference<byte>(buffer.Array);
             buffer.Dispose();
 

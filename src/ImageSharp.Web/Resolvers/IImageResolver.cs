@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.Web.Memory;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Resolvers
 {
@@ -39,6 +40,6 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// </summary>
         /// <param name="context">The current HTTP request context.</param>
         /// <returns>The <see cref="T:Task{IByteBuffer}"/>.</returns>
-        Task<IByteBuffer> ResolveImageAsync(HttpContext context);
+        Task<IManagedByteBuffer> ResolveImageAsync(HttpContext context);
     }
 }

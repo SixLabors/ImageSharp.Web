@@ -16,6 +16,7 @@ using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Middleware
 {
@@ -157,7 +158,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
 
             // Create a cache key based on all the components of the requested url
-            string uri = $"{context.Request.Host.ToString().ToLowerInvariant()}/{context.Request.PathBase.ToString().ToLowerInvariant()}/{context.Request.Path}{QueryString.Create(commands)}";
+            string uri = GetUri(context, commands);
             string key = this.cacheHash.Create(uri, this.options.CachedNameLength);
 
             // Prevent identical requests from running at the same time
@@ -193,7 +194,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         if (!info.Expired)
                         {
                             // We're pulling the buffer from the cache. This should be cleaned up after.
-                            using (IByteBuffer cachedBuffer = await this.cache.GetAsync(key))
+                            using (IManagedByteBuffer cachedBuffer = await this.cache.GetAsync(key))
                             {
                                 // Image is a cached image. Return the correct response now.
                                 await this.SendResponse(imageContext, key, info.LastModifiedUtc, cachedBuffer);
@@ -203,8 +204,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         }
 
                         // Not cached? Let's get it from the image resolver.
-                        IByteBuffer inBuffer = null;
-                        IByteBuffer outBuffer = null;
+                        IManagedByteBuffer inBuffer = null;
+                        IManagedByteBuffer outBuffer = null;
                         MemoryStream outStream = null;
                         try
                         {
@@ -266,9 +267,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
         }
 
-        private async Task SendResponse(ImageContext imageContext, string key, DateTimeOffset lastModified, IByteBuffer buffer)
+        private async Task SendResponse(ImageContext imageContext, string key, DateTimeOffset lastModified, IManagedByteBuffer buffer)
         {
-            imageContext.ComprehendRequestHeaders(lastModified, buffer.Length);
+            imageContext.ComprehendRequestHeaders(lastModified, buffer.Memory.Length);
 
             string contentType = FormatHelpers.GetContentType(this.options.Configuration, key);
 
@@ -282,7 +283,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     }
 
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
-                    await imageContext.SendAsync(contentType, buffer, buffer.Length);
+                    await imageContext.SendAsync(contentType, buffer, buffer.Memory.Length);
 
                     break;
 
@@ -299,6 +300,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     Debug.Fail(exception.ToString());
                     throw exception;
             }
+        }
+
+        private static string GetUri(HttpContext context, IDictionary<string, string> commands)
+        {
+            return $"{context.Request.Host.ToString().ToLowerInvariant()}/{context.Request.PathBase.ToString().ToLowerInvariant()}/{context.Request.Path}{QueryString.Create(commands)}";
         }
     }
 }

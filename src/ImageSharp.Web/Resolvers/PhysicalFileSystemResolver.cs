@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Resolvers
 {
@@ -67,11 +68,11 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         }
 
         /// <inheritdoc/>
-        public async Task<IByteBuffer> ResolveImageAsync(HttpContext context)
+        public async Task<IManagedByteBuffer> ResolveImageAsync(HttpContext context)
         {
             // Path has already been correctly parsed before here.
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
-            IByteBuffer buffer;
+            IManagedByteBuffer buffer;
 
             // Check to see if the file exists.
             if (!fileInfo.Exists)

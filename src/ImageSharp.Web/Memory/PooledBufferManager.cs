@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Buffers;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Memory
 {
@@ -10,6 +11,8 @@ namespace SixLabors.ImageSharp.Web.Memory
     /// </summary>
     public class PooledBufferManager : IBufferManager
     {
+        private readonly MemoryAllocator allocator = ArrayPoolMemoryAllocator.CreateDefault();
+
         /// <summary>
         /// The maximum length of each array in the pool (2^21).
         /// </summary>
@@ -49,21 +52,9 @@ namespace SixLabors.ImageSharp.Web.Memory
         }
 
         /// <inheritdoc />
-        public IByteBuffer Allocate(int minimumLength)
+        public IManagedByteBuffer Allocate(int minimumLength)
         {
-            return new PooledByteBuffer(this, this.arrayPool.Rent(minimumLength), minimumLength);
-        }
-
-        /// <summary>
-        /// Returns the rented array back to the pool.
-        /// </summary>
-        /// <param name="array">The array to return to the buffer pool.</param>
-        internal void Return(byte[] array)
-        {
-            if (array != null)
-            {
-                this.arrayPool.Return(array);
-            }
+            return this.allocator.AllocateManagedByteBuffer(minimumLength);
         }
     }
 }

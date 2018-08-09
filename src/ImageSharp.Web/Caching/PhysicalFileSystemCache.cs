@@ -11,6 +11,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Caching
 {
@@ -91,11 +92,11 @@ namespace SixLabors.ImageSharp.Web.Caching
             };
 
         /// <inheritdoc/>
-        public async Task<IByteBuffer> GetAsync(string key)
+        public async Task<IManagedByteBuffer> GetAsync(string key)
         {
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
 
-            IByteBuffer buffer;
+            IManagedByteBuffer buffer;
 
             // Check to see if the file exists.
             if (!fileInfo.Exists)
@@ -158,7 +159,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         }
 
         /// <inheritdoc/>
-        public async Task<DateTimeOffset> SetAsync(string key, IByteBuffer value)
+        public async Task<DateTimeOffset> SetAsync(string key, IManagedByteBuffer value)
         {
             string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
             string directory = Path.GetDirectoryName(path);
@@ -170,7 +171,8 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             using (FileStream fileStream = File.Create(path))
             {
-                await fileStream.WriteAsync(value.Array, 0, value.Length);
+                // TODO: Do buffered write here!
+                await fileStream.WriteAsync(value.Array, 0, value.Memory.Length);
             }
 
             return File.GetLastWriteTimeUtc(path);

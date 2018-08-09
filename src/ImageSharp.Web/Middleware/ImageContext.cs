@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.Net.Http.Headers;
 using SixLabors.ImageSharp.Web.Memory;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Middleware
 {
@@ -148,7 +149,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="buffer">The cached image buffer.</param>
         /// <param name="length">The The length, in bytes, of the cached image buffer.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public async Task SendAsync(string contentType, IByteBuffer buffer, long length)
+        public async Task SendAsync(string contentType, IManagedByteBuffer buffer, long length)
         {
             this.ApplyResponseHeaders(ResponseConstants.Status200Ok, contentType);
 
