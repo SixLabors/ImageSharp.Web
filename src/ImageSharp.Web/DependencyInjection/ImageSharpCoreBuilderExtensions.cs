@@ -57,11 +57,24 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
+        /// Sets the given <see cref="MemoryAllocator"/> adding it to the service collection.
+        /// </summary>
+        /// <typeparam name="TMemoryAllocator">The type of class implementing <see cref="MemoryAllocator"/>to add.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
+        public static IImageSharpCoreBuilder SetMemoryAllocator<TMemoryAllocator>(this IImageSharpCoreBuilder builder)
+            where TMemoryAllocator : MemoryAllocator
+        {
+            builder.Services.AddSingleton<MemoryAllocator, TMemoryAllocator>();
+            return builder;
+        }
+
+        /// <summary>
         /// Sets the the memory allocator configured in <see cref="Configuration.MemoryAllocator"/> of <see cref="ImageSharpMiddlewareOptions.Configuration"/>.
         /// </summary>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
-        public static IImageSharpCoreBuilder UseMemoryAllocatorFromMiddlewareOptions(this IImageSharpCoreBuilder builder)
+        public static IImageSharpCoreBuilder SetMemoryAllocatorFromMiddlewareOptions(this IImageSharpCoreBuilder builder)
         {
             MemoryAllocator AllocatorResolver(IServiceProvider s) => s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration.MemoryAllocator;
 

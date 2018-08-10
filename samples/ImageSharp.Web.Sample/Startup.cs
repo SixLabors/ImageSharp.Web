@@ -26,7 +26,7 @@ namespace SixLabors.ImageSharp.Web.Sample
         {
             services.AddImageSharpCore()
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .UseMemoryAllocatorFromMiddlewareOptions()
+                .SetMemoryAllocatorFromMiddlewareOptions()
                 .SetCache(provider => new PhysicalFileSystemCache(
                     provider.GetRequiredService<IHostingEnvironment>(),
                     provider.GetRequiredService<MemoryAllocator>(),
@@ -45,10 +45,11 @@ namespace SixLabors.ImageSharp.Web.Sample
                 .AddProcessor<FormatWebProcessor>()
                 .AddProcessor<BackgroundColorWebProcessor>();
 
-            //// Add the default service and options.
+            // Add the default service and options.
+            //
             //services.AddImageSharp();
 
-            //// Or add the default service and custom options.
+            // Or add the default service and custom options.
             //services.AddImageSharp(
             //    options =>
             //        {
@@ -62,10 +63,11 @@ namespace SixLabors.ImageSharp.Web.Sample
             //            options.OnPrepareResponse = _ => { };
             //        });
 
-            //// Or we can fine-grain control adding the default options and configure all other services.
+            // Or we can fine-grain control adding the default options and configure all other services.
+            //
             //services.AddImageSharpCore()
             //        .SetRequestParser<QueryCollectionRequestParser>()
-            //        .SetBufferManager<PooledBufferManager>()
+            //        .SetMemoryAllocator<ArrayPoolMemoryAllocator>()
             //        .SetCache<PhysicalFileSystemCache>()
             //        .SetCacheHash<CacheHash>()
             //        .SetAsyncKeyLock<AsyncKeyLock>()
@@ -75,8 +77,9 @@ namespace SixLabors.ImageSharp.Web.Sample
             //        .AddProcessor<BackgroundColorWebProcessor>();
 
 
-            //// Or we can fine-grain control adding custom options and configure all other services
-            //// There are also factory methods for each builder that will allow building from configuration files.
+            // Or we can fine-grain control adding custom options and configure all other services
+            // There are also factory methods for each builder that will allow building from configuration files.
+            //
             //services.AddImageSharpCore(
             //    options =>
             //        {
@@ -90,12 +93,12 @@ namespace SixLabors.ImageSharp.Web.Sample
             //            options.OnPrepareResponse = _ => { };
             //        })
             //    .SetRequestParser<QueryCollectionRequestParser>()
-            //    .SetBufferManager<PooledBufferManager>()
+            //    .SetMemoryAllocator(provider => ArrayPoolMemoryAllocator.CreateWithMinimalPooling())
             //    .SetCache(provider =>
             //      {
             //          var p = new PhysicalFileSystemCache(
             //              provider.GetRequiredService<IHostingEnvironment>(),
-            //              provider.GetRequiredService<IBufferManager>(),
+            //              provider.GetRequiredService<MemoryAllocator>(),
             //              provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
 
             //          p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;

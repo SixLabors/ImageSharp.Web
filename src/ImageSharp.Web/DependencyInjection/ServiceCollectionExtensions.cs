@@ -93,7 +93,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         {
             builder.SetRequestParser<QueryCollectionRequestParser>();
 
-            builder.UseMemoryAllocatorFromMiddlewareOptions();
+            builder.SetMemoryAllocatorFromMiddlewareOptions();
 
             builder.SetCache<PhysicalFileSystemCache>();
 
