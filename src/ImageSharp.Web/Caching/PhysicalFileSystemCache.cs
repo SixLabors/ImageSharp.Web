@@ -52,7 +52,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// The buffer manager.
         /// </summary>
-        private readonly MemoryAllocator bufferManager;
+        private readonly MemoryAllocator memoryAllocator;
 
         /// <summary>
         /// The middleware configuration options.
@@ -63,12 +63,12 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
         /// <param name="environment">The hosting environment the application is running in.</param>
-        /// <param name="bufferManager">An <see cref="MemoryAllocator"/> instance used to allocate arrays transporting encoded image data.</param>
+        /// <param name="memoryAllocator">An <see cref="MemoryAllocator"/> instance used to allocate arrays transporting encoded image data.</param>
         /// <param name="options">The middleware configuration options.</param>
-        public PhysicalFileSystemCache(IHostingEnvironment environment, MemoryAllocator bufferManager, IOptions<ImageSharpMiddlewareOptions> options)
+        public PhysicalFileSystemCache(IHostingEnvironment environment, MemoryAllocator memoryAllocator, IOptions<ImageSharpMiddlewareOptions> options)
         {
             Guard.NotNull(environment, nameof(environment));
-            Guard.NotNull(bufferManager, nameof(bufferManager));
+            Guard.NotNull(memoryAllocator, nameof(memoryAllocator));
             Guard.NotNull(options, nameof(options));
 
             Guard.NotNullOrWhiteSpace(
@@ -78,7 +78,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             this.environment = environment;
             this.fileProvider = this.environment.WebRootFileProvider;
-            this.bufferManager = bufferManager;
+            this.memoryAllocator = memoryAllocator;
             this.options = options.Value;
         }
 
@@ -108,7 +108,7 @@ namespace SixLabors.ImageSharp.Web.Caching
                 int length = (int)stream.Length;
 
                 // Buffer is disposed of in the middleware
-                buffer = this.bufferManager.AllocateManagedByteBuffer(length);
+                buffer = this.memoryAllocator.AllocateManagedByteBuffer(length);
                 await stream.ReadAsync(buffer.Array, 0, length);
             }
 

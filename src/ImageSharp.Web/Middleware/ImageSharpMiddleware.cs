@@ -47,7 +47,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// The buffer data pool.
         /// </summary>
-        private readonly MemoryAllocator bufferManager;
+        private readonly MemoryAllocator memoryAllocator;
 
         /// <summary>
         /// The parser for parsing commands from the current request.
@@ -85,7 +85,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="next">The next middleware in the pipeline.</param>
         /// <param name="options">The middleware configuration options.</param>
         /// <param name="loggerFactory">An <see cref="ILoggerFactory"/> instance used to create loggers.</param>
-        /// <param name="bufferManager">An <see cref="MemoryAllocator"/> instance used to allocate arrays transporting encoded image data.</param>
+        /// <param name="memoryAllocator">An <see cref="MemoryAllocator"/> instance used to allocate arrays transporting encoded image data.</param>
         /// <param name="requestParser">An <see cref="IRequestParser"/> instance used to parse image requests for commands.</param>
         /// <param name="resolvers">A collection of <see cref="IImageResolver"/> instances used to resolve images.</param>
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images.</param>
@@ -96,7 +96,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             RequestDelegate next,
             IOptions<ImageSharpMiddlewareOptions> options,
             ILoggerFactory loggerFactory,
-            MemoryAllocator bufferManager,
+            MemoryAllocator memoryAllocator,
             IRequestParser requestParser,
             IEnumerable<IImageResolver> resolvers,
             IEnumerable<IImageWebProcessor> processors,
@@ -107,7 +107,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             Guard.NotNull(next, nameof(next));
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
-            Guard.NotNull(bufferManager, nameof(bufferManager));
+            Guard.NotNull(memoryAllocator, nameof(memoryAllocator));
             Guard.NotNull(requestParser, nameof(requestParser));
             Guard.NotNull(resolvers, nameof(resolvers));
             Guard.NotNull(processors, nameof(processors));
@@ -117,7 +117,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             this.next = next;
             this.options = options.Value;
-            this.bufferManager = bufferManager;
+            this.memoryAllocator = memoryAllocator;
             this.requestParser = requestParser;
             this.resolvers = resolvers;
             this.processors = processors;
@@ -235,7 +235,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 int outLength = (int)outStream.Length;
 
                                 // Copy the out-stream to the pooled buffer.
-                                outBuffer = this.bufferManager.AllocateManagedByteBuffer(outLength);
+                                outBuffer = this.memoryAllocator.AllocateManagedByteBuffer(outLength);
                                 await outStream.ReadAsync(outBuffer.Array, 0, outLength);
 
                                 DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer);
