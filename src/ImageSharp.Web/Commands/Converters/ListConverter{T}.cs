@@ -29,9 +29,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
 
             if (value != null)
             {
-                string[] items = this.GetStringArray(value, culture);
-
-                foreach (string s in items)
+                foreach (string s in this.GetStringArray(value, culture))
                 {
                     object item = paramConverter.ConvertFromInvariantString(s, type);
                     if (item != null)
@@ -53,9 +51,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         protected string[] GetStringArray(string input, CultureInfo culture)
         {
             char separator = culture.TextInfo.ListSeparator[0];
-            string[] result = input.Split(separator).Select(s => s.Trim()).ToArray();
-
-            return result;
+            return input.Split(separator).Select(s => s.Trim()).ToArray();
         }
     }
 }

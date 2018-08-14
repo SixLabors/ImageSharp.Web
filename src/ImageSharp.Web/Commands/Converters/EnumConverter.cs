@@ -26,8 +26,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
                 if (value.IndexOf(separator) != -1)
                 {
                     long convertedValue = 0;
-                    string[] values = GetStringArray(value, separator);
-                    foreach (string v in values)
+                    foreach (string v in GetStringArray(value, separator))
                     {
                         convertedValue |= Convert.ToInt64((Enum)Enum.Parse(propertyType, v, true), culture);
                     }
