@@ -109,7 +109,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
                 // Buffer is disposed of in the middleware
                 buffer = this.memoryAllocator.AllocateManagedByteBuffer(length);
-                await stream.ReadAsync(buffer.Array, 0, length);
+                await stream.ReadAsync(buffer.Array, 0, length).ConfigureAwait(false);
             }
 
             return buffer;
@@ -171,7 +171,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             using (FileStream fileStream = File.Create(path))
             {
                 // TODO: Do buffered write here!
-                await fileStream.WriteAsync(value.Array, 0, value.Memory.Length);
+                await fileStream.WriteAsync(value.Array, 0, value.Memory.Length).ConfigureAwait(false);
             }
 
             return File.GetLastWriteTimeUtc(path);

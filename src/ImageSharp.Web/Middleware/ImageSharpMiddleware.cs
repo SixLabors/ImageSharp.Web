@@ -149,10 +149,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             this.options.OnValidate?.Invoke(new ImageValidationContext(context, commands, CommandParser.Instance));
 
-            if (!commands.Any())
+            if (commands.Count == 0)
             {
                 // Nothing to do. call the next delegate/middleware in the pipeline
-                await this.next(context);
+                await this.next(context).ConfigureAwait(false);
                 return;
             }
 
@@ -163,12 +163,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
             // Prevent identical requests from running at the same time
             // This reduces the overheads of unnecessary processing plus avoids file locks
             bool processRequest = true;
-            using (await this.asyncKeyLock.LockAsync(key))
+            using (await this.asyncKeyLock.LockAsync(key).ConfigureAwait(false))
             {
                 // Get the correct service for the request.
                 IImageResolver resolver = this.resolvers.FirstOrDefault(r => r.Match(context));
 
-                if (resolver == null || !await resolver.IsValidRequestAsync(context))
+                if (resolver == null || !await resolver.IsValidRequestAsync(context).ConfigureAwait(false))
                 {
                     // Nothing to do. Call the next delegate/middleware in the pipeline
                     processRequest = false;
@@ -176,7 +176,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                 if (processRequest)
                 {
-                    CachedInfo info = await this.cache.IsExpiredAsync(context, key, DateTime.UtcNow.AddDays(-this.options.MaxCacheDays));
+                    CachedInfo info = await this.cache.IsExpiredAsync(context, key, DateTime.UtcNow.AddDays(-this.options.MaxCacheDays)).ConfigureAwait(false);
 
                     var imageContext = new ImageContext(context, this.options);
 
@@ -193,10 +193,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         if (!info.Expired)
                         {
                             // We're pulling the buffer from the cache. This should be cleaned up after.
-                            using (IManagedByteBuffer cachedBuffer = await this.cache.GetAsync(key))
+                            using (IManagedByteBuffer cachedBuffer = await this.cache.GetAsync(key).ConfigureAwait(false))
                             {
                                 // Image is a cached image. Return the correct response now.
-                                await this.SendResponse(imageContext, key, info.LastModifiedUtc, cachedBuffer);
+                                await this.SendResponse(imageContext, key, info.LastModifiedUtc, cachedBuffer).ConfigureAwait(false);
                             }
 
                             return;
@@ -208,7 +208,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         MemoryStream outStream = null;
                         try
                         {
-                            inBuffer = await resolver.ResolveImageAsync(context);
+                            inBuffer = await resolver.ResolveImageAsync(context).ConfigureAwait(false);
                             if (inBuffer == null || inBuffer.Array.Length == 0)
                             {
                                 // Log the error but let the pipeline handle the 404
@@ -236,10 +236,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                                 // Copy the out-stream to the pooled buffer.
                                 outBuffer = this.memoryAllocator.AllocateManagedByteBuffer(outLength);
-                                await outStream.ReadAsync(outBuffer.Array, 0, outLength);
+                                await outStream.ReadAsync(outBuffer.Array, 0, outLength).ConfigureAwait(false);
 
-                                DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer);
-                                await this.SendResponse(imageContext, key, cachedDate, outBuffer);
+                                DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer).ConfigureAwait(false);
+                                await this.SendResponse(imageContext, key, cachedDate, outBuffer).ConfigureAwait(false);
                             }
                         }
                         catch (Exception ex)
@@ -262,7 +262,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             if (!processRequest)
             {
                 // Call the next delegate/middleware in the pipeline
-                await this.next(context);
+                await this.next(context).ConfigureAwait(false);
             }
         }
 
@@ -278,21 +278,21 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 case ImageContext.PreconditionState.ShouldProcess:
                     if (imageContext.IsHeadRequest())
                     {
-                        await imageContext.SendStatusAsync(ResponseConstants.Status200Ok, contentType);
+                        await imageContext.SendStatusAsync(ResponseConstants.Status200Ok, contentType).ConfigureAwait(false);
                     }
 
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
-                    await imageContext.SendAsync(contentType, buffer, buffer.Memory.Length);
+                    await imageContext.SendAsync(contentType, buffer, buffer.Memory.Length).ConfigureAwait(false);
 
                     break;
 
                 case ImageContext.PreconditionState.NotModified:
                     this.logger.LogImageNotModified(imageContext.GetDisplayUrl());
-                    await imageContext.SendStatusAsync(ResponseConstants.Status304NotModified, contentType);
+                    await imageContext.SendStatusAsync(ResponseConstants.Status304NotModified, contentType).ConfigureAwait(false);
                     break;
                 case ImageContext.PreconditionState.PreconditionFailed:
                     this.logger.LogImagePreconditionFailed(imageContext.GetDisplayUrl());
-                    await imageContext.SendStatusAsync(ResponseConstants.Status412PreconditionFailed, contentType);
+                    await imageContext.SendStatusAsync(ResponseConstants.Status412PreconditionFailed, contentType).ConfigureAwait(false);
                     break;
                 default:
                     var exception = new NotImplementedException(imageContext.GetPreconditionState().ToString());

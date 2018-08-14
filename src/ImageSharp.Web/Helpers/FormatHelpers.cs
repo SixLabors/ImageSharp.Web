@@ -14,7 +14,7 @@ namespace SixLabors.ImageSharp.Web.Helpers
     /// <summary>
     /// Helper utilities for image formats.
     /// </summary>
-    public class FormatHelpers
+    public static class FormatHelpers
     {
         /// <summary>
         /// Returns the correct content type (mime-type) for the given cached image key.

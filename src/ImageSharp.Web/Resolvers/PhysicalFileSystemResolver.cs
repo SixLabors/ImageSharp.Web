@@ -82,7 +82,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
             {
                 // Buffer is returned to the pool in the middleware
                 buffer = this.memoryAllocator.AllocateManagedByteBuffer((int)stream.Length);
-                await stream.ReadAsync(buffer.Array, 0, (int)stream.Length);
+                await stream.ReadAsync(buffer.Array, 0, (int)stream.Length).ConfigureAwait(false);
             }
 
             return buffer;

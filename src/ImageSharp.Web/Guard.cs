@@ -18,6 +18,7 @@ namespace SixLabors.ImageSharp.Web
         /// Verifies, that the method parameter with specified object value is not null
         /// and throws an exception if it is found to be so.
         /// </summary>
+        /// <typeparam name="T">The type of object to check.</typeparam>
         /// <param name="target">The target object, which cannot be null.</param>
         /// <param name="parameterName">The name of the parameter that is to be checked.</param>
         /// <param name="message">The error message, if any to add to the exception.</param>

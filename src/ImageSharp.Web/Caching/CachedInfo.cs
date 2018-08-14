@@ -57,8 +57,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             {
                 int hashCode = this.Expired.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.LastModifiedUtc.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Length.GetHashCode();
-                return hashCode;
+                return (hashCode * 397) ^ this.Length.GetHashCode();
             }
         }
     }

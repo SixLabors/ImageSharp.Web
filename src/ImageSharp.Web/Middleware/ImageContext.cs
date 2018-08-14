@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -153,7 +152,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.ApplyResponseHeaders(ResponseConstants.Status200Ok, contentType);
 
             // We don't need to directly cancel this, if the client disconnects it will fail silently.
-            await this.response.Body.WriteAsync(buffer.Array, 0, (int)length, CancellationToken.None);
+            await this.response.Body.WriteAsync(buffer.Array, 0, (int)length, CancellationToken.None).ConfigureAwait(false);
             if (this.response.Body.CanSeek)
             {
                 this.response.Body.Position = 0;
@@ -221,7 +220,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             // 14.24 If-Match
             IList<EntityTagHeaderValue> ifMatch = this.requestHeaders.IfMatch;
 
-            if (ifMatch != null && ifMatch.Any())
+            if (ifMatch?.Count > 0)
             {
                 this.ifMatchState = PreconditionState.PreconditionFailed;
                 foreach (EntityTagHeaderValue etag in ifMatch)
@@ -237,7 +236,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             // 14.26 If-None-Match
             IList<EntityTagHeaderValue> ifNoneMatch = this.requestHeaders.IfNoneMatch;
 
-            if (ifNoneMatch != null && ifNoneMatch.Any())
+            if (ifNoneMatch?.Count > 0)
             {
                 this.ifNoneMatchState = PreconditionState.ShouldProcess;
                 foreach (EntityTagHeaderValue etag in ifNoneMatch)
