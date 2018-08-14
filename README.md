@@ -79,7 +79,7 @@ Or you can fine-grain control adding the default options and configure all other
 services.AddImageSharpCore()
         .SetRequestParser<QueryCollectionRequestParser>()
         .SetBufferManager<PooledBufferManager>()
-        .SetCache<PhysicalFileSystemCache>()
+        .SetMemoryAllocatorFromMiddlewareOptions()
         .SetCacheHash<CacheHash>()
         .SetAsyncKeyLock<AsyncKeyLock>()
         .AddResolver<PhysicalFileSystemResolver>()
@@ -105,7 +105,7 @@ services.AddImageSharpCore(
             options.OnPrepareResponse = _ => { };
         })
     .SetRequestParser<QueryCollectionRequestParser>()
-    .SetBufferManager<PooledBufferManager>()
+    .SetMemoryAllocator<ArrayPoolMemoryAllocator>()
     .SetCache(provider =>
       {
           var p = new PhysicalFileSystemCache(
