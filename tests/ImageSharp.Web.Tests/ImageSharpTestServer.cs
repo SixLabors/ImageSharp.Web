@@ -37,7 +37,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                             options.MaxBrowserCacheDays = -1;
                             options.MaxCacheDays = -1;
                             options.CachedNameLength = 12;
-                            options.OnValidate = _ => { };
+                            options.OnParseCommands = _ => { };
                             options.OnBeforeSave = _ => { };
                             options.OnProcessed = _ => { };
                             options.OnPrepareResponse = _ => { };
@@ -55,7 +55,7 @@ namespace SixLabors.ImageSharp.Web.Tests
 
 
         public static TestServer CreateWithActions(
-            Action<ImageValidationContext> onValidate,
+            Action<ImageCommandContext> onParseCommands,
             Action<FormattedImage> onBeforeSave = null,
             Action<ImageProcessingContext> onProcessed = null,
             Action<HttpContext> onPrepareResponse = null)
@@ -65,7 +65,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                     options.Configuration = Configuration.Default;
                     options.MaxBrowserCacheDays = -1;
                     options.MaxCacheDays = -1;
-                    options.OnValidate = onValidate;
+                    options.OnParseCommands = onParseCommands;
                     options.OnBeforeSave = onBeforeSave;
                     options.OnProcessed = onProcessed;
                     options.OnPrepareResponse = onPrepareResponse;

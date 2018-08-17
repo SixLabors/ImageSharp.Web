@@ -15,7 +15,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
         public async Task ShouldRunOnValidateAction()
         {
             bool complete = false;
-            void OnValidate(ImageValidationContext context)
+            void OnParseCommands(ImageCommandContext context)
             {
                 Assert.NotNull(context);
                 Assert.NotNull(context.Context);
@@ -24,7 +24,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
                 complete = true;
             }
 
-            TestServer server = ImageSharpTestServer.CreateWithActions(OnValidate);
+            TestServer server = ImageSharpTestServer.CreateWithActions(OnParseCommands);
 
             await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20");
             Assert.True(complete);

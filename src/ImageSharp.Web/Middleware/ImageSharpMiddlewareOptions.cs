@@ -35,22 +35,20 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public uint CachedNameLength { get; set; } = 12;
 
         /// <summary>
-        /// Gets or sets the additional validation method.
+        /// Gets or sets the additional command parsing method that can be used to used to augment commands.
         /// This is called once the commands have been gathered and before an <see cref="IImageResolver"/> has been assigned.
-        /// This can be used to used to augment commands and further validate the request.
-        /// Emptying the dictionary will ensure that the middleware will ignore the request.
         /// </summary>
-        public Action<ImageValidationContext> OnValidate { get; set; } = v =>
+        public Action<ImageCommandContext> OnParseCommands { get; set; } = c =>
             {
-                // It's a good idea to have this to provide very basic security. We can safely use the static
-                // resize processor properties and the validation method will pass even if not installed.
-                uint width = v.Parser.ParseValue<uint>(v.Commands.GetValueOrDefault(ResizeWebProcessor.Width));
-                uint height = v.Parser.ParseValue<uint>(v.Commands.GetValueOrDefault(ResizeWebProcessor.Height));
+                // It's a good idea to have this to provide very basic security.
+                // We can safely use the static resize processor properties.
+                uint width = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Width));
+                uint height = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Height));
 
                 if (width > 4000 && height > 4000)
                 {
-                    v.Commands.Remove(ResizeWebProcessor.Width);
-                    v.Commands.Remove(ResizeWebProcessor.Height);
+                    c.Commands.Remove(ResizeWebProcessor.Width);
+                    c.Commands.Remove(ResizeWebProcessor.Height);
                 }
             };
 

@@ -148,7 +148,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 .Where(kvp => this.knownCommands.Contains(kvp.Key))
                 .ToDictionary(p => p.Key, p => p.Value);
 
-            this.options.OnValidate?.Invoke(new ImageValidationContext(context, commands, CommandParser.Instance));
+            this.options.OnParseCommands?.Invoke(new ImageCommandContext(context, commands, CommandParser.Instance));
 
             // Get the correct service for the request.
             IImageResolver resolver = this.resolvers.FirstOrDefault(r => r.Match(context));

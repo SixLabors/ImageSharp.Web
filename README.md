@@ -65,7 +65,7 @@ services.AddImageSharp(
             options.MaxBrowserCacheDays = 7;
             options.MaxCacheDays = 365;
             options.CachedNameLength = 8;
-            options.OnValidate = _ => { };
+            options.OnParseCommands = _ => { };
             options.OnBeforeSave = _ => { };
             options.OnProcessed = _ => { };
             options.OnPrepareResponse = _ => { };
@@ -99,7 +99,7 @@ services.AddImageSharpCore(
             options.MaxBrowserCacheDays = 7;
             options.MaxCacheDays = 365;
             options.CachedNameLength = 8;
-            options.OnValidate = _ => { };
+            options.OnParseCommands = _ => { };
             options.OnBeforeSave = _ => { };
             options.OnProcessed = _ => { };
             options.OnPrepareResponse = _ => { };
