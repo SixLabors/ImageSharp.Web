@@ -22,6 +22,11 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <remarks>Passing zero for one of height or width will automatically preserve the aspect ratio of the original image.</remarks>
         public static FormattedImage Process(this FormattedImage source, ILogger logger, IEnumerable<IImageWebProcessor> processors, IDictionary<string, string> commands)
         {
+            if (commands.Count == 0)
+            {
+                return source;
+            }
+
             foreach (IImageWebProcessor processor in processors)
             {
                 source = processor.Process(source, logger, commands);

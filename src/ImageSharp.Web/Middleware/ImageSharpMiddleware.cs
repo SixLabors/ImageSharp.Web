@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -149,7 +150,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             this.options.OnValidate?.Invoke(new ImageValidationContext(context, commands, CommandParser.Instance));
 
-            if (commands.Count == 0)
+            // Get the correct service for the request.
+            IImageResolver resolver = this.resolvers.FirstOrDefault(r => r.Match(context));
+
+            if (resolver == null || !await resolver.IsValidRequestAsync(context).ConfigureAwait(false))
             {
                 // Nothing to do. call the next delegate/middleware in the pipeline
                 await this.next(context).ConfigureAwait(false);
@@ -165,96 +169,84 @@ namespace SixLabors.ImageSharp.Web.Middleware
             bool processRequest = true;
             using (await this.asyncKeyLock.LockAsync(key).ConfigureAwait(false))
             {
-                // Get the correct service for the request.
-                IImageResolver resolver = this.resolvers.FirstOrDefault(r => r.Match(context));
+                CachedInfo info = await this.cache.IsExpiredAsync(context, key, DateTime.UtcNow.AddDays(-this.options.MaxCacheDays)).ConfigureAwait(false);
 
-                if (resolver == null || !await resolver.IsValidRequestAsync(context).ConfigureAwait(false))
+                var imageContext = new ImageContext(context, this.options);
+
+                if (info.Equals(default))
                 {
-                    // Nothing to do. Call the next delegate/middleware in the pipeline
+                    // Cache has tried to resolve the source image and failed
+                    // Log the error but let the pipeline handle the 404
+                    this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
                     processRequest = false;
                 }
 
                 if (processRequest)
                 {
-                    CachedInfo info = await this.cache.IsExpiredAsync(context, key, DateTime.UtcNow.AddDays(-this.options.MaxCacheDays)).ConfigureAwait(false);
-
-                    var imageContext = new ImageContext(context, this.options);
-
-                    if (info.Equals(default))
+                    if (!info.Expired)
                     {
-                        // Cache has tried to resolve the source image and failed
-                        // Log the error but let the pipeline handle the 404
-                        this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
-                        processRequest = false;
+                        // We're pulling the buffer from the cache. This should be cleaned up after.
+                        using (IManagedByteBuffer cachedBuffer = await this.cache.GetAsync(key).ConfigureAwait(false))
+                        {
+                            // Image is a cached image. Return the correct response now.
+                            await this.SendResponse(imageContext, key, info.LastModifiedUtc, cachedBuffer).ConfigureAwait(false);
+                        }
+
+                        return;
                     }
 
-                    if (processRequest)
+                    // Not cached? Let's get it from the image resolver.
+                    IManagedByteBuffer inBuffer = null;
+                    IManagedByteBuffer outBuffer = null;
+                    MemoryStream outStream = null;
+                    try
                     {
-                        if (!info.Expired)
+                        inBuffer = await resolver.ResolveImageAsync(context).ConfigureAwait(false);
+                        if (inBuffer == null || inBuffer.Array.Length == 0)
                         {
-                            // We're pulling the buffer from the cache. This should be cleaned up after.
-                            using (IManagedByteBuffer cachedBuffer = await this.cache.GetAsync(key).ConfigureAwait(false))
+                            // Log the error but let the pipeline handle the 404
+                            this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
+                            processRequest = false;
+                        }
+
+                        if (processRequest)
+                        {
+                            // No allocations here for inStream since we are passing the buffer.
+                            // TODO: How to prevent the allocation in outStream? Passing a pooled buffer won't let stream grow if needed.
+                            outStream = new MemoryStream();
+                            using (var image = FormattedImage.Load(this.options.Configuration, inBuffer.Array))
                             {
-                                // Image is a cached image. Return the correct response now.
-                                await this.SendResponse(imageContext, key, info.LastModifiedUtc, cachedBuffer).ConfigureAwait(false);
+                                image.Process(this.logger, this.processors, commands);
+                                this.options.OnBeforeSave?.Invoke(image);
+                                image.Save(outStream);
                             }
 
-                            return;
+                            // Allow for any further optimization of the image. Always reset the position just in case.
+                            outStream.Position = 0;
+                            this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, Path.GetExtension(key)));
+                            outStream.Position = 0;
+                            int outLength = (int)outStream.Length;
+
+                            // Copy the out-stream to the pooled buffer.
+                            outBuffer = this.memoryAllocator.AllocateManagedByteBuffer(outLength);
+                            await outStream.ReadAsync(outBuffer.Array, 0, outLength).ConfigureAwait(false);
+
+                            DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer).ConfigureAwait(false);
+                            await this.SendResponse(imageContext, key, cachedDate, outBuffer).ConfigureAwait(false);
                         }
-
-                        // Not cached? Let's get it from the image resolver.
-                        IManagedByteBuffer inBuffer = null;
-                        IManagedByteBuffer outBuffer = null;
-                        MemoryStream outStream = null;
-                        try
-                        {
-                            inBuffer = await resolver.ResolveImageAsync(context).ConfigureAwait(false);
-                            if (inBuffer == null || inBuffer.Array.Length == 0)
-                            {
-                                // Log the error but let the pipeline handle the 404
-                                this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
-                                processRequest = false;
-                            }
-
-                            if (processRequest)
-                            {
-                                // No allocations here for inStream since we are passing the buffer.
-                                // TODO: How to prevent the allocation in outStream? Passing a pooled buffer won't let stream grow if needed.
-                                outStream = new MemoryStream();
-                                using (var image = FormattedImage.Load(this.options.Configuration, inBuffer.Array))
-                                {
-                                    image.Process(this.logger, this.processors, commands);
-                                    this.options.OnBeforeSave?.Invoke(image);
-                                    image.Save(outStream);
-                                }
-
-                                // Allow for any further optimization of the image. Always reset the position just in case.
-                                outStream.Position = 0;
-                                this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, Path.GetExtension(key)));
-                                outStream.Position = 0;
-                                int outLength = (int)outStream.Length;
-
-                                // Copy the out-stream to the pooled buffer.
-                                outBuffer = this.memoryAllocator.AllocateManagedByteBuffer(outLength);
-                                await outStream.ReadAsync(outBuffer.Array, 0, outLength).ConfigureAwait(false);
-
-                                DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer).ConfigureAwait(false);
-                                await this.SendResponse(imageContext, key, cachedDate, outBuffer).ConfigureAwait(false);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            // Log the error internally then rethrow.
-                            // We don't call next here, the pipeline will automatically handle it
-                            this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
-                            throw;
-                        }
-                        finally
-                        {
-                            outStream?.Dispose();
-                            inBuffer?.Dispose();
-                            outBuffer?.Dispose();
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the error internally then rethrow.
+                        // We don't call next here, the pipeline will automatically handle it
+                        this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
+                        throw;
+                    }
+                    finally
+                    {
+                        outStream?.Dispose();
+                        inBuffer?.Dispose();
+                        outBuffer?.Dispose();
                     }
                 }
             }
@@ -303,7 +295,23 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
         private static string GetUri(HttpContext context, IDictionary<string, string> commands)
         {
-            return $"{context.Request.Host.ToString().ToLowerInvariant()}/{context.Request.PathBase.ToString().ToLowerInvariant()}/{context.Request.Path}{QueryString.Create(commands)}";
+            var sb = new StringBuilder(context.Request.Host.ToString());
+
+            string pathBase = context.Request.PathBase.ToString();
+            if (!string.IsNullOrWhiteSpace(pathBase))
+            {
+                sb.AppendFormat("{0}/", pathBase);
+            }
+
+            string path = context.Request.Path.ToString();
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                sb.Append(path);
+            }
+
+            sb.Append(QueryString.Create(commands));
+
+            return sb.ToString().ToLowerInvariant();
         }
     }
 }
