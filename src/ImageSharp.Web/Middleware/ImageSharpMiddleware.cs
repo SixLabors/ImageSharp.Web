@@ -169,13 +169,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
             bool processRequest = true;
             using (await this.asyncKeyLock.LockAsync(key).ConfigureAwait(false))
             {
-                CachedInfo info = await this.cache.IsExpiredAsync(context, key, DateTime.UtcNow.AddDays(-this.options.MaxCacheDays)).ConfigureAwait(false);
-
+                // TODO: How do I get the last write time without significant overhead in non physical resolvers?
                 var imageContext = new ImageContext(context, this.options);
+                ICachedImage resolvedImage = await resolver.ResolveImageAsync(context).ConfigureAwait(false);
 
-                if (info.Equals(default))
+                if (resolvedImage == null)
                 {
-                    // Cache has tried to resolve the source image and failed
                     // Log the error but let the pipeline handle the 404
                     this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
                     processRequest = false;
@@ -183,10 +182,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                 if (processRequest)
                 {
+                    CachedInfo info = await this.cache.IsExpiredAsync(context, key, resolvedImage.LastWriteTimeUtc(), DateTime.UtcNow.AddDays(-this.options.MaxCacheDays)).ConfigureAwait(false);
+
                     if (!info.Expired)
                     {
-                        // We're pulling the buffer from the cache. This should be cleaned up after.
-                        using (IManagedByteBuffer cachedBuffer = await this.cache.GetAsync(key).ConfigureAwait(false))
+                        // We're pulling the image from the cache.
+                        ICachedImage cachedImage = await this.cache.GetAsync(key).ConfigureAwait(false);
+                        using (Stream cachedBuffer = cachedImage.OpenRead())
                         {
                             // Image is a cached image. Return the correct response now.
                             await this.SendResponse(imageContext, key, info.LastModifiedUtc, cachedBuffer).ConfigureAwait(false);
@@ -196,25 +198,16 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     }
 
                     // Not cached? Let's get it from the image resolver.
-                    IManagedByteBuffer inBuffer = null;
-                    IManagedByteBuffer outBuffer = null;
-                    MemoryStream outStream = null;
+                    Stream outStream = null;
                     try
                     {
-                        inBuffer = await resolver.ResolveImageAsync(context).ConfigureAwait(false);
-                        if (inBuffer == null || inBuffer.Array.Length == 0)
-                        {
-                            // Log the error but let the pipeline handle the 404
-                            this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
-                            processRequest = false;
-                        }
-
                         if (processRequest)
                         {
-                            // No allocations here for inStream since we are passing the buffer.
-                            // TODO: How to prevent the allocation in outStream? Passing a pooled buffer won't let stream grow if needed.
-                            outStream = new MemoryStream();
-                            using (var image = FormattedImage.Load(this.options.Configuration, inBuffer.Array))
+                            // No allocations here for inStream since we are passing the raw input stream.
+                            // outStream allocation depends on the stream used.
+                            outStream = resolvedImage.OpenWrite();
+                            using (Stream inStream = resolvedImage.OpenRead())
+                            using (var image = FormattedImage.Load(this.options.Configuration, inStream))
                             {
                                 image.Process(this.logger, this.processors, commands);
                                 this.options.OnBeforeSave?.Invoke(image);
@@ -222,17 +215,19 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             }
 
                             // Allow for any further optimization of the image. Always reset the position just in case.
-                            outStream.Position = 0;
+                            if (outStream.CanSeek)
+                            {
+                                outStream.Position = 0;
+                            }
+
                             this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, Path.GetExtension(key)));
-                            outStream.Position = 0;
-                            int outLength = (int)outStream.Length;
+                            if (outStream.CanSeek)
+                            {
+                                outStream.Position = 0;
+                            }
 
-                            // Copy the out-stream to the pooled buffer.
-                            outBuffer = this.memoryAllocator.AllocateManagedByteBuffer(outLength);
-                            await outStream.ReadAsync(outBuffer.Array, 0, outLength).ConfigureAwait(false);
-
-                            DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer).ConfigureAwait(false);
-                            await this.SendResponse(imageContext, key, cachedDate, outBuffer).ConfigureAwait(false);
+                            DateTimeOffset cachedDate = await this.cache.SetAsync(key, outStream).ConfigureAwait(false);
+                            await this.SendResponse(imageContext, key, cachedDate, outStream).ConfigureAwait(false);
                         }
                     }
                     catch (Exception ex)
@@ -245,8 +240,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     finally
                     {
                         outStream?.Dispose();
-                        inBuffer?.Dispose();
-                        outBuffer?.Dispose();
                     }
                 }
             }
@@ -258,9 +251,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
         }
 
-        private async Task SendResponse(ImageContext imageContext, string key, DateTimeOffset lastModified, IManagedByteBuffer buffer)
+        private async Task SendResponse(ImageContext imageContext, string key, DateTimeOffset lastModified, Stream stream)
         {
-            imageContext.ComprehendRequestHeaders(lastModified, buffer.Memory.Length);
+            imageContext.ComprehendRequestHeaders(lastModified, stream.Length);
 
             string contentType = FormatHelpers.GetContentType(this.options.Configuration, key);
 
@@ -274,7 +267,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     }
 
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
-                    await imageContext.SendAsync(contentType, buffer, buffer.Memory.Length).ConfigureAwait(false);
+                    await imageContext.SendAsync(contentType, stream).ConfigureAwait(false);
 
                     break;
 

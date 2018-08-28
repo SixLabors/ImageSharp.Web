@@ -3,13 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.Net.Http.Headers;
-using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Middleware
 {
@@ -112,19 +112,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// Gets the preconditioned state of the request.
         /// </summary>
         /// <returns>The <see cref="PreconditionState"/>.</returns>
-        public PreconditionState GetPreconditionState()
-        {
-            return GetMaxPreconditionState(this.ifMatchState, this.ifNoneMatchState, this.ifModifiedSinceState, this.ifUnmodifiedSinceState);
-        }
+        public PreconditionState GetPreconditionState() => GetMaxPreconditionState(this.ifMatchState, this.ifNoneMatchState, this.ifModifiedSinceState, this.ifUnmodifiedSinceState);
 
         /// <summary>
         /// Gets a value indicating whether this request is a head request.
         /// </summary>
         /// <returns>THe <see cref="bool"/>.</returns>
-        public bool IsHeadRequest()
-        {
-            return string.Equals("HEAD", this.request.Method, StringComparison.OrdinalIgnoreCase);
-        }
+        public bool IsHeadRequest() => string.Equals("HEAD", this.request.Method, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Set the response status headers.
@@ -144,15 +138,19 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// Set the response content.
         /// </summary>
         /// <param name="contentType">The content type.</param>
-        /// <param name="buffer">The cached image buffer.</param>
-        /// <param name="length">The The length, in bytes, of the cached image buffer.</param>
+        /// <param name="stream">The cached image buffer.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public async Task SendAsync(string contentType, IManagedByteBuffer buffer, long length)
+        public async Task SendAsync(string contentType, Stream stream)
         {
             this.ApplyResponseHeaders(ResponseConstants.Status200Ok, contentType);
 
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
+            }
+
             // We don't need to directly cancel this, if the client disconnects it will fail silently.
-            await this.response.Body.WriteAsync(buffer.Array, 0, (int)length, CancellationToken.None).ConfigureAwait(false);
+            await stream.CopyToAsync(this.response.Body, (int)stream.Length, CancellationToken.None).ConfigureAwait(false);
             if (this.response.Body.CanSeek)
             {
                 this.response.Body.Position = 0;

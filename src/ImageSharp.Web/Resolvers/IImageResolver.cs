@@ -37,7 +37,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// Resolves the image in an asynchronous manner.
         /// </summary>
         /// <param name="context">The current HTTP request context.</param>
-        /// <returns>The <see cref="T:Task{IByteBuffer}"/>.</returns>
-        Task<IManagedByteBuffer> ResolveImageAsync(HttpContext context);
+        /// <returns>The <see cref="T:Task{ICachedImage}"/>.</returns>
+        Task<ICachedImage> ResolveImageAsync(HttpContext context);
     }
 }

@@ -26,7 +26,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
 
             TestServer server = ImageSharpTestServer.CreateWithActions(OnParseCommands);
 
-            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20");
+            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20").ConfigureAwait(false);
             Assert.True(complete);
         }
 
@@ -44,7 +44,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
 
             TestServer server = ImageSharpTestServer.CreateWithActions(null, OnBeforeSave);
 
-            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20");
+            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20").ConfigureAwait(false);
             Assert.True(complete);
         }
 
@@ -63,7 +63,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
 
             TestServer server = ImageSharpTestServer.CreateWithActions(null, null, OnProcessed);
 
-            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20");
+            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20").ConfigureAwait(false);
             Assert.True(complete);
         }
 
@@ -80,7 +80,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
 
             TestServer server = ImageSharpTestServer.CreateWithActions(null, null, null, OnPrepareResponse);
 
-            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20");
+            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20").ConfigureAwait(false);
             Assert.True(complete);
         }
     }

@@ -23,10 +23,7 @@ namespace SixLabors.ImageSharp.Web.Tests
     {
         public static string TestImage = "http://localhost/SubFolder/imagesharp-logo.png";
 
-        public static Action<IApplicationBuilder> DefaultConfig = app =>
-        {
-            app.UseImageSharp();
-        };
+        public static Action<IApplicationBuilder> DefaultConfig = app => app.UseImageSharp();
 
         public static Action<IServiceCollection> DefaultServices = services =>
         {
@@ -52,7 +49,6 @@ namespace SixLabors.ImageSharp.Web.Tests
         };
 
         public static TestServer CreateDefault() => Create(DefaultConfig, DefaultServices);
-
 
         public static TestServer CreateWithActions(
             Action<ImageCommandContext> onParseCommands,
@@ -80,7 +76,6 @@ namespace SixLabors.ImageSharp.Web.Tests
 
             return Create(DefaultConfig, ConfigureServices);
         }
-
 
         public static TestServer Create(Action<IApplicationBuilder> configureApp, Action<IServiceCollection> configureServices = null)
         {

@@ -29,8 +29,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                 {
                     Settings =
                     {
-                        [PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder,
-                        [PhysicalFileSystemCache.CheckSourceChanged] = "true"
+                        [PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder
                     }
                 })
                 .SetCacheHash<CacheHash>()
@@ -112,7 +111,6 @@ namespace SixLabors.ImageSharp.Web.Sample
                           provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
 
                       p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
-                      p.Settings[PhysicalFileSystemCache.CheckSourceChanged] = "true";
 
                       return p;
                   })

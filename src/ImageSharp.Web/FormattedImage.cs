@@ -66,7 +66,7 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="configuration">The configuration.</param>
         /// <param name="source">The source.</param>
         /// <returns>A formatted image.</returns>
-        public static FormattedImage Load(Configuration configuration, byte[] source)
+        public static FormattedImage Load(Configuration configuration, Stream source)
         {
             var image = ImageSharp.Image.Load(configuration, source, out IImageFormat format);
             return new FormattedImage(image, format);

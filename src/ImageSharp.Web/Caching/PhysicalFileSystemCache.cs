@@ -30,11 +30,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         public const string DefaultCacheFolder = "is-cache";
 
         /// <summary>
-        /// The configuration key for checking whether changes in source images should be accounted for when checking the cache.
-        /// </summary>
-        public const string CheckSourceChanged = "CheckSourceChanged";
-
-        /// <summary>
         /// The default value for determining whether to check for changes in the source.
         /// </summary>
         public const string DefaultCheckSourceChanged = "false";
@@ -86,79 +81,44 @@ namespace SixLabors.ImageSharp.Web.Caching
         public IDictionary<string, string> Settings { get; }
             = new Dictionary<string, string>
             {
-                { Folder, DefaultCacheFolder },
-                { CheckSourceChanged, DefaultCheckSourceChanged }
+                { Folder, DefaultCacheFolder }
             };
 
         /// <inheritdoc/>
-        public async Task<IManagedByteBuffer> GetAsync(string key)
+        public Task<ICachedImage> GetAsync(string key)
         {
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
-
-            IManagedByteBuffer buffer;
 
             // Check to see if the file exists.
             if (!fileInfo.Exists)
             {
-                return default;
+                return Task.FromResult<ICachedImage>(null);
             }
 
-            using (Stream stream = fileInfo.CreateReadStream())
-            {
-                int length = (int)stream.Length;
-
-                // Buffer is disposed of in the middleware
-                buffer = this.memoryAllocator.AllocateManagedByteBuffer(length);
-                await stream.ReadAsync(buffer.Array, 0, length).ConfigureAwait(false);
-            }
-
-            return buffer;
+            return Task.FromResult<ICachedImage>(new PhysicalFileSystemCachedImage(fileInfo));
         }
 
         /// <inheritdoc/>
-        public Task<CachedInfo> IsExpiredAsync(HttpContext context, string key, DateTime minDateUtc)
+        public Task<CachedInfo> IsExpiredAsync(HttpContext context, string key, DateTime lastWriteTimeUtc, DateTime minDateUtc)
         {
-            bool.TryParse(this.Settings[CheckSourceChanged], out bool checkSource);
-
             IFileInfo cachedFileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
             bool exists = cachedFileInfo.Exists;
-            DateTimeOffset lastModified = exists ? cachedFileInfo.LastModified : DateTimeOffset.MinValue;
+            DateTimeOffset lastCacheModified = exists ? cachedFileInfo.LastModified : DateTimeOffset.MinValue;
             long length = exists ? cachedFileInfo.Length : 0;
             bool expired = true;
 
-            // Checking the source adds overhead but is configurable. Defaults to false
-            if (checkSource)
+            // Check if the file exists and whether the last modified date is less than the min date.
+            // If it's newer than the cached file then it must be an update.
+            if (exists && lastCacheModified.UtcDateTime > minDateUtc && lastWriteTimeUtc < lastCacheModified.UtcDateTime)
             {
-                IFileInfo sourceFileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
-
-                if (!sourceFileInfo.Exists)
-                {
-                    return Task.FromResult(default(CachedInfo));
-                }
-
-                // Check if the file exists and whether the last modified date is less than the min date.
-                if (exists && lastModified.UtcDateTime > minDateUtc)
-                {
-                    // If it's newer than the cached file then it must be an update.
-                    if (sourceFileInfo.LastModified.UtcDateTime < lastModified.UtcDateTime)
-                    {
-                        expired = false;
-                    }
-                }
-            }
-            else
-            {
-                if (exists && lastModified.UtcDateTime > minDateUtc)
-                {
-                    expired = false;
-                }
+                expired = false;
             }
 
-            return Task.FromResult(new CachedInfo(expired, lastModified, length));
+            return Task.FromResult(new CachedInfo(expired, lastCacheModified, length));
         }
 
         /// <inheritdoc/>
-        public async Task<DateTimeOffset> SetAsync(string key, IManagedByteBuffer value)
+        public async Task<DateTimeOffset> SetAsync(string key, Stream stream)
         {
             string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
             string directory = Path.GetDirectoryName(path);
@@ -170,8 +130,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             using (FileStream fileStream = File.Create(path))
             {
-                // TODO: Do buffered write here!
-                await fileStream.WriteAsync(value.Array, 0, value.Memory.Length).ConfigureAwait(false);
+                await stream.CopyToAsync(fileStream, (int)stream.Length).ConfigureAwait(false);
             }
 
             return File.GetLastWriteTimeUtc(path);
@@ -182,9 +141,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <returns>The <see cref="string"/>.</returns>
-        private string ToFilePath(string key)
-        {
-            return $"{this.Settings[Folder]}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
-        }
+        private string ToFilePath(string key) => $"{this.Settings[Folder]}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
     }
 }

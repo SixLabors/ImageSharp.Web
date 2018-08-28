@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -60,32 +59,21 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         public IDictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
 
         /// <inheritdoc/>
-        public Task<bool> IsValidRequestAsync(HttpContext context)
-        {
-            return Task.FromResult(FormatHelpers.GetExtension(this.options.Configuration, context.Request.GetDisplayUrl()) != null);
-        }
+        public Task<bool> IsValidRequestAsync(HttpContext context) => Task.FromResult(FormatHelpers.GetExtension(this.options.Configuration, context.Request.GetDisplayUrl()) != null);
 
         /// <inheritdoc/>
-        public async Task<IManagedByteBuffer> ResolveImageAsync(HttpContext context)
+        public Task<ICachedImage> ResolveImageAsync(HttpContext context)
         {
             // Path has already been correctly parsed before here.
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
-            IManagedByteBuffer buffer;
 
             // Check to see if the file exists.
             if (!fileInfo.Exists)
             {
-                return null;
+                return Task.FromResult<ICachedImage>(null);
             }
 
-            using (Stream stream = fileInfo.CreateReadStream())
-            {
-                // Buffer is returned to the pool in the middleware
-                buffer = this.memoryAllocator.AllocateManagedByteBuffer((int)stream.Length);
-                await stream.ReadAsync(buffer.Array, 0, (int)stream.Length).ConfigureAwait(false);
-            }
-
-            return buffer;
+            return Task.FromResult<ICachedImage>(new PhysicalFileSystemCachedImage(fileInfo));
         }
     }
 }
