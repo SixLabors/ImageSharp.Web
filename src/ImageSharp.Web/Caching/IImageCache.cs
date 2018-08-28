@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using SixLabors.ImageSharp.Web.Resolvers;
 
 // TODO: Do we add cleanup to this? Scalable caches probably shouldn't do so.
 namespace SixLabors.ImageSharp.Web.Caching
@@ -21,11 +22,11 @@ namespace SixLabors.ImageSharp.Web.Caching
         IDictionary<string, string> Settings { get; }
 
         /// <summary>
-        /// Gets the value associated with the specified key.
+        /// Gets the image resolver associated with the specified key.
         /// </summary>
         /// <param name="key">The cache key.</param>
-        /// <returns>The <see cref="Task{IImageCache}"/>.</returns>
-        Task<ICachedImage> GetAsync(string key);
+        /// <returns>The <see cref="IImageResolver"/>.</returns>
+        IImageResolver Get(string key);
 
         /// <summary>
         /// Returns a value indicating whether the current cached item is expired.
@@ -37,7 +38,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// The minimum allowable date and time in coordinated universal time (UTC) since the file was last modified.
         /// Calculated as the current datetime minus the maximum allowable cached days.
         /// </param>
-        /// <returns>The <see cref="Task{ImageCacheInfo}"/>.</returns>
+        /// <returns>The <see cref="Task{CachedInfo}"/>.</returns>
         Task<CachedInfo> IsExpiredAsync(HttpContext context, string key, DateTime lastWriteTimeUtc, DateTime minDateUtc);
 
         /// <summary>

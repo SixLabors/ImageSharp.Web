@@ -8,7 +8,7 @@ using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
-using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Sample
@@ -34,7 +34,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                 })
                 .SetCacheHash<CacheHash>()
                 .SetAsyncKeyLock<AsyncKeyLock>()
-                .AddResolver<PhysicalFileSystemResolver>()
+                .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
                 .AddProcessor<BackgroundColorWebProcessor>();
@@ -81,7 +81,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                     .SetCache<PhysicalFileSystemCache>()
                     .SetCacheHash<CacheHash>()
                     .SetAsyncKeyLock<AsyncKeyLock>()
-                    .AddResolver<PhysicalFileSystemResolver>()
+                    .AddProvider<PhysicalFileSystemProvider>()
                     .AddProcessor<ResizeWebProcessor>()
                     .AddProcessor<FormatWebProcessor>()
                     .AddProcessor<BackgroundColorWebProcessor>();
@@ -116,7 +116,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                   })
                 .SetCacheHash<CacheHash>()
                 .SetAsyncKeyLock<AsyncKeyLock>()
-                .AddResolver<PhysicalFileSystemResolver>()
+                .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
                 .AddProcessor<BackgroundColorWebProcessor>();

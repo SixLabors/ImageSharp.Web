@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -150,7 +149,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
 
             // We don't need to directly cancel this, if the client disconnects it will fail silently.
-            await stream.CopyToAsync(this.response.Body, (int)stream.Length, CancellationToken.None).ConfigureAwait(false);
+            await stream.CopyToAsync(this.response.Body).ConfigureAwait(false);
             if (this.response.Body.CanSeek)
             {
                 this.response.Body.Position = 0;

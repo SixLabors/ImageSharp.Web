@@ -14,7 +14,7 @@ using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
-using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Tests
@@ -44,7 +44,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                     .SetCache<PhysicalFileSystemCache>()
                     .SetCacheHash<CacheHash>()
                     .SetAsyncKeyLock<AsyncKeyLock>()
-                    .AddResolver<PhysicalFileSystemResolver>()
+                    .AddProvider<PhysicalFileSystemProvider>()
                     .AddProcessor<ResizeWebProcessor>();
         };
 
@@ -71,7 +71,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                 .SetCache<PhysicalFileSystemCache>()
                 .SetCacheHash<CacheHash>()
                 .SetAsyncKeyLock<AsyncKeyLock>()
-                .AddResolver<PhysicalFileSystemResolver>()
+                .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>();
 
             return Create(DefaultConfig, ConfigureServices);

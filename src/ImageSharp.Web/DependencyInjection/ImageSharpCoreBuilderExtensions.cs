@@ -9,7 +9,7 @@ using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
-using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.DependencyInjection
@@ -158,25 +158,25 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Adds the given <see cref="IImageResolver"/> to the resolver collection within the service collection.
+        /// Adds the given <see cref="IImageProvider"/> to the resolver collection within the service collection.
         /// </summary>
-        /// <typeparam name="TResolver">The type of class implementing <see cref="IImageResolver"/>to add.</typeparam>
+        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
-        public static IImageSharpCoreBuilder AddResolver<TResolver>(this IImageSharpCoreBuilder builder)
-            where TResolver : class, IImageResolver
+        public static IImageSharpCoreBuilder AddProvider<TProvider>(this IImageSharpCoreBuilder builder)
+            where TProvider : class, IImageProvider
         {
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageResolver, TResolver>());
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageProvider, TProvider>());
             return builder;
         }
 
         /// <summary>
-        /// Adds the given <see cref="IImageResolver"/> to the resolver collection within the service collection.
+        /// Adds the given <see cref="IImageProvider"/> to the resolver collection within the service collection.
         /// </summary>
         /// <param name="builder">The core builder.</param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageResolver"/>.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
-        public static IImageSharpCoreBuilder AddResolver(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IImageResolver> implementationFactory)
+        public static IImageSharpCoreBuilder AddProvider(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IImageProvider> implementationFactory)
         {
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton(implementationFactory));
             return builder;
@@ -199,7 +199,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// Adds the given <see cref="IImageWebProcessor"/> to the processor collection within the service collection.
         /// </summary>
         /// <param name="builder">The core builder.</param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageResolver"/>.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder AddProcessor(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IImageWebProcessor> implementationFactory)
         {

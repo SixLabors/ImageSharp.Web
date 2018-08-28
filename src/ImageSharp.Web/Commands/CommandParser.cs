@@ -40,10 +40,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// </summary>
         /// <param name="type">The <see cref="Type"/> to add a converter for. </param>
         /// <param name="converterType">The type of <see cref="CommandConverter"/> to add.</param>
-        public void AddConverter(Type type, Type converterType)
-        {
-            CommandDescriptor.AddConverter(type, converterType);
-        }
+        public void AddConverter(Type type, Type converterType) => CommandDescriptor.AddConverter(type, converterType);
 
         /// <summary>
         /// Parses the given string value converting it to the given using the invariant culture.
@@ -53,10 +50,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// The <see cref="Type"/> to convert the string to.
         /// </typeparam>
         /// <returns>The converted instance or the default.</returns>
-        public T ParseValue<T>(string value)
-        {
-            return this.ParseValue<T>(value, CultureInfo.InvariantCulture);
-        }
+        public T ParseValue<T>(string value) => this.ParseValue<T>(value, CultureInfo.InvariantCulture);
 
         /// <summary>
         /// Parses the given string value converting it to the given type.
@@ -82,7 +76,6 @@ namespace SixLabors.ImageSharp.Web.Commands
             }
             catch
             {
-                // Return the default value
                 return default;
             }
         }
@@ -164,9 +157,6 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// <summary>
         /// Adds the default color converters.
         /// </summary>
-        private void AddColorConverters()
-        {
-            this.AddConverter(TypeConstants.Rgba32, typeof(Rgba32Converter));
-        }
+        private void AddColorConverters() => this.AddConverter(TypeConstants.Rgba32, typeof(Rgba32Converter));
     }
 }

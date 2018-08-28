@@ -29,9 +29,9 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
 
             if (value != null)
             {
-                foreach (string s in this.GetStringArray(value, culture))
+                foreach (string pill in this.GetStringArray(value, culture))
                 {
-                    object item = paramConverter.ConvertFromInvariantString(s, type);
+                    object item = paramConverter.ConvertFromInvariantString(pill, type);
                     if (item != null)
                     {
                         result.Add((T)item);

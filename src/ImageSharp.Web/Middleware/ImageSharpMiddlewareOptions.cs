@@ -5,7 +5,7 @@ using System;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
-using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.ImageSharp.Web.Providers;
 
 namespace SixLabors.ImageSharp.Web.Middleware
 {
@@ -36,7 +36,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
         /// <summary>
         /// Gets or sets the additional command parsing method that can be used to used to augment commands.
-        /// This is called once the commands have been gathered and before an <see cref="IImageResolver"/> has been assigned.
+        /// This is called once the commands have been gathered and before an <see cref="IImageProvider"/> has been assigned.
         /// </summary>
         public Action<ImageCommandContext> OnParseCommands { get; set; } = c =>
             {

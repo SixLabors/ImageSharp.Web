@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Middleware;
+using SixLabors.ImageSharp.Web.Resolvers;
 using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Caching
@@ -85,36 +86,39 @@ namespace SixLabors.ImageSharp.Web.Caching
             };
 
         /// <inheritdoc/>
-        public Task<ICachedImage> GetAsync(string key)
+        public IImageResolver Get(string key)
         {
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
 
             // Check to see if the file exists.
             if (!fileInfo.Exists)
             {
-                return Task.FromResult<ICachedImage>(null);
+                return null;
             }
 
-            return Task.FromResult<ICachedImage>(new PhysicalFileSystemCachedImage(fileInfo));
+            return new PhysicalFileSystemResolver(fileInfo);
         }
 
         /// <inheritdoc/>
         public Task<CachedInfo> IsExpiredAsync(HttpContext context, string key, DateTime lastWriteTimeUtc, DateTime minDateUtc)
         {
             IFileInfo cachedFileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
-            bool exists = cachedFileInfo.Exists;
-            DateTimeOffset lastCacheModified = exists ? cachedFileInfo.LastModified : DateTimeOffset.MinValue;
-            long length = exists ? cachedFileInfo.Length : 0;
+            if (!cachedFileInfo.Exists)
+            {
+                return Task.FromResult(new CachedInfo(true, DateTime.MinValue));
+            }
+
+            DateTime lastCacheModifiedUtc = cachedFileInfo.LastModified.UtcDateTime;
             bool expired = true;
 
-            // Check if the file exists and whether the last modified date is less than the min date.
+            // Check whether the last modified date is less than the min date.
             // If it's newer than the cached file then it must be an update.
-            if (exists && lastCacheModified.UtcDateTime > minDateUtc && lastWriteTimeUtc < lastCacheModified.UtcDateTime)
+            if (lastCacheModifiedUtc > minDateUtc && lastWriteTimeUtc < lastCacheModifiedUtc)
             {
                 expired = false;
             }
 
-            return Task.FromResult(new CachedInfo(expired, lastCacheModified, length));
+            return Task.FromResult(new CachedInfo(expired, lastCacheModifiedUtc));
         }
 
         /// <inheritdoc/>
@@ -130,7 +134,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             using (FileStream fileStream = File.Create(path))
             {
-                await stream.CopyToAsync(fileStream, (int)stream.Length).ConfigureAwait(false);
+                await stream.CopyToAsync(fileStream).ConfigureAwait(false);
             }
 
             return File.GetLastWriteTimeUtc(path);

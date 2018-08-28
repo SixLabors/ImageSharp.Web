@@ -82,7 +82,7 @@ services.AddImageSharpCore()
         .SetMemoryAllocatorFromMiddlewareOptions()
         .SetCacheHash<CacheHash>()
         .SetAsyncKeyLock<AsyncKeyLock>()
-        .AddResolver<PhysicalFileSystemResolver>()
+        .AddProvider<PhysicalFileSystemProvider>()
         .AddProcessor<ResizeWebProcessor>()
         .AddProcessor<FormatWebProcessor>()
         .AddProcessor<BackgroundColorWebProcessor>();
@@ -114,13 +114,12 @@ services.AddImageSharpCore(
               provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
 
           p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
-          p.Settings[PhysicalFileSystemCache.CheckSourceChanged] = "true";
 
           return p;
       })
     .SetCacheHash<CacheHash>()
     .SetAsyncKeyLock<AsyncKeyLock>()
-    .AddResolver<PhysicalFileSystemResolver>()
+    .AddProvider<PhysicalFileSystemProvider>()
     .AddProcessor<ResizeWebProcessor>()
     .AddProcessor<FormatWebProcessor>()
     .AddProcessor<BackgroundColorWebProcessor>();

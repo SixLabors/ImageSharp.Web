@@ -15,6 +15,7 @@ using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Processors;
+using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.ImageSharp.Web.Resolvers;
 using SixLabors.Memory;
 
@@ -58,7 +59,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// The collection of image resolvers.
         /// </summary>
-        private readonly IEnumerable<IImageResolver> resolvers;
+        private readonly IEnumerable<IImageProvider> resolvers;
 
         /// <summary>
         /// The collection of image processors.
@@ -88,7 +89,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="loggerFactory">An <see cref="ILoggerFactory"/> instance used to create loggers.</param>
         /// <param name="memoryAllocator">An <see cref="MemoryAllocator"/> instance used to allocate arrays transporting encoded image data.</param>
         /// <param name="requestParser">An <see cref="IRequestParser"/> instance used to parse image requests for commands.</param>
-        /// <param name="resolvers">A collection of <see cref="IImageResolver"/> instances used to resolve images.</param>
+        /// <param name="resolvers">A collection of <see cref="IImageProvider"/> instances used to resolve images.</param>
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images.</param>
         /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images.</param>
         /// <param name="cacheHash">An <see cref="ICacheHash"/>instance used for calculating cached file names.</param>
@@ -99,7 +100,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             ILoggerFactory loggerFactory,
             MemoryAllocator memoryAllocator,
             IRequestParser requestParser,
-            IEnumerable<IImageResolver> resolvers,
+            IEnumerable<IImageProvider> resolvers,
             IEnumerable<IImageWebProcessor> processors,
             IImageCache cache,
             ICacheHash cacheHash,
@@ -151,9 +152,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.options.OnParseCommands?.Invoke(new ImageCommandContext(context, commands, CommandParser.Instance));
 
             // Get the correct service for the request.
-            IImageResolver resolver = this.resolvers.FirstOrDefault(r => r.Match(context));
+            IImageProvider provider = this.resolvers.FirstOrDefault(r => r.Match(context));
 
-            if (resolver == null || !await resolver.IsValidRequestAsync(context).ConfigureAwait(false))
+            if (provider == null || !await provider.IsValidRequestAsync(context).ConfigureAwait(false))
             {
                 // Nothing to do. call the next delegate/middleware in the pipeline
                 await this.next(context).ConfigureAwait(false);
@@ -169,9 +170,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
             bool processRequest = true;
             using (await this.asyncKeyLock.LockAsync(key).ConfigureAwait(false))
             {
-                // TODO: How do I get the last write time without significant overhead in non physical resolvers?
                 var imageContext = new ImageContext(context, this.options);
-                ICachedImage resolvedImage = await resolver.ResolveImageAsync(context).ConfigureAwait(false);
+                IImageResolver resolvedImage = provider.Get(context);
 
                 if (resolvedImage == null)
                 {
@@ -182,13 +182,14 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                 if (processRequest)
                 {
-                    CachedInfo info = await this.cache.IsExpiredAsync(context, key, resolvedImage.LastWriteTimeUtc(), DateTime.UtcNow.AddDays(-this.options.MaxCacheDays)).ConfigureAwait(false);
+                    DateTime lastWriteTimeUtc = await resolvedImage.GetLastWriteTimeUtcAsync().ConfigureAwait(false);
+                    CachedInfo info = await this.cache.IsExpiredAsync(context, key, lastWriteTimeUtc, DateTime.UtcNow.AddDays(-this.options.MaxCacheDays)).ConfigureAwait(false);
 
                     if (!info.Expired)
                     {
                         // We're pulling the image from the cache.
-                        ICachedImage cachedImage = await this.cache.GetAsync(key).ConfigureAwait(false);
-                        using (Stream cachedBuffer = cachedImage.OpenRead())
+                        IImageResolver cachedImage = this.cache.Get(key);
+                        using (Stream cachedBuffer = await cachedImage.OpenReadAsync().ConfigureAwait(false))
                         {
                             // Image is a cached image. Return the correct response now.
                             await this.SendResponse(imageContext, key, info.LastModifiedUtc, cachedBuffer).ConfigureAwait(false);
@@ -206,7 +207,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             // No allocations here for inStream since we are passing the raw input stream.
                             // outStream allocation depends on the stream used.
                             outStream = resolvedImage.OpenWrite();
-                            using (Stream inStream = resolvedImage.OpenRead())
+                            using (Stream inStream = await resolvedImage.OpenReadAsync().ConfigureAwait(false))
                             using (var image = FormattedImage.Load(this.options.Configuration, inStream))
                             {
                                 image.Process(this.logger, this.processors, commands);
