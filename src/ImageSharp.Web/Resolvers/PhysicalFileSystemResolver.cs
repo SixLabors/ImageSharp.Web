@@ -26,8 +26,5 @@ namespace SixLabors.ImageSharp.Web.Resolvers
 
         /// <inheritdoc/>
         public Task<Stream> OpenReadAsync() => Task.FromResult(this.fileInfo.CreateReadStream());
-
-        /// <inheritdoc/>
-        public Stream OpenWrite() => new MemoryStream(); // TODO: Chunked stream
     }
 }

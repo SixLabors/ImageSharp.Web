@@ -199,14 +199,14 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     }
 
                     // Not cached? Let's get it from the image resolver.
-                    Stream outStream = null;
+                    ChunkedMemoryStream outStream = null;
                     try
                     {
                         if (processRequest)
                         {
                             // No allocations here for inStream since we are passing the raw input stream.
-                            // outStream allocation depends on the stream used.
-                            outStream = resolvedImage.OpenWrite();
+                            // outStream allocation depends on the memory allocator used.
+                            outStream = new ChunkedMemoryStream(this.memoryAllocator);
                             using (Stream inStream = await resolvedImage.OpenReadAsync().ConfigureAwait(false))
                             using (var image = FormattedImage.Load(this.options.Configuration, inStream))
                             {
@@ -216,16 +216,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             }
 
                             // Allow for any further optimization of the image. Always reset the position just in case.
-                            if (outStream.CanSeek)
-                            {
-                                outStream.Position = 0;
-                            }
-
+                            outStream.Position = 0;
                             this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, Path.GetExtension(key)));
-                            if (outStream.CanSeek)
-                            {
-                                outStream.Position = 0;
-                            }
+                            outStream.Position = 0;
 
                             DateTimeOffset cachedDate = await this.cache.SetAsync(key, outStream).ConfigureAwait(false);
                             await this.SendResponse(imageContext, key, cachedDate, outStream).ConfigureAwait(false);

@@ -23,11 +23,5 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// </summary>
         /// <returns>The <see cref="Task{Stream}"/>.</returns>
         Task<Stream> OpenReadAsync();
-
-        /// <summary>
-        /// Gets the output image stream.
-        /// </summary>
-        /// <returns>The <see cref="Stream"/>.</returns>
-        Stream OpenWrite();
     }
 }
