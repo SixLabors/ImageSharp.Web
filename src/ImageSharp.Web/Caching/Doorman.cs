@@ -67,7 +67,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
         public void Reset()
         {
-            this.refCount = 1;
+            Interlocked.Exchange(ref this.refCount, 1);
         }
 
         /// <inheritdoc />
