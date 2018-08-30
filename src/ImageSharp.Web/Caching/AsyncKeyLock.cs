@@ -2,8 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Collections.Generic;
-using System.Threading;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 namespace SixLabors.ImageSharp.Web.Caching
@@ -17,7 +16,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// A collection of doorman counters used for tracking references to the same key.
         /// </summary>
-        private static readonly Dictionary<string, Doorman> Keys = new Dictionary<string, Doorman>();
+        private static readonly ConcurrentDictionary<string, Doorman> Keys = new ConcurrentDictionary<string, Doorman>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Locks the current thread asynchronously.
@@ -28,36 +27,17 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </returns>
         public async Task<IDisposable> LockAsync(string key)
         {
-            string lowerKey = key.ToLowerInvariant();
-            await GetOrCreate(lowerKey).WaitAsync().ConfigureAwait(false);
-            return new Releaser(lowerKey);
-        }
+            Doorman doorman = null;
 
-        /// <summary>
-        /// Returns a <see cref="SemaphoreSlim"/> matching on the given key
-        ///  or a new one if none is found.
-        /// </summary>
-        /// <param name="key">The key identifying the semaphore.</param>
-        /// <returns>
-        /// The <see cref="SemaphoreSlim"/>.
-        /// </returns>
-        private static SemaphoreSlim GetOrCreate(string key)
-        {
-            Doorman item;
-            lock (Keys)
+            do
             {
-                if (Keys.TryGetValue(key, out item))
-                {
-                    ++item.RefCount;
-                }
-                else
-                {
-                    item = DoormanPool.Rent();
-                    Keys[key] = item;
-                }
+                doorman = Keys.GetOrAdd(key, _ => DoormanPool.Rent());
             }
+            while (!doorman.TryAcquire());
 
-            return item.Semaphore;
+            await doorman.Semaphore.WaitAsync().ConfigureAwait(false);
+
+            return new Releaser(doorman, key);
         }
 
         /// <summary>
@@ -71,29 +51,33 @@ namespace SixLabors.ImageSharp.Web.Caching
             private readonly string key;
 
             /// <summary>
+            /// The <see cref="Doorman"/> that limits the number of threads.
+            /// </summary>
+            private readonly Doorman doorman;
+
+            /// <summary>
             /// Initializes a new instance of the <see cref="Releaser"/> class.
             /// </summary>
+            /// <param name="doorman">The doorman that limits the number of threads.</param>
             /// <param name="key">The key identifying the doorman that limits the number of threads.</param>
-            public Releaser(string key)
+            public Releaser(Doorman doorman, string key)
             {
+                this.doorman = doorman;
                 this.key = key;
             }
 
             /// <inheritdoc />
             public void Dispose()
             {
-                lock (Keys)
-                {
-                    Doorman doorman = Keys[this.key];
-                    --doorman.RefCount;
-                    if (doorman.RefCount == 0)
-                    {
-                        Keys.Remove(this.key);
-                        doorman.Reset();
-                        DoormanPool.Return(doorman);
-                    }
+                // Release the semaphore as soon as we can
+                this.doorman.Semaphore.Release();
 
-                    doorman.Semaphore.Release();
+                // If there is no more reference to it we can return it to the pool
+                if (this.doorman.Release())
+                {
+                    Keys.TryRemove(this.key, out Doorman localDoorman);
+                    this.doorman.Reset();
+                    DoormanPool.Return(this.doorman);
                 }
             }
         }

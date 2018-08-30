@@ -17,13 +17,19 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         public void DoormanResetsRefCounter()
         {
             var doorman = new Doorman();
-            Assert.Equal(1, doorman.RefCount);
-            doorman.RefCount--;
-
             Assert.Equal(0, doorman.RefCount);
 
-            doorman.Reset();
+            doorman.TryAcquire();
             Assert.Equal(1, doorman.RefCount);
+
+            doorman.TryAcquire();
+            Assert.Equal(2, doorman.RefCount);
+
+            Assert.False(doorman.Release());
+            Assert.Equal(1, doorman.RefCount);
+
+            Assert.True(doorman.Release());
+            Assert.Equal(-1, doorman.RefCount);
         }
     }
 }

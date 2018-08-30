@@ -11,34 +11,68 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// </summary>
     internal sealed class Doorman : IDisposable
     {
+        private volatile int refCount = 0;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Doorman"/> class.
         /// </summary>
         public Doorman()
         {
             this.Semaphore = new SemaphoreSlim(1, 1);
-            this.RefCount = 1;
         }
 
         /// <summary>
-        /// Gets the SemaphoreSlim that performs the limiting
+        /// Gets the number of references to this doorman.
+        /// </summary>
+        public int RefCount => this.refCount;
+
+        /// <summary>
+        /// Gets the SemaphoreSlim that performs the limiting.
         /// </summary>
         public SemaphoreSlim Semaphore { get; }
 
         /// <summary>
-        /// Gets or sets the number of references to this doorman.
+        /// Removes a reference to this doorman.
         /// </summary>
-        public int RefCount { get; set; }
+        /// <returns><c>true</c> if the doorman is not used anymore.</returns>
+        public bool Release()
+        {
+            // We use -1 as a way to prevent any other thread from acquiring it successfully.
+            if (Interlocked.CompareExchange(ref this.refCount, -1, 1) == 1)
+            {
+                return true;
+            }
+            else
+            {
+                Interlocked.Decrement(ref this.refCount);
+
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Tries to add a reference to this doorman.
+        /// </summary>
+        /// <returns><c>true</c> if it was acquired.</returns>
+        public bool TryAcquire()
+        {
+            // If the doorman is being released then it
+            if (Interlocked.Increment(ref this.refCount) > 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         public void Reset()
         {
-            this.RefCount = 1;
+            this.refCount = 1;
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
-            this.RefCount = 1;
             this.Semaphore.Dispose();
         }
     }
