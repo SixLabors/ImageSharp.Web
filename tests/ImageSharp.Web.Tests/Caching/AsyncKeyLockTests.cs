@@ -21,7 +21,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             int index = 0;
             Task[] tasks = Enumerable.Range(0, 5).Select(i => Task.Run(async () =>
             {
-                using (await this.asyncKeyLock.LockAsync(AsyncKey))
+                using (await this.asyncKeyLock.ReaderLockAsync(AsyncKey))
                 {
                     if (i == 0)
                     {
@@ -52,7 +52,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             int index = 0;
             Task[] tasks = Enumerable.Range(0, 5).Select(i => Task.Run(async () =>
             {
-                using (await this.asyncKeyLock.LockAsync(i > 0 ? AsyncKey2 : AsyncKey1))
+                using (await this.asyncKeyLock.ReaderLockAsync(i > 0 ? AsyncKey2 : AsyncKey1))
                 {
                     if (i == 0)
                     {

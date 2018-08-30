@@ -163,7 +163,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             // Prevent identical requests from running at the same time
             // This reduces the overheads of unnecessary processing plus avoids file locks
             bool processRequest = true;
-            using (await this.asyncKeyLock.LockAsync(key))
+            using (await this.asyncKeyLock.ReaderLockAsync(key))
             {
                 // Get the correct service for the request.
                 IImageResolver resolver = this.resolvers.FirstOrDefault(r => r.Match(context));
@@ -208,38 +208,41 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         MemoryStream outStream = null;
                         try
                         {
-                            inBuffer = await resolver.ResolveImageAsync(context, this.logger);
-                            if (inBuffer == null || inBuffer.Array.Length == 0)
+                            using (await this.asyncKeyLock.WriterLockAsync(key))
                             {
-                                // Log the error but let the pipeline handle the 404
-                                this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
-                                processRequest = false;
-                            }
-
-                            if (processRequest)
-                            {
-                                // No allocations here for inStream since we are passing the buffer.
-                                // TODO: How to prevent the allocation in outStream? Passing a pooled buffer won't let stream grow if needed.
-                                outStream = new MemoryStream();
-                                using (var image = FormattedImage.Load(this.options.Configuration, inBuffer.Array))
+                                inBuffer = await resolver.ResolveImageAsync(context, this.logger);
+                                if (inBuffer == null || inBuffer.Array.Length == 0)
                                 {
-                                    image.Process(this.logger, this.processors, commands);
-                                    this.options.OnBeforeSave?.Invoke(image);
-                                    image.Save(outStream);
+                                    // Log the error but let the pipeline handle the 404
+                                    this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
+                                    processRequest = false;
                                 }
 
-                                // Allow for any further optimization of the image. Always reset the position just in case.
-                                outStream.Position = 0;
-                                this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, Path.GetExtension(key)));
-                                outStream.Position = 0;
-                                int outLength = (int)outStream.Length;
+                                if (processRequest)
+                                {
+                                    // No allocations here for inStream since we are passing the buffer.
+                                    // TODO: How to prevent the allocation in outStream? Passing a pooled buffer won't let stream grow if needed.
+                                    outStream = new MemoryStream();
+                                    using (var image = FormattedImage.Load(this.options.Configuration, inBuffer.Array))
+                                    {
+                                        image.Process(this.logger, this.processors, commands);
+                                        this.options.OnBeforeSave?.Invoke(image);
+                                        image.Save(outStream);
+                                    }
 
-                                // Copy the out-stream to the pooled buffer.
-                                outBuffer = this.bufferManager.Allocate(outLength);
-                                await outStream.ReadAsync(outBuffer.Array, 0, outLength);
+                                    // Allow for any further optimization of the image. Always reset the position just in case.
+                                    outStream.Position = 0;
+                                    this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, Path.GetExtension(key)));
+                                    outStream.Position = 0;
+                                    int outLength = (int)outStream.Length;
 
-                                DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer);
-                                await this.SendResponse(imageContext, key, cachedDate, outBuffer);
+                                    // Copy the out-stream to the pooled buffer.
+                                    outBuffer = this.bufferManager.Allocate(outLength);
+                                    await outStream.ReadAsync(outBuffer.Array, 0, outLength);
+
+                                    DateTimeOffset cachedDate = await this.cache.SetAsync(key, outBuffer);
+                                    await this.SendResponse(imageContext, key, cachedDate, outBuffer);
+                                }
                             }
                         }
                         catch (Exception ex)

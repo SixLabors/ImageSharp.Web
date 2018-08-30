@@ -6,39 +6,39 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
 {
     public class DoormanPoolTests
     {
-        [Fact]
-        public void RentingGivesDifferentInstances()
-        {
-            Doorman first = DoormanPool.Rent();
-            Doorman second = DoormanPool.Rent();
+        //[Fact]
+        //public void RentingGivesDifferentInstances()
+        //{
+        //    Doorman first = DoormanPool.Rent();
+        //    Doorman second = DoormanPool.Rent();
 
-            Assert.NotSame(first, second);
+        //    Assert.NotSame(first, second);
 
-            DoormanPool.Return(first);
-            DoormanPool.Return(second);
-        }
+        //    DoormanPool.Return(first);
+        //    DoormanPool.Return(second);
+        //}
 
-        [Fact]
-        public void DoormanPoolReusesItems()
-        {
-            Doorman first = DoormanPool.Rent();
+        //[Fact]
+        //public void DoormanPoolReusesItems()
+        //{
+        //    Doorman first = DoormanPool.Rent();
 
-            DoormanPool.Return(first);
+        //    DoormanPool.Return(first);
 
-            Doorman second = DoormanPool.Rent();
+        //    Doorman second = DoormanPool.Rent();
 
-            Assert.Equal(first, second);
+        //    Assert.Equal(first, second);
 
-            DoormanPool.Return(second);
-        }
+        //    DoormanPool.Return(second);
+        //}
 
-        [Fact]
-        public void CallingReturnWithNullThrows()
-        {
-            Assert.Throws<ArgumentNullException>("doorman", () =>
-             {
-                 DoormanPool.Return(null);
-             });
-        }
+        //[Fact]
+        //public void CallingReturnWithNullThrows()
+        //{
+        //    Assert.Throws<ArgumentNullException>("doorman", () =>
+        //     {
+        //         DoormanPool.Return(null);
+        //     });
+        //}
     }
 }

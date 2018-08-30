@@ -19,6 +19,8 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <returns>
         /// The <see cref="Task{IDisposable}"/> that will release the lock.
         /// </returns>
-        Task<IDisposable> LockAsync(string key);
+        Task<IDisposable> ReaderLockAsync(string key);
+
+        Task<IDisposable> WriterLockAsync(string key);
     }
 }

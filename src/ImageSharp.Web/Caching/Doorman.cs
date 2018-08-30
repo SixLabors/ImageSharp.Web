@@ -2,78 +2,153 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Threading;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SixLabors.ImageSharp.Web.Caching
 {
-    /// <summary>
-    /// A wrapper around <see cref="SemaphoreSlim"/> that operates a one-in-one out policy
-    /// </summary>
-    internal sealed class Doorman : IDisposable
+    internal sealed class Doorman
     {
-        private volatile int refCount = 0;
+        private Queue<TaskCompletionSource<Releaser>> waitingWriters;
+        private TaskCompletionSource<Releaser> waitingReader;
+        private int readersWaiting;
+        private readonly Task<Releaser> readerReleaser;
+        private readonly Task<Releaser> writerReleaser;
+        private readonly string key;
+        private int status;
+        private readonly Action reset;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Doorman"/> class.
-        /// </summary>
-        public Doorman()
+        public Doorman(string key, Action reset)
         {
-            this.Semaphore = new SemaphoreSlim(1, 1);
+            this.waitingWriters = new Queue<TaskCompletionSource<Releaser>>();
+            this.waitingReader = new TaskCompletionSource<Releaser>();
+            this.status = 0;
+
+            this.key = key;
+            this.readerReleaser = Task.FromResult(new Releaser(this, false));
+            this.writerReleaser = Task.FromResult(new Releaser(this, true));
+            this.reset = reset;
         }
 
-        /// <summary>
-        /// Gets the number of references to this doorman.
-        /// </summary>
-        public int RefCount => this.refCount;
-
-        /// <summary>
-        /// Gets the SemaphoreSlim that performs the limiting.
-        /// </summary>
-        public SemaphoreSlim Semaphore { get; }
-
-        /// <summary>
-        /// Removes a reference to this doorman.
-        /// </summary>
-        /// <returns><c>true</c> if the doorman is not used anymore.</returns>
-        public bool Release()
+        public Task<Releaser> ReaderLockAsync()
         {
-            // We use -1 as a way to prevent any other thread from acquiring it successfully.
-            if (Interlocked.CompareExchange(ref this.refCount, -1, 1) == 1)
+            lock (this.waitingWriters)
             {
-                return true;
+                if (this.status >= 0 && this.waitingWriters.Count == 0)
+                {
+                    ++this.status;
+                    return this.readerReleaser;
+                }
+                else
+                {
+                    ++this.readersWaiting;
+                    return this.waitingReader.Task.ContinueWith(t => t.Result);
+                }
             }
-            else
+        }
+
+        public Task<Releaser> WriterLockAsync()
+        {
+            lock (this.waitingWriters)
             {
-                Interlocked.Decrement(ref this.refCount);
-
-                return false;
+                if (this.status == 0)
+                {
+                    this.status = -1;
+                    return this.writerReleaser;
+                }
+                else
+                {
+                    var waiter = new TaskCompletionSource<Releaser>();
+                    this.waitingWriters.Enqueue(waiter);
+                    return waiter.Task;
+                }
             }
         }
 
-        /// <summary>
-        /// Tries to add a reference to this doorman.
-        /// </summary>
-        /// <returns><c>true</c> if it was acquired.</returns>
-        public bool TryAcquire()
+        private void ReaderRelease()
         {
-            // If the doorman is being released then it
-            if (Interlocked.Increment(ref this.refCount) > 0)
+            TaskCompletionSource<Releaser> toWake = null;
+
+            lock (this.waitingWriters)
             {
-                return true;
+                --this.status;
+
+                if (this.status == 0)
+                {
+                    if (this.waitingWriters.Count > 0)
+                    {
+                        this.status = -1;
+                        toWake = this.waitingWriters.Dequeue();
+                    }
+                    else
+                    {
+                        this.reset();
+                    }
+                }
             }
 
-            return false;
+            if (toWake != null)
+            {
+                toWake.SetResult(new Releaser(this, true));
+            }
         }
 
-        public void Reset()
+        private void WriterRelease()
         {
-            Interlocked.Exchange(ref this.refCount, 1);
-        }
+            TaskCompletionSource<Releaser> toWake = null;
+            bool toWakeIsWriter = false;
 
-        /// <inheritdoc />
-        public void Dispose()
+            lock (this.waitingWriters)
+            {
+                if (this.waitingWriters.Count > 0)
+                {
+                    toWake = this.waitingWriters.Dequeue();
+                    toWakeIsWriter = true;
+                }
+                else if (this.readersWaiting > 0)
+                {
+                    toWake = this.waitingReader;
+                    this.status = this.readersWaiting;
+                    this.readersWaiting = 0;
+                    this.waitingReader = new TaskCompletionSource<Releaser>();
+                }
+                else
+                {
+                    this.reset();
+                }
+            }
+
+            if (toWake != null)
+            {
+                toWake.SetResult(new Releaser(this, toWakeIsWriter));
+            }
+        }
+        
+        public struct Releaser : IDisposable
         {
-            this.Semaphore.Dispose();
+            private readonly Doorman toRelease;
+            private readonly bool writer;
+
+            internal Releaser(Doorman toRelease, bool writer)
+            {
+                this.toRelease = toRelease;
+                this.writer = writer;
+            }
+
+            public void Dispose()
+            {
+                if (this.toRelease != null)
+                {
+                    if (this.writer)
+                    {
+                        this.toRelease.WriterRelease();
+                    }
+                    else
+                    {
+                        this.toRelease.ReaderRelease();
+                    }
+                }
+            }
         }
     }
 }
