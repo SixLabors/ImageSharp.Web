@@ -123,7 +123,7 @@ namespace SixLabors.ImageSharp.Web.Caching
                 toWake.SetResult(new Releaser(this, toWakeIsWriter));
             }
         }
-        
+
         public struct Releaser : IDisposable
         {
             private readonly Doorman toRelease;
