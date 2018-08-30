@@ -31,13 +31,18 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             do
             {
-                doorman = Keys.GetOrAdd(key, _ => DoormanPool.Rent());
+                doorman = Keys.GetOrAdd(key, GetDoorman);
             }
             while (!doorman.TryAcquire());
 
             await doorman.Semaphore.WaitAsync().ConfigureAwait(false);
 
             return new Releaser(doorman, key);
+        }
+
+        private static Doorman GetDoorman(string key)
+        {
+            return DoormanPool.Rent();
         }
 
         /// <summary>
