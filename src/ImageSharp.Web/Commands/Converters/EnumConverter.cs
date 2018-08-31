@@ -17,6 +17,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         {
             if (value == null)
             {
+                // TODO: How can we get the default enum, or should we return null?
                 return base.ConvertFrom(culture, null, propertyType);
             }
 
@@ -48,9 +49,6 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// <param name="input">The input string to split.</param>
         /// <param name="separator">The separator to split string by.</param>
         /// <returns>The <see cref="T:String[]"/>.</returns>
-        private static string[] GetStringArray(string input, char separator)
-        {
-            return input.Split(separator).Select(s => s.Trim()).ToArray();
-        }
+        private static string[] GetStringArray(string input, char separator) => input.Split(separator).Select(s => s.Trim()).ToArray();
     }
 }
