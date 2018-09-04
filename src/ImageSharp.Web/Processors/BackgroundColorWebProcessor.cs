@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Overlays;
 using SixLabors.ImageSharp.Web.Commands;
 
 namespace SixLabors.ImageSharp.Web.Processors

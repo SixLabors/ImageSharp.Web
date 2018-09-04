@@ -4,8 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Transforms;
-using SixLabors.ImageSharp.Processing.Transforms.Resamplers;
+using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.Primitives;
 
