@@ -6,49 +6,36 @@ using System;
 namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
-    /// Contains information about a cached image instance
+    /// Contains information about a cached image instance.
     /// </summary>
     public readonly struct CachedInfo : IEquatable<CachedInfo>
     {
         /// <summary>
-        /// Gets a value indicating whether the cached image is expired
+        /// Gets a value indicating whether the cached image is expired.
         /// </summary>
         public readonly bool Expired;
 
         /// <summary>
-        /// Gets the date and time, in coordinated universal time (UTC), the cached image was last written to
+        /// Gets the date and time, in coordinated universal time (UTC), the cached image was last written to.
         /// </summary>
-        public readonly DateTimeOffset LastModifiedUtc;
-
-        /// <summary>
-        /// Gets the length, in bytes, of the cached image
-        /// </summary>
-        public readonly long Length;
+        public readonly DateTime LastModifiedUtc;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CachedInfo"/> struct.
         /// </summary>
-        /// <param name="expired">Whether the cached image is expired</param>
-        /// <param name="lastModified">The date and time, in coordinated universal time (UTC), the cached image was last written to</param>
-        /// <param name="length">The length, in bytes, of the cached image</param>
-        public CachedInfo(bool expired, DateTimeOffset lastModified, long length)
+        /// <param name="expired">Whether the cached image is expired.</param>
+        /// <param name="lastModifiedUtc">The date and time, in coordinated universal time (UTC), the cached image was last written to.</param>
+        public CachedInfo(bool expired, DateTime lastModifiedUtc)
         {
             this.Expired = expired;
-            this.LastModifiedUtc = lastModified;
-            this.Length = length;
+            this.LastModifiedUtc = lastModifiedUtc;
         }
 
         /// <inheritdoc/>
-        public bool Equals(CachedInfo other)
-        {
-            return this.Expired == other.Expired && this.LastModifiedUtc.Equals(other.LastModifiedUtc) && this.Length == other.Length;
-        }
+        public bool Equals(CachedInfo other) => this.Expired == other.Expired && this.LastModifiedUtc.Equals(other.LastModifiedUtc);
 
         /// <inheritdoc/>
-        public override bool Equals(object obj)
-        {
-            return obj is CachedInfo info && this.Equals(info);
-        }
+        public override bool Equals(object obj) => obj is CachedInfo info && this.Equals(info);
 
         /// <inheritdoc/>
         public override int GetHashCode()
@@ -56,9 +43,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             unchecked
             {
                 int hashCode = this.Expired.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.LastModifiedUtc.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Length.GetHashCode();
-                return hashCode;
+                return hashCode = (hashCode * 397) ^ this.LastModifiedUtc.GetHashCode();
             }
         }
     }

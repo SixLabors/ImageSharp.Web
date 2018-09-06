@@ -15,10 +15,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageProcessingContext"/> class.
         /// </summary>
-        /// <param name="context">The current HTTP request context</param>
-        /// <param name="stream">The stream containing the processed image bytes</param>
-        /// <param name="commands">The parsed collection of processing commands</param>
-        /// <param name="extension">The file extension for the processed image</param>
+        /// <param name="context">The current HTTP request context.</param>
+        /// <param name="stream">The stream containing the processed image bytes.</param>
+        /// <param name="commands">The parsed collection of processing commands.</param>
+        /// <param name="extension">The file extension for the processed image.</param>
         public ImageProcessingContext(HttpContext context, Stream stream, IDictionary<string, string> commands, string extension)
         {
             this.Context = context;
@@ -38,7 +38,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public Stream Stream { get; }
 
         /// <summary>
-        /// Gets the parsed collection of processing commands
+        /// Gets the parsed collection of processing commands.
         /// </summary>
         public IDictionary<string, string> Commands { get; }
 

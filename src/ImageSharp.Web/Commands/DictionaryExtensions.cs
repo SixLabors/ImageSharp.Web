@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace SixLabors.ImageSharp.Web.Commands
 {
     /// <summary>
-    /// Extension methods for <see cref="IDictionary{TKey, TValue}"/>
+    /// Extension methods for <see cref="IDictionary{TKey, TValue}"/>.
     /// </summary>
     public static class DictionaryExtensions
     {
@@ -20,7 +20,8 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// <returns>The value associated with the specified key or the default value.</returns>
         public static TValue GetValueOrDefault<TValue, TKey>(this IDictionary<TKey, TValue> dictionary, TKey key)
         {
-            return dictionary.ContainsKey(key) ? dictionary[key] : default(TValue);
+            dictionary.TryGetValue(key, out TValue result);
+            return result;
         }
     }
 }

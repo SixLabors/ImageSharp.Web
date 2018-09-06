@@ -8,7 +8,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
     /// Defines a contract that allows the prevention of multiple asynchronous threads acting upon the same object with the given
-    /// key at the same time
+    /// key at the same time.
     /// </summary>
     public interface IAsyncKeyLock
     {

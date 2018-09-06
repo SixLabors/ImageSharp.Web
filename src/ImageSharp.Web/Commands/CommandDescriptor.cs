@@ -9,12 +9,12 @@ using SixLabors.ImageSharp.Web.Commands.Converters;
 namespace SixLabors.ImageSharp.Web.Commands
 {
     /// <summary>
-    /// Hold the collection of <see cref="ICommandConverter"/> converters
+    /// Hold the collection of <see cref="ICommandConverter"/> converters.
     /// </summary>
     internal static class CommandDescriptor
     {
         /// <summary>
-        /// A reusable enum converter
+        /// A reusable enum converter.
         /// </summary>
         private static readonly ICommandConverter EnumConverter = (ICommandConverter)Activator.CreateInstance(typeof(EnumConverter));
 

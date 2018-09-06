@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
-using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
-using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.ImageSharp.Web.Providers;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Sample
 {
@@ -26,89 +21,105 @@ namespace SixLabors.ImageSharp.Web.Sample
         {
             services.AddImageSharpCore()
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetBufferManager<PooledBufferManager>()
+                .SetMemoryAllocatorFromMiddlewareOptions()
                 .SetCache(provider => new PhysicalFileSystemCache(
                     provider.GetRequiredService<IHostingEnvironment>(),
-                    provider.GetRequiredService<IBufferManager>(),
+                    provider.GetRequiredService<MemoryAllocator>(),
                     provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>())
                 {
                     Settings =
                     {
-                        [PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder,
-                        [PhysicalFileSystemCache.CheckSourceChanged] = "true"
+                        [PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder
                     }
                 })
                 .SetCacheHash<CacheHash>()
                 .SetAsyncKeyLock<AsyncKeyLock>()
-                .AddResolver<PhysicalFileSystemResolver>()
+                .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
                 .AddProcessor<BackgroundColorWebProcessor>();
 
-            //// Add the default service and options.
+            // Add the default service and options.
+            //
             //services.AddImageSharp();
 
-            //// Or add the default service and custom options.
-            //services.AddImageSharp(
-            //    options =>
-            //        {
-            //            options.Configuration = Configuration.Default;
-            //            options.MaxBrowserCacheDays = 7;
-            //            options.MaxCacheDays = 365;
-            //            options.CachedNameLength = 8;
-            //            options.OnValidate = _ => { };
-            //            options.OnBeforeSave = _ => { };
-            //            options.OnProcessed = _ => { };
-            //            options.OnPrepareResponse = _ => { };
-            //        });
+            // Or add the default service and custom options.
+            //
+            // this.ConfigureDefaultServicesAndCustomOptions(services);
 
-            //// Or we can fine-grain control adding the default options and configure all other services.
-            //services.AddImageSharpCore()
-            //        .SetRequestParser<QueryCollectionRequestParser>()
-            //        .SetBufferManager<PooledBufferManager>()
-            //        .SetCache<PhysicalFileSystemCache>()
-            //        .SetCacheHash<CacheHash>()
-            //        .SetAsyncKeyLock<AsyncKeyLock>()
-            //        .AddResolver<PhysicalFileSystemResolver>()
-            //        .AddProcessor<ResizeWebProcessor>()
-            //        .AddProcessor<FormatWebProcessor>()
-            //        .AddProcessor<BackgroundColorWebProcessor>();
+            // Or we can fine-grain control adding the default options and configure all other services.
+            //
+            // this.ConfigureCustomServicesAndDefaultOptions(services);
 
+            // Or we can fine-grain control adding custom options and configure all other services
+            // There are also factory methods for each builder that will allow building from configuration files.
+            //
+            // this.ConfigureCustomServicesAndCustomOptions(services);
+        }
 
-            //// Or we can fine-grain control adding custom options and configure all other services
-            //// There are also factory methods for each builder that will allow building from configuration files.
-            //services.AddImageSharpCore(
-            //    options =>
-            //        {
-            //            options.Configuration = Configuration.Default;
-            //            options.MaxBrowserCacheDays = 7;
-            //            options.MaxCacheDays = 365;
-            //            options.CachedNameLength = 8;
-            //            options.OnValidate = _ => { };
-            //            options.OnBeforeSave = _ => { };
-            //            options.OnProcessed = _ => { };
-            //            options.OnPrepareResponse = _ => { };
-            //        })
-            //    .SetRequestParser<QueryCollectionRequestParser>()
-            //    .SetBufferManager<PooledBufferManager>()
-            //    .SetCache(provider =>
-            //      {
-            //          var p = new PhysicalFileSystemCache(
-            //              provider.GetRequiredService<IHostingEnvironment>(),
-            //              provider.GetRequiredService<IBufferManager>(),
-            //              provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
+        private void ConfigureDefaultServicesAndCustomOptions(IServiceCollection services)
+        {
+            services.AddImageSharp(
+                options =>
+                    {
+                        options.Configuration = Configuration.Default;
+                        options.MaxBrowserCacheDays = 7;
+                        options.MaxCacheDays = 365;
+                        options.CachedNameLength = 8;
+                        options.OnParseCommands = _ => { };
+                        options.OnBeforeSave = _ => { };
+                        options.OnProcessed = _ => { };
+                        options.OnPrepareResponse = _ => { };
+                    });
+        }
 
-            //          p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
-            //          p.Settings[PhysicalFileSystemCache.CheckSourceChanged] = "true";
+        private void ConfigureCustomServicesAndDefaultOptions(IServiceCollection services)
+        {
+            services.AddImageSharpCore()
+                    .SetRequestParser<QueryCollectionRequestParser>()
+                    .SetMemoryAllocator<ArrayPoolMemoryAllocator>()
+                    .SetCache<PhysicalFileSystemCache>()
+                    .SetCacheHash<CacheHash>()
+                    .SetAsyncKeyLock<AsyncKeyLock>()
+                    .AddProvider<PhysicalFileSystemProvider>()
+                    .AddProcessor<ResizeWebProcessor>()
+                    .AddProcessor<FormatWebProcessor>()
+                    .AddProcessor<BackgroundColorWebProcessor>();
+        }
 
-            //          return p;
-            //      })
-            //    .SetCacheHash<CacheHash>()
-            //    .SetAsyncKeyLock<AsyncKeyLock>()
-            //    .AddResolver<PhysicalFileSystemResolver>()
-            //    .AddProcessor<ResizeWebProcessor>()
-            //    .AddProcessor<FormatWebProcessor>()
-            //    .AddProcessor<BackgroundColorWebProcessor>();
+        private void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
+        {
+            services.AddImageSharpCore(
+                options =>
+                    {
+                        options.Configuration = Configuration.Default;
+                        options.MaxBrowserCacheDays = 7;
+                        options.MaxCacheDays = 365;
+                        options.CachedNameLength = 8;
+                        options.OnParseCommands = _ => { };
+                        options.OnBeforeSave = _ => { };
+                        options.OnProcessed = _ => { };
+                        options.OnPrepareResponse = _ => { };
+                    })
+                .SetRequestParser<QueryCollectionRequestParser>()
+                .SetMemoryAllocator(provider => ArrayPoolMemoryAllocator.CreateWithMinimalPooling())
+                .SetCache(provider =>
+                  {
+                      var p = new PhysicalFileSystemCache(
+                          provider.GetRequiredService<IHostingEnvironment>(),
+                          provider.GetRequiredService<MemoryAllocator>(),
+                          provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
+
+                      p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
+
+                      return p;
+                  })
+                .SetCacheHash<CacheHash>()
+                .SetAsyncKeyLock<AsyncKeyLock>()
+                .AddProvider<PhysicalFileSystemProvider>()
+                .AddProcessor<ResizeWebProcessor>()
+                .AddProcessor<FormatWebProcessor>()
+                .AddProcessor<BackgroundColorWebProcessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

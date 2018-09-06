@@ -7,7 +7,7 @@ using System.Threading;
 namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
-    /// A wrapper around <see cref="SemaphoreSlim"/> that operates a one-in-one out policy
+    /// A wrapper around <see cref="SemaphoreSlim"/> that operates a one-in-one out policy.
     /// </summary>
     internal sealed class Doorman : IDisposable
     {

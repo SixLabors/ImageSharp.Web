@@ -18,7 +18,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         {
             if (value == null)
             {
-                return base.ConvertFrom(culture, null, propertyType);
+                return default(T);
             }
 
             Type t = typeof(T);

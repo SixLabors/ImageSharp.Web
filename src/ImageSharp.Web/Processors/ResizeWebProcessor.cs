@@ -4,8 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Transforms;
-using SixLabors.ImageSharp.Processing.Transforms.Resamplers;
+using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.Primitives;
 
@@ -17,37 +16,37 @@ namespace SixLabors.ImageSharp.Web.Processors
     public class ResizeWebProcessor : IImageWebProcessor
     {
         /// <summary>
-        /// The command constant for the resize width
+        /// The command constant for the resize width.
         /// </summary>
         public const string Width = "width";
 
         /// <summary>
-        /// The command constant for the resize height
+        /// The command constant for the resize height.
         /// </summary>
         public const string Height = "height";
 
         /// <summary>
-        /// The command constant for the resize focal point coordinates
+        /// The command constant for the resize focal point coordinates.
         /// </summary>
         public const string Xy = "rxy";
 
         /// <summary>
-        /// The command constant for the resize mode
+        /// The command constant for the resize mode.
         /// </summary>
         public const string Mode = "rmode";
 
         /// <summary>
-        /// The command constant for the resize sampler
+        /// The command constant for the resize sampler.
         /// </summary>
         public const string Sampler = "rsampler";
 
         /// <summary>
-        /// The command constant for the resize sampler
+        /// The command constant for the resize sampler.
         /// </summary>
         public const string Anchor = "ranchor";
 
         /// <summary>
-        /// The command constant for the resize compand mode
+        /// The command constant for the resize compand mode.
         /// </summary>
         public const string Compand = "compand";
 

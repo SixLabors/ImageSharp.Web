@@ -11,7 +11,7 @@ using SixLabors.ImageSharp.PixelFormats;
 namespace SixLabors.ImageSharp.Web.Commands.Converters
 {
     /// <summary>
-    /// Allows the conversion of strings into rgba32 pixel colors
+    /// Allows the conversion of strings into rgba32 pixel colors.
     /// </summary>
     internal class Rgba32Converter : CommandConverter
     {
@@ -36,7 +36,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                return base.ConvertFrom(culture, value, propertyType);
+                return default(Rgba32);
             }
 
             // Special case. HTML requires LightGrey, but NamedColors has LightGray to conform with System.Drawing
@@ -86,13 +86,11 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// <summary>
         /// Initializes color table mapping color constants.
         /// </summary>
-        /// <returns>The <see cref="IDictionary{String, Rgba32}"/></returns>
+        /// <returns>The <see cref="IDictionary{String, Rgba32}"/>.</returns>
         private static IDictionary<string, Rgba32> InitializeRgba32ConstantsTable()
         {
             IDictionary<string, Rgba32> table = new Dictionary<string, Rgba32>(StringComparer.OrdinalIgnoreCase);
-            FieldInfo[] fields = TypeConstants.Rgba32.GetFields(BindingFlags.Public | BindingFlags.Static);
-
-            foreach (FieldInfo field in fields)
+            foreach (FieldInfo field in TypeConstants.Rgba32.GetFields(BindingFlags.Public | BindingFlags.Static))
             {
                 if (field.FieldType == TypeConstants.Rgba32)
                 {

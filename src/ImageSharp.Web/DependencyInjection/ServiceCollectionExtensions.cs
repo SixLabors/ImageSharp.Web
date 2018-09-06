@@ -7,10 +7,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
-using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
-using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.ImageSharp.Web.Providers;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.DependencyInjection
 {
@@ -86,14 +86,14 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Adds the default service to the service collection
+        /// Adds the default service to the service collection.
         /// </summary>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/> that can be used to further configure the ImageSharp services</param>
+        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/> that can be used to further configure the ImageSharp services.</param>
         private static void AddDefaultServices(IImageSharpCoreBuilder builder)
         {
             builder.SetRequestParser<QueryCollectionRequestParser>();
 
-            builder.SetBufferManager<PooledBufferManager>();
+            builder.SetMemoryAllocatorFromMiddlewareOptions();
 
             builder.SetCache<PhysicalFileSystemCache>();
 
@@ -101,7 +101,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
 
             builder.SetAsyncKeyLock<AsyncKeyLock>();
 
-            builder.AddResolver<PhysicalFileSystemResolver>();
+            builder.AddProvider<PhysicalFileSystemProvider>();
 
             builder.AddProcessor<ResizeWebProcessor>()
                    .AddProcessor<FormatWebProcessor>()

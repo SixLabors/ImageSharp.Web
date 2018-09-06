@@ -5,23 +5,22 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Overlays;
 using SixLabors.ImageSharp.Web.Commands;
 
 namespace SixLabors.ImageSharp.Web.Processors
 {
     /// <summary>
-    /// Allows setting of the background color
+    /// Allows setting of the background color.
     /// </summary>
     public class BackgroundColorWebProcessor : IImageWebProcessor
     {
         /// <summary>
-        /// The command for changing the background color
+        /// The command for changing the background color.
         /// </summary>
         public const string Color = "bgcolor";
 
         /// <summary>
-        /// The reusable collection of commands
+        /// The reusable collection of commands.
         /// </summary>
         private static readonly IEnumerable<string> ColorCommands
             = new[] { Color };
