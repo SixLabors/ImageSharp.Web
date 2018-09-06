@@ -29,11 +29,9 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
 
             if (value != null)
             {
-                string[] items = this.GetStringArray(value, culture);
-
-                foreach (string s in items)
+                foreach (string pill in this.GetStringArray(value, culture))
                 {
-                    object item = paramConverter.ConvertFromInvariantString(s, type);
+                    object item = paramConverter.ConvertFromInvariantString(pill, type);
                     if (item != null)
                     {
                         result.Add((T)item);
@@ -49,13 +47,11 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// </summary>
         /// <param name="input">The input string to split.</param>
         /// <param name="culture">A <see cref="CultureInfo"/>. The current culture to split string by.</param>
-        /// <returns>The <see cref="T:String[]"/></returns>
+        /// <returns>The <see cref="T:String[]"/>.</returns>
         protected string[] GetStringArray(string input, CultureInfo culture)
         {
             char separator = culture.TextInfo.ListSeparator[0];
-            string[] result = input.Split(separator).Select(s => s.Trim()).ToArray();
-
-            return result;
+            return input.Split(separator).Select(s => s.Trim()).ToArray();
         }
     }
 }

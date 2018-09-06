@@ -10,15 +10,15 @@ namespace SixLabors.ImageSharp.Web.Middleware
     /// <summary>
     /// Contains information about the current image request and parsed commands.
     /// </summary>
-    public class ImageValidationContext
+    public class ImageCommandContext
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ImageValidationContext"/> class.
+        /// Initializes a new instance of the <see cref="ImageCommandContext"/> class.
         /// </summary>
-        /// <param name="context">The current HTTP request context</param>
+        /// <param name="context">The current HTTP request context.</param>
         /// <param name="commands">The dictionary containing the collection of URI derived processing commands.</param>
         /// <param name="parser">The command parser for parsing URI derived processing commands.</param>
-        public ImageValidationContext(HttpContext context, IDictionary<string, string> commands, CommandParser parser)
+        public ImageCommandContext(HttpContext context, IDictionary<string, string> commands, CommandParser parser)
         {
             this.Context = context;
             this.Commands = commands;
@@ -26,7 +26,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         }
 
         /// <summary>
-        /// Gets the current HTTP request context
+        /// Gets the current HTTP request context.
         /// </summary>
         public HttpContext Context { get; }
 

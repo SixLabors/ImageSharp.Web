@@ -9,8 +9,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
+using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Caching
 {
@@ -30,11 +31,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         public const string DefaultCacheFolder = "is-cache";
 
         /// <summary>
-        /// The configuration key for checking whether changes in source images should be accounted for when checking the cache.
-        /// </summary>
-        public const string CheckSourceChanged = "CheckSourceChanged";
-
-        /// <summary>
         /// The default value for determining whether to check for changes in the source.
         /// </summary>
         public const string DefaultCheckSourceChanged = "false";
@@ -52,7 +48,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// The buffer manager.
         /// </summary>
-        private readonly IBufferManager bufferManager;
+        private readonly MemoryAllocator memoryAllocator;
 
         /// <summary>
         /// The middleware configuration options.
@@ -62,18 +58,23 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
-        /// <param name="environment">The hosting environment the application is running in</param>
-        /// <param name="bufferManager">An <see cref="IBufferManager"/> instance used to allocate arrays transporting encoded image data</param>
-        /// <param name="options">The middleware configuration options</param>
-        public PhysicalFileSystemCache(IHostingEnvironment environment, IBufferManager bufferManager, IOptions<ImageSharpMiddlewareOptions> options)
+        /// <param name="environment">The hosting environment the application is running in.</param>
+        /// <param name="memoryAllocator">An <see cref="MemoryAllocator"/> instance used to allocate arrays transporting encoded image data.</param>
+        /// <param name="options">The middleware configuration options.</param>
+        public PhysicalFileSystemCache(IHostingEnvironment environment, MemoryAllocator memoryAllocator, IOptions<ImageSharpMiddlewareOptions> options)
         {
             Guard.NotNull(environment, nameof(environment));
-            Guard.NotNull(bufferManager, nameof(bufferManager));
+            Guard.NotNull(memoryAllocator, nameof(memoryAllocator));
             Guard.NotNull(options, nameof(options));
+
+            Guard.NotNullOrWhiteSpace(
+              environment.WebRootPath,
+              nameof(environment.WebRootPath),
+              "The folder 'wwwroot' that contains the web-servable application content files is missing. Please add this folder to the application root to allow caching.");
 
             this.environment = environment;
             this.fileProvider = this.environment.WebRootFileProvider;
-            this.bufferManager = bufferManager;
+            this.memoryAllocator = memoryAllocator;
             this.options = options.Value;
         }
 
@@ -81,85 +82,48 @@ namespace SixLabors.ImageSharp.Web.Caching
         public IDictionary<string, string> Settings { get; }
             = new Dictionary<string, string>
             {
-                { Folder, DefaultCacheFolder },
-                { CheckSourceChanged, DefaultCheckSourceChanged }
+                { Folder, DefaultCacheFolder }
             };
 
         /// <inheritdoc/>
-        public async Task<IByteBuffer> GetAsync(string key)
+        public IImageResolver Get(string key)
         {
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
-
-            IByteBuffer buffer;
 
             // Check to see if the file exists.
             if (!fileInfo.Exists)
             {
-                return default;
+                return null;
             }
 
-            using (Stream stream = fileInfo.CreateReadStream())
-            {
-                int length = (int)stream.Length;
-
-                // Buffer is disposed of in the middleware
-                buffer = this.bufferManager.Allocate(length);
-                await stream.ReadAsync(buffer.Array, 0, length);
-            }
-
-            return buffer;
+            return new PhysicalFileSystemResolver(fileInfo);
         }
 
         /// <inheritdoc/>
-        public Task<CachedInfo> IsExpiredAsync(HttpContext context, string key, DateTime minDateUtc)
+        public Task<CachedInfo> IsExpiredAsync(HttpContext context, string key, DateTime lastWriteTimeUtc, DateTime minDateUtc)
         {
-            bool.TryParse(this.Settings[CheckSourceChanged], out bool checkSource);
-
             IFileInfo cachedFileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
-            bool exists = cachedFileInfo.Exists;
-            DateTimeOffset lastModified = exists ? cachedFileInfo.LastModified : DateTimeOffset.MinValue;
-            long length = exists ? cachedFileInfo.Length : 0;
+            if (!cachedFileInfo.Exists)
+            {
+                return Task.FromResult(new CachedInfo(true, DateTime.MinValue));
+            }
+
+            DateTime lastCacheModifiedUtc = cachedFileInfo.LastModified.UtcDateTime;
             bool expired = true;
 
-            // Checking the source adds overhead but is configurable. Defaults to false
-            if (checkSource)
+            // Check whether the last modified date is less than the min date.
+            // If it's newer than the cached file then it must be an update.
+            if (lastCacheModifiedUtc > minDateUtc && lastWriteTimeUtc < lastCacheModifiedUtc)
             {
-                IFileInfo sourceFileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
-
-                if (!sourceFileInfo.Exists)
-                {
-                    return Task.FromResult(default(CachedInfo));
-                }
-
-                // Check if the file exists and whether the last modified date is less than the min date.
-                if (exists && lastModified.UtcDateTime > minDateUtc)
-                {
-                    // If it's newer than the cached file then it must be an update.
-                    if (sourceFileInfo.LastModified.UtcDateTime < lastModified.UtcDateTime)
-                    {
-                        expired = false;
-                    }
-                }
-            }
-            else
-            {
-                if (exists && lastModified.UtcDateTime > minDateUtc)
-                {
-                    expired = false;
-                }
+                expired = false;
             }
 
-            return Task.FromResult(new CachedInfo(expired, lastModified, length));
+            return Task.FromResult(new CachedInfo(expired, lastCacheModifiedUtc));
         }
 
         /// <inheritdoc/>
-        public async Task<DateTimeOffset> SetAsync(string key, IByteBuffer value)
+        public async Task<DateTimeOffset> SetAsync(string key, Stream stream)
         {
-            Guard.NotNullOrEmpty(
-                this.environment.WebRootPath,
-                nameof(this.environment.WebRootPath),
-                "The folder 'wwwroot' that contains the web-servable application content files is missing. Please add this folder to the application root to allow caching.");
-
             string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
             string directory = Path.GetDirectoryName(path);
 
@@ -170,7 +134,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             using (FileStream fileStream = File.Create(path))
             {
-                await fileStream.WriteAsync(value.Array, 0, value.Length);
+                await stream.CopyToAsync(fileStream).ConfigureAwait(false);
             }
 
             return File.GetLastWriteTimeUtc(path);
@@ -180,10 +144,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Converts the key into a nested file path.
         /// </summary>
         /// <param name="key">The cache key.</param>
-        /// <returns>The <see cref="string"/></returns>
-        private string ToFilePath(string key)
-        {
-            return $"{this.Settings[Folder]}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
-        }
+        /// <returns>The <see cref="string"/>.</returns>
+        private string ToFilePath(string key) => $"{this.Settings[Folder]}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
     }
 }

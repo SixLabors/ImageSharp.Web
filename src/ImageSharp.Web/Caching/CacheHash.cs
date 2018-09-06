@@ -22,7 +22,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheHash"/> class.
         /// </summary>
-        /// <param name="options">The middleware configuration options</param>
+        /// <param name="options">The middleware configuration options.</param>
         public CacheHash(IOptions<ImageSharpMiddlewareOptions> options)
         {
             this.options = options.Value;

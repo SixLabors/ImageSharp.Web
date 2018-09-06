@@ -20,10 +20,10 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <summary>
         /// Processes the image based on the querystring commands.
         /// </summary>
-        /// <param name="image">The image to process</param>
-        /// <param name="logger">The type used for performing logging</param>
-        /// <param name="commands">The querystring collection containing the processing commands</param>
-        /// <returns>The <see cref="Image{Rgba32}"/></returns>
+        /// <param name="image">The image to process.</param>
+        /// <param name="logger">The type used for performing logging.</param>
+        /// <param name="commands">The querystring collection containing the processing commands.</param>
+        /// <returns>The <see cref="Image{Rgba32}"/>.</returns>
         FormattedImage Process(FormattedImage image, ILogger logger, IDictionary<string, string> commands);
     }
 }

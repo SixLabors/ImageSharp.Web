@@ -28,7 +28,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         internal const int Status412PreconditionFailed = 412;
 
         /// <summary>
-        /// An empty completed task
+        /// An empty completed task.
         /// </summary>
         internal static readonly Task CompletedTask = CreateCompletedTask();
 

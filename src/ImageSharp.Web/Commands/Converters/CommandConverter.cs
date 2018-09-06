@@ -25,8 +25,8 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// <summary>
         /// Gets a suitable exception to throw when a conversion cannot be performed.
         /// </summary>
-        /// <param name="value">The value to convert</param>
-        /// <returns><see cref="NotSupportedException"/></returns>
+        /// <param name="value">The value to convert.</param>
+        /// <returns><see cref="NotSupportedException"/>.</returns>
         protected Exception GetConvertFromException(object value)
         {
             string valueTypeName = value == null ? "null" : value.GetType().FullName;

@@ -2,10 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq.Expressions;
 using System.Net;
 using SixLabors.ImageSharp.Web.Commands.Converters;
 
@@ -14,17 +12,12 @@ namespace SixLabors.ImageSharp.Web.Commands
     /// <summary>
     /// Parses URI derived command values into usable commands for processors.
     /// </summary>
-    public class CommandParser
+    public sealed class CommandParser
     {
         /// <summary>
         /// A new instance of the <see cref="CommandParser"/> class with lazy initialization.
         /// </summary>
         private static readonly Lazy<CommandParser> Lazy = new Lazy<CommandParser>(() => new CommandParser());
-
-        /// <summary>
-        /// The cache for storing created default types.
-        /// </summary>
-        private static readonly ConcurrentDictionary<Type, object> TypeDefaultsCache = new ConcurrentDictionary<Type, object>();
 
         /// <summary>
         /// Prevents a default instance of the <see cref="CommandParser"/> class from being created.
@@ -47,10 +40,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// </summary>
         /// <param name="type">The <see cref="Type"/> to add a converter for. </param>
         /// <param name="converterType">The type of <see cref="CommandConverter"/> to add.</param>
-        public void AddConverter(Type type, Type converterType)
-        {
-            CommandDescriptor.AddConverter(type, converterType);
-        }
+        public void AddConverter(Type type, Type converterType) => CommandDescriptor.AddConverter(type, converterType);
 
         /// <summary>
         /// Parses the given string value converting it to the given using the invariant culture.
@@ -60,10 +50,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// The <see cref="Type"/> to convert the string to.
         /// </typeparam>
         /// <returns>The converted instance or the default.</returns>
-        public T ParseValue<T>(string value)
-        {
-            return this.ParseValue<T>(value, CultureInfo.InvariantCulture);
-        }
+        public T ParseValue<T>(string value) => this.ParseValue<T>(value, CultureInfo.InvariantCulture);
 
         /// <summary>
         /// Parses the given string value converting it to the given type.
@@ -76,46 +63,25 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// <returns>The converted instance or the default.</returns>
         public T ParseValue<T>(string value, CultureInfo culture)
         {
-            return (T)this.ParseValue(typeof(T), value, culture);
-        }
-
-        /// <summary>
-        /// Parses the given string value converting it to the given type.
-        /// </summary>
-        /// <param name="type">
-        /// The <see cref="Type"/> to convert the string to.
-        /// </param>
-        /// <param name="value">
-        /// The <see cref="string"/> value to parse.
-        /// </param>
-        /// <param name="culture">
-        /// The <see cref="CultureInfo"/> to use as the current culture.
-        /// <remarks>If not set will parse using <see cref="CultureInfo.InvariantCulture"/></remarks>
-        /// </param>
-        /// <returns>
-        /// The <see cref="object"/>.
-        /// </returns>
-        internal object ParseValue(Type type, string value, CultureInfo culture)
-        {
             if (culture == null)
             {
                 culture = CultureInfo.InvariantCulture;
             }
 
+            Type type = typeof(T);
             ICommandConverter converter = CommandDescriptor.GetConverter(type);
             try
             {
-                return converter.ConvertFrom(culture, WebUtility.UrlDecode(value), type);
+                return (T)converter.ConvertFrom(culture, WebUtility.UrlDecode(value), type);
             }
             catch
             {
-                // Return the default value
-                return TypeDefaultsCache.GetOrAdd(type, t => this.GetDefaultValue(type));
+                return default;
             }
         }
 
         /// <summary>
-        /// Add the generic converters
+        /// Add the generic converters.
         /// </summary>
         private void AddSimpleConverters()
         {
@@ -189,28 +155,8 @@ namespace SixLabors.ImageSharp.Web.Commands
         }
 
         /// <summary>
-        /// Adds the default color converters
+        /// Adds the default color converters.
         /// </summary>
-        private void AddColorConverters()
-        {
-            this.AddConverter(TypeConstants.Rgba32, typeof(Rgba32Converter));
-        }
-
-        /// <summary>
-        /// Returns the default value for the given type.
-        /// </summary>
-        /// <param name="type">The <see cref="Type"/> to return.</param>
-        /// <returns>The <see cref="object"/> representing the default value.</returns>
-        private object GetDefaultValue(Type type)
-        {
-            Guard.NotNull(type, nameof(type));
-
-            // We want an Func<object> which returns the default value.
-            // Create that expression, convert to object.
-            // The default value, will always be what the *code* tells us.
-            var e = Expression.Lambda<Func<object>>(Expression.Convert(Expression.Default(type), typeof(object)));
-
-            return e.Compile()();
-        }
+        private void AddColorConverters() => this.AddConverter(TypeConstants.Rgba32, typeof(Rgba32Converter));
     }
 }

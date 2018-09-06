@@ -9,7 +9,7 @@ using SixLabors.ImageSharp.PixelFormats;
 namespace SixLabors.ImageSharp.Web
 {
     /// <summary>
-    /// A class encapsulating an image with a particular file encoding
+    /// A class encapsulating an image with a particular file encoding.
     /// </summary>
     /// <seealso cref="System.IDisposable" />
     public class FormattedImage : IDisposable
@@ -61,12 +61,12 @@ namespace SixLabors.ImageSharp.Web
         }
 
         /// <summary>
-        /// Loads the specified source
+        /// Loads the specified source.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <param name="source">The source.</param>
-        /// <returns>A formatted image</returns>
-        public static FormattedImage Load(Configuration configuration, byte[] source)
+        /// <returns>A formatted image.</returns>
+        public static FormattedImage Load(Configuration configuration, Stream source)
         {
             var image = ImageSharp.Image.Load(configuration, source, out IImageFormat format);
             return new FormattedImage(image, format);

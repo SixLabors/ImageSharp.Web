@@ -12,10 +12,10 @@ using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
-using SixLabors.ImageSharp.Web.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
-using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.ImageSharp.Web.Providers;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Tests
 {
@@ -23,10 +23,7 @@ namespace SixLabors.ImageSharp.Web.Tests
     {
         public static string TestImage = "http://localhost/SubFolder/imagesharp-logo.png";
 
-        public static Action<IApplicationBuilder> DefaultConfig = app =>
-        {
-            app.UseImageSharp();
-        };
+        public static Action<IApplicationBuilder> DefaultConfig = app => app.UseImageSharp();
 
         public static Action<IServiceCollection> DefaultServices = services =>
         {
@@ -37,25 +34,24 @@ namespace SixLabors.ImageSharp.Web.Tests
                             options.MaxBrowserCacheDays = -1;
                             options.MaxCacheDays = -1;
                             options.CachedNameLength = 12;
-                            options.OnValidate = _ => { };
+                            options.OnParseCommands = _ => { };
                             options.OnBeforeSave = _ => { };
                             options.OnProcessed = _ => { };
                             options.OnPrepareResponse = _ => { };
                         })
                     .SetRequestParser<QueryCollectionRequestParser>()
-                    .SetBufferManager<PooledBufferManager>()
+                    .SetMemoryAllocatorFromMiddlewareOptions()
                     .SetCache<PhysicalFileSystemCache>()
                     .SetCacheHash<CacheHash>()
                     .SetAsyncKeyLock<AsyncKeyLock>()
-                    .AddResolver<PhysicalFileSystemResolver>()
+                    .AddProvider<PhysicalFileSystemProvider>()
                     .AddProcessor<ResizeWebProcessor>();
         };
 
         public static TestServer CreateDefault() => Create(DefaultConfig, DefaultServices);
 
-
         public static TestServer CreateWithActions(
-            Action<ImageValidationContext> onValidate,
+            Action<ImageCommandContext> onParseCommands,
             Action<FormattedImage> onBeforeSave = null,
             Action<ImageProcessingContext> onProcessed = null,
             Action<HttpContext> onPrepareResponse = null)
@@ -65,22 +61,21 @@ namespace SixLabors.ImageSharp.Web.Tests
                     options.Configuration = Configuration.Default;
                     options.MaxBrowserCacheDays = -1;
                     options.MaxCacheDays = -1;
-                    options.OnValidate = onValidate;
+                    options.OnParseCommands = onParseCommands;
                     options.OnBeforeSave = onBeforeSave;
                     options.OnProcessed = onProcessed;
                     options.OnPrepareResponse = onPrepareResponse;
                 })
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetBufferManager<PooledBufferManager>()
+                .SetMemoryAllocatorFromMiddlewareOptions()
                 .SetCache<PhysicalFileSystemCache>()
                 .SetCacheHash<CacheHash>()
                 .SetAsyncKeyLock<AsyncKeyLock>()
-                .AddResolver<PhysicalFileSystemResolver>()
+                .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>();
 
             return Create(DefaultConfig, ConfigureServices);
         }
-
 
         public static TestServer Create(Action<IApplicationBuilder> configureApp, Action<IServiceCollection> configureServices = null)
         {

@@ -65,7 +65,7 @@ services.AddImageSharp(
             options.MaxBrowserCacheDays = 7;
             options.MaxCacheDays = 365;
             options.CachedNameLength = 8;
-            options.OnValidate = _ => { };
+            options.OnParseCommands = _ => { };
             options.OnBeforeSave = _ => { };
             options.OnProcessed = _ => { };
             options.OnPrepareResponse = _ => { };
@@ -79,10 +79,10 @@ Or you can fine-grain control adding the default options and configure all other
 services.AddImageSharpCore()
         .SetRequestParser<QueryCollectionRequestParser>()
         .SetBufferManager<PooledBufferManager>()
-        .SetCache<PhysicalFileSystemCache>()
+        .SetMemoryAllocatorFromMiddlewareOptions()
         .SetCacheHash<CacheHash>()
         .SetAsyncKeyLock<AsyncKeyLock>()
-        .AddResolver<PhysicalFileSystemResolver>()
+        .AddProvider<PhysicalFileSystemProvider>()
         .AddProcessor<ResizeWebProcessor>()
         .AddProcessor<FormatWebProcessor>()
         .AddProcessor<BackgroundColorWebProcessor>();
@@ -99,13 +99,13 @@ services.AddImageSharpCore(
             options.MaxBrowserCacheDays = 7;
             options.MaxCacheDays = 365;
             options.CachedNameLength = 8;
-            options.OnValidate = _ => { };
+            options.OnParseCommands = _ => { };
             options.OnBeforeSave = _ => { };
             options.OnProcessed = _ => { };
             options.OnPrepareResponse = _ => { };
         })
     .SetRequestParser<QueryCollectionRequestParser>()
-    .SetBufferManager<PooledBufferManager>()
+    .SetMemoryAllocator<ArrayPoolMemoryAllocator>()
     .SetCache(provider =>
       {
           var p = new PhysicalFileSystemCache(
@@ -114,13 +114,12 @@ services.AddImageSharpCore(
               provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
 
           p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
-          p.Settings[PhysicalFileSystemCache.CheckSourceChanged] = "true";
 
           return p;
       })
     .SetCacheHash<CacheHash>()
     .SetAsyncKeyLock<AsyncKeyLock>()
-    .AddResolver<PhysicalFileSystemResolver>()
+    .AddProvider<PhysicalFileSystemProvider>()
     .AddProcessor<ResizeWebProcessor>()
     .AddProcessor<FormatWebProcessor>()
     .AddProcessor<BackgroundColorWebProcessor>();
