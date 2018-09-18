@@ -99,8 +99,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
 
             builder.SetCacheHash<CacheHash>();
 
-            builder.SetAsyncKeyLock<AsyncKeyLock>();
-
             builder.AddProvider<PhysicalFileSystemProvider>();
 
             builder.AddProcessor<ResizeWebProcessor>()

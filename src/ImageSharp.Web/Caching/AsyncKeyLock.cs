@@ -2,8 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Collections.Generic;
-using System.Threading;
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace SixLabors.ImageSharp.Web.Caching
@@ -12,90 +12,42 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// The async key lock prevents multiple asynchronous threads acting upon the same object with the given key at the same time.
     /// It is designed so that it does not block unique requests allowing a high throughput.
     /// </summary>
-    public sealed class AsyncKeyLock : IAsyncKeyLock
+    internal sealed class AsyncKeyLock
     {
         /// <summary>
         /// A collection of doorman counters used for tracking references to the same key.
         /// </summary>
-        private static readonly Dictionary<string, Doorman> Keys = new Dictionary<string, Doorman>();
+        private static readonly ConcurrentDictionary<string, Doorman> Keys = new ConcurrentDictionary<string, Doorman>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Locks the current thread asynchronously.
+        /// Locks the current thread in read mode asynchronously.
         /// </summary>
         /// <param name="key">The key identifying the specific object to lock against.</param>
         /// <returns>
         /// The <see cref="Task{IDisposable}"/> that will release the lock.
         /// </returns>
-        public async Task<IDisposable> LockAsync(string key)
+        public async Task<IDisposable> ReaderLockAsync(string key)
         {
-            string lowerKey = key.ToLowerInvariant();
-            await GetOrCreate(lowerKey).WaitAsync().ConfigureAwait(false);
-            return new Releaser(lowerKey);
+            Doorman doorman = Keys.GetOrAdd(key, GetDoorman);
+
+            return await doorman.ReaderLockAsync().ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Returns a <see cref="SemaphoreSlim"/> matching on the given key
-        ///  or a new one if none is found.
+        /// Locks the current thread in write mode asynchronously.
         /// </summary>
-        /// <param name="key">The key identifying the semaphore.</param>
+        /// <param name="key">The key identifying the specific object to lock against.</param>
         /// <returns>
-        /// The <see cref="SemaphoreSlim"/>.
+        /// The <see cref="Task{IDisposable}"/> that will release the lock.
         /// </returns>
-        private static SemaphoreSlim GetOrCreate(string key)
+        public async Task<IDisposable> WriterLockAsync(string key)
         {
-            Doorman item;
-            lock (Keys)
-            {
-                if (Keys.TryGetValue(key, out item))
-                {
-                    ++item.RefCount;
-                }
-                else
-                {
-                    item = DoormanPool.Rent();
-                    Keys[key] = item;
-                }
-            }
+            Doorman doorman = Keys.GetOrAdd(key, GetDoorman);
 
-            return item.Semaphore;
+            return await doorman.WriterLockAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// The disposable releaser tasked with releasing the semaphore.
-        /// </summary>
-        private sealed class Releaser : IDisposable
-        {
-            /// <summary>
-            /// The key identifying the <see cref="Doorman"/> that limits the number of threads.
-            /// </summary>
-            private readonly string key;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Releaser"/> class.
-            /// </summary>
-            /// <param name="key">The key identifying the doorman that limits the number of threads.</param>
-            public Releaser(string key)
-            {
-                this.key = key;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                lock (Keys)
-                {
-                    Doorman doorman = Keys[this.key];
-                    --doorman.RefCount;
-                    if (doorman.RefCount == 0)
-                    {
-                        Keys.Remove(this.key);
-                        doorman.Reset();
-                        DoormanPool.Return(doorman);
-                    }
-
-                    doorman.Semaphore.Release();
-                }
-            }
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Doorman GetDoorman(string key) => new Doorman(key, () => Keys.TryRemove(key, out Doorman localDoorman));
     }
 }
