@@ -43,7 +43,6 @@ namespace SixLabors.ImageSharp.Web.Tests
                     .SetMemoryAllocatorFromMiddlewareOptions()
                     .SetCache<PhysicalFileSystemCache>()
                     .SetCacheHash<CacheHash>()
-                    .SetAsyncKeyLock<AsyncKeyLock>()
                     .AddProvider<PhysicalFileSystemProvider>()
                     .AddProcessor<ResizeWebProcessor>();
         };
@@ -70,7 +69,6 @@ namespace SixLabors.ImageSharp.Web.Tests
                 .SetMemoryAllocatorFromMiddlewareOptions()
                 .SetCache<PhysicalFileSystemCache>()
                 .SetCacheHash<CacheHash>()
-                .SetAsyncKeyLock<AsyncKeyLock>()
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>();
 

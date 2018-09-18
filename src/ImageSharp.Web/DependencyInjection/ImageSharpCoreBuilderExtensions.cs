@@ -133,31 +133,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="IAsyncKeyLock"/> adding it to the service collection.
-        /// </summary>
-        /// <typeparam name="TLock">The type of class implementing <see cref="IAsyncKeyLock"/>to add.</typeparam>
-        /// <param name="builder">The core builder.</param>
-        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
-        public static IImageSharpCoreBuilder SetAsyncKeyLock<TLock>(this IImageSharpCoreBuilder builder)
-            where TLock : class, IAsyncKeyLock
-        {
-            builder.Services.AddSingleton<IAsyncKeyLock, TLock>();
-            return builder;
-        }
-
-        /// <summary>
-        /// Sets the given <see cref="IAsyncKeyLock"/> adding it to the service collection.
-        /// </summary>
-        /// <param name="builder">The core builder.</param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageCache"/>.</param>
-        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
-        public static IImageSharpCoreBuilder SetAsyncKeyLock(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IAsyncKeyLock> implementationFactory)
-        {
-            builder.Services.AddSingleton(implementationFactory);
-            return builder;
-        }
-
-        /// <summary>
         /// Adds the given <see cref="IImageProvider"/> to the resolver collection within the service collection.
         /// </summary>
         /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>

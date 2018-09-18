@@ -29,7 +29,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// The key-lock used for limiting identical requests.
         /// </summary>
-        private readonly IAsyncKeyLock asyncKeyLock;
+        private static readonly AsyncKeyLock AsyncLock = new AsyncKeyLock();
 
         /// <summary>
         /// The function processing the Http request.
@@ -93,7 +93,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images.</param>
         /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images.</param>
         /// <param name="cacheHash">An <see cref="ICacheHash"/>instance used for calculating cached file names.</param>
-        /// <param name="asyncKeyLock">An <see cref="IAsyncKeyLock"/> instance used for providing locking during processing.</param>
         public ImageSharpMiddleware(
             RequestDelegate next,
             IOptions<ImageSharpMiddlewareOptions> options,
@@ -103,8 +102,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IEnumerable<IImageProvider> resolvers,
             IEnumerable<IImageWebProcessor> processors,
             IImageCache cache,
-            ICacheHash cacheHash,
-            IAsyncKeyLock asyncKeyLock)
+            ICacheHash cacheHash)
         {
             Guard.NotNull(next, nameof(next));
             Guard.NotNull(options, nameof(options));
@@ -115,7 +113,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             Guard.NotNull(processors, nameof(processors));
             Guard.NotNull(cache, nameof(cache));
             Guard.NotNull(cache, nameof(cacheHash));
-            Guard.NotNull(asyncKeyLock, nameof(asyncKeyLock));
+            Guard.NotNull(AsyncLock, nameof(AsyncLock));
 
             this.next = next;
             this.options = options.Value;
@@ -125,7 +123,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.processors = processors;
             this.cache = cache;
             this.cacheHash = cacheHash;
-            this.asyncKeyLock = asyncKeyLock;
 
             var commands = new List<string>();
             foreach (IImageWebProcessor processor in this.processors)
@@ -165,22 +162,21 @@ namespace SixLabors.ImageSharp.Web.Middleware
             string uri = GetUri(context, commands);
             string key = this.cacheHash.Create(uri, this.options.CachedNameLength);
 
-            // Prevent identical requests from running at the same time
-            // This reduces the overheads of unnecessary processing plus avoids file locks
             bool processRequest = true;
-            using (await this.asyncKeyLock.LockAsync(key).ConfigureAwait(false))
+            var imageContext = new ImageContext(context, this.options);
+            IImageResolver resolvedImage = provider.Get(context);
+
+            if (resolvedImage == null)
             {
-                var imageContext = new ImageContext(context, this.options);
-                IImageResolver resolvedImage = provider.Get(context);
+                // Log the error but let the pipeline handle the 404
+                this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
+                processRequest = false;
+            }
 
-                if (resolvedImage == null)
-                {
-                    // Log the error but let the pipeline handle the 404
-                    this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
-                    processRequest = false;
-                }
-
-                if (processRequest)
+            if (processRequest)
+            {
+                // Lock any reads when a write is being done for the same key to prevent potential file locks.
+                using (await AsyncLock.ReaderLockAsync(key).ConfigureAwait(false))
                 {
                     DateTime lastWriteTimeUtc = await resolvedImage.GetLastWriteTimeUtcAsync().ConfigureAwait(false);
                     CachedInfo info = await this.cache.IsExpiredAsync(context, key, lastWriteTimeUtc, DateTime.UtcNow.AddDays(-this.options.MaxCacheDays)).ConfigureAwait(false);
@@ -197,12 +193,17 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                         return;
                     }
+                }
 
-                    // Not cached? Let's get it from the image resolver.
-                    ChunkedMemoryStream outStream = null;
-                    try
+                // Not cached? Let's get it from the image resolver.
+                ChunkedMemoryStream outStream = null;
+                try
+                {
+                    if (processRequest)
                     {
-                        if (processRequest)
+                        // Enter a write lock which locks writing and any reads for the same request.
+                        // This reduces the overheads of unnecessary processing plus avoids file locks.
+                        using (await AsyncLock.WriterLockAsync(key).ConfigureAwait(false))
                         {
                             // No allocations here for inStream since we are passing the raw input stream.
                             // outStream allocation depends on the memory allocator used.
@@ -224,17 +225,17 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             await this.SendResponse(imageContext, key, cachedDate, outStream).ConfigureAwait(false);
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        // Log the error internally then rethrow.
-                        // We don't call next here, the pipeline will automatically handle it
-                        this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
-                        throw;
-                    }
-                    finally
-                    {
-                        outStream?.Dispose();
-                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the error internally then rethrow.
+                    // We don't call next here, the pipeline will automatically handle it
+                    this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
+                    throw;
+                }
+                finally
+                {
+                    outStream?.Dispose();
                 }
             }
 

@@ -33,7 +33,6 @@ namespace SixLabors.ImageSharp.Web.Sample
                     }
                 })
                 .SetCacheHash<CacheHash>()
-                .SetAsyncKeyLock<AsyncKeyLock>()
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
@@ -80,7 +79,6 @@ namespace SixLabors.ImageSharp.Web.Sample
                     .SetMemoryAllocator<ArrayPoolMemoryAllocator>()
                     .SetCache<PhysicalFileSystemCache>()
                     .SetCacheHash<CacheHash>()
-                    .SetAsyncKeyLock<AsyncKeyLock>()
                     .AddProvider<PhysicalFileSystemProvider>()
                     .AddProcessor<ResizeWebProcessor>()
                     .AddProcessor<FormatWebProcessor>()
@@ -115,7 +113,6 @@ namespace SixLabors.ImageSharp.Web.Sample
                       return p;
                   })
                 .SetCacheHash<CacheHash>()
-                .SetAsyncKeyLock<AsyncKeyLock>()
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
