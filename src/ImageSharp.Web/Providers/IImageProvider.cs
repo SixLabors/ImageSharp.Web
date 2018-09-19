@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -29,9 +28,9 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// </summary>
         /// <param name="context">The current HTTP request context.</param>
         /// <returns>
-        /// <returns>The <see cref="Task{Boolean}"/></returns>
+        /// <returns>The <see cref="bool"/></returns>
         /// </returns>
-        Task<bool> IsValidRequestAsync(HttpContext context);
+        bool IsValidRequest(HttpContext context);
 
         /// <summary>
         /// Gets the image resolver associated with the context.

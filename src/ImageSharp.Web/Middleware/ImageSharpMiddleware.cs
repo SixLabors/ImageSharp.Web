@@ -151,7 +151,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             // Get the correct service for the request.
             IImageProvider provider = this.resolvers.FirstOrDefault(r => r.Match(context));
 
-            if (provider == null || !await provider.IsValidRequestAsync(context).ConfigureAwait(false))
+            if (provider?.IsValidRequest(context) != true)
             {
                 // Nothing to do. call the next delegate/middleware in the pipeline
                 await this.next(context).ConfigureAwait(false);

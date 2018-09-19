@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -60,7 +59,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         public IDictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
 
         /// <inheritdoc/>
-        public Task<bool> IsValidRequestAsync(HttpContext context) => Task.FromResult(FormatHelpers.GetExtension(this.options.Configuration, context.Request.GetDisplayUrl()) != null);
+        public bool IsValidRequest(HttpContext context) => FormatHelpers.GetExtension(this.options.Configuration, context.Request.GetDisplayUrl()) != null;
 
         /// <inheritdoc/>
         public IImageResolver Get(HttpContext context)
