@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Middleware;
 
-namespace ImageSharp.Web.Benchmarks
+namespace SixLabors.ImageSharp.Web.Benchmarks
 {
     /// <summary>
     /// A baseline naive SHA256 hashing implementation
@@ -14,6 +14,7 @@ namespace ImageSharp.Web.Benchmarks
     public class CacheHashBaseline : ICacheHash
     {
         private readonly ImageSharpMiddlewareOptions options;
+        private readonly FormatHelper formatHelper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheHash"/> class.
@@ -22,6 +23,7 @@ namespace ImageSharp.Web.Benchmarks
         public CacheHashBaseline(IOptions<ImageSharpMiddlewareOptions> options)
         {
             this.options = options.Value;
+            this.formatHelper = new FormatHelper(this.options.Configuration);
         }
 
         /// <inheritdoc/>
@@ -43,7 +45,7 @@ namespace ImageSharp.Web.Benchmarks
                     sb.Append(hash[i].ToString("X2"));
                 }
 
-                sb.AppendFormat(".{0}", FormatHelpers.GetExtensionOrDefault(this.options.Configuration, value));
+                sb.AppendFormat(".{0}", this.formatHelper.GetExtensionOrDefault(value));
                 return sb.ToString();
             }
         }

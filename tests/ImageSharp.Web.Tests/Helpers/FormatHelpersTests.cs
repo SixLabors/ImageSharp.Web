@@ -17,28 +17,28 @@ namespace SixLabors.ImageSharp.Web.Tests.Helpers
         public void GetExtensionShouldMatchDefaultExtensions(string expected, string ext)
         {
             string uri = $"http://www.example.org/some/path/to/image.{ext}?width=300";
-            Assert.Equal(expected, FormatHelpers.GetExtension(Configuration.Default, uri));
+            Assert.Equal(expected, FormatHelper.GetExtension(Configuration.Default, uri));
         }
 
         [Fact]
         public void GetExtensionShouldNotMatchExtensionWithoutDotPrefix()
         {
             string uri = "http://www.example.org/some/path/to/bmpimage";
-            Assert.Null(FormatHelpers.GetExtension(Configuration.Default, uri));
+            Assert.Null(FormatHelper.GetExtension(Configuration.Default, uri));
         }
 
         [Fact]
         public void GetExtensionShouldIgnoreQueryStringWithoutFormatParamter()
         {
             string uri = "http://www.example.org/some/path/to/image.bmp?width=300&foo=.png";
-            Assert.Equal("bmp", FormatHelpers.GetExtension(Configuration.Default, uri));
+            Assert.Equal("bmp", FormatHelper.GetExtension(Configuration.Default, uri));
         }
 
         [Fact]
         public void GetExtensionShouldAcknowledgeQueryStringFormatParameter()
         {
             string uri = "http://www.example.org/some/path/to/image.bmp?width=300&format=png";
-            Assert.Equal("png", FormatHelpers.GetExtension(Configuration.Default, uri));
+            Assert.Equal("png", FormatHelper.GetExtension(Configuration.Default, uri));
         }
     }
 }

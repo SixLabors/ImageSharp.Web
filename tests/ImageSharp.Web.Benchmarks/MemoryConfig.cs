@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Configs;
 
-namespace ImageSharp.Web.Benchmarks
+namespace SixLabors.ImageSharp.Web.Benchmarks
 {
     public class MemoryConfig : ManualConfig
     {
