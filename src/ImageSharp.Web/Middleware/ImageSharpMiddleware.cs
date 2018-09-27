@@ -112,7 +112,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             Guard.NotNull(resolvers, nameof(resolvers));
             Guard.NotNull(processors, nameof(processors));
             Guard.NotNull(cache, nameof(cache));
-            Guard.NotNull(cache, nameof(cacheHash));
+            Guard.NotNull(cacheHash, nameof(cacheHash));
             Guard.NotNull(AsyncLock, nameof(AsyncLock));
 
             this.next = next;
