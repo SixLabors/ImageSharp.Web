@@ -2,18 +2,28 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
-    /// Provides methods for encoding byte arrrays into hex strings.
+    /// Provides methods for encoding byte arrays into hexidecimal strings.
     /// </summary>
     internal static class HexEncoder
     {
+        // LUT's that provide the hexidecimal representation of each possible byte value.
+        private static readonly char[] HexLutBase = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+        // The base LUT arranged in 16x each item order. 0 * 16, 1 * 16, .... F * 16
+        private static readonly char[] HexLutHi = Enumerable.Range(0, 256).Select(x => HexLutBase[x / 0x10]).ToArray();
+
+        // The base LUT repeated 16x.
+        private static readonly char[] HexLutLo = Enumerable.Range(0, 256).Select(x => HexLutBase[x % 0x10]).ToArray();
+
         /// <summary>
-        /// Converts a <see cref="Span{Byte}"/> to a hexidecimal formatted <see cref="string"/> padded to 2 digits.
+        /// Converts a <see cref="T:Span{byte}"/> to a hexidecimal formatted <see cref="string"/> padded to 2 digits.
         /// </summary>
         /// <param name="bytes">The bytes.</param>
         /// <returns>The <see cref="string"/>.</returns>
@@ -21,24 +31,21 @@ namespace SixLabors.ImageSharp.Web.Caching
         public static string Encode(Span<byte> bytes)
         {
             int length = bytes.Length;
-            char[] c = new char[length * 2];
-            ref char charRef = ref c[0];
+            char[] chars = new char[length * 2];
+            ref char charRef = ref MemoryMarshal.GetReference<char>(chars);
             ref byte bytesRef = ref MemoryMarshal.GetReference(bytes);
-            const int padHi = 0x37 + 0x20;
-            const int padLo = 0x30;
+            ref char hiRef = ref MemoryMarshal.GetReference<char>(HexLutHi);
+            ref char lowRef = ref MemoryMarshal.GetReference<char>(HexLutLo);
 
-            byte b;
-            for (int bx = 0, cx = 0; bx < length; ++bx, ++cx)
+            int index = 0;
+            for (int i = 0; i < length; i++)
             {
-                byte bref = Unsafe.Add(ref bytesRef, bx);
-                b = (byte)(bref >> 4);
-                Unsafe.Add(ref charRef, cx) = (char)(b > 9 ? b + padHi : b + padLo);
-
-                b = (byte)(bref & 0x0F);
-                Unsafe.Add(ref charRef, ++cx) = (char)(b > 9 ? b + padHi : b + padLo);
+                byte byteIndex = Unsafe.Add(ref bytesRef, i);
+                Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref hiRef, byteIndex);
+                Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref lowRef, byteIndex);
             }
 
-            return new string(c);
+            return new string(chars, 0, chars.Length);
         }
     }
 }

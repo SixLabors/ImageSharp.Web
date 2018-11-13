@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using BenchmarkDotNet.Attributes;
@@ -27,25 +28,28 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
         [Benchmark(Description = "Custom ToHex")]
         public string CustomToHex()
         {
-            // char[] c = new char[bytes.Length * 2];
-            const int len = 12;
-            char[] c = new char[len];
+            int length = bytes.Length;
+            char[] c = new char[length * 2];
+            ref char charRef = ref c[0];
+            ref byte bytesRef = ref bytes[0];
+            const int padHi = 0x37 + 0x20;
+            const int padLo = 0x30;
 
             byte b;
-
-            for (int bx = 0, cx = 0; bx < len / 2; ++bx, ++cx)
+            for (int bx = 0, cx = 0; bx < length; ++bx, ++cx)
             {
-                b = ((byte)(bytes[bx] >> 4));
-                c[cx] = (char)(b > 9 ? b + 0x37 + 0x20 : b + 0x30);
+                byte bref = Unsafe.Add(ref bytesRef, bx);
+                b = (byte)(bref >> 4);
+                Unsafe.Add(ref charRef, cx) = (char)(b > 9 ? b + padHi : b + padLo);
 
-                b = ((byte)(bytes[bx] & 0x0F));
-                c[++cx] = (char)(b > 9 ? b + 0x37 + 0x20 : b + 0x30);
+                b = (byte)(bref & 0x0F);
+                Unsafe.Add(ref charRef, ++cx) = (char)(b > 9 ? b + padHi : b + padLo);
             }
 
             return new string(c);
         }
 
-        [Benchmark(Description = "Custom ToHex Unsafe")]
+        [Benchmark(Description = "HexEncoder.Encode with LUT")]
         public string CustomToHexUnsafe() => HexEncoder.Encode(new Span<byte>(bytes).Slice(0, 6));
 
         private static byte[] Hash()
