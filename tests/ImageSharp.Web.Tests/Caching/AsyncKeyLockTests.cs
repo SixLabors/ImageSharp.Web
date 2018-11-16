@@ -8,7 +8,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
 {
     public class AsyncKeyLockTests
     {
-        private readonly AsyncKeyLock asyncKeyLock = new AsyncKeyLock();
+        private static readonly AsyncKeyLock AsyncLock = new AsyncKeyLock();
         private const string AsyncKey = "ASYNC_KEY";
         private const string AsyncKey1 = "ASYNC_KEY1";
         private const string AsyncKey2 = "ASYNC_KEY2";
@@ -21,7 +21,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             int index = 0;
             Task[] tasks = Enumerable.Range(0, 5).Select(i => Task.Run(async () =>
             {
-                using (await this.asyncKeyLock.WriterLockAsync(AsyncKey).ConfigureAwait(false))
+                using (await AsyncLock.WriterLockAsync(AsyncKey).ConfigureAwait(false))
                 {
                     if (i == 0)
                     {
@@ -51,7 +51,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             int index = 0;
             Task[] tasks = Enumerable.Range(0, 5).Select(i => Task.Run(async () =>
             {
-                using (await this.asyncKeyLock.WriterLockAsync(i > 0 ? AsyncKey2 : AsyncKey1).ConfigureAwait(false))
+                using (await AsyncLock.WriterLockAsync(i > 0 ? AsyncKey2 : AsyncKey1).ConfigureAwait(false))
                 {
                     if (i == 0)
                     {
