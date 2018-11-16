@@ -13,7 +13,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         private const string AsyncKey1 = "ASYNC_KEY1";
         private const string AsyncKey2 = "ASYNC_KEY2";
 
-        [Fact (Skip = "")]
+        [Fact]
         public void AsyncLockCanLockByKey()
         {
             bool zeroEntered = false;
@@ -43,7 +43,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             Assert.Equal(5, index);
         }
 
-        [Fact(Skip = "")]
+        [Fact]
         public void AsyncLockAllowsDifferentKeysToRun()
         {
             bool zeroEntered = false;
