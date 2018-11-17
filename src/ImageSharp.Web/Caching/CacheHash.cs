@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
-using System.Buffers;
+using System;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Middleware;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Caching
 {
@@ -17,41 +18,34 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// </summary>
     public sealed class CacheHash : ICacheHash
     {
-        private readonly ImageSharpMiddlewareOptions options;
+        private readonly MemoryAllocator memoryAllocator;
+        private readonly FormatHelper formatHelper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheHash"/> class.
         /// </summary>
         /// <param name="options">The middleware configuration options.</param>
-        public CacheHash(IOptions<ImageSharpMiddlewareOptions> options)
+        /// <param name="memoryAllocator">The memory allocator.</param>
+        public CacheHash(IOptions<ImageSharpMiddlewareOptions> options, MemoryAllocator memoryAllocator)
         {
-            this.options = options.Value;
+            Guard.NotNull(options, nameof(options));
+            Guard.MustBeBetweenOrEqualTo<uint>(options.Value.CachedNameLength, 2, 64, nameof(options.Value.CachedNameLength));
+
+            this.memoryAllocator = memoryAllocator;
+            this.formatHelper = new FormatHelper(options.Value.Configuration);
         }
 
         /// <inheritdoc/>
         public string Create(string value, uint length)
         {
-            Guard.MustBeBetweenOrEqualTo<uint>(length, 2, 64, nameof(length));
-
+            int len = (int)length;
+            int byteCount = Encoding.ASCII.GetByteCount(value);
             using (var hashAlgorithm = SHA256.Create())
+            using (IManagedByteBuffer buffer = this.memoryAllocator.AllocateManagedByteBuffer(byteCount))
             {
-                int len = (int)length;
-
-                // Concatenate the hash bytes into one long string.
-                int byteCount = Encoding.ASCII.GetByteCount(value);
-                byte[] buffer = ArrayPool<byte>.Shared.Rent(byteCount);
-                Encoding.ASCII.GetBytes(value, 0, value.Length, buffer, 0);
-                byte[] hash = hashAlgorithm.ComputeHash(buffer, 0, byteCount);
-                ArrayPool<byte>.Shared.Return(buffer);
-
-                var sb = new StringBuilder(len);
-                for (int i = 0; i < len / 2; i++)
-                {
-                    sb.Append(hash[i].ToString("X2"));
-                }
-
-                sb.AppendFormat(".{0}", FormatHelpers.GetExtensionOrDefault(this.options.Configuration, value));
-                return sb.ToString();
+                byte[] hash = hashAlgorithm.ComputeHash(buffer.Array, 0, byteCount);
+                string ext = this.formatHelper.GetExtensionOrDefault(value);
+                return $"{HexEncoder.Encode(new Span<byte>(hash).Slice(0, len / 2))}.{ext}";
             }
         }
     }

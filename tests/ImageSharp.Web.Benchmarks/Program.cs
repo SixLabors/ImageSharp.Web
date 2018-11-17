@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using BenchmarkDotNet.Running;
 
-namespace ImageSharp.Web.Benchmarks
+namespace SixLabors.ImageSharp.Web.Benchmarks
 {
     class Program
     {

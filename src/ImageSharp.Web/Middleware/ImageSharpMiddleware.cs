@@ -82,6 +82,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private readonly IEnumerable<string> knownCommands;
 
         /// <summary>
+        /// Contains various helper methods based on the current configuration.
+        /// </summary>
+        private readonly FormatHelper formatHelper;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ImageSharpMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next middleware in the pipeline.</param>
@@ -133,6 +138,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.knownCommands = commands;
 
             this.logger = loggerFactory.CreateLogger<ImageSharpMiddleware>();
+            this.formatHelper = new FormatHelper(this.options.Configuration);
         }
 
         /// <summary>
@@ -250,7 +256,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         {
             imageContext.ComprehendRequestHeaders(lastModified, stream.Length);
 
-            string contentType = FormatHelpers.GetContentType(this.options.Configuration, key);
+            string contentType = this.formatHelper.GetContentType(key);
 
             switch (imageContext.GetPreconditionState())
             {

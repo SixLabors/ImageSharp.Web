@@ -26,7 +26,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         private readonly IFileProvider fileProvider;
 
         /// <summary>
-        /// The buffer manager.
+        /// The memory allocator.
         /// </summary>
         private readonly MemoryAllocator memoryAllocator;
 
@@ -34,6 +34,11 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// The middleware configuration options.
         /// </summary>
         private readonly ImageSharpMiddlewareOptions options;
+
+        /// <summary>
+        /// Contains various helper methods based on the current configuration.
+        /// </summary>
+        private readonly FormatHelper formatHelper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemProvider"/> class.
@@ -50,6 +55,7 @@ namespace SixLabors.ImageSharp.Web.Providers
             this.options = options.Value;
             this.fileProvider = environment.WebRootFileProvider;
             this.memoryAllocator = memoryAllocator;
+            this.formatHelper = new FormatHelper(this.options.Configuration);
         }
 
         /// <inheritdoc/>
@@ -59,7 +65,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         public IDictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
 
         /// <inheritdoc/>
-        public bool IsValidRequest(HttpContext context) => FormatHelpers.GetExtension(this.options.Configuration, context.Request.GetDisplayUrl()) != null;
+        public bool IsValidRequest(HttpContext context) => this.formatHelper.GetExtension(context.Request.GetDisplayUrl()) != null;
 
         /// <inheritdoc/>
         public IImageResolver Get(HttpContext context)
