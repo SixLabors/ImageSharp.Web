@@ -19,7 +19,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         {
             // Run the two tests from a single test to see if we can stop tests freezing on Travis.
             this.AsyncLockCanLockByKey();
-            this.AsyncLockAllowsDifferentKeysToRun()
+            this.AsyncLockAllowsDifferentKeysToRun();
         }
 
         private void AsyncLockCanLockByKey()
