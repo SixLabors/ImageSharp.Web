@@ -6,6 +6,7 @@ using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.Caching
 {
+    [Collection(nameof(NonParallelFixture))]
     public class AsyncKeyLockTests
     {
         private static readonly AsyncKeyLock AsyncLock = new AsyncKeyLock();
