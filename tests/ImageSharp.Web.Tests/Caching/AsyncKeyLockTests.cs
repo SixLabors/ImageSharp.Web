@@ -15,7 +15,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         private const string AsyncKey2 = "ASYNC_KEY2";
 
         [Fact]
-        public void AsyncLockCanLockByKey()
+        public void AsyncLockActsAsDoorman()
+        {
+            // Run the two tests from a single test to see if we can stop tests freezing on Travis.
+            this.AsyncLockCanLockByKey();
+            this.AsyncLockAllowsDifferentKeysToRun()
+        }
+
+        private void AsyncLockCanLockByKey()
         {
             bool zeroEntered = false;
             bool entered = false;
@@ -44,8 +51,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             Assert.Equal(5, index);
         }
 
-        [Fact]
-        public void AsyncLockAllowsDifferentKeysToRun()
+        private void AsyncLockAllowsDifferentKeysToRun()
         {
             bool zeroEntered = false;
             bool entered = false;
