@@ -21,7 +21,7 @@ SixLabors.ImageSharp.Web
 
 ### **ImageSharp.Web** is a new high-performance ASP.NET Core middleware leveraging the ImageSharp graphics library.
 
-> Pre-release downloads are available from the [MyGet package repository](https://www.myget.org/gallery/imagesharp).
+> Pre-release downloads are available from the [MyGet package repository](https://www.myget.org/feed/sixlabors/package/nuget/SixLabors.ImageSharp.Web).
 
 
 
