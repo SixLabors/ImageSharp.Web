@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp.Web.Caching;
 using Xunit;
@@ -27,7 +26,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             bool zeroEntered = false;
             bool entered = false;
             int index = 0;
-            Task[] tasks = Enumerable.Range(0, 3).Select(i => Task.Run(async () =>
+            Task[] tasks = Enumerable.Range(0, 5).Select(i => Task.Run(async () =>
             {
                 using (await AsyncLock.WriterLockAsync(AsyncKey).ConfigureAwait(false))
                 {
@@ -35,7 +34,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
                     {
                         entered = true;
                         zeroEntered = true;
-                        Thread.Sleep(3000);
+                        await Task.Delay(3000).ConfigureAwait(false);
                         entered = false;
                     }
                     else if (zeroEntered)
@@ -48,7 +47,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             })).ToArray();
 
             Task.WaitAll(tasks);
-            Assert.Equal(3, index);
+            Assert.Equal(5, index);
         }
 
         private void AsyncLockAllowsDifferentKeysToRun()
@@ -56,7 +55,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             bool zeroEntered = false;
             bool entered = false;
             int index = 0;
-            Task[] tasks = Enumerable.Range(0, 3).Select(i => Task.Run(async () =>
+            Task[] tasks = Enumerable.Range(0, 5).Select(i => Task.Run(async () =>
             {
                 using (await AsyncLock.WriterLockAsync(i > 0 ? AsyncKey2 : AsyncKey1).ConfigureAwait(false))
                 {
@@ -64,7 +63,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
                     {
                         entered = true;
                         zeroEntered = true;
-                        Thread.Sleep(2000);
+                        await Task.Delay(2000).ConfigureAwait(false);
                         entered = false;
                     }
                     else if (zeroEntered)
@@ -78,7 +77,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             })).ToArray();
 
             Task.WaitAll(tasks);
-            Assert.Equal(3, index);
+            Assert.Equal(5, index);
         }
     }
 }

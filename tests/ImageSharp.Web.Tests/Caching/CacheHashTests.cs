@@ -42,6 +42,17 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         }
 
         [Fact]
+        public void CachHashProducesDifferentResults()
+        {
+            const string input = "http://testwebsite.com/image-12345.jpeg?width=400";
+            const string input2 = "http://testwebsite.com/image-23456.jpeg?width=400";
+            string expected = cacheHash.Create(input, 8);
+            string actual = cacheHash.Create(input2, 8);
+
+            Assert.NotEqual(expected, actual);
+        }
+
+        [Fact]
         public void CachHashLengthIsIdentical()
         {
             const string input = "http://testwebsite.com/image-12345.jpeg?width=400";
