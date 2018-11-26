@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp.Web.Caching;
 using Xunit;
@@ -35,7 +34,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
                     {
                         entered = true;
                         zeroEntered = true;
-                        Thread.Sleep(3000);
+                        await Task.Delay(3000).ConfigureAwait(false);
                         entered = false;
                     }
                     else if (zeroEntered)
@@ -64,7 +63,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
                     {
                         entered = true;
                         zeroEntered = true;
-                        Thread.Sleep(2000);
+                        await Task.Delay(2000).ConfigureAwait(false);
                         entered = false;
                     }
                     else if (zeroEntered)
