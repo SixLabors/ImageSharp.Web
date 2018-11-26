@@ -43,6 +43,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             using (var hashAlgorithm = SHA256.Create())
             using (IManagedByteBuffer buffer = this.memoryAllocator.AllocateManagedByteBuffer(byteCount))
             {
+                Encoding.ASCII.GetBytes(value, 0, byteCount, buffer.Array, 0);
                 byte[] hash = hashAlgorithm.ComputeHash(buffer.Array, 0, byteCount);
                 string ext = this.formatHelper.GetExtensionOrDefault(value);
                 return $"{HexEncoder.Encode(new Span<byte>(hash).Slice(0, len / 2))}.{ext}";
