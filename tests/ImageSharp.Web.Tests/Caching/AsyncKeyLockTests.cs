@@ -26,7 +26,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             bool zeroEntered = false;
             bool entered = false;
             int index = 0;
-            Task[] tasks = Enumerable.Range(0, 3).Select(i => Task.Run(async () =>
+            Task[] tasks = Enumerable.Range(0, 5).Select(i => Task.Run(async () =>
             {
                 using (await AsyncLock.WriterLockAsync(AsyncKey).ConfigureAwait(false))
                 {
@@ -47,7 +47,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             })).ToArray();
 
             Task.WaitAll(tasks);
-            Assert.Equal(3, index);
+            Assert.Equal(5, index);
         }
 
         private void AsyncLockAllowsDifferentKeysToRun()
@@ -55,7 +55,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             bool zeroEntered = false;
             bool entered = false;
             int index = 0;
-            Task[] tasks = Enumerable.Range(0, 3).Select(i => Task.Run(async () =>
+            Task[] tasks = Enumerable.Range(0, 5).Select(i => Task.Run(async () =>
             {
                 using (await AsyncLock.WriterLockAsync(i > 0 ? AsyncKey2 : AsyncKey1).ConfigureAwait(false))
                 {
@@ -77,7 +77,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             })).ToArray();
 
             Task.WaitAll(tasks);
-            Assert.Equal(3, index);
+            Assert.Equal(5, index);
         }
     }
 }
