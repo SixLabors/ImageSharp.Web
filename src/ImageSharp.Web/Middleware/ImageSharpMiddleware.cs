@@ -170,7 +170,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             bool processRequest = true;
             var imageContext = new ImageContext(context, this.options);
-            IImageResolver resolvedImage = provider.Get(context);
+            IImageResolver resolvedImage = await provider.GetAsync(context).ConfigureAwait(false);
 
             if (resolvedImage == null)
             {

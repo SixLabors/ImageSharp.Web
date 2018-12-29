@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -68,7 +69,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         public bool IsValidRequest(HttpContext context) => this.formatHelper.GetExtension(context.Request.GetDisplayUrl()) != null;
 
         /// <inheritdoc/>
-        public IImageResolver Get(HttpContext context)
+        public Task<IImageResolver> GetAsync(HttpContext context)
         {
             // Path has already been correctly parsed before here.
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
@@ -76,10 +77,10 @@ namespace SixLabors.ImageSharp.Web.Providers
             // Check to see if the file exists.
             if (!fileInfo.Exists)
             {
-                return null;
+                return Task.FromResult<IImageResolver>(null);
             }
 
-            return new PhysicalFileSystemResolver(fileInfo);
+            return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo));
         }
     }
 }

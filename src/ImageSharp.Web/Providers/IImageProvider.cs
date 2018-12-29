@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -37,6 +38,6 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// </summary>
         /// <param name="context">The current HTTP request context.</param>
         /// <returns>The <see cref="IImageResolver"/>.</returns>
-        IImageResolver Get(HttpContext context);
+        Task<IImageResolver> GetAsync(HttpContext context);
     }
 }
