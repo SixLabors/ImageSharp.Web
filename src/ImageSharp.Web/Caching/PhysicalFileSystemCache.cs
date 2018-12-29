@@ -108,6 +108,7 @@ namespace SixLabors.ImageSharp.Web.Caching
                 return Task.FromResult(new CachedInfo(true, DateTime.MinValue));
             }
 
+            // TODO: This should be in a utils class.
             DateTime lastCacheModifiedUtc = cachedFileInfo.LastModified.UtcDateTime;
             bool expired = true;
 

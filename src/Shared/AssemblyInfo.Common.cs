@@ -5,4 +5,5 @@ using System.Runtime.CompilerServices;
 
 // Ensure the internals can be built and tested.
 [assembly: InternalsVisibleTo("SixLabors.ImageSharp.Web.Tests")]
+[assembly: InternalsVisibleTo("SixLabors.ImageSharp.Web.Providers.Azure")]
 [assembly: InternalsVisibleTo("ImageSharp.Web.Benchmarks")]
