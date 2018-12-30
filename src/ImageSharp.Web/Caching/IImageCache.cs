@@ -26,7 +26,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <returns>The <see cref="IImageResolver"/>.</returns>
-        IImageResolver Get(string key);
+        Task<IImageResolver> GetAsync(string key);
 
         /// <summary>
         /// Returns a value indicating whether the current cached item is expired.
@@ -47,7 +47,8 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <param name="stream">The stream containing the image to store.</param>
+        /// <param name="contentType">The content type of the image to store.</param>
         /// <returns>The <see cref="Task{DateTimeOffset}"/>.</returns>
-        Task<DateTimeOffset> SetAsync(string key, Stream stream);
+        Task<DateTimeOffset> SetAsync(string key, Stream stream, string contentType);
     }
 }

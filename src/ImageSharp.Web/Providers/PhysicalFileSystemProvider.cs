@@ -80,7 +80,10 @@ namespace SixLabors.ImageSharp.Web.Providers
                 return Task.FromResult<IImageResolver>(null);
             }
 
-            return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo));
+            // Make an educated guess of the contentType based on the filename.
+            string contentType = this.formatHelper.GetContentType(fileInfo.Name);
+
+            return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, contentType));
         }
     }
 }

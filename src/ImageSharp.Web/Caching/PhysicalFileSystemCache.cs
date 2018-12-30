@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Resolvers;
 using SixLabors.Memory;
@@ -36,6 +37,16 @@ namespace SixLabors.ImageSharp.Web.Caching
         public const string DefaultCheckSourceChanged = "false";
 
         /// <summary>
+        /// Filename extension for the metadata files.
+        /// </summary>
+        private const string MetaFileExtension = ".meta";
+
+        /// <summary>
+        /// Key for the Content-Type value in the metadata files.
+        /// </summary>
+        private const string ContentTypeKey = "Content-Type";
+
+        /// <summary>
         /// The hosting environment the application is running in.
         /// </summary>
         private readonly IHostingEnvironment environment;
@@ -54,6 +65,11 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// The middleware configuration options.
         /// </summary>
         private readonly ImageSharpMiddlewareOptions options;
+
+        /// <summary>
+        /// Contains various helper methods based on the current configuration.
+        /// </summary>
+        private readonly FormatHelper formatHelper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
@@ -76,6 +92,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             this.fileProvider = this.environment.WebRootFileProvider;
             this.memoryAllocator = memoryAllocator;
             this.options = options.Value;
+            this.formatHelper = new FormatHelper(this.options.Configuration);
         }
 
         /// <inheritdoc/>
@@ -86,9 +103,10 @@ namespace SixLabors.ImageSharp.Web.Caching
             };
 
         /// <inheritdoc/>
-        public IImageResolver Get(string key)
+        public async Task<IImageResolver> GetAsync(string key)
         {
-            IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
+            string path = this.ToFilePath(key);
+            IFileInfo fileInfo = this.fileProvider.GetFileInfo(path);
 
             // Check to see if the file exists.
             if (!fileInfo.Exists)
@@ -96,7 +114,29 @@ namespace SixLabors.ImageSharp.Web.Caching
                 return null;
             }
 
-            return new PhysicalFileSystemResolver(fileInfo);
+            string contentType = null;
+
+            // If a metadata file exists, then try to load it and obtain the content type from the saved metadata
+            IFileInfo metaFileInfo = this.fileProvider.GetFileInfo($"{path}{MetaFileExtension}");
+            if (metaFileInfo.Exists)
+            {
+                Dictionary<string, string> metadata;
+                using (Stream metaStream = metaFileInfo.CreateReadStream())
+                {
+                    metadata = await this.ReadMetadataFile(metaStream);
+                }
+
+                metadata.TryGetValue(ContentTypeKey, out contentType);
+            }
+
+            // If content type metadata was not available, then fallback on guessing the content type
+            // based on the filename.
+            if (contentType == null)
+            {
+                contentType = this.formatHelper.GetContentType(key);
+            }
+
+            return new PhysicalFileSystemResolver(fileInfo, contentType);
         }
 
         /// <inheritdoc/>
@@ -122,9 +162,10 @@ namespace SixLabors.ImageSharp.Web.Caching
         }
 
         /// <inheritdoc/>
-        public async Task<DateTimeOffset> SetAsync(string key, Stream stream)
+        public async Task<DateTimeOffset> SetAsync(string key, Stream stream, string contentType)
         {
             string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
+            string metaPath = $"{path}{MetaFileExtension}";
             string directory = Path.GetDirectoryName(path);
 
             if (!Directory.Exists(directory))
@@ -137,6 +178,15 @@ namespace SixLabors.ImageSharp.Web.Caching
                 await stream.CopyToAsync(fileStream).ConfigureAwait(false);
             }
 
+            using (FileStream fileStream = File.Create(metaPath))
+            {
+                var metadata = new Dictionary<string, string>
+                {
+                    { ContentTypeKey, contentType }
+                };
+                await this.WriteMetadataFile(metadata, fileStream);
+            }
+
             return File.GetLastWriteTimeUtc(path);
         }
 
@@ -146,5 +196,40 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="key">The cache key.</param>
         /// <returns>The <see cref="string"/>.</returns>
         private string ToFilePath(string key) => $"{this.Settings[Folder]}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
+
+        private async Task<Dictionary<string, string>> ReadMetadataFile(Stream stream)
+        {
+            Dictionary<string, string> metadata = new Dictionary<string, string>();
+
+            using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8))
+            {
+                string line;
+                while ((line = await reader.ReadLineAsync()) != null)
+                {
+                    int idx = line.IndexOf(':');
+                    if (idx > 0)
+                    {
+                        string key = line.Substring(0, idx).Trim();
+                        string value = line.Substring(idx + 1).Trim();
+                        metadata[key] = value;
+                    }
+                }
+            }
+
+            return metadata;
+        }
+
+        private async Task WriteMetadataFile(Dictionary<string, string> metadata, Stream stream)
+        {
+            using (var writer = new StreamWriter(stream, System.Text.Encoding.UTF8))
+            {
+                foreach (KeyValuePair<string, string> keyValuePair in metadata)
+                {
+                    await writer.WriteLineAsync($"{keyValuePair.Key}: {keyValuePair.Value}");
+                }
+
+                await writer.FlushAsync();
+            }
+        }
     }
 }

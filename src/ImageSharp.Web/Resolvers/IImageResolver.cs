@@ -19,6 +19,12 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         Task<DateTime> GetLastWriteTimeUtcAsync();
 
         /// <summary>
+        /// Gets the content type of the image data.
+        /// </summary>
+        /// <returns>The content type.</returns>
+        Task<string> GetContentTypeAsync();
+
+        /// <summary>
         /// Gets the input image stream in an asynchronous manner.
         /// </summary>
         /// <returns>The <see cref="Task{Stream}"/>.</returns>

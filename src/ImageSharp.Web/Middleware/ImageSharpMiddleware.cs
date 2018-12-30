@@ -190,11 +190,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     if (!info.Expired)
                     {
                         // We're pulling the image from the cache.
-                        IImageResolver cachedImage = this.cache.Get(key);
+                        IImageResolver cachedImage = await this.cache.GetAsync(key).ConfigureAwait(false);
                         using (Stream cachedBuffer = await cachedImage.OpenReadAsync().ConfigureAwait(false))
                         {
                             // Image is a cached image. Return the correct response now.
-                            await this.SendResponse(imageContext, key, info.LastModifiedUtc, cachedBuffer).ConfigureAwait(false);
+                            string contentType = await cachedImage.GetContentTypeAsync();
+                            await this.SendResponse(imageContext, key, info.LastModifiedUtc, cachedBuffer, contentType).ConfigureAwait(false);
                         }
 
                         return;
@@ -211,6 +212,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         // This reduces the overheads of unnecessary processing plus avoids file locks.
                         using (await AsyncLock.WriterLockAsync(key).ConfigureAwait(false))
                         {
+                            string contentType;
+
                             // No allocations here for inStream since we are passing the raw input stream.
                             // outStream allocation depends on the memory allocator used.
                             outStream = new ChunkedMemoryStream(this.memoryAllocator);
@@ -219,6 +222,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             {
                                 image.Process(this.logger, this.processors, commands);
                                 this.options.OnBeforeSave?.Invoke(image);
+                                contentType = image.Format.DefaultMimeType;
                                 image.Save(outStream);
                             }
 
@@ -227,8 +231,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, Path.GetExtension(key)));
                             outStream.Position = 0;
 
-                            DateTimeOffset cachedDate = await this.cache.SetAsync(key, outStream).ConfigureAwait(false);
-                            await this.SendResponse(imageContext, key, cachedDate, outStream).ConfigureAwait(false);
+                            DateTimeOffset cachedDate = await this.cache.SetAsync(key, outStream, contentType).ConfigureAwait(false);
+                            await this.SendResponse(imageContext, key, cachedDate, outStream, contentType).ConfigureAwait(false);
                         }
                     }
                 }
@@ -252,11 +256,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
         }
 
-        private async Task SendResponse(ImageContext imageContext, string key, DateTimeOffset lastModified, Stream stream)
+        private async Task SendResponse(ImageContext imageContext, string key, DateTimeOffset lastModified, Stream stream, string contentType)
         {
             imageContext.ComprehendRequestHeaders(lastModified, stream.Length);
-
-            string contentType = this.formatHelper.GetContentType(key);
 
             switch (imageContext.GetPreconditionState())
             {
