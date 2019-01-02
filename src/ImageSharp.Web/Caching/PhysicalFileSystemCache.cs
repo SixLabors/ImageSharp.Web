@@ -42,11 +42,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         private const string MetaFileExtension = ".meta";
 
         /// <summary>
-        /// Key for the Content-Type value in the metadata files.
-        /// </summary>
-        private const string ContentTypeKey = "Content-Type";
-
-        /// <summary>
         /// The hosting environment the application is running in.
         /// </summary>
         private readonly IHostingEnvironment environment;
@@ -114,55 +109,32 @@ namespace SixLabors.ImageSharp.Web.Caching
                 return null;
             }
 
-            string contentType = null;
-
-            // If a metadata file exists, then try to load it and obtain the content type from the saved metadata
+            // Try to load the image metadata.  If no such meta file exists, then generate a fallback
+            // ImageMetadata by guessing at the ContentType based on the cached image filename, and
+            // using the LastModified timestamp of the cached image file.
+            ImageMetadata metadata;
             IFileInfo metaFileInfo = this.fileProvider.GetFileInfo($"{path}{MetaFileExtension}");
             if (metaFileInfo.Exists)
             {
-                Dictionary<string, string> metadata;
-                using (Stream metaStream = metaFileInfo.CreateReadStream())
+                using (Stream stream = metaFileInfo.CreateReadStream())
                 {
-                    metadata = await this.ReadMetadataFile(metaStream);
+                    metadata = await ImageMetadata.LoadAsync(stream);
                 }
-
-                metadata.TryGetValue(ContentTypeKey, out contentType);
             }
-
-            // If content type metadata was not available, then fallback on guessing the content type
-            // based on the filename.
-            if (contentType == null)
+            else
             {
-                contentType = this.formatHelper.GetContentType(key);
+                metadata = new ImageMetadata()
+                {
+                    ContentType = this.formatHelper.GetContentType(key),
+                    LastModified = fileInfo.LastModified
+                };
             }
 
-            return new PhysicalFileSystemResolver(fileInfo, contentType);
+            return new PhysicalFileSystemResolver(fileInfo, metadata);
         }
 
         /// <inheritdoc/>
-        public Task<CachedInfo> IsExpiredAsync(HttpContext context, string key, DateTime lastWriteTimeUtc, DateTime minDateUtc)
-        {
-            IFileInfo cachedFileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
-            if (!cachedFileInfo.Exists)
-            {
-                return Task.FromResult(new CachedInfo(true, DateTime.MinValue));
-            }
-
-            DateTime lastCacheModifiedUtc = cachedFileInfo.LastModified.UtcDateTime;
-            bool expired = true;
-
-            // Check whether the last modified date is less than the min date.
-            // If it's newer than the cached file then it must be an update.
-            if (lastCacheModifiedUtc > minDateUtc && lastWriteTimeUtc < lastCacheModifiedUtc)
-            {
-                expired = false;
-            }
-
-            return Task.FromResult(new CachedInfo(expired, lastCacheModifiedUtc));
-        }
-
-        /// <inheritdoc/>
-        public async Task<DateTimeOffset> SetAsync(string key, Stream stream, string contentType)
+        public async Task SetAsync(string key, Stream stream, ImageMetadata metadata)
         {
             string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
             string metaPath = $"{path}{MetaFileExtension}";
@@ -180,14 +152,8 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             using (FileStream fileStream = File.Create(metaPath))
             {
-                var metadata = new Dictionary<string, string>
-                {
-                    { ContentTypeKey, contentType }
-                };
-                await this.WriteMetadataFile(metadata, fileStream);
+                await metadata.WriteAsync(fileStream);
             }
-
-            return File.GetLastWriteTimeUtc(path);
         }
 
         /// <summary>
@@ -196,40 +162,5 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="key">The cache key.</param>
         /// <returns>The <see cref="string"/>.</returns>
         private string ToFilePath(string key) => $"{this.Settings[Folder]}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
-
-        private async Task<Dictionary<string, string>> ReadMetadataFile(Stream stream)
-        {
-            Dictionary<string, string> metadata = new Dictionary<string, string>();
-
-            using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8))
-            {
-                string line;
-                while ((line = await reader.ReadLineAsync()) != null)
-                {
-                    int idx = line.IndexOf(':');
-                    if (idx > 0)
-                    {
-                        string key = line.Substring(0, idx).Trim();
-                        string value = line.Substring(idx + 1).Trim();
-                        metadata[key] = value;
-                    }
-                }
-            }
-
-            return metadata;
-        }
-
-        private async Task WriteMetadataFile(Dictionary<string, string> metadata, Stream stream)
-        {
-            using (var writer = new StreamWriter(stream, System.Text.Encoding.UTF8))
-            {
-                foreach (KeyValuePair<string, string> keyValuePair in metadata)
-                {
-                    await writer.WriteLineAsync($"{keyValuePair.Key}: {keyValuePair.Value}");
-                }
-
-                await writer.FlushAsync();
-            }
-        }
     }
 }

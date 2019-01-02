@@ -13,16 +13,10 @@ namespace SixLabors.ImageSharp.Web.Resolvers
     public interface IImageResolver
     {
         /// <summary>
-        /// Gets the date and time in coordinated universal time (UTC) since the source file was last modified.
+        /// Gets metadata associated with this image.
         /// </summary>
-        /// <returns>The <see cref="DateTime"/>.</returns>
-        Task<DateTime> GetLastWriteTimeUtcAsync();
-
-        /// <summary>
-        /// Gets the content type of the image data.
-        /// </summary>
-        /// <returns>The content type.</returns>
-        Task<string> GetContentTypeAsync();
+        /// <returns>The <see cref="ImageMetadata"/>.</returns>
+        Task<ImageMetadata> GetImageMetadataAsync();
 
         /// <summary>
         /// Gets the input image stream in an asynchronous manner.

@@ -29,26 +29,13 @@ namespace SixLabors.ImageSharp.Web.Caching
         Task<IImageResolver> GetAsync(string key);
 
         /// <summary>
-        /// Returns a value indicating whether the current cached item is expired.
-        /// </summary>
-        /// <param name="context">The current HTTP request context.</param>
-        /// <param name="key">The cache key.</param>
-        /// <param name="lastWriteTimeUtc">The date and time in coordinated universal time (UTC) since the source file was last modified.</param>
-        /// <param name="minDateUtc">
-        /// The minimum allowable date and time in coordinated universal time (UTC) since the file was last modified.
-        /// Calculated as the current datetime minus the maximum allowable cached days.
-        /// </param>
-        /// <returns>The <see cref="Task{CachedInfo}"/>.</returns>
-        Task<CachedInfo> IsExpiredAsync(HttpContext context, string key, DateTime lastWriteTimeUtc, DateTime minDateUtc);
-
-        /// <summary>
         /// Sets the value associated with the specified key.
         /// Returns the date and time, in coordinated universal time (UTC), that the value was last written to.
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <param name="stream">The stream containing the image to store.</param>
-        /// <param name="contentType">The content type of the image to store.</param>
-        /// <returns>The <see cref="Task{DateTimeOffset}"/>.</returns>
-        Task<DateTimeOffset> SetAsync(string key, Stream stream, string contentType);
+        /// <param name="metadata">The <see cref="ImageMetadata"/> associated with the image to store.</param>
+        /// <returns>The task.</returns>
+        Task SetAsync(string key, Stream stream, ImageMetadata metadata);
     }
 }

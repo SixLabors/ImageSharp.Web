@@ -83,7 +83,13 @@ namespace SixLabors.ImageSharp.Web.Providers
             // Make an educated guess of the contentType based on the filename.
             string contentType = this.formatHelper.GetContentType(fileInfo.Name);
 
-            return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, contentType));
+            var metadata = new ImageMetadata()
+            {
+                ContentType = contentType,
+                LastModified = fileInfo.LastModified
+            };
+
+            return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
         }
     }
 }
