@@ -34,8 +34,8 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <param name="stream">The stream containing the image to store.</param>
-        /// <param name="metadata">The <see cref="ImageMetadata"/> associated with the image to store.</param>
+        /// <param name="metadata">The <see cref="ImageMetaData"/> associated with the image to store.</param>
         /// <returns>The task.</returns>
-        Task SetAsync(string key, Stream stream, ImageMetadata metadata);
+        Task SetAsync(string key, Stream stream, ImageMetaData metadata);
     }
 }

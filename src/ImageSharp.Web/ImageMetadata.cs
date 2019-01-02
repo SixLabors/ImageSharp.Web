@@ -2,89 +2,139 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
+using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web
 {
     /// <summary>
-    /// A collection of metadata properties associated with an image file.
+    /// Represents the metadata associated with an image file.
     /// </summary>
-    public struct ImageMetadata
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public readonly struct ImageMetaData : IEquatable<ImageMetaData>
     {
-        private const string ContentTypeKey = "Content-Type";
-        private const string LastModifiedKey = "Last-Modified";
+        private static readonly int DateSize = Unsafe.SizeOf<DateTime>();
 
         /// <summary>
-        /// The date and time in coordinated universal time (UTC) since this image was last modified.
+        /// Initializes a new instance of the <see cref="ImageMetaData"/> struct.
         /// </summary>
-        public DateTimeOffset LastModified;
-
-        /// <summary>
-        /// The content type of this image.
-        /// </summary>
-        public string ContentType;
-
-        /// <summary>
-        /// Asynchronously deserializes an <see cref="ImageMetadata"/> from the specified <see cref="Stream"/>.
-        /// </summary>
-        /// <param name="stream">The <see cref="Stream"/>.</param>
-        /// <returns>The <see cref="ImageMetadata"/>.</returns>
-        public static async Task<ImageMetadata> LoadAsync(Stream stream)
+        /// <param name="lastWriteTimeUtc">The date and time in coordinated universal time (UTC) since the source file was last modified.</param>
+        /// <param name="contentType">The content type for the source file.</param>
+        public ImageMetaData(DateTime lastWriteTimeUtc, string contentType)
         {
-            // Parse the key/value pairs from the stream
-            var keyValuePairs = new Dictionary<string, string>();
-            using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8))
-            {
-                string line;
-                while ((line = await reader.ReadLineAsync()) != null)
-                {
-                    int idx = line.IndexOf(':');
-                    if (idx > 0)
-                    {
-                        string key = line.Substring(0, idx).Trim();
-                        string value = line.Substring(idx + 1).Trim();
-                        keyValuePairs[key] = value;
-                    }
-                }
-            }
-
-            // Extract the fields we are interested in
-            keyValuePairs.TryGetValue(ContentTypeKey, out string contentType);
-            keyValuePairs.TryGetValue(LastModifiedKey, out string lastModifiedString);
-            DateTimeOffset.TryParse(lastModifiedString, out DateTimeOffset lastModified);
-
-            return new ImageMetadata()
-            {
-                ContentType = contentType,
-                LastModified = lastModified
-            };
+            this.LastWriteTimeUtc = lastWriteTimeUtc;
+            this.ContentType = contentType;
         }
 
         /// <summary>
-        /// Asynchronously serializes this ImageMetadata to the specified <see cref="Stream"/>.
+        /// Gets the date and time in coordinated universal time (UTC) since the source file was last modified.
         /// </summary>
-        /// <param name="stream">The <see cref="Stream"/>.</param>
-        /// <returns>A task.</returns>
-        public async Task WriteAsync(Stream stream)
+        public DateTime LastWriteTimeUtc { get; }
+
+        /// <summary>
+        /// Gets the content type of the source file.
+        /// </summary>
+        public string ContentType { get; }
+
+        /// <summary>
+        /// Compares two <see cref="ImageMetaData"/> objects for equality.
+        /// </summary>
+        /// <param name="left">The <see cref="ImageMetaData"/> on the left side of the operand.</param>
+        /// <param name="right">The <see cref="ImageMetaData"/> on the right side of the operand.</param>
+        /// <returns>
+        /// True if the current left is equal to the <paramref name="right"/> parameter; otherwise, false.
+        /// </returns>
+        public static bool operator ==(in ImageMetaData left, in ImageMetaData right) => left.Equals(right);
+
+        /// <summary>
+        /// Compares two <see cref="ImageMetaData"/> objects for inequality.
+        /// </summary>
+        /// <param name="left">The <see cref="ImageMetaData"/> on the left side of the operand.</param>
+        /// <param name="right">The <see cref="ImageMetaData"/> on the right side of the operand.</param>
+        /// <returns>
+        /// True if the current left is unequal to the <paramref name="right"/> parameter; otherwise, false.
+        /// </returns>
+        public static bool operator !=(in ImageMetaData left, in ImageMetaData right) => !left.Equals(right);
+
+        /// <summary>
+        /// Asynchronously reads and returns an <see cref="ImageMetaData"/> from the input stream.
+        /// </summary>
+        /// <param name="stream">The input stream.</param>
+        /// <param name="memoryAllocator">The memory allocator used for managing buffers.</param>
+        /// <returns>The <see cref="ImageMetaData"/>.</returns>
+        public static async Task<ImageMetaData> ReadAsync(Stream stream, MemoryAllocator memoryAllocator)
         {
-            // Create a collection of key/value pairs from the metadata
-            var keyValuePairs = new Dictionary<string, string>
+            int count = (int)stream.Length;
+            using (IManagedByteBuffer buffer = memoryAllocator.AllocateManagedByteBuffer(count))
             {
-                { ContentTypeKey, this.ContentType },
-                { LastModifiedKey, this.LastModified.ToString("o") }
-            };
+                await stream.ReadAsync(buffer.Array, 0, count).ConfigureAwait(false);
+                return Parse(buffer.Memory.Span);
+            }
+        }
 
-            // Write the key/value pairs to the stream
-            using (var writer = new StreamWriter(stream, System.Text.Encoding.UTF8))
+        /// <summary>
+        /// Converts the string representation of the cached meta data to its <see cref="ImageMetaData" /> equivalent.
+        /// </summary>
+        /// <param name="buffer">The source buffer to parse.</param>
+        /// <returns>The <see cref="ImageMetaData"/>.</returns>
+        public static ImageMetaData Parse(ReadOnlySpan<byte> buffer) => Unsafe.As<byte, ImageMetaData>(ref MemoryMarshal.GetReference(buffer));
+
+        /// <inheritdoc/>
+        public bool Equals(ImageMetaData other)
+        {
+            return this.LastWriteTimeUtc == other.LastWriteTimeUtc
+                   && this.ContentType == other.ContentType;
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => obj is ImageMetaData data && this.Equals(data);
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            // TODO: Replace with HashCode from Core.
+            int hashCode = this.LastWriteTimeUtc.GetHashCode();
+            return hashCode = (hashCode * 397) ^ this.ContentType.GetHashCode();
+        }
+
+        /// <inheritdoc/>
+        public override string ToString() => FormattableString.Invariant($"ImageMetaData({this.LastWriteTimeUtc}, {this.ContentType})");
+
+        /// <summary>
+        /// Calculates the number of bytes this <see cref="ImageMetaData"/> represents.
+        /// </summary>
+        /// <returns>The <see cref="int"/>.</returns>
+        public int GetByteCount() => DateSize + Encoding.ASCII.GetByteCount(this.ContentType);
+
+        /// <summary>
+        /// Writes the metadata to the target buffer.
+        /// </summary>
+        /// <param name="buffer">The target buffer.</param>
+        public void WriteTo(Span<byte> buffer)
+        {
+            Guard.MustBeGreaterThanOrEqualTo(buffer.Length, this.GetByteCount(), nameof(buffer));
+
+            ref ImageMetaData meta = ref Unsafe.As<byte, ImageMetaData>(ref MemoryMarshal.GetReference(buffer));
+            meta = this;
+        }
+
+        /// <summary>
+        /// Asynchronously writes the metadata to the target stream.
+        /// </summary>
+        /// <param name="stream">The target stream.</param>
+        /// <param name="memoryAllocator">The memory allocator used for managing buffers.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task WriteAsync(Stream stream, MemoryAllocator memoryAllocator)
+        {
+            int count = this.GetByteCount();
+            using (IManagedByteBuffer buffer = memoryAllocator.AllocateManagedByteBuffer(count))
             {
-                foreach (KeyValuePair<string, string> keyValuePair in keyValuePairs)
-                {
-                    await writer.WriteLineAsync($"{keyValuePair.Key}: {keyValuePair.Value}");
-                }
-
-                await writer.FlushAsync();
+                this.WriteTo(buffer.Memory.Span);
+                await stream.WriteAsync(buffer.Array, 0, count).ConfigureAwait(false);
             }
         }
     }

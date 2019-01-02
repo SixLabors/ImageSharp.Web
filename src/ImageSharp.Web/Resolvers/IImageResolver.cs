@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -13,13 +12,13 @@ namespace SixLabors.ImageSharp.Web.Resolvers
     public interface IImageResolver
     {
         /// <summary>
-        /// Gets metadata associated with this image.
+        /// Asynchronously gets metadata associated with this image.
         /// </summary>
-        /// <returns>The <see cref="ImageMetadata"/>.</returns>
-        Task<ImageMetadata> GetImageMetadataAsync();
+        /// <returns>The <see cref="ImageMetaData"/>.</returns>
+        Task<ImageMetaData> GetMetaDataAsync();
 
         /// <summary>
-        /// Gets the input image stream in an asynchronous manner.
+        /// Asynchronously gets the input image stream.
         /// </summary>
         /// <returns>The <see cref="Task{Stream}"/>.</returns>
         Task<Stream> OpenReadAsync();

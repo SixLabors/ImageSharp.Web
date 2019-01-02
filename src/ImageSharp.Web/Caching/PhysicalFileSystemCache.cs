@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Helpers;
@@ -109,32 +107,21 @@ namespace SixLabors.ImageSharp.Web.Caching
                 return null;
             }
 
-            // Try to load the image metadata.  If no such meta file exists, then generate a fallback
-            // ImageMetadata by guessing at the ContentType based on the cached image filename, and
-            // using the LastModified timestamp of the cached image file.
-            ImageMetadata metadata;
+            ImageMetaData metadata = default;
             IFileInfo metaFileInfo = this.fileProvider.GetFileInfo($"{path}{MetaFileExtension}");
             if (metaFileInfo.Exists)
             {
                 using (Stream stream = metaFileInfo.CreateReadStream())
                 {
-                    metadata = await ImageMetadata.LoadAsync(stream);
+                    metadata = await ImageMetaData.ReadAsync(stream, this.memoryAllocator).ConfigureAwait(false);
                 }
-            }
-            else
-            {
-                metadata = new ImageMetadata()
-                {
-                    ContentType = this.formatHelper.GetContentType(key),
-                    LastModified = fileInfo.LastModified
-                };
             }
 
             return new PhysicalFileSystemResolver(fileInfo, metadata);
         }
 
         /// <inheritdoc/>
-        public async Task SetAsync(string key, Stream stream, ImageMetadata metadata)
+        public async Task SetAsync(string key, Stream stream, ImageMetaData metadata)
         {
             string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
             string metaPath = $"{path}{MetaFileExtension}";
@@ -152,7 +139,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             using (FileStream fileStream = File.Create(metaPath))
             {
-                await metadata.WriteAsync(fileStream);
+                await metadata.WriteAsync(fileStream, this.memoryAllocator).ConfigureAwait(false);
             }
         }
 
