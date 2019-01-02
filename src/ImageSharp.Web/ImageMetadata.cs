@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using SixLabors.Memory;
 
@@ -17,7 +16,9 @@ namespace SixLabors.ImageSharp.Web
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct ImageMetaData : IEquatable<ImageMetaData>
     {
-        private static readonly int DateSize = Unsafe.SizeOf<DateTime>();
+        // Bytes per struct.
+        private const int DateSize = 8;
+        private const int CharSize = 2;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageMetaData"/> struct.
@@ -82,6 +83,7 @@ namespace SixLabors.ImageSharp.Web
             int count = (int)stream.Length;
             using (IManagedByteBuffer buffer = memoryAllocator.AllocateManagedByteBuffer(count))
             {
+                stream.Position = 0;
                 await stream.ReadAsync(buffer.Array, 0, count).ConfigureAwait(false);
                 return Parse(buffer.Memory.Span);
             }
@@ -92,7 +94,7 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="buffer">The source buffer to parse.</param>
         /// <returns>The <see cref="ImageMetaData"/>.</returns>
-        [MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ImageMetaData Parse(ReadOnlySpan<byte> buffer) => Unsafe.As<byte, ImageMetaData>(ref MemoryMarshal.GetReference(buffer));
 
         /// <inheritdoc/>
@@ -122,7 +124,10 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <returns>The <see cref="int"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetByteCount() => DateSize + Encoding.ASCII.GetByteCount(this.ContentType);
+        public int GetByteCount()
+
+            // 8 bytes for the datetime + 2 bytes per char * string length.
+            => DateSize + (this.ContentType.Length * CharSize);
 
         /// <summary>
         /// Writes the metadata to the target buffer.
@@ -149,6 +154,7 @@ namespace SixLabors.ImageSharp.Web
             using (IManagedByteBuffer buffer = memoryAllocator.AllocateManagedByteBuffer(count))
             {
                 this.WriteTo(buffer.Memory.Span);
+                stream.Position = 0;
                 await stream.WriteAsync(buffer.Array, 0, count).ConfigureAwait(false);
             }
         }

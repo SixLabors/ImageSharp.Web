@@ -3,7 +3,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using System.Text;
 using SixLabors.Memory;
 using Xunit;
 using Xunit.Abstractions;
@@ -33,9 +32,11 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             var meta = new ImageMetaData(LastWriteTimeUtc, ContentType);
 
             int dateBytes = Unsafe.SizeOf<DateTime>();
-            int contentBytes = Encoding.ASCII.GetByteCount(ContentType);
+            int contentBytes = (ContentType.Length * Unsafe.SizeOf<char>());
 
             Assert.Equal(dateBytes + contentBytes, meta.GetByteCount());
+
+            this.Output.WriteLine(meta.GetByteCount().ToString());
         }
 
         [Fact]
