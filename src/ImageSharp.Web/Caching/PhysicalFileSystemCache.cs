@@ -35,11 +35,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         public const string DefaultCheckSourceChanged = "false";
 
         /// <summary>
-        /// Filename extension for the metadata files.
-        /// </summary>
-        private const string MetaFileExtension = ".meta";
-
-        /// <summary>
         /// The hosting environment the application is running in.
         /// </summary>
         private readonly IHostingEnvironment environment;
@@ -62,7 +57,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Contains various helper methods based on the current configuration.
         /// </summary>
-        private readonly FormatHelper formatHelper;
+        private readonly FormatUtilities formatUtilies;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
@@ -85,7 +80,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             this.fileProvider = this.environment.WebRootFileProvider;
             this.memoryAllocator = memoryAllocator;
             this.options = options.Value;
-            this.formatHelper = new FormatHelper(this.options.Configuration);
+            this.formatUtilies = new FormatUtilities(this.options.Configuration);
         }
 
         /// <inheritdoc/>
@@ -99,22 +94,25 @@ namespace SixLabors.ImageSharp.Web.Caching
         public async Task<IImageResolver> GetAsync(string key)
         {
             string path = this.ToFilePath(key);
-            IFileInfo fileInfo = this.fileProvider.GetFileInfo(path);
 
-            // Check to see if the file exists.
-            if (!fileInfo.Exists)
+            IFileInfo metaFileInfo = this.fileProvider.GetFileInfo(this.ToMetaDataFilePath(path));
+            if (!metaFileInfo.Exists)
             {
                 return null;
             }
 
             ImageMetaData metadata = default;
-            IFileInfo metaFileInfo = this.fileProvider.GetFileInfo($"{path}{MetaFileExtension}");
-            if (metaFileInfo.Exists)
+            using (Stream stream = metaFileInfo.CreateReadStream())
             {
-                using (Stream stream = metaFileInfo.CreateReadStream())
-                {
-                    metadata = await ImageMetaData.ReadAsync(stream, this.memoryAllocator).ConfigureAwait(false);
-                }
+                metadata = await ImageMetaData.ReadAsync(stream, this.memoryAllocator).ConfigureAwait(false);
+            }
+
+            IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToImageFilePath(path, metadata));
+
+            // Check to see if the file exists.
+            if (!fileInfo.Exists)
+            {
+                return null;
             }
 
             return new PhysicalFileSystemResolver(fileInfo, metadata);
@@ -124,7 +122,8 @@ namespace SixLabors.ImageSharp.Web.Caching
         public async Task SetAsync(string key, Stream stream, ImageMetaData metadata)
         {
             string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
-            string metaPath = $"{path}{MetaFileExtension}";
+            string imagePath = this.ToImageFilePath(path, metadata);
+            string metaPath = this.ToMetaDataFilePath(path);
             string directory = Path.GetDirectoryName(path);
 
             if (!Directory.Exists(directory))
@@ -132,7 +131,7 @@ namespace SixLabors.ImageSharp.Web.Caching
                 Directory.CreateDirectory(directory);
             }
 
-            using (FileStream fileStream = File.Create(path))
+            using (FileStream fileStream = File.Create(imagePath))
             {
                 await stream.CopyToAsync(fileStream).ConfigureAwait(false);
             }
@@ -142,6 +141,21 @@ namespace SixLabors.ImageSharp.Web.Caching
                 await metadata.WriteAsync(fileStream, this.memoryAllocator).ConfigureAwait(false);
             }
         }
+
+        /// <summary>
+        /// Gets the path to the image file based on the supplied root and metadata.
+        /// </summary>
+        /// <param name="path">The root path.</param>
+        /// <param name="metaData">The image metadata.</param>
+        /// <returns>The <see cref="string"/>.</returns>
+        private string ToImageFilePath(string path, in ImageMetaData metaData) => $"{path}.{this.formatUtilies.GetExtensionFromContentType(metaData.ContentType)}";
+
+        /// <summary>
+        /// Gets the path to the image file based on the supplied root.
+        /// </summary>
+        /// <param name="path">The root path.</param>
+        /// <returns>The <see cref="string"/>.</returns>
+        private string ToMetaDataFilePath(string path) => $"{path}.meta";
 
         /// <summary>
         /// Converts the key into a nested file path.

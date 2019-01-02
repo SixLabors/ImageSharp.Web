@@ -23,6 +23,15 @@ namespace SixLabors.ImageSharp.Web
         /// Initializes a new instance of the <see cref="ImageMetaData"/> struct.
         /// </summary>
         /// <param name="lastWriteTimeUtc">The date and time in coordinated universal time (UTC) since the source file was last modified.</param>
+        public ImageMetaData(DateTime lastWriteTimeUtc)
+            : this(lastWriteTimeUtc, string.Empty)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageMetaData"/> struct.
+        /// </summary>
+        /// <param name="lastWriteTimeUtc">The date and time in coordinated universal time (UTC) since the source file was last modified.</param>
         /// <param name="contentType">The content type for the source file.</param>
         public ImageMetaData(DateTime lastWriteTimeUtc, string contentType)
         {
@@ -48,6 +57,7 @@ namespace SixLabors.ImageSharp.Web
         /// <returns>
         /// True if the current left is equal to the <paramref name="right"/> parameter; otherwise, false.
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(in ImageMetaData left, in ImageMetaData right) => left.Equals(right);
 
         /// <summary>
@@ -58,6 +68,7 @@ namespace SixLabors.ImageSharp.Web
         /// <returns>
         /// True if the current left is unequal to the <paramref name="right"/> parameter; otherwise, false.
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in ImageMetaData left, in ImageMetaData right) => !left.Equals(right);
 
         /// <summary>
@@ -81,9 +92,11 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="buffer">The source buffer to parse.</param>
         /// <returns>The <see cref="ImageMetaData"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ImageMetaData Parse(ReadOnlySpan<byte> buffer) => Unsafe.As<byte, ImageMetaData>(ref MemoryMarshal.GetReference(buffer));
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(ImageMetaData other)
         {
             return this.LastWriteTimeUtc == other.LastWriteTimeUtc
@@ -108,12 +121,14 @@ namespace SixLabors.ImageSharp.Web
         /// Calculates the number of bytes this <see cref="ImageMetaData"/> represents.
         /// </summary>
         /// <returns>The <see cref="int"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetByteCount() => DateSize + Encoding.ASCII.GetByteCount(this.ContentType);
 
         /// <summary>
         /// Writes the metadata to the target buffer.
         /// </summary>
         /// <param name="buffer">The target buffer.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteTo(Span<byte> buffer)
         {
             Guard.MustBeGreaterThanOrEqualTo(buffer.Length, this.GetByteCount(), nameof(buffer));

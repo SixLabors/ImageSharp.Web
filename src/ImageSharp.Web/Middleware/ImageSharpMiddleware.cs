@@ -84,7 +84,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Contains various helper methods based on the current configuration.
         /// </summary>
-        private readonly FormatHelper formatHelper;
+        private readonly FormatUtilities formatUtilities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageSharpMiddleware"/> class.
@@ -138,7 +138,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.knownCommands = commands;
 
             this.logger = loggerFactory.CreateLogger<ImageSharpMiddleware>();
-            this.formatHelper = new FormatHelper(this.options.Configuration);
+            this.formatUtilities = new FormatUtilities(this.options.Configuration);
         }
 
         /// <summary>
@@ -181,12 +181,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             if (processRequest)
             {
-                ImageMetaData sourceImageMetadata = await sourceImageResolver.GetMetaDataAsync().ConfigureAwait(false);
-
                 // Lock any reads when a write is being done for the same key to prevent potential file locks.
                 using (await AsyncLock.ReaderLockAsync(key).ConfigureAwait(false))
                 {
                     // Check to see if the cache contains this image
+                    ImageMetaData sourceImageMetadata = await sourceImageResolver.GetMetaDataAsync().ConfigureAwait(false);
                     IImageResolver cachedImageResolver = await this.cache.GetAsync(key).ConfigureAwait(false);
                     if (cachedImageResolver != null)
                     {
@@ -240,7 +239,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                             // Save the image to the cache and send the response to the caller.
                             await this.cache.SetAsync(key, outStream, cachedImageMetadata).ConfigureAwait(false);
-                            await this.SendResponse(imageContext, key, outStream, sourceImageMetadata).ConfigureAwait(false);
+                            await this.SendResponse(imageContext, key, outStream, cachedImageMetadata).ConfigureAwait(false);
                         }
                     }
                 }

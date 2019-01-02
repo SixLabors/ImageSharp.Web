@@ -14,7 +14,7 @@ namespace SixLabors.ImageSharp.Web.Benchmarks
     public class CacheHashBaseline : ICacheHash
     {
         private readonly ImageSharpMiddlewareOptions options;
-        private readonly FormatHelper formatHelper;
+        private readonly FormatUtilities formatUtilities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheHash"/> class.
@@ -23,7 +23,7 @@ namespace SixLabors.ImageSharp.Web.Benchmarks
         public CacheHashBaseline(IOptions<ImageSharpMiddlewareOptions> options)
         {
             this.options = options.Value;
-            this.formatHelper = new FormatHelper(this.options.Configuration);
+            this.formatUtilities = new FormatUtilities(this.options.Configuration);
         }
 
         /// <inheritdoc/>
@@ -45,7 +45,6 @@ namespace SixLabors.ImageSharp.Web.Benchmarks
                     sb.Append(hash[i].ToString("X2"));
                 }
 
-                sb.AppendFormat(".{0}", this.formatHelper.GetExtensionOrDefault(value));
                 return sb.ToString();
             }
         }
