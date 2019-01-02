@@ -92,7 +92,7 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="buffer">The source buffer to parse.</param>
         /// <returns>The <see cref="ImageMetaData"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static ImageMetaData Parse(ReadOnlySpan<byte> buffer) => Unsafe.As<byte, ImageMetaData>(ref MemoryMarshal.GetReference(buffer));
 
         /// <inheritdoc/>
