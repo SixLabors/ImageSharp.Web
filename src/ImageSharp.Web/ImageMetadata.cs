@@ -2,23 +2,21 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
-using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web
 {
     /// <summary>
     /// Represents the metadata associated with an image file.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct ImageMetaData : IEquatable<ImageMetaData>
     {
-        // Bytes per struct.
-        private const int DateSize = 8;
-        private const int CharSize = 2;
+        private const string ContentTypeKey = "ContentType";
+        private const string LastModifiedKey = "LastModified";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageMetaData"/> struct.
@@ -76,26 +74,30 @@ namespace SixLabors.ImageSharp.Web
         /// Asynchronously reads and returns an <see cref="ImageMetaData"/> from the input stream.
         /// </summary>
         /// <param name="stream">The input stream.</param>
-        /// <param name="memoryAllocator">The memory allocator used for managing buffers.</param>
         /// <returns>The <see cref="ImageMetaData"/>.</returns>
-        public static async Task<ImageMetaData> ReadAsync(Stream stream, MemoryAllocator memoryAllocator)
+        public static async Task<ImageMetaData> ReadAsync(Stream stream)
         {
-            int count = (int)stream.Length;
-            using (IManagedByteBuffer buffer = memoryAllocator.AllocateManagedByteBuffer(count))
+            var keyValuePairs = new Dictionary<string, string>();
+            using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
-                stream.Position = 0;
-                await stream.ReadAsync(buffer.Array, 0, count).ConfigureAwait(false);
-                return Parse(buffer.Memory.Span);
+                string line;
+                while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+                {
+                    int idx = line.IndexOf(':');
+                    if (idx > 0)
+                    {
+                        string key = line.Substring(0, idx);
+                        keyValuePairs[key] = line.Substring(idx + 1);
+                    }
+                }
             }
-        }
 
-        /// <summary>
-        /// Converts the string representation of the cached meta data to its <see cref="ImageMetaData" /> equivalent.
-        /// </summary>
-        /// <param name="buffer">The source buffer to parse.</param>
-        /// <returns>The <see cref="ImageMetaData"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ImageMetaData Parse(ReadOnlySpan<byte> buffer) => Unsafe.As<byte, ImageMetaData>(ref MemoryMarshal.GetReference(buffer));
+            keyValuePairs.TryGetValue(ContentTypeKey, out string contentType);
+            keyValuePairs.TryGetValue(LastModifiedKey, out string lastWriteTimeUtcString);
+            DateTime.TryParse(lastWriteTimeUtcString, out DateTime lastWriteTimeUtc);
+
+            return new ImageMetaData(lastWriteTimeUtc, contentType ?? string.Empty);
+        }
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -120,42 +122,26 @@ namespace SixLabors.ImageSharp.Web
         public override string ToString() => FormattableString.Invariant($"ImageMetaData({this.LastWriteTimeUtc}, {this.ContentType})");
 
         /// <summary>
-        /// Calculates the number of bytes this <see cref="ImageMetaData"/> represents.
-        /// </summary>
-        /// <returns>The <see cref="int"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetByteCount()
-
-            // 8 bytes for the datetime + 2 bytes per char * string length.
-            => DateSize + (this.ContentType.Length * CharSize);
-
-        /// <summary>
-        /// Writes the metadata to the target buffer.
-        /// </summary>
-        /// <param name="buffer">The target buffer.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteTo(Span<byte> buffer)
-        {
-            Guard.MustBeGreaterThanOrEqualTo(buffer.Length, this.GetByteCount(), nameof(buffer));
-
-            ref ImageMetaData meta = ref Unsafe.As<byte, ImageMetaData>(ref MemoryMarshal.GetReference(buffer));
-            meta = this;
-        }
-
-        /// <summary>
         /// Asynchronously writes the metadata to the target stream.
         /// </summary>
         /// <param name="stream">The target stream.</param>
-        /// <param name="memoryAllocator">The memory allocator used for managing buffers.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task WriteAsync(Stream stream, MemoryAllocator memoryAllocator)
+        public async Task WriteAsync(Stream stream)
         {
-            int count = this.GetByteCount();
-            using (IManagedByteBuffer buffer = memoryAllocator.AllocateManagedByteBuffer(count))
+            var keyValuePairs = new Dictionary<string, string>
             {
-                this.WriteTo(buffer.Memory.Span);
-                stream.Position = 0;
-                await stream.WriteAsync(buffer.Array, 0, count).ConfigureAwait(false);
+                { LastModifiedKey, this.LastWriteTimeUtc.ToString("o") },
+                { ContentTypeKey, this.ContentType }
+            };
+
+            using (var writer = new StreamWriter(stream, Encoding.UTF8))
+            {
+                foreach (KeyValuePair<string, string> keyValuePair in keyValuePairs)
+                {
+                    await writer.WriteLineAsync($"{keyValuePair.Key}:{keyValuePair.Value}").ConfigureAwait(false);
+                }
+
+                await writer.FlushAsync().ConfigureAwait(false);
             }
         }
     }

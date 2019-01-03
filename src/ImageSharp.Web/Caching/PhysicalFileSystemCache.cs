@@ -104,7 +104,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             ImageMetaData metadata = default;
             using (Stream stream = metaFileInfo.CreateReadStream())
             {
-                metadata = await ImageMetaData.ReadAsync(stream, this.memoryAllocator).ConfigureAwait(false);
+                metadata = await ImageMetaData.ReadAsync(stream).ConfigureAwait(false);
             }
 
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToImageFilePath(path, metadata));
@@ -138,7 +138,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             using (FileStream fileStream = File.Create(metaPath))
             {
-                await metadata.WriteAsync(fileStream, this.memoryAllocator).ConfigureAwait(false);
+                await metadata.WriteAsync(fileStream).ConfigureAwait(false);
             }
         }
 

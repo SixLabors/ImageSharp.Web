@@ -2,8 +2,6 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Runtime.CompilerServices;
-using SixLabors.Memory;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -27,19 +25,6 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         }
 
         [Fact]
-        public void ByteCountIsCorrect()
-        {
-            var meta = new ImageMetaData(LastWriteTimeUtc, ContentType);
-
-            int dateBytes = Unsafe.SizeOf<DateTime>();
-            int contentBytes = (ContentType.Length * Unsafe.SizeOf<char>());
-
-            Assert.Equal(dateBytes + contentBytes, meta.GetByteCount());
-
-            this.Output.WriteLine(meta.GetByteCount().ToString());
-        }
-
-        [Fact]
         public void EqualityChecksAreCorrect()
         {
             var meta = new ImageMetaData(LastWriteTimeUtc, ContentType);
@@ -48,23 +33,6 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
 
             var meta3 = new ImageMetaData(meta.LastWriteTimeUtc, "image/png");
             Assert.NotEqual(meta, meta3);
-        }
-
-        [Fact]
-        public void CanSerializeCorrectly()
-        {
-            var meta = new ImageMetaData(LastWriteTimeUtc, ContentType);
-            this.Output.WriteLine(meta.ToString());
-
-            using (IManagedByteBuffer buffer = Configuration.Default.MemoryAllocator.AllocateManagedByteBuffer(meta.GetByteCount(), AllocationOptions.Clean))
-            {
-                meta.WriteTo(buffer.Memory.Span);
-
-                var meta2 = ImageMetaData.Parse(buffer.Memory.Span);
-                this.Output.WriteLine(meta2.ToString());
-
-                Assert.Equal(meta, meta2);
-            }
         }
     }
 }
