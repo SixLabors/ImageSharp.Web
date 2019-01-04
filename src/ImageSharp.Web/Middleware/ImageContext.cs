@@ -123,11 +123,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// Set the response status headers.
         /// </summary>
         /// <param name="statusCode">The status code.</param>
-        /// <param name="contentType">The content type.</param>
+        /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public Task SendStatusAsync(int statusCode, string contentType)
+        public Task SendStatusAsync(int statusCode, in ImageMetaData metaData)
         {
-            this.ApplyResponseHeaders(statusCode, contentType);
+            this.ApplyResponseHeaders(statusCode, metaData.ContentType, this.ComputeMaxAge(metaData));
 
             // this.logger.LogHandled(statusCode, SubPath);
             return ResponseConstants.CompletedTask;
@@ -136,12 +136,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Set the response content.
         /// </summary>
-        /// <param name="contentType">The content type.</param>
-        /// <param name="stream">The cached image buffer.</param>
+        /// <param name="stream">The output stream.</param>
+        /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public async Task SendAsync(string contentType, Stream stream)
+        public async Task SendAsync(Stream stream, ImageMetaData metaData)
         {
-            this.ApplyResponseHeaders(ResponseConstants.Status200Ok, contentType);
+            this.ApplyResponseHeaders(ResponseConstants.Status200Ok, metaData.ContentType, this.ComputeMaxAge(metaData));
 
             if (stream.CanSeek)
             {
@@ -170,7 +170,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             return max;
         }
 
-        private void ApplyResponseHeaders(int statusCode, string contentType)
+        private void ApplyResponseHeaders(int statusCode, string contentType, TimeSpan maxAge)
         {
             this.response.StatusCode = statusCode;
             if (statusCode < 400)
@@ -189,7 +189,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 this.responseHeaders.CacheControl = new CacheControlHeaderValue
                 {
                     Public = true,
-                    MaxAge = new TimeSpan(this.options.MaxBrowserCacheDays, 0, 0, 0),
+                    MaxAge = maxAge,
                     MustRevalidate = true
                 };
 
@@ -266,6 +266,18 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 bool unmodified = ifUnmodifiedSince >= this.fileLastModified;
                 this.ifUnmodifiedSinceState = unmodified ? PreconditionState.ShouldProcess : PreconditionState.PreconditionFailed;
             }
+        }
+
+        private TimeSpan ComputeMaxAge(in ImageMetaData metaData)
+        {
+            // 14.9.3 CacheControl Max-Age
+            var maxAge = TimeSpan.FromDays(this.options.MaxBrowserCacheDays);
+            if (!metaData.CacheControlMaxAge.Equals(TimeSpan.MinValue))
+            {
+                maxAge = metaData.CacheControlMaxAge;
+            }
+
+            return maxAge;
         }
     }
 }

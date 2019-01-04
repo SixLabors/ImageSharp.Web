@@ -10,6 +10,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
     public class ImageMetaDataTests
     {
         private static readonly DateTime LastWriteTimeUtc = new DateTime(1980, 11, 4);
+        private static readonly TimeSpan MaxAge = TimeSpan.FromDays(7);
         private const string ContentType = "image/jpeg";
 
         public ImageMetaDataTests(ITestOutputHelper output) => this.Output = output;
@@ -19,9 +20,10 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         [Fact]
         public void ConstructorAssignsProperties()
         {
-            var meta = new ImageMetaData(LastWriteTimeUtc, ContentType);
+            var meta = new ImageMetaData(LastWriteTimeUtc, ContentType, MaxAge);
             Assert.Equal(LastWriteTimeUtc, meta.LastWriteTimeUtc);
             Assert.Equal(ContentType, meta.ContentType);
+            Assert.Equal(MaxAge, meta.CacheControlMaxAge);
         }
 
         [Fact]

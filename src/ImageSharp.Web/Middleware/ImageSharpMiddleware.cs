@@ -179,13 +179,14 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 processRequest = false;
             }
 
+            ImageMetaData sourceImageMetadata = default;
             if (processRequest)
             {
                 // Lock any reads when a write is being done for the same key to prevent potential file locks.
                 using (await AsyncLock.ReaderLockAsync(key).ConfigureAwait(false))
                 {
                     // Check to see if the cache contains this image
-                    ImageMetaData sourceImageMetadata = await sourceImageResolver.GetMetaDataAsync().ConfigureAwait(false);
+                    sourceImageMetadata = await sourceImageResolver.GetMetaDataAsync().ConfigureAwait(false);
                     IImageResolver cachedImageResolver = await this.cache.GetAsync(key).ConfigureAwait(false);
                     if (cachedImageResolver != null)
                     {
@@ -229,7 +230,15 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 this.options.OnBeforeSave?.Invoke(image);
                                 image.Save(outStream);
 
-                                cachedImageMetadata = new ImageMetaData(DateTime.UtcNow, image.Format.DefaultMimeType);
+                                // Check to see if the source metadata has a cachecontrol max-age value and use it to
+                                // override the default max age from our options.
+                                var maxAge = TimeSpan.FromDays(this.options.MaxBrowserCacheDays);
+                                if (!sourceImageMetadata.CacheControlMaxAge.Equals(TimeSpan.MinValue))
+                                {
+                                    maxAge = sourceImageMetadata.CacheControlMaxAge;
+                                }
+
+                                cachedImageMetadata = new ImageMetaData(DateTime.UtcNow, image.Format.DefaultMimeType, maxAge);
                             }
 
                             // Allow for any further optimization of the image. Always reset the position just in case.
@@ -273,21 +282,21 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 case ImageContext.PreconditionState.ShouldProcess:
                     if (imageContext.IsHeadRequest())
                     {
-                        await imageContext.SendStatusAsync(ResponseConstants.Status200Ok, metadata.ContentType).ConfigureAwait(false);
+                        await imageContext.SendStatusAsync(ResponseConstants.Status200Ok, metadata).ConfigureAwait(false);
                     }
 
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
-                    await imageContext.SendAsync(metadata.ContentType, stream).ConfigureAwait(false);
+                    await imageContext.SendAsync(stream, metadata).ConfigureAwait(false);
 
                     break;
 
                 case ImageContext.PreconditionState.NotModified:
                     this.logger.LogImageNotModified(imageContext.GetDisplayUrl());
-                    await imageContext.SendStatusAsync(ResponseConstants.Status304NotModified, metadata.ContentType).ConfigureAwait(false);
+                    await imageContext.SendStatusAsync(ResponseConstants.Status304NotModified, metadata).ConfigureAwait(false);
                     break;
                 case ImageContext.PreconditionState.PreconditionFailed:
                     this.logger.LogImagePreconditionFailed(imageContext.GetDisplayUrl());
-                    await imageContext.SendStatusAsync(ResponseConstants.Status412PreconditionFailed, metadata.ContentType).ConfigureAwait(false);
+                    await imageContext.SendStatusAsync(ResponseConstants.Status412PreconditionFailed, metadata).ConfigureAwait(false);
                     break;
                 default:
                     var exception = new NotImplementedException(imageContext.GetPreconditionState().ToString());

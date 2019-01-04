@@ -80,7 +80,7 @@ namespace SixLabors.ImageSharp.Web.Providers
                 return Task.FromResult<IImageResolver>(null);
             }
 
-            // We don't care about the content type here.
+            // We don't care about the content type nor cache control max age here.
             var metadata = new ImageMetaData(fileInfo.LastModified.UtcDateTime);
             return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
         }
