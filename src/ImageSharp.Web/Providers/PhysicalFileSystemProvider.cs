@@ -39,7 +39,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <summary>
         /// Contains various helper methods based on the current configuration.
         /// </summary>
-        private readonly FormatHelper formatHelper;
+        private readonly FormatUtilities formatUtilities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemProvider"/> class.
@@ -56,7 +56,7 @@ namespace SixLabors.ImageSharp.Web.Providers
             this.options = options.Value;
             this.fileProvider = environment.WebRootFileProvider;
             this.memoryAllocator = memoryAllocator;
-            this.formatHelper = new FormatHelper(this.options.Configuration);
+            this.formatUtilities = new FormatUtilities(this.options.Configuration);
         }
 
         /// <inheritdoc/>
@@ -66,7 +66,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         public IDictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
 
         /// <inheritdoc/>
-        public bool IsValidRequest(HttpContext context) => this.formatHelper.GetExtension(context.Request.GetDisplayUrl()) != null;
+        public bool IsValidRequest(HttpContext context) => this.formatUtilities.GetExtensionFromUri(context.Request.GetDisplayUrl()) != null;
 
         /// <inheritdoc/>
         public Task<IImageResolver> GetAsync(HttpContext context)
@@ -80,7 +80,9 @@ namespace SixLabors.ImageSharp.Web.Providers
                 return Task.FromResult<IImageResolver>(null);
             }
 
-            return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo));
+            // We don't care about the content type nor cache control max age here.
+            var metadata = new ImageMetaData(fileInfo.LastModified.UtcDateTime);
+            return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
         }
     }
 }

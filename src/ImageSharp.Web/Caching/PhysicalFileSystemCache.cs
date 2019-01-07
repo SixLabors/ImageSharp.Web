@@ -1,14 +1,13 @@
 ﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Resolvers;
 using SixLabors.Memory;
@@ -56,6 +55,11 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly ImageSharpMiddlewareOptions options;
 
         /// <summary>
+        /// Contains various helper methods based on the current configuration.
+        /// </summary>
+        private readonly FormatUtilities formatUtilies;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
         /// <param name="environment">The hosting environment the application is running in.</param>
@@ -76,6 +80,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             this.fileProvider = this.environment.WebRootFileProvider;
             this.memoryAllocator = memoryAllocator;
             this.options = options.Value;
+            this.formatUtilies = new FormatUtilities(this.options.Configuration);
         }
 
         /// <inheritdoc/>
@@ -86,9 +91,23 @@ namespace SixLabors.ImageSharp.Web.Caching
             };
 
         /// <inheritdoc/>
-        public IImageResolver Get(string key)
+        public async Task<IImageResolver> GetAsync(string key)
         {
-            IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
+            string path = this.ToFilePath(key);
+
+            IFileInfo metaFileInfo = this.fileProvider.GetFileInfo(this.ToMetaDataFilePath(path));
+            if (!metaFileInfo.Exists)
+            {
+                return null;
+            }
+
+            ImageMetaData metadata = default;
+            using (Stream stream = metaFileInfo.CreateReadStream())
+            {
+                metadata = await ImageMetaData.ReadAsync(stream).ConfigureAwait(false);
+            }
+
+            IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToImageFilePath(path, metadata));
 
             // Check to see if the file exists.
             if (!fileInfo.Exists)
@@ -96,35 +115,15 @@ namespace SixLabors.ImageSharp.Web.Caching
                 return null;
             }
 
-            return new PhysicalFileSystemResolver(fileInfo);
+            return new PhysicalFileSystemResolver(fileInfo, metadata);
         }
 
         /// <inheritdoc/>
-        public Task<CachedInfo> IsExpiredAsync(HttpContext context, string key, DateTime lastWriteTimeUtc, DateTime minDateUtc)
-        {
-            IFileInfo cachedFileInfo = this.fileProvider.GetFileInfo(this.ToFilePath(key));
-            if (!cachedFileInfo.Exists)
-            {
-                return Task.FromResult(new CachedInfo(true, DateTime.MinValue));
-            }
-
-            DateTime lastCacheModifiedUtc = cachedFileInfo.LastModified.UtcDateTime;
-            bool expired = true;
-
-            // Check whether the last modified date is less than the min date.
-            // If it's newer than the cached file then it must be an update.
-            if (lastCacheModifiedUtc > minDateUtc && lastWriteTimeUtc < lastCacheModifiedUtc)
-            {
-                expired = false;
-            }
-
-            return Task.FromResult(new CachedInfo(expired, lastCacheModifiedUtc));
-        }
-
-        /// <inheritdoc/>
-        public async Task<DateTimeOffset> SetAsync(string key, Stream stream)
+        public async Task SetAsync(string key, Stream stream, ImageMetaData metadata)
         {
             string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
+            string imagePath = this.ToImageFilePath(path, metadata);
+            string metaPath = this.ToMetaDataFilePath(path);
             string directory = Path.GetDirectoryName(path);
 
             if (!Directory.Exists(directory))
@@ -132,13 +131,31 @@ namespace SixLabors.ImageSharp.Web.Caching
                 Directory.CreateDirectory(directory);
             }
 
-            using (FileStream fileStream = File.Create(path))
+            using (FileStream fileStream = File.Create(imagePath))
             {
                 await stream.CopyToAsync(fileStream).ConfigureAwait(false);
             }
 
-            return File.GetLastWriteTimeUtc(path);
+            using (FileStream fileStream = File.Create(metaPath))
+            {
+                await metadata.WriteAsync(fileStream).ConfigureAwait(false);
+            }
         }
+
+        /// <summary>
+        /// Gets the path to the image file based on the supplied root and metadata.
+        /// </summary>
+        /// <param name="path">The root path.</param>
+        /// <param name="metaData">The image metadata.</param>
+        /// <returns>The <see cref="string"/>.</returns>
+        private string ToImageFilePath(string path, in ImageMetaData metaData) => $"{path}.{this.formatUtilies.GetExtensionFromContentType(metaData.ContentType)}";
+
+        /// <summary>
+        /// Gets the path to the image file based on the supplied root.
+        /// </summary>
+        /// <param name="path">The root path.</param>
+        /// <returns>The <see cref="string"/>.</returns>
+        private string ToMetaDataFilePath(string path) => $"{path}.meta";
 
         /// <summary>
         /// Converts the key into a nested file path.
