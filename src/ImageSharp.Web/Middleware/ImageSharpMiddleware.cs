@@ -243,7 +243,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                             // Allow for any further optimization of the image. Always reset the position just in case.
                             outStream.Position = 0;
-                            this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, Path.GetExtension(key)));
+                            string contentType = cachedImageMetadata.ContentType;
+                            string extension = this.formatUtilities.GetExtensionFromContentType(contentType);
+                            this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, contentType, extension));
                             outStream.Position = 0;
 
                             // Save the image to the cache and send the response to the caller.

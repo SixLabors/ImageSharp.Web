@@ -44,12 +44,12 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="lastWriteTimeUtc">The date and time in coordinated universal time (UTC) since the source file was last modified.</param>
         /// <param name="contentType">The content type for the source file.</param>
-        /// <param name="cachControlMaxAge">The maximum amount of time a resource will be considered fresh.</param>
-        public ImageMetaData(DateTime lastWriteTimeUtc, string contentType, TimeSpan cachControlMaxAge)
+        /// <param name="cacheControlMaxAge">The maximum amount of time a resource will be considered fresh.</param>
+        public ImageMetaData(DateTime lastWriteTimeUtc, string contentType, TimeSpan cacheControlMaxAge)
         {
             this.LastWriteTimeUtc = lastWriteTimeUtc;
             this.ContentType = contentType;
-            this.CacheControlMaxAge = cachControlMaxAge;
+            this.CacheControlMaxAge = cacheControlMaxAge;
         }
 
         /// <summary>
