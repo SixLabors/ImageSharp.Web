@@ -18,7 +18,7 @@ namespace SixLabors.ImageSharp.Web.Providers
     /// <summary>
     /// Returns images stored in Azure Blob Storage.
     /// </summary>
-    public class BlobStorageImageProvider : IImageProvider
+    public class AzureBlobStorageImageProvider : IImageProvider
     {
         /// <summary>
         /// The cloud storage account.
@@ -38,7 +38,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <summary>
         /// The blob storage options.
         /// </summary>
-        private readonly BlobStorageImageProviderOptions storageOptions;
+        private readonly AzureBlobStorageImageProviderOptions storageOptions;
 
         /// <summary>
         /// Contains various helper methods based on the current configuration.
@@ -46,11 +46,11 @@ namespace SixLabors.ImageSharp.Web.Providers
         private readonly FormatHelper formatHelper;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlobStorageImageProvider"/> class.
+        /// Initializes a new instance of the <see cref="AzureBlobStorageImageProvider"/> class.
         /// </summary>
         /// <param name="options">The middleware configuration options.</param>
         /// <param name="storageOptions">The blob storage options.</param>
-        public BlobStorageImageProvider(IOptions<ImageSharpMiddlewareOptions> options, IOptions<BlobStorageImageProviderOptions> storageOptions)
+        public AzureBlobStorageImageProvider(IOptions<ImageSharpMiddlewareOptions> options, IOptions<AzureBlobStorageImageProviderOptions> storageOptions)
         {
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(storageOptions, nameof(storageOptions));
@@ -60,6 +60,7 @@ namespace SixLabors.ImageSharp.Web.Providers
             this.formatHelper = new FormatHelper(this.options.Configuration);
             this.storageAccount = CloudStorageAccount.Parse(this.storageOptions.ConnectionString);
 
+            // It's ok to create a single reusable client since we are not altering it.
             CloudBlobClient client = this.storageAccount.CreateCloudBlobClient();
             this.container = client.GetContainerReference(this.storageOptions.ContainerName);
 
@@ -93,7 +94,7 @@ namespace SixLabors.ImageSharp.Web.Providers
                 return null;
             }
 
-            return new BlobStorageImageResolver(blob);
+            return new AzureBlobStorageImageResolver(blob);
         }
 
         /// <inheritdoc/>

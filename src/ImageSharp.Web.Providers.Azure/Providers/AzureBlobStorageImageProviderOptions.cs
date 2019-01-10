@@ -8,7 +8,7 @@ namespace SixLabors.ImageSharp.Web.Providers
     /// <summary>
     /// Configuration options for the Azure Blob Storage provider middleware.
     /// </summary>
-    public class BlobStorageImageProviderOptions
+    public class AzureBlobStorageImageProviderOptions
     {
         /// <summary>
         /// Gets or sets the connection string.

@@ -11,7 +11,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
     /// <summary>
     /// Provides means to manage image buffers within the Azure Blob file system.
     /// </summary>
-    public class BlobStorageImageResolver : IImageResolver
+    public class AzureBlobStorageImageResolver : IImageResolver
     {
         /// <summary>
         /// The Azure blob.
@@ -19,10 +19,10 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         private readonly CloudBlob blob;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlobStorageImageResolver"/> class.
+        /// Initializes a new instance of the <see cref="AzureBlobStorageImageResolver"/> class.
         /// </summary>
         /// <param name="blob">The Azure blob.</param>
-        public BlobStorageImageResolver(CloudBlob blob) => this.blob = blob;
+        public AzureBlobStorageImageResolver(CloudBlob blob) => this.blob = blob;
 
         /// <inheritdoc/>
         public async Task<DateTime> GetLastWriteTimeUtcAsync()
