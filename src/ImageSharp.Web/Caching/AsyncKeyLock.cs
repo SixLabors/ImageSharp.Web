@@ -2,8 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SixLabors.ImageSharp.Web.Caching
@@ -17,7 +17,12 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// A collection of doorman counters used for tracking references to the same key.
         /// </summary>
-        private static readonly ConcurrentDictionary<string, Doorman> Keys = new ConcurrentDictionary<string, Doorman>(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, Doorman> Keys = new Dictionary<string, Doorman>();
+
+        /// <summary>
+        /// SpinLock used to protect access to the Keys collection.
+        /// </summary>
+        private static SpinLock Lock = new SpinLock(false);
 
         /// <summary>
         /// Locks the current thread in read mode asynchronously.
@@ -28,7 +33,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </returns>
         public async Task<IDisposable> ReaderLockAsync(string key)
         {
-            Doorman doorman = Keys.GetOrAdd(key, GetDoorman);
+            Doorman doorman = GetDoorman(key);
 
             return await doorman.ReaderLockAsync().ConfigureAwait(false);
         }
@@ -42,12 +47,68 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </returns>
         public async Task<IDisposable> WriterLockAsync(string key)
         {
-            Doorman doorman = Keys.GetOrAdd(key, GetDoorman);
+            Doorman doorman = GetDoorman(key);
 
             return await doorman.WriterLockAsync().ConfigureAwait(false);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Doorman GetDoorman(string key) => new Doorman(key, () => Keys.TryRemove(key, out Doorman localDoorman));
+        /// <summary>
+        /// Gets the doorman for the specified key. If no such doorman exists, then a new one
+        /// is allocated.
+        /// </summary>
+        /// <param name="key">The key for the desired doorman.</param>
+        /// <returns>The <see cref="Doorman"/>.</returns>
+        private static Doorman GetDoorman(string key)
+        {
+            Doorman doorman;
+            bool lockTaken = false;
+            try
+            {
+                Lock.Enter(ref lockTaken);
+
+                if (!Keys.TryGetValue(key, out doorman))
+                {
+                    doorman = new Doorman(key, ReleaseDoorman);
+                    Keys.Add(key, doorman);
+                }
+
+                doorman.RefCount++;
+            }
+            finally
+            {
+                if (lockTaken)
+                {
+                    Lock.Exit();
+                }
+            }
+
+            return doorman;
+        }
+
+        /// <summary>
+        /// Releases a reference to a doorman. If the ref-count hits zero, then the doorman is
+        /// removed from the Keys collection.
+        /// </summary>
+        /// <param name="doorman">The <see cref="Doorman"/>.</param>
+        private static void ReleaseDoorman(Doorman doorman)
+        {
+            bool lockTaken = false;
+            try
+            {
+                Lock.Enter(ref lockTaken);
+
+                if (--doorman.RefCount == 0)
+                {
+                    Keys.Remove(doorman.Key);
+                }
+            }
+            finally
+            {
+                if (lockTaken)
+                {
+                    Lock.Exit();
+                }
+            }
+        }
     }
 }
