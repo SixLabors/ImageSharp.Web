@@ -33,7 +33,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// SpinLock used to protect access to the Keys and Pool collections.
         /// </summary>
-        private static SpinLock Lock = new SpinLock(false);
+        private static SpinLock spinLock = new SpinLock(false);
 
         /// <summary>
         /// Locks the current thread in read mode asynchronously.
@@ -76,7 +76,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             bool lockTaken = false;
             try
             {
-                Lock.Enter(ref lockTaken);
+                spinLock.Enter(ref lockTaken);
 
                 if (!Keys.TryGetValue(key, out doorman))
                 {
@@ -91,7 +91,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             {
                 if (lockTaken)
                 {
-                    Lock.Exit();
+                    spinLock.Exit();
                 }
             }
 
@@ -109,7 +109,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             bool lockTaken = false;
             try
             {
-                Lock.Enter(ref lockTaken);
+                spinLock.Enter(ref lockTaken);
 
                 if (--doorman.RefCount == 0)
                 {
@@ -125,7 +125,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             {
                 if (lockTaken)
                 {
-                    Lock.Exit();
+                    spinLock.Exit();
                 }
             }
         }
