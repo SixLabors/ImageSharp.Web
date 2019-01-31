@@ -20,7 +20,18 @@ namespace SixLabors.ImageSharp.Web.Caching
         private static readonly Dictionary<string, Doorman> Keys = new Dictionary<string, Doorman>();
 
         /// <summary>
-        /// SpinLock used to protect access to the Keys collection.
+        /// A pool of unused doorman counters that can be re-used to avoid allocations.
+        /// </summary>
+        private static readonly Stack<Doorman> Pool = new Stack<Doorman>(MaxPoolSize);
+
+        /// <summary>
+        /// Maximum size of the doorman pool. If the pool is already full when releasing
+        /// a doorman, it is simply left for garbage collection.
+        /// </summary>
+        private const int MaxPoolSize = 20;
+
+        /// <summary>
+        /// SpinLock used to protect access to the Keys and Pool collections.
         /// </summary>
         private static SpinLock Lock = new SpinLock(false);
 
@@ -53,8 +64,9 @@ namespace SixLabors.ImageSharp.Web.Caching
         }
 
         /// <summary>
-        /// Gets the doorman for the specified key. If no such doorman exists, then a new one
-        /// is allocated.
+        /// Gets the doorman for the specified key. If no such doorman exists, an unused doorman
+        /// is obtained from the pool (or a new one is allocated if the pool is empty), and it's
+        /// assigned to the requested key.
         /// </summary>
         /// <param name="key">The key for the desired doorman.</param>
         /// <returns>The <see cref="Doorman"/>.</returns>
@@ -68,7 +80,8 @@ namespace SixLabors.ImageSharp.Web.Caching
 
                 if (!Keys.TryGetValue(key, out doorman))
                 {
-                    doorman = new Doorman(key, ReleaseDoorman);
+                    doorman = (Pool.Count > 0) ? Pool.Pop() : new Doorman(ReleaseDoorman);
+                    doorman.Key = key;
                     Keys.Add(key, doorman);
                 }
 
@@ -87,7 +100,8 @@ namespace SixLabors.ImageSharp.Web.Caching
 
         /// <summary>
         /// Releases a reference to a doorman. If the ref-count hits zero, then the doorman is
-        /// removed from the Keys collection.
+        /// returned to the pool (or is simply left for the garbage collector to cleanup if the
+        /// pool is already full).
         /// </summary>
         /// <param name="doorman">The <see cref="Doorman"/>.</param>
         private static void ReleaseDoorman(Doorman doorman)
@@ -100,6 +114,11 @@ namespace SixLabors.ImageSharp.Web.Caching
                 if (--doorman.RefCount == 0)
                 {
                     Keys.Remove(doorman.Key);
+                    if (Pool.Count < MaxPoolSize)
+                    {
+                        doorman.Key = null;
+                        Pool.Push(doorman);
+                    }
                 }
             }
             finally

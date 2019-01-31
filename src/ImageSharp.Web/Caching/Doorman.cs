@@ -23,24 +23,22 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Initializes a new instance of the <see cref="Doorman"/> class.
         /// </summary>
-        /// <param name="key">The key to identify the doorman instance.</param>
         /// <param name="reset">The reset action.</param>
-        public Doorman(string key, Action<Doorman> reset)
+        public Doorman(Action<Doorman> reset)
         {
             this.waitingWriters = new Queue<TaskCompletionSource<Releaser>>();
             this.waitingReader = new TaskCompletionSource<Releaser>();
             this.status = 0;
 
-            this.Key = key;
             this.readerReleaser = Task.FromResult(new Releaser(this, false));
             this.writerReleaser = Task.FromResult(new Releaser(this, true));
             this.reset = reset;
         }
 
         /// <summary>
-        /// Gets the key that this doorman is mapped to.
+        /// Gets or sets the key that this doorman is mapped to.
         /// </summary>
-        public string Key { get; }
+        public string Key { get; set; }
 
         /// <summary>
         /// Gets or sets the current reference count on this doorman.
