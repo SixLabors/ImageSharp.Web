@@ -113,7 +113,7 @@ namespace SixLabors.ImageSharp.Web
 
             // DateTime.TryParse(null) ==  DateTime.MinValue so no need for conditional;
             keyValuePairs.TryGetValue(LastModifiedKey, out string lastWriteTimeUtcString);
-            DateTime.TryParse(lastWriteTimeUtcString, out DateTime lastWriteTimeUtc);
+            DateTime.TryParse(lastWriteTimeUtcString, null, DateTimeStyles.RoundtripKind, out DateTime lastWriteTimeUtc);
 
             keyValuePairs.TryGetValue(ContentTypeKey, out string contentType);
 
