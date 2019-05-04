@@ -65,7 +65,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         }
 
         /// <inheritdoc/>
-        public Func<HttpContext, bool> Match { get; set; } = _ => true; // TODO: How do we decide to match
+        public Func<HttpContext, bool> Match { get; set; } = _ => true;
 
         /// <inheritdoc/>
         public IDictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
