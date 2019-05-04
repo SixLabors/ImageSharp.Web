@@ -5,7 +5,6 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.Memory;
 
@@ -19,7 +18,6 @@ namespace SixLabors.ImageSharp.Web.Caching
     public sealed class CacheHash : ICacheHash
     {
         private readonly MemoryAllocator memoryAllocator;
-        private readonly FormatHelper formatHelper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheHash"/> class.
@@ -32,7 +30,6 @@ namespace SixLabors.ImageSharp.Web.Caching
             Guard.MustBeBetweenOrEqualTo<uint>(options.Value.CachedNameLength, 2, 64, nameof(options.Value.CachedNameLength));
 
             this.memoryAllocator = memoryAllocator;
-            this.formatHelper = new FormatHelper(options.Value.Configuration);
         }
 
         /// <inheritdoc/>
@@ -45,8 +42,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             {
                 Encoding.ASCII.GetBytes(value, 0, byteCount, buffer.Array, 0);
                 byte[] hash = hashAlgorithm.ComputeHash(buffer.Array, 0, byteCount);
-                string ext = this.formatHelper.GetExtensionOrDefault(value);
-                return $"{HexEncoder.Encode(new Span<byte>(hash).Slice(0, len / 2))}.{ext}";
+                return $"{HexEncoder.Encode(new Span<byte>(hash).Slice(0, len / 2))}";
             }
         }
     }

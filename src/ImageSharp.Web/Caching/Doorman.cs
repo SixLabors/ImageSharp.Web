@@ -15,8 +15,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly Queue<TaskCompletionSource<Releaser>> waitingWriters;
         private readonly Task<Releaser> readerReleaser;
         private readonly Task<Releaser> writerReleaser;
-        private readonly string key;
-        private readonly Action reset;
+        private readonly Action<Doorman> reset;
         private TaskCompletionSource<Releaser> waitingReader;
         private int readersWaiting;
         private int status;
@@ -24,19 +23,27 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Initializes a new instance of the <see cref="Doorman"/> class.
         /// </summary>
-        /// <param name="key">The key to identify the doorman instance.</param>
         /// <param name="reset">The reset action.</param>
-        public Doorman(string key, Action reset)
+        public Doorman(Action<Doorman> reset)
         {
             this.waitingWriters = new Queue<TaskCompletionSource<Releaser>>();
             this.waitingReader = new TaskCompletionSource<Releaser>();
             this.status = 0;
 
-            this.key = key;
             this.readerReleaser = Task.FromResult(new Releaser(this, false));
             this.writerReleaser = Task.FromResult(new Releaser(this, true));
             this.reset = reset;
         }
+
+        /// <summary>
+        /// Gets or sets the key that this doorman is mapped to.
+        /// </summary>
+        public string Key { get; set; }
+
+        /// <summary>
+        /// Gets or sets the current reference count on this doorman.
+        /// </summary>
+        public int RefCount { get; set; }
 
         /// <summary>
         /// Locks the current thread in read mode asynchronously.
@@ -96,12 +103,10 @@ namespace SixLabors.ImageSharp.Web.Caching
                         this.status = -1;
                         toWake = this.waitingWriters.Dequeue();
                     }
-                    else
-                    {
-                        this.reset();
-                    }
                 }
             }
+
+            this.reset(this);
 
             toWake?.SetResult(new Releaser(this, true));
         }
@@ -127,9 +132,11 @@ namespace SixLabors.ImageSharp.Web.Caching
                 }
                 else
                 {
-                    this.reset();
+                    this.status = 0;
                 }
             }
+
+            this.reset(this);
 
             toWake?.SetResult(new Releaser(this, toWakeIsWriter));
         }
