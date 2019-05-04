@@ -319,11 +319,6 @@ namespace SixLabors.ImageSharp.Web
                 this.readChunk = this.readChunk.Next;
                 this.readOffset = 0;
                 chunkBuffer = this.readChunk.Buffer.Array;
-                chunkSize = this.readChunk.Length;
-                if (this.readChunk.Next == null)
-                {
-                    chunkSize = this.writeOffset;
-                }
             }
 
             return chunkBuffer[this.readOffset++];
@@ -386,7 +381,6 @@ namespace SixLabors.ImageSharp.Web
                 this.writeChunk = this.writeChunk.Next;
                 this.writeOffset = 0;
                 chunkBuffer = this.writeChunk.Buffer.Array;
-                chunkSize = this.writeChunk.Length;
             }
 
             chunkBuffer[this.writeOffset++] = value;
