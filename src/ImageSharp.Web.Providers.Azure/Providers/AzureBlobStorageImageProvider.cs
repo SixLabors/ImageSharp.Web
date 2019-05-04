@@ -9,8 +9,6 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using SixLabors.ImageSharp.Web.Helpers;
-using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Resolvers;
 
 namespace SixLabors.ImageSharp.Web.Providers
@@ -31,11 +29,6 @@ namespace SixLabors.ImageSharp.Web.Providers
         private readonly CloudBlobContainer container;
 
         /// <summary>
-        /// The middleware configuration options.
-        /// </summary>
-        private readonly ImageSharpMiddlewareOptions options;
-
-        /// <summary>
         /// The blob storage options.
         /// </summary>
         private readonly AzureBlobStorageImageProviderOptions storageOptions;
@@ -43,21 +36,21 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <summary>
         /// Contains various helper methods based on the current configuration.
         /// </summary>
-        private readonly FormatHelper formatHelper;
+        private readonly FormatUtilities formatUtilities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureBlobStorageImageProvider"/> class.
         /// </summary>
-        /// <param name="options">The middleware configuration options.</param>
         /// <param name="storageOptions">The blob storage options.</param>
-        public AzureBlobStorageImageProvider(IOptions<ImageSharpMiddlewareOptions> options, IOptions<AzureBlobStorageImageProviderOptions> storageOptions)
+        /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
+        public AzureBlobStorageImageProvider(
+            IOptions<AzureBlobStorageImageProviderOptions> storageOptions,
+            FormatUtilities formatUtilities)
         {
-            Guard.NotNull(options, nameof(options));
             Guard.NotNull(storageOptions, nameof(storageOptions));
 
-            this.options = options.Value;
             this.storageOptions = storageOptions.Value;
-            this.formatHelper = new FormatHelper(this.options.Configuration);
+            this.formatUtilities = formatUtilities;
             this.storageAccount = CloudStorageAccount.Parse(this.storageOptions.ConnectionString);
 
             // It's ok to create a single reusable client since we are not altering it.
@@ -72,7 +65,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         }
 
         /// <inheritdoc/>
-        public Func<HttpContext, bool> Match { get; set; } = _ => true;
+        public Func<HttpContext, bool> Match { get; set; } = _ => true; // TODO: How do we decide to match
 
         /// <inheritdoc/>
         public IDictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
@@ -98,6 +91,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         }
 
         /// <inheritdoc/>
-        public bool IsValidRequest(HttpContext context) => this.formatHelper.GetExtension(context.Request.GetDisplayUrl()) != null;
+        public bool IsValidRequest(HttpContext context)
+            => this.formatUtilities.GetExtensionFromUri(context.Request.GetDisplayUrl()) != null;
     }
 }

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Primitives;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Web.Processors;
 
-namespace SixLabors.ImageSharp.Web.Helpers
+namespace SixLabors.ImageSharp.Web
 {
     /// <summary>
     /// Contains various helper methods based on the given configuration.

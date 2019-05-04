@@ -11,7 +11,7 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
         private const string URL = "http://testwebsite.com/image-12345.jpeg?width=400";
         private static readonly IOptions<ImageSharpMiddlewareOptions> options = Options.Create(new ImageSharpMiddlewareOptions());
         private static readonly CacheHash Sha256Hasher = new CacheHash(options, options.Value.Configuration.MemoryAllocator);
-        private static readonly CacheHashBaseline NaiveSha256Hasher = new CacheHashBaseline(options);
+        private static readonly CacheHashBaseline NaiveSha256Hasher = new CacheHashBaseline();
 
         [Benchmark(Baseline = true, Description = "Baseline Sha256Hasher")]
         public string HashUsingBaselineHash() => NaiveSha256Hasher.Create(URL, 12);

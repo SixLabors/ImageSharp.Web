@@ -8,11 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Helpers;
-using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Resolvers;
-using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Providers
 {
@@ -27,36 +23,23 @@ namespace SixLabors.ImageSharp.Web.Providers
         private readonly IFileProvider fileProvider;
 
         /// <summary>
-        /// The memory allocator.
-        /// </summary>
-        private readonly MemoryAllocator memoryAllocator;
-
-        /// <summary>
-        /// The middleware configuration options.
-        /// </summary>
-        private readonly ImageSharpMiddlewareOptions options;
-
-        /// <summary>
-        /// Contains various helper methods based on the current configuration.
+        /// Contains various format helper methods based on the current configuration.
         /// </summary>
         private readonly FormatUtilities formatUtilities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemProvider"/> class.
         /// </summary>
-        /// <param name="options">The middleware configuration options.</param>
         /// <param name="environment">The <see cref="IHostingEnvironment"/> used by this middleware.</param>
-        /// <param name="memoryAllocator">An <see cref="MemoryAllocator"/> instance used to allocate arrays transporting encoded image data.</param>
-        public PhysicalFileSystemProvider(IOptions<ImageSharpMiddlewareOptions> options, IHostingEnvironment environment, MemoryAllocator memoryAllocator)
+        /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
+        public PhysicalFileSystemProvider(
+            IHostingEnvironment environment,
+            FormatUtilities formatUtilities)
         {
-            Guard.NotNull(options, nameof(options));
             Guard.NotNull(environment, nameof(environment));
-            Guard.NotNull(memoryAllocator, nameof(memoryAllocator));
 
-            this.options = options.Value;
             this.fileProvider = environment.WebRootFileProvider;
-            this.memoryAllocator = memoryAllocator;
-            this.formatUtilities = new FormatUtilities(this.options.Configuration);
+            this.formatUtilities = formatUtilities;
         }
 
         /// <inheritdoc/>

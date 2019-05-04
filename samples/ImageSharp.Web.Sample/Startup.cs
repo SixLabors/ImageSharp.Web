@@ -21,11 +21,10 @@ namespace SixLabors.ImageSharp.Web.Sample
         {
             services.AddImageSharpCore()
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetMemoryAllocatorFromMiddlewareOptions()
                 .SetCache(provider => new PhysicalFileSystemCache(
                     provider.GetRequiredService<IHostingEnvironment>(),
-                    provider.GetRequiredService<MemoryAllocator>(),
-                    provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>())
+                    provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
+                    provider.GetRequiredService<FormatUtilities>())
                 {
                     Settings =
                     {
@@ -105,8 +104,8 @@ namespace SixLabors.ImageSharp.Web.Sample
                   {
                       var p = new PhysicalFileSystemCache(
                           provider.GetRequiredService<IHostingEnvironment>(),
-                          provider.GetRequiredService<MemoryAllocator>(),
-                          provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
+                          provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
+                          provider.GetRequiredService<FormatUtilities>());
 
                       p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
 

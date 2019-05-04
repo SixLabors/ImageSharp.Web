@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -28,7 +29,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpCoreBuilder SetRequestParser<TParser>(this IImageSharpCoreBuilder builder)
             where TParser : class, IRequestParser
         {
-            builder.Services.AddSingleton<IRequestParser, TParser>();
+            var descriptor = new ServiceDescriptor(typeof(IRequestParser), typeof(TParser), ServiceLifetime.Singleton);
+            builder.Services.Replace(descriptor);
             return builder;
         }
 
@@ -40,7 +42,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetRequestParser(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IRequestParser> implementationFactory)
         {
-            builder.Services.AddSingleton(implementationFactory);
+            var descriptor = new ServiceDescriptor(typeof(IRequestParser), implementationFactory, ServiceLifetime.Singleton);
+            builder.Services.Replace(descriptor);
             return builder;
         }
 
@@ -52,7 +55,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetMemoryAllocator(this IImageSharpCoreBuilder builder, Func<IServiceProvider, MemoryAllocator> implementationFactory)
         {
-            builder.Services.AddSingleton(implementationFactory);
+            var descriptor = new ServiceDescriptor(typeof(MemoryAllocator), implementationFactory, ServiceLifetime.Singleton);
+            builder.Services.Replace(descriptor);
             return builder;
         }
 
@@ -65,20 +69,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpCoreBuilder SetMemoryAllocator<TMemoryAllocator>(this IImageSharpCoreBuilder builder)
             where TMemoryAllocator : MemoryAllocator
         {
-            builder.Services.AddSingleton<MemoryAllocator, TMemoryAllocator>();
-            return builder;
-        }
-
-        /// <summary>
-        /// Sets the the memory allocator configured in <see cref="Configuration.MemoryAllocator"/> of <see cref="ImageSharpMiddlewareOptions.Configuration"/>.
-        /// </summary>
-        /// <param name="builder">The core builder.</param>
-        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
-        public static IImageSharpCoreBuilder SetMemoryAllocatorFromMiddlewareOptions(this IImageSharpCoreBuilder builder)
-        {
-            MemoryAllocator AllocatorResolver(IServiceProvider s) => s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration.MemoryAllocator;
-
-            builder.SetMemoryAllocator(AllocatorResolver);
+            var descriptor = new ServiceDescriptor(typeof(MemoryAllocator), typeof(TMemoryAllocator), ServiceLifetime.Singleton);
+            builder.Services.Replace(descriptor);
             return builder;
         }
 
@@ -91,7 +83,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpCoreBuilder SetCache<TCache>(this IImageSharpCoreBuilder builder)
             where TCache : class, IImageCache
         {
-            builder.Services.AddSingleton<IImageCache, TCache>();
+            var descriptor = new ServiceDescriptor(typeof(IImageCache), typeof(TCache), ServiceLifetime.Singleton);
+            builder.Services.Replace(descriptor);
             return builder;
         }
 
@@ -103,7 +96,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetCache(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IImageCache> implementationFactory)
         {
-            builder.Services.AddSingleton(implementationFactory);
+            var descriptor = new ServiceDescriptor(typeof(IImageCache), implementationFactory, ServiceLifetime.Singleton);
+            builder.Services.Replace(descriptor);
             return builder;
         }
 
@@ -116,7 +110,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpCoreBuilder SetCacheHash<TCacheHash>(this IImageSharpCoreBuilder builder)
             where TCacheHash : class, ICacheHash
         {
-            builder.Services.AddSingleton<ICacheHash, TCacheHash>();
+            var descriptor = new ServiceDescriptor(typeof(ICacheHash), typeof(TCacheHash), ServiceLifetime.Singleton);
+            builder.Services.Replace(descriptor);
             return builder;
         }
 
@@ -128,7 +123,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
         public static IImageSharpCoreBuilder SetCacheHash(this IImageSharpCoreBuilder builder, Func<IServiceProvider, ICacheHash> implementationFactory)
         {
-            builder.Services.AddSingleton(implementationFactory);
+            var descriptor = new ServiceDescriptor(typeof(ICacheHash), implementationFactory, ServiceLifetime.Singleton);
+            builder.Services.Replace(descriptor);
             return builder;
         }
 
@@ -179,6 +175,34 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpCoreBuilder AddProcessor(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IImageWebProcessor> implementationFactory)
         {
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton(implementationFactory));
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the the memory allocator configured in <see cref="Configuration.MemoryAllocator"/> of <see cref="ImageSharpMiddlewareOptions.Configuration"/>.
+        /// </summary>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
+        internal static IImageSharpCoreBuilder SetMemoryAllocatorFromMiddlewareOptions(this IImageSharpCoreBuilder builder)
+        {
+            MemoryAllocator AllocatorFactory(IServiceProvider s)
+                => s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration.MemoryAllocator;
+
+            builder.SetMemoryAllocator(AllocatorFactory);
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the the <see cref="FormatUtilities"/> configured by <see cref="ImageSharpMiddlewareOptions.Configuration"/>.
+        /// </summary>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
+        internal static IImageSharpCoreBuilder SetFormatUtilitesFromMiddlewareOptions(this IImageSharpCoreBuilder builder)
+        {
+            FormatUtilities FormatUtilitiesFactory(IServiceProvider s)
+                => new FormatUtilities(s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration);
+
+            builder.Services.AddSingleton(FormatUtilitiesFactory);
             return builder;
         }
     }
