@@ -13,9 +13,6 @@ namespace SixLabors.ImageSharp.Web.Resolvers
     /// </summary>
     public class AzureBlobStorageImageResolver : IImageResolver
     {
-        /// <summary>
-        /// The Azure blob.
-        /// </summary>
         private readonly CloudBlob blob;
 
         /// <summary>
@@ -25,10 +22,10 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         public AzureBlobStorageImageResolver(CloudBlob blob) => this.blob = blob;
 
         /// <inheritdoc/>
-        public async Task<DateTime> GetLastWriteTimeUtcAsync()
+        public async Task<ImageMetaData> GetMetaDataAsync()
         {
             await this.blob.FetchAttributesAsync().ConfigureAwait(false);
-            return this.blob.Properties?.LastModified?.DateTime ?? DateTime.UtcNow;
+            return new ImageMetaData(this.blob.Properties?.LastModified?.DateTime ?? DateTime.UtcNow);
         }
 
         /// <inheritdoc/>
