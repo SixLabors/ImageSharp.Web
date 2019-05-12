@@ -25,7 +25,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>An <see cref="IImageSharpBuilder"/> that can be used to further configure the ImageSharp services.</returns>
         public static IImageSharpBuilder AddImageSharp(this IServiceCollection services)
         {
-            IImageSharpCoreBuilder builder = AddImageSharpCore(services);
+            IImageSharpBuilder builder = AddImageSharpCore(services);
 
             AddDefaultServices(builder);
 
@@ -40,7 +40,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>An <see cref="IImageSharpBuilder"/> that can be used to further configure the ImageSharp services.</returns>
         public static IImageSharpBuilder AddImageSharp(this IServiceCollection services, Action<ImageSharpMiddlewareOptions> setupAction)
         {
-            IImageSharpCoreBuilder builder = AddImageSharpCore(services, setupAction);
+            IImageSharpBuilder builder = AddImageSharpCore(services, setupAction);
 
             AddDefaultServices(builder);
 
@@ -53,14 +53,14 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
         /// <param name="setupAction">An <see cref="Action{ImageSharpMiddlewareOptions}"/> to configure the provided <see cref="ImageSharpMiddlewareOptions"/>.</param>
-        /// <returns>An <see cref="IImageSharpCoreBuilder"/> that can be used to further configure the ImageSharp services.</returns>
-        public static IImageSharpCoreBuilder AddImageSharpCore(this IServiceCollection services, Action<ImageSharpMiddlewareOptions> setupAction)
+        /// <returns>An <see cref="IImageSharpBuilder"/> that can be used to further configure the ImageSharp services.</returns>
+        public static IImageSharpBuilder AddImageSharpCore(this IServiceCollection services, Action<ImageSharpMiddlewareOptions> setupAction)
         {
             Guard.NotNull(services, nameof(services));
 
             services.TryAddTransient<IConfigureOptions<ImageSharpMiddlewareOptions>, ImageSharpConfiguration>();
 
-            IImageSharpCoreBuilder builder = new ImageSharpCoreBuilder(services);
+            IImageSharpBuilder builder = new ImageSharpBuilder(services);
 
             builder.Services.Configure(setupAction);
 
@@ -75,19 +75,18 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// All additional services are required to be configured.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
-        /// <returns>An <see cref="IImageSharpCoreBuilder"/> that can be used to further configure the ImageSharp services.</returns>
-        public static IImageSharpCoreBuilder AddImageSharpCore(this IServiceCollection services)
+        /// <returns>An <see cref="IImageSharpBuilder"/> that can be used to further configure the ImageSharp services.</returns>
+        public static IImageSharpBuilder AddImageSharpCore(this IServiceCollection services)
             => AddImageSharpCore(services, _ => { });
 
         /// <summary>
         /// Adds the default service to the service collection.
         /// </summary>
-        /// <param name="builder">The <see cref="IImageSharpCoreBuilder"/> that can be used to further configure the ImageSharp services.</param>
-        private static void AddDefaultServices(IImageSharpCoreBuilder builder)
+        /// <param name="builder">The <see cref="IImageSharpBuilder"/> that can be used to further configure the ImageSharp services.</param>
+        private static void AddDefaultServices(IImageSharpBuilder builder)
         {
             builder.SetRequestParser<QueryCollectionRequestParser>();
 
-            builder.Configure<PhysicalFileSystemCacheOptions>();
             builder.SetCache<PhysicalFileSystemCache>();
 
             builder.SetCacheHash<CacheHash>();

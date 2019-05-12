@@ -15,7 +15,6 @@ using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
-using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Tests
 {
@@ -40,7 +39,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                             options.OnPrepareResponse = _ => { };
                         })
                     .SetRequestParser<QueryCollectionRequestParser>()
-                    .SetMemoryAllocatorFromMiddlewareOptions()
+                    .Configure<PhysicalFileSystemCacheOptions>()
                     .SetCache<PhysicalFileSystemCache>()
                     .SetCacheHash<CacheHash>()
                     .AddProvider<PhysicalFileSystemProvider>()
@@ -66,7 +65,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                     options.OnPrepareResponse = onPrepareResponse;
                 })
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetMemoryAllocatorFromMiddlewareOptions()
+                .Configure<PhysicalFileSystemCacheOptions>()
                 .SetCache<PhysicalFileSystemCache>()
                 .SetCacheHash<CacheHash>()
                 .AddProvider<PhysicalFileSystemProvider>()

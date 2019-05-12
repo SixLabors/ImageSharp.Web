@@ -55,7 +55,6 @@ namespace SixLabors.ImageSharp.Web.Caching
             FormatUtilities formatUtilities)
         {
             Guard.NotNull(environment, nameof(environment));
-            Guard.NotNull(cacheOptions, nameof(cacheOptions));
             Guard.NotNull(options, nameof(options));
 
             Guard.NotNullOrWhiteSpace(
@@ -65,7 +64,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             this.environment = environment;
             this.fileProvider = this.environment.WebRootFileProvider;
-            this.cacheOptions = cacheOptions.Value;
+            this.cacheOptions = cacheOptions != null ? cacheOptions.Value : new PhysicalFileSystemCacheOptions();
             this.options = options.Value;
             this.formatUtilies = formatUtilities;
         }

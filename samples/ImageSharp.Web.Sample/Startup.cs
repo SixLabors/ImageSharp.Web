@@ -75,15 +75,9 @@ namespace SixLabors.ImageSharp.Web.Sample
 
         private void ConfigureCustomServicesAndDefaultOptions(IServiceCollection services)
         {
-            services.AddImageSharpCore()
-                    .SetRequestParser<QueryCollectionRequestParser>()
-                    .SetMemoryAllocator<ArrayPoolMemoryAllocator>()
-                    .SetCache<PhysicalFileSystemCache>()
-                    .SetCacheHash<CacheHash>()
-                    .AddProvider<PhysicalFileSystemProvider>()
-                    .AddProcessor<ResizeWebProcessor>()
-                    .AddProcessor<FormatWebProcessor>()
-                    .AddProcessor<BackgroundColorWebProcessor>();
+            services.AddImageSharp()
+                    .RemoveProcessor<FormatWebProcessor>()
+                    .RemoveProcessor<BackgroundColorWebProcessor>();
         }
 
         private void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
