@@ -87,6 +87,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         {
             builder.SetRequestParser<QueryCollectionRequestParser>();
 
+            builder.Configure<PhysicalFileSystemCacheOptions>();
             builder.SetCache<PhysicalFileSystemCache>();
 
             builder.SetCacheHash<CacheHash>();

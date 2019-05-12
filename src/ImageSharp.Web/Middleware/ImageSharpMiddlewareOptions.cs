@@ -10,7 +10,7 @@ using SixLabors.ImageSharp.Web.Providers;
 namespace SixLabors.ImageSharp.Web.Middleware
 {
     /// <summary>
-    /// Configuration options for the ImageSharp middleware.
+    /// Configuration options for the <see cref="ImageSharpMiddleware"/> middleware.
     /// </summary>
     public class ImageSharpMiddlewareOptions
     {

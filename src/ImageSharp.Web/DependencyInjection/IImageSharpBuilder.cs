@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace SixLabors.ImageSharp.Web.DependencyInjection
 {
     /// <summary>
-    /// Defines a contract for adding ImsgeSharp services.
+    /// Defines a contract for adding ImageSharp services.
     /// </summary>
     public interface IImageSharpBuilder
     {

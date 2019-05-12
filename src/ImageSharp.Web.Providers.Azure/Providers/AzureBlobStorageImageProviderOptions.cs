@@ -6,7 +6,7 @@ using Microsoft.Azure.Storage.Blob;
 namespace SixLabors.ImageSharp.Web.Providers
 {
     /// <summary>
-    /// Configuration options for the Azure Blob Storage provider middleware.
+    /// Configuration options for the <see cref="AzureBlobStorageImageProvider"/> provider.
     /// </summary>
     public class AzureBlobStorageImageProviderOptions
     {

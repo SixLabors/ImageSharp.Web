@@ -129,7 +129,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Adds the given <see cref="IImageProvider"/> to the resolver collection within the service collection.
+        /// Adds the given <see cref="IImageProvider"/> to the provider collection within the service collection.
         /// </summary>
         /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
         /// <param name="builder">The core builder.</param>
@@ -142,7 +142,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Adds the given <see cref="IImageProvider"/> to the resolver collection within the service collection.
+        /// Adds the given <see cref="IImageProvider"/> to the provider collection within the service collection.
         /// </summary>
         /// <param name="builder">The core builder.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
@@ -150,6 +150,19 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpCoreBuilder AddProvider(this IImageSharpCoreBuilder builder, Func<IServiceProvider, IImageProvider> implementationFactory)
         {
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton(implementationFactory));
+            return builder;
+        }
+
+        /// <summary>
+        /// Removes the given <see cref="IImageProvider"/> from the provider collection within the service collection.
+        /// </summary>
+        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
+        public static IImageSharpCoreBuilder RemoveProvider<TProvider>(this IImageSharpCoreBuilder builder)
+            where TProvider : class, IImageProvider
+        {
+            builder.Services.Remove(ServiceDescriptor.Singleton<IImageProvider, TProvider>());
             return builder;
         }
 
@@ -179,6 +192,43 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
+        /// Removes the given <see cref="IImageWebProcessor"/> from the processor collection within the service collection.
+        /// </summary>
+        /// <typeparam name="TProcessor">The type of class implementing <see cref="IImageWebProcessor"/>to add.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
+        public static IImageSharpCoreBuilder RemoveProcessor<TProcessor>(this IImageSharpCoreBuilder builder)
+            where TProcessor : class, IImageWebProcessor
+        {
+            builder.Services.Remove(ServiceDescriptor.Singleton<IImageWebProcessor, TProcessor>());
+            return builder;
+        }
+
+        /// <summary>
+        /// Registers the particular type of options.
+        /// </summary>
+        /// <typeparam name="TOptions">The options type to be configured.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
+        public static IImageSharpCoreBuilder Configure<TOptions>(this IImageSharpCoreBuilder builder)
+             where TOptions : class
+            => builder.Configure<TOptions>(_ => { });
+
+        /// <summary>
+        /// Registers an action used to configure a particular type of options.
+        /// </summary>
+        /// <typeparam name="TOptions">The options type to be configured.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="configureOptions">The action used to configure the options.</param>
+        /// <returns>The <see cref="IImageSharpCoreBuilder"/>.</returns>
+        public static IImageSharpCoreBuilder Configure<TOptions>(this IImageSharpCoreBuilder builder, Action<TOptions> configureOptions)
+             where TOptions : class
+        {
+            builder.Services.Configure(configureOptions);
+            return builder;
+        }
+
+        /// <summary>
         /// Sets the the memory allocator configured in <see cref="Configuration.MemoryAllocator"/> of <see cref="ImageSharpMiddlewareOptions.Configuration"/>.
         /// </summary>
         /// <param name="builder">The core builder.</param>
@@ -186,7 +236,9 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         internal static IImageSharpCoreBuilder SetMemoryAllocatorFromMiddlewareOptions(this IImageSharpCoreBuilder builder)
         {
             MemoryAllocator AllocatorFactory(IServiceProvider s)
-                => s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration.MemoryAllocator;
+            {
+                return s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration.MemoryAllocator;
+            }
 
             builder.SetMemoryAllocator(AllocatorFactory);
             return builder;
@@ -200,7 +252,9 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         internal static IImageSharpCoreBuilder SetFormatUtilitesFromMiddlewareOptions(this IImageSharpCoreBuilder builder)
         {
             FormatUtilities FormatUtilitiesFactory(IServiceProvider s)
-                => new FormatUtilities(s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration);
+            {
+                return new FormatUtilities(s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration);
+            }
 
             builder.Services.AddSingleton(FormatUtilitiesFactory);
             return builder;
