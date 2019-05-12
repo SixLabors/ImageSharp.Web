@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -66,9 +65,6 @@ namespace SixLabors.ImageSharp.Web.Providers
 
         /// <inheritdoc/>
         public Func<HttpContext, bool> Match { get; set; } = _ => true;
-
-        /// <inheritdoc/>
-        public IDictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
 
         /// <inheritdoc/>
         public async Task<IImageResolver> GetAsync(HttpContext context)
