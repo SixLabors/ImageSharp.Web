@@ -18,6 +18,11 @@ namespace SixLabors.ImageSharp.Web.Providers
     public class AzureBlobStorageImageProvider : IImageProvider
     {
         /// <summary>
+        /// Character array to remove from paths.
+        /// </summary>
+        private static readonly char[] SlashChars = { '\\', '/' };
+
+        /// <summary>
         /// The cloud storage account.
         /// </summary>
         private readonly CloudStorageAccount storageAccount;
@@ -36,6 +41,11 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// Contains various helper methods based on the current configuration.
         /// </summary>
         private readonly FormatUtilities formatUtilities;
+
+        /// <summary>
+        /// A match function used by the resolver to identify itself as the correct resolver to use.
+        /// </summary>
+        private Func<HttpContext, bool> match;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureBlobStorageImageProvider"/> class.
@@ -64,14 +74,22 @@ namespace SixLabors.ImageSharp.Web.Providers
         }
 
         /// <inheritdoc/>
-        public Func<HttpContext, bool> Match { get; set; } = _ => true;
+        public Func<HttpContext, bool> Match
+        {
+            get => this.match ?? this.IsMatch;
+            set => this.match = value;
+        }
 
         /// <inheritdoc/>
         public async Task<IImageResolver> GetAsync(HttpContext context)
         {
-            // Strip the leading slash from the HTTP request path and treat the remaining path string as the blob name.
+            // Strip the leading slash and container name from the HTTP request path and treat
+            // the remaining path string as the blob name.
             // Path has already been correctly parsed before here.
-            string blobName = context.Request.Path.Value.TrimStart('\\', '/');
+            string blobName = context.Request.Path.Value.TrimStart(SlashChars)
+                                     .Substring(this.storageOptions.ContainerName.Length)
+                                     .TrimStart(SlashChars);
+
             if (string.IsNullOrWhiteSpace(blobName))
             {
                 return null;
@@ -89,5 +107,11 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <inheritdoc/>
         public bool IsValidRequest(HttpContext context)
             => this.formatUtilities.GetExtensionFromUri(context.Request.GetDisplayUrl()) != null;
+
+        private bool IsMatch(HttpContext context)
+        {
+            string path = context.Request.Path.Value.TrimStart(SlashChars);
+            return path.StartsWith(this.storageOptions.ContainerName, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

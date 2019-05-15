@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Web.Caching;
@@ -20,7 +22,11 @@ namespace SixLabors.ImageSharp.Web.Tests
 {
     public static class ImageSharpTestServer
     {
-        public static string TestImage = "http://localhost/SubFolder/imagesharp-logo.png";
+        private const string AzureConnectionString = "UseDevelopmentStorage=true";
+        private const string AzureContainerName = "azure";
+        private const string ImagePath = "SubFolder/imagesharp-logo.png";
+        public const string PhysicalTestImage = "http://localhost/" + ImagePath;
+        public const string AzureTestImage = "http://localhost/" + AzureContainerName + "/" + ImagePath;
 
         public static Action<IApplicationBuilder> DefaultConfig = app => app.UseImageSharp();
 
@@ -39,10 +45,16 @@ namespace SixLabors.ImageSharp.Web.Tests
                             options.OnPrepareResponse = _ => { };
                         })
                     .SetRequestParser<QueryCollectionRequestParser>()
-                    .Configure<PhysicalFileSystemCacheOptions>()
+                    .Configure<PhysicalFileSystemCacheOptions>(_ => { })
                     .SetCache<PhysicalFileSystemCache>()
                     .SetCacheHash<CacheHash>()
-                    .AddProvider<PhysicalFileSystemProvider>()
+                    .AddProvider<PhysicalFileSystemProvider>(PhysicalProviderFactory)
+                    .Configure<AzureBlobStorageImageProviderOptions>(options =>
+                    {
+                        options.ConnectionString = AzureConnectionString;
+                        options.ContainerName = AzureContainerName;
+                    })
+                    .AddProvider<AzureBlobStorageImageProvider>()
                     .AddProcessor<ResizeWebProcessor>();
         };
 
@@ -54,7 +66,9 @@ namespace SixLabors.ImageSharp.Web.Tests
             Action<ImageProcessingContext> onProcessed = null,
             Action<HttpContext> onPrepareResponse = null)
         {
-            void ConfigureServices(IServiceCollection services) => services.AddImageSharpCore(options =>
+            void ConfigureServices(IServiceCollection services)
+            {
+                services.AddImageSharpCore(options =>
                 {
                     options.Configuration = Configuration.Default;
                     options.MaxBrowserCacheDays = -1;
@@ -65,11 +79,18 @@ namespace SixLabors.ImageSharp.Web.Tests
                     options.OnPrepareResponse = onPrepareResponse;
                 })
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .Configure<PhysicalFileSystemCacheOptions>()
+                .Configure<PhysicalFileSystemCacheOptions>(_ => { })
                 .SetCache<PhysicalFileSystemCache>()
                 .SetCacheHash<CacheHash>()
-                .AddProvider<PhysicalFileSystemProvider>()
+                .AddProvider<PhysicalFileSystemProvider>(PhysicalProviderFactory)
+                .Configure<AzureBlobStorageImageProviderOptions>(options =>
+                {
+                    options.ConnectionString = AzureConnectionString;
+                    options.ContainerName = AzureContainerName;
+                })
+                .AddProvider<AzureBlobStorageImageProvider>()
                 .AddProcessor<ResizeWebProcessor>();
+            }
 
             return Create(DefaultConfig, ConfigureServices);
         }
@@ -84,15 +105,56 @@ namespace SixLabors.ImageSharp.Web.Tests
                 .AddInMemoryCollection(new[]
                 {
                     new KeyValuePair<string, string>("webroot", "../../../")
-                })
-                .Build();
+                }).Build();
 
             IWebHostBuilder builder = new WebHostBuilder()
                 .UseConfiguration(configuration)
                 .Configure(configureApp)
                 .ConfigureServices(configureServices ?? DefaultConfigureServices);
 
-            return new TestServer(builder);
+            var server = new TestServer(builder);
+
+            InitializeAzureStorage(server);
+
+            return server;
+        }
+
+        private static void InitializeAzureStorage(TestServer server)
+        {
+            // Upload an image to the Azure Test Storage;
+            var storageAccount = CloudStorageAccount.Parse(AzureConnectionString);
+            CloudBlobClient client = storageAccount.CreateCloudBlobClient();
+            CloudBlobContainer container = client.GetContainerReference(AzureContainerName);
+
+            if (!container.Exists())
+            {
+                container.Create();
+                container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
+            }
+
+            IHostingEnvironment environment = server.Host.Services.GetRequiredService<IHostingEnvironment>();
+            CloudBlockBlob blob = container.GetBlockBlobReference(ImagePath);
+            if (!blob.Exists())
+            {
+                Microsoft.Extensions.FileProviders.IFileInfo file = environment.WebRootFileProvider.GetFileInfo(ImagePath);
+                using (System.IO.Stream stream = file.CreateReadStream())
+                {
+                    blob.UploadFromStream(stream);
+                }
+            }
+        }
+
+        private static PhysicalFileSystemProvider PhysicalProviderFactory(IServiceProvider provider)
+        {
+            return new PhysicalFileSystemProvider(
+                provider.GetRequiredService<IHostingEnvironment>(),
+                provider.GetRequiredService<FormatUtilities>())
+            {
+                Match = context =>
+                {
+                    return !context.Request.Path.StartsWithSegments("/" + AzureContainerName);
+                }
+            };
         }
     }
 }

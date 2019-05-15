@@ -4,10 +4,18 @@ image: Previous Visual Studio 2017
 # prevent the double build when a branch has an active PR
 skip_branch_with_pr: true
 
+# Install and run the Azure Storage Emulator
+# https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator#get-the-storage-emulator
+install:
+  - ps: >-
+      $msiPath = "$($env:USERPROFILE)\MicrosoftAzureStorageEmulator.msi"
+      (New-Object Net.WebClient).DownloadFile('https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409', $msiPath)
+      cmd /c start /wait msiexec /i $msiPath /quiet
 
 before_build:
   - git submodule -q update --init
   - cmd: dotnet --info
+  - cmd: '"%programfiles(x86)%\Microsoft SDKs\Azure\Storage Emulator\AzureStorageEmulator.exe" start'
 
 build_script:
 - cmd: build.cmd

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -143,12 +144,14 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Adds the given <see cref="IImageProvider"/> to the provider collection within the service collection.
         /// </summary>
+        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        public static IImageSharpBuilder AddProvider(this IImageSharpBuilder builder, Func<IServiceProvider, IImageProvider> implementationFactory)
+        public static IImageSharpBuilder AddProvider<TProvider>(this IImageSharpBuilder builder, Func<IServiceProvider, TProvider> implementationFactory)
+            where TProvider : class, IImageProvider
         {
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton(implementationFactory));
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageProvider>(implementationFactory));
             return builder;
         }
 
@@ -181,12 +184,14 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Adds the given <see cref="IImageWebProcessor"/> to the processor collection within the service collection.
         /// </summary>
+        /// <typeparam name="TProcessor">The type of class implementing <see cref="IImageWebProcessor"/>to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        public static IImageSharpBuilder AddProcessor(this IImageSharpBuilder builder, Func<IServiceProvider, IImageWebProcessor> implementationFactory)
+        public static IImageSharpBuilder AddProcessor<TProcessor>(this IImageSharpBuilder builder, Func<IServiceProvider, TProcessor> implementationFactory)
+            where TProcessor : class, IImageWebProcessor
         {
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton(implementationFactory));
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageWebProcessor>(implementationFactory));
             return builder;
         }
 
@@ -204,14 +209,18 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Registers the particular type of options.
+        /// Registers an action used to configure a particular type of options.
         /// </summary>
         /// <typeparam name="TOptions">The options type to be configured.</typeparam>
         /// <param name="builder">The core builder.</param>
+        /// <param name="configuration">The configuration being bound.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        public static IImageSharpBuilder Configure<TOptions>(this IImageSharpBuilder builder)
+        public static IImageSharpBuilder Configure<TOptions>(this IImageSharpBuilder builder, IConfiguration configuration)
              where TOptions : class
-            => builder.Configure<TOptions>(_ => { });
+        {
+            builder.Services.Configure<TOptions>(configuration);
+            return builder;
+        }
 
         /// <summary>
         /// Registers an action used to configure a particular type of options.

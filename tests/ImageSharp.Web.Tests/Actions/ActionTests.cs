@@ -11,8 +11,10 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
 {
     public class ActionTests
     {
-        [Fact]
-        public async Task ShouldRunOnValidateAction()
+        [Theory]
+        [InlineData(ImageSharpTestServer.PhysicalTestImage)]
+        [InlineData(ImageSharpTestServer.AzureTestImage)]
+        public async Task ShouldRunOnValidateAction(string url)
         {
             bool complete = false;
             void OnParseCommands(ImageCommandContext context)
@@ -26,7 +28,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
 
             TestServer server = ImageSharpTestServer.CreateWithActions(OnParseCommands);
 
-            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20").ConfigureAwait(false);
+            await server.CreateClient().GetAsync(url + "?width=20").ConfigureAwait(false);
             Assert.True(complete);
         }
 
@@ -44,7 +46,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
 
             TestServer server = ImageSharpTestServer.CreateWithActions(null, OnBeforeSave);
 
-            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20").ConfigureAwait(false);
+            await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
             Assert.True(complete);
         }
 
@@ -63,7 +65,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
 
             TestServer server = ImageSharpTestServer.CreateWithActions(null, null, OnProcessed);
 
-            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20").ConfigureAwait(false);
+            await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
             Assert.True(complete);
         }
 
@@ -80,7 +82,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
 
             TestServer server = ImageSharpTestServer.CreateWithActions(null, null, null, OnPrepareResponse);
 
-            await server.CreateClient().GetAsync(ImageSharpTestServer.TestImage + "?width=20").ConfigureAwait(false);
+            await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
             Assert.True(complete);
         }
     }

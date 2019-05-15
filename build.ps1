@@ -107,4 +107,5 @@ if ($LASTEXITCODE ){ Exit $LASTEXITCODE }
 
 Write-Host "Packaging projects"
 dotnet pack ./src/ImageSharp.Web/ -c Release --output ../../artifacts --no-build  /p:packageversion=$version
+dotnet pack ./src/ImageSharp.Web.Providers.Azure/ -c Release --output ../../artifacts --no-build  /p:packageversion=$version
 if ($LASTEXITCODE ){ Exit $LASTEXITCODE }
