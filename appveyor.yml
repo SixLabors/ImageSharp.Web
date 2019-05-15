@@ -9,7 +9,9 @@ skip_branch_with_pr: true
 install:
   - ps: >-
       $msiPath = "$($env:USERPROFILE)\MicrosoftAzureStorageEmulator.msi"
+
       (New-Object Net.WebClient).DownloadFile('https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409', $msiPath)
+
       cmd /c start /wait msiexec /i $msiPath /quiet
 
 before_build:
