@@ -20,7 +20,7 @@ branches:
 script:
   - git submodule -q update --init
   - npm install -g azurite
-  - azurite --silent --location /usr/share/azurite --debug /usr/share/azurite/debug.log
+  - azurite --silent --location /home/travis/build/SixLabors/ --debug /home/travis/build/SixLabors/debug.log
   - dotnet restore
   - dotnet test tests/ImageSharp.Web.Tests/ImageSharp.Web.Tests.csproj -c Release -f "netcoreapp2.1"
   - dotnet test tests/ImageSharp.Web.Tests/ImageSharp.Web.Tests.csproj -c Release -f "netcoreapp1.1"
