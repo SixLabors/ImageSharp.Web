@@ -18,6 +18,9 @@ branches:
     - coverity_scan
 
 script:
+  - git submodule -q update --init
+  - npm install -g azurite
+  - azurite -s -l c:\azurite -d c:\azurite\debug.log
   - dotnet restore
   - dotnet test tests/ImageSharp.Web.Tests/ImageSharp.Web.Tests.csproj -c Release -f "netcoreapp2.1"
   - dotnet test tests/ImageSharp.Web.Tests/ImageSharp.Web.Tests.csproj -c Release -f "netcoreapp1.1"
