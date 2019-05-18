@@ -27,6 +27,7 @@ test_script:
 
 after_test:
   - cmd: appveyor PushArtifact "artifacts\SixLabors.ImageSharp.Web.%APPVEYOR_BUILD_VERSION%.nupkg"
+  - cmd: appveyor PushArtifact "artifacts\ImageSharp.Web.Providers.Azure.%APPVEYOR_BUILD_VERSION%.nupkg"
 
 deploy:
     # MyGet Deployment for builds & releases

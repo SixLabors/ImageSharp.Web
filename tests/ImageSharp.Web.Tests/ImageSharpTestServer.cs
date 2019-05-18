@@ -11,6 +11,7 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
@@ -136,7 +137,7 @@ namespace SixLabors.ImageSharp.Web.Tests
             CloudBlockBlob blob = container.GetBlockBlobReference(ImagePath);
             if (!blob.Exists())
             {
-                Microsoft.Extensions.FileProviders.IFileInfo file = environment.WebRootFileProvider.GetFileInfo(ImagePath);
+                IFileInfo file = environment.WebRootFileProvider.GetFileInfo(ImagePath);
                 using (System.IO.Stream stream = file.CreateReadStream())
                 {
                     blob.UploadFromStream(stream);
