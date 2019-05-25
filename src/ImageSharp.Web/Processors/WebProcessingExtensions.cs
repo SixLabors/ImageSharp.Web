@@ -20,7 +20,11 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <param name="commands">The parsed collection of processing commands.</param>
         /// <returns>The <see cref="Image{Rgba32}"/>.</returns>
         /// <remarks>Passing zero for one of height or width will automatically preserve the aspect ratio of the original image.</remarks>
-        public static FormattedImage Process(this FormattedImage source, ILogger logger, IEnumerable<IImageWebProcessor> processors, IDictionary<string, string> commands)
+        public static FormattedImage Process(
+            this FormattedImage source,
+            ILogger logger,
+            IEnumerable<IImageWebProcessor> processors,
+            IDictionary<string, string> commands)
         {
             if (commands.Count == 0)
             {

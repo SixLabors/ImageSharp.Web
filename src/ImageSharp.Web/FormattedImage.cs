@@ -49,7 +49,7 @@ namespace SixLabors.ImageSharp.Web
         /// <returns>A formatted image.</returns>
         public static FormattedImage Load(Configuration configuration, Stream source)
         {
-            var image = ImageSharp.Image.Load(configuration, source, out IImageFormat format);
+            var image = ImageSharp.Image.Load<Rgba32>(configuration, source, out IImageFormat format);
             return new FormattedImage(image, format);
         }
 
@@ -57,10 +57,7 @@ namespace SixLabors.ImageSharp.Web
         /// Saves the specified destination.
         /// </summary>
         /// <param name="destination">The destination.</param>
-        public void Save(Stream destination)
-        {
-            this.Image.Save(destination, this.format);
-        }
+        public void Save(Stream destination) => this.Image.Save(destination, this.format);
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.

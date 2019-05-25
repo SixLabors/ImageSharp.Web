@@ -118,24 +118,16 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         private static float[] GetCenter(IDictionary<string, string> commands, CommandParser parser)
-        {
-            return parser.ParseValue<float[]>(commands.GetValueOrDefault(Xy));
-        }
+            => parser.ParseValue<float[]>(commands.GetValueOrDefault(Xy));
 
         private static ResizeMode GetMode(IDictionary<string, string> commands, CommandParser parser)
-        {
-            return parser.ParseValue<ResizeMode>(commands.GetValueOrDefault(Mode));
-        }
+            => parser.ParseValue<ResizeMode>(commands.GetValueOrDefault(Mode));
 
         private static AnchorPositionMode GetAnchor(IDictionary<string, string> commands, CommandParser parser)
-        {
-            return parser.ParseValue<AnchorPositionMode>(commands.GetValueOrDefault(Anchor));
-        }
+            => parser.ParseValue<AnchorPositionMode>(commands.GetValueOrDefault(Anchor));
 
         private static bool GetCompandMode(IDictionary<string, string> commands, CommandParser parser)
-        {
-            return parser.ParseValue<bool>(commands.GetValueOrDefault(Compand));
-        }
+            => parser.ParseValue<bool>(commands.GetValueOrDefault(Compand));
 
         private static IResampler GetSampler(IDictionary<string, string> commands)
         {
