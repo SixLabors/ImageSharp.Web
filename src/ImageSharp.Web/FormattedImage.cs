@@ -15,7 +15,6 @@ namespace SixLabors.ImageSharp.Web
     public class FormattedImage : IDisposable
     {
         private IImageFormat format;
-        private Image<Rgba32> image;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FormattedImage"/> class.
@@ -25,13 +24,13 @@ namespace SixLabors.ImageSharp.Web
         protected FormattedImage(Image<Rgba32> image, IImageFormat format)
         {
             this.format = format;
-            this.image = image;
+            this.Image = image;
         }
 
         /// <summary>
         /// Gets the image.
         /// </summary>
-        public Image<Rgba32> Image => this.image;
+        public Image<Rgba32> Image { get; private set; }
 
         /// <summary>
         /// Gets or sets the format.
@@ -43,24 +42,6 @@ namespace SixLabors.ImageSharp.Web
         }
 
         /// <summary>
-        /// Saves the specified destination.
-        /// </summary>
-        /// <param name="destination">The destination.</param>
-        public void Save(Stream destination)
-        {
-            this.image.Save(destination, this.format);
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            this.image?.Dispose();
-            this.image = null;
-        }
-
-        /// <summary>
         /// Loads the specified source.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
@@ -68,8 +49,23 @@ namespace SixLabors.ImageSharp.Web
         /// <returns>A formatted image.</returns>
         public static FormattedImage Load(Configuration configuration, Stream source)
         {
-            var image = ImageSharp.Image.Load(configuration, source, out IImageFormat format);
+            var image = ImageSharp.Image.Load<Rgba32>(configuration, source, out IImageFormat format);
             return new FormattedImage(image, format);
+        }
+
+        /// <summary>
+        /// Saves the specified destination.
+        /// </summary>
+        /// <param name="destination">The destination.</param>
+        public void Save(Stream destination) => this.Image.Save(destination, this.format);
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Image?.Dispose();
+            this.Image = null;
         }
     }
 }

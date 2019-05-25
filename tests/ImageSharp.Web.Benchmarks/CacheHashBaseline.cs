@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
-using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Middleware;
 
 namespace SixLabors.ImageSharp.Web.Benchmarks
@@ -13,19 +12,6 @@ namespace SixLabors.ImageSharp.Web.Benchmarks
     /// </summary>
     public class CacheHashBaseline : ICacheHash
     {
-        private readonly ImageSharpMiddlewareOptions options;
-        private readonly FormatUtilities formatUtilities;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CacheHash"/> class.
-        /// </summary>
-        /// <param name="options">The middleware configuration options</param>
-        public CacheHashBaseline(IOptions<ImageSharpMiddlewareOptions> options)
-        {
-            this.options = options.Value;
-            this.formatUtilities = new FormatUtilities(this.options.Configuration);
-        }
-
         /// <inheritdoc/>
         public string Create(string value, uint length)
         {

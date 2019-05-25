@@ -20,11 +20,6 @@ namespace SixLabors.ImageSharp.Web.Providers
         Func<HttpContext, bool> Match { get; set; }
 
         /// <summary>
-        /// Gets or sets any additional settings.
-        /// </summary>
-        IDictionary<string, string> Settings { get; set; }
-
-        /// <summary>
         /// Gets a value indicating whether the current request passes sanitizing rules.
         /// </summary>
         /// <param name="context">The current HTTP request context.</param>

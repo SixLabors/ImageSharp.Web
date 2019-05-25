@@ -67,8 +67,8 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
                     List<byte> rgba = CommandParser.Instance.ParseValue<List<byte>>(value);
 
                     return rgba.Count == 4
-                        ? ColorBuilder<Rgba32>.FromRGBA(rgba[0], rgba[1], rgba[2], rgba[3])
-                        : ColorBuilder<Rgba32>.FromRGB(rgba[0], rgba[1], rgba[2]);
+                        ? new Rgba32(rgba[0], rgba[1], rgba[2], rgba[3])
+                        : new Rgba32(rgba[0], rgba[1], rgba[2]);
                 }
             }
 

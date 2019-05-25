@@ -13,7 +13,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
-using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.ImageSharp.Web.Resolvers;
@@ -98,6 +97,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images.</param>
         /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images.</param>
         /// <param name="cacheHash">An <see cref="ICacheHash"/>instance used for calculating cached file names.</param>
+        /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public ImageSharpMiddleware(
             RequestDelegate next,
             IOptions<ImageSharpMiddlewareOptions> options,
@@ -107,7 +107,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IEnumerable<IImageProvider> resolvers,
             IEnumerable<IImageWebProcessor> processors,
             IImageCache cache,
-            ICacheHash cacheHash)
+            ICacheHash cacheHash,
+            FormatUtilities formatUtilities)
         {
             Guard.NotNull(next, nameof(next));
             Guard.NotNull(options, nameof(options));
@@ -138,7 +139,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.knownCommands = commands;
 
             this.logger = loggerFactory.CreateLogger<ImageSharpMiddleware>();
-            this.formatUtilities = new FormatUtilities(this.options.Configuration);
+            this.formatUtilities = formatUtilities;
         }
 
         /// <summary>

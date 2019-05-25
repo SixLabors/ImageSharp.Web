@@ -2,10 +2,10 @@ language: csharp
 
 matrix:
   include:
-    - os: linux # Ubuntu 14.04
-      dist: trusty
+    - os: linux # Ubuntu 16.04
+      dist: xenial
       sudo: required
-      dotnet: 2.1.300
+      dotnet: 2.1.603
       mono: latest
 #    - os: osx # OSX 10.11
 #      osx_image: xcode7.3.1
@@ -18,6 +18,9 @@ branches:
     - coverity_scan
 
 script:
+  - git submodule -q update --init
+  - npm install -g azurite
+  - azurite --silent --location /home/travis/build/SixLabors/ --debug /home/travis/build/SixLabors/debug.log &
   - dotnet restore
   - dotnet test tests/ImageSharp.Web.Tests/ImageSharp.Web.Tests.csproj -c Release -f "netcoreapp2.1"
   - dotnet test tests/ImageSharp.Web.Tests/ImageSharp.Web.Tests.csproj -c Release -f "netcoreapp1.1"
@@ -43,7 +46,7 @@ addons:
   apt:
     # Install framework 1.1.2 in order to run tests on netcoreapp1.1, see https://codeblog.jonskeet.uk/2017/08/15/using-net-core-2-0-sdk-on-travis/
     sources:
-    - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-trusty-prod trusty main'
+    - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main'
       key_url: 'https://packages.microsoft.com/keys/microsoft.asc'
     packages:
     - dotnet-sharedframework-microsoft.netcore.app-1.1.2

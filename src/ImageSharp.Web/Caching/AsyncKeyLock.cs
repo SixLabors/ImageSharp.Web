@@ -25,15 +25,15 @@ namespace SixLabors.ImageSharp.Web.Caching
         private static readonly Stack<Doorman> Pool = new Stack<Doorman>(MaxPoolSize);
 
         /// <summary>
+        /// SpinLock used to protect access to the Keys and Pool collections.
+        /// </summary>
+        private static readonly SpinLock SpinLock = new SpinLock(false);
+
+        /// <summary>
         /// Maximum size of the doorman pool. If the pool is already full when releasing
         /// a doorman, it is simply left for garbage collection.
         /// </summary>
         private const int MaxPoolSize = 20;
-
-        /// <summary>
-        /// SpinLock used to protect access to the Keys and Pool collections.
-        /// </summary>
-        private static SpinLock spinLock = new SpinLock(false);
 
         /// <summary>
         /// Locks the current thread in read mode asynchronously.
@@ -76,7 +76,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             bool lockTaken = false;
             try
             {
-                spinLock.Enter(ref lockTaken);
+                SpinLock.Enter(ref lockTaken);
 
                 if (!Keys.TryGetValue(key, out doorman))
                 {
@@ -91,7 +91,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             {
                 if (lockTaken)
                 {
-                    spinLock.Exit();
+                    SpinLock.Exit();
                 }
             }
 
@@ -109,7 +109,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             bool lockTaken = false;
             try
             {
-                spinLock.Enter(ref lockTaken);
+                SpinLock.Enter(ref lockTaken);
 
                 if (--doorman.RefCount == 0)
                 {
@@ -125,7 +125,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             {
                 if (lockTaken)
                 {
-                    spinLock.Exit();
+                    SpinLock.Exit();
                 }
             }
         }

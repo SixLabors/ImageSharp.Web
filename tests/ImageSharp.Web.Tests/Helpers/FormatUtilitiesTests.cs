@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using SixLabors.ImageSharp.Web.Helpers;
 using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.Helpers

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,22 +16,27 @@ namespace SixLabors.ImageSharp.Web.Sample
 {
     public class Startup
     {
+        public Startup(IConfiguration configuration) => this.AppConfiguration = configuration;
+
+        public IConfiguration AppConfiguration { get; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddImageSharpCore()
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetMemoryAllocatorFromMiddlewareOptions()
-                .SetCache(provider => new PhysicalFileSystemCache(
-                    provider.GetRequiredService<IHostingEnvironment>(),
-                    provider.GetRequiredService<MemoryAllocator>(),
-                    provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>())
+                .Configure<PhysicalFileSystemCacheOptions>(options =>
                 {
-                    Settings =
-                    {
-                        [PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder
-                    }
+                    options.CacheFolder = "is-cache";
+                })
+                .SetCache(provider =>
+                {
+                    return new PhysicalFileSystemCache(
+                                provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
+                                provider.GetRequiredService<IHostingEnvironment>(),
+                                provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
+                                provider.GetRequiredService<FormatUtilities>());
                 })
                 .SetCacheHash<CacheHash>()
                 .AddProvider<PhysicalFileSystemProvider>()
@@ -40,7 +46,7 @@ namespace SixLabors.ImageSharp.Web.Sample
 
             // Add the default service and options.
             //
-            //services.AddImageSharp();
+            // services.AddImageSharp();
 
             // Or add the default service and custom options.
             //
@@ -74,15 +80,9 @@ namespace SixLabors.ImageSharp.Web.Sample
 
         private void ConfigureCustomServicesAndDefaultOptions(IServiceCollection services)
         {
-            services.AddImageSharpCore()
-                    .SetRequestParser<QueryCollectionRequestParser>()
-                    .SetMemoryAllocator<ArrayPoolMemoryAllocator>()
-                    .SetCache<PhysicalFileSystemCache>()
-                    .SetCacheHash<CacheHash>()
-                    .AddProvider<PhysicalFileSystemProvider>()
-                    .AddProcessor<ResizeWebProcessor>()
-                    .AddProcessor<FormatWebProcessor>()
-                    .AddProcessor<BackgroundColorWebProcessor>();
+            services.AddImageSharp()
+                    .RemoveProcessor<FormatWebProcessor>()
+                    .RemoveProcessor<BackgroundColorWebProcessor>();
         }
 
         private void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
@@ -101,17 +101,18 @@ namespace SixLabors.ImageSharp.Web.Sample
                     })
                 .SetRequestParser<QueryCollectionRequestParser>()
                 .SetMemoryAllocator(provider => ArrayPoolMemoryAllocator.CreateWithMinimalPooling())
+                .Configure<PhysicalFileSystemCacheOptions>(options =>
+                {
+                    options.CacheFolder = "different-cache";
+                })
                 .SetCache(provider =>
-                  {
-                      var p = new PhysicalFileSystemCache(
-                          provider.GetRequiredService<IHostingEnvironment>(),
-                          provider.GetRequiredService<MemoryAllocator>(),
-                          provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
-
-                      p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
-
-                      return p;
-                  })
+                {
+                    return new PhysicalFileSystemCache(
+                        provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
+                        provider.GetRequiredService<IHostingEnvironment>(),
+                        provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
+                        provider.GetRequiredService<FormatUtilities>());
+                })
                 .SetCacheHash<CacheHash>()
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()

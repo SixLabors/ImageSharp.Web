@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp;
 
 namespace SixLabors.ImageSharp.Web.Processors
 {

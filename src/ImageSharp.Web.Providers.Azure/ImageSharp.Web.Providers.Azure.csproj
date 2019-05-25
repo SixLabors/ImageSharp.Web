@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyTitle>SixLabors.ImageSharp.Web.Providers.Azure</AssemblyTitle>
+    <Authors>Six Labors and contributors</Authors>
+    <Company>Six Labors</Company>
+    <Copyright>Copyright (c) Six Labors and contributors.</Copyright>
+    <Product>SixLabors.ImageSharp.Web.Providers.Azure</Product>
+    <Description>A provider for resolving images via Azure Blob Storage.</Description>
+    <NeutralLanguage>en</NeutralLanguage>
+
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>SixLabors.ImageSharp.Web.Providers.Azure</AssemblyName>
+    <PackageId>SixLabors.ImageSharp.Web.Providers.Azure</PackageId>
+    <PackageTags>Image Middleware Resize Crop Gif Jpg Jpeg Bitmap Png Azure</PackageTags>
+    <PackageIconUrl>https://raw.githubusercontent.com/SixLabors/Branding/master/icons/imagesharp/sixlabors.imagesharp.128.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/SixLabors/ImageSharp.Web</PackageProjectUrl>
+    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/SixLabors/ImageSharp.Web</RepositoryUrl>
+
+    <DebugType Condition="$(codecov) != ''">full</DebugType>
+    <DebugType Condition="$(codecov) == ''">portable</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.KeyVault.Core" Version="3.0.1" />
+    <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="10.0.2" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ImageSharp.Web\ImageSharp.Web.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>..\..\standards\SixLabors.ruleset</CodeAnalysisRuleSet>
+    <RootNamespace>SixLabors.ImageSharp.Web</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="..\..\standards\stylecop.json" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

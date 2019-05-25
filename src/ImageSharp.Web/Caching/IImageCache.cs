@@ -1,11 +1,8 @@
 ﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Resolvers;
 
 // TODO: Do we add cleanup to this? Scalable caches probably shouldn't do so.
@@ -16,11 +13,6 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// </summary>
     public interface IImageCache
     {
-        /// <summary>
-        /// Gets any additional settings.
-        /// </summary>
-        IDictionary<string, string> Settings { get; }
-
         /// <summary>
         /// Gets the image resolver associated with the specified key.
         /// </summary>

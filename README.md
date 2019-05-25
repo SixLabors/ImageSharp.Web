@@ -72,25 +72,19 @@ services.AddImageSharp(
         });
 ```
 
-Or you can fine-grain control adding the default options and configure all other services.
+Or you can fine-grain control adding the default options and configure other services.
 
 ``` c#
-// Fine-grain control adding the default options and configure all other services. Setting all services is required.
-services.AddImageSharpCore()
-        .SetRequestParser<QueryCollectionRequestParser>()
-        .SetBufferManager<PooledBufferManager>()
-        .SetMemoryAllocatorFromMiddlewareOptions()
-        .SetCacheHash<CacheHash>()
-        .AddProvider<PhysicalFileSystemProvider>()
-        .AddProcessor<ResizeWebProcessor>()
-        .AddProcessor<FormatWebProcessor>()
-        .AddProcessor<BackgroundColorWebProcessor>();
+// Fine-grain control adding the default options and configure other services.
+services.AddImageSharp()
+        .RemoveProcessor<FormatWebProcessor>()
+        .RemoveProcessor<BackgroundColorWebProcessor>();
 ```
 
 There are also factory methods for each builder that will allow building from configuration files.
 
 ``` c#
-// Use the factory methods to configure the PhysicalFileSystemCache
+// Use the factory methods to configure the PhysicalFileSystemCacheOptions
 services.AddImageSharpCore(
     options =>
         {
@@ -104,18 +98,12 @@ services.AddImageSharpCore(
             options.OnPrepareResponse = _ => { };
         })
     .SetRequestParser<QueryCollectionRequestParser>()
-    .SetMemoryAllocator<ArrayPoolMemoryAllocator>()
-    .SetCache(provider =>
-      {
-          var p = new PhysicalFileSystemCache(
-              provider.GetRequiredService<IHostingEnvironment>(),
-              provider.GetRequiredService<IBufferManager>(),
-              provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>());
-
-          p.Settings[PhysicalFileSystemCache.Folder] = PhysicalFileSystemCache.DefaultCacheFolder;
-
-          return p;
-      })
+    .SetMemoryAllocator(provider => ArrayPoolMemoryAllocator.CreateWithMinimalPooling())
+    .Configure<PhysicalFileSystemCacheOptions>(options =>
+    {
+        options.CacheFolder = "different-cache";
+    })
+    .SetCache<PhysicalFileSystemCache>()
     .SetCacheHash<CacheHash>()
     .AddProvider<PhysicalFileSystemProvider>()
     .AddProcessor<ResizeWebProcessor>()

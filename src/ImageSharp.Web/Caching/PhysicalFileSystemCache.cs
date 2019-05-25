@@ -1,16 +1,13 @@
 ﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Helpers;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Resolvers;
-using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Caching
 {
@@ -19,21 +16,6 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// </summary>
     public class PhysicalFileSystemCache : IImageCache
     {
-        /// <summary>
-        /// The configuration key for determining the cache folder.
-        /// </summary>
-        public const string Folder = "CacheFolder";
-
-        /// <summary>
-        /// The default cache folder name.
-        /// </summary>
-        public const string DefaultCacheFolder = "is-cache";
-
-        /// <summary>
-        /// The default value for determining whether to check for changes in the source.
-        /// </summary>
-        public const string DefaultCheckSourceChanged = "false";
-
         /// <summary>
         /// The hosting environment the application is running in.
         /// </summary>
@@ -45,9 +27,9 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly IFileProvider fileProvider;
 
         /// <summary>
-        /// The buffer manager.
+        /// The cache configuration options.
         /// </summary>
-        private readonly MemoryAllocator memoryAllocator;
+        private readonly PhysicalFileSystemCacheOptions cacheOptions;
 
         /// <summary>
         /// The middleware configuration options.
@@ -55,7 +37,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly ImageSharpMiddlewareOptions options;
 
         /// <summary>
-        /// Contains various helper methods based on the current configuration.
+        /// Contains various format helper methods based on the current configuration.
         /// </summary>
         private readonly FormatUtilities formatUtilies;
 
@@ -63,12 +45,16 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
         /// <param name="environment">The hosting environment the application is running in.</param>
-        /// <param name="memoryAllocator">An <see cref="MemoryAllocator"/> instance used to allocate arrays transporting encoded image data.</param>
+        /// <param name="cacheOptions">The cache configuraiton options.</param>
         /// <param name="options">The middleware configuration options.</param>
-        public PhysicalFileSystemCache(IHostingEnvironment environment, MemoryAllocator memoryAllocator, IOptions<ImageSharpMiddlewareOptions> options)
+        /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
+        public PhysicalFileSystemCache(
+            IOptions<PhysicalFileSystemCacheOptions> cacheOptions,
+            IHostingEnvironment environment,
+            IOptions<ImageSharpMiddlewareOptions> options,
+            FormatUtilities formatUtilities)
         {
             Guard.NotNull(environment, nameof(environment));
-            Guard.NotNull(memoryAllocator, nameof(memoryAllocator));
             Guard.NotNull(options, nameof(options));
 
             Guard.NotNullOrWhiteSpace(
@@ -78,17 +64,10 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             this.environment = environment;
             this.fileProvider = this.environment.WebRootFileProvider;
-            this.memoryAllocator = memoryAllocator;
+            this.cacheOptions = cacheOptions != null ? cacheOptions.Value : new PhysicalFileSystemCacheOptions();
             this.options = options.Value;
-            this.formatUtilies = new FormatUtilities(this.options.Configuration);
+            this.formatUtilies = formatUtilities;
         }
-
-        /// <inheritdoc/>
-        public IDictionary<string, string> Settings { get; }
-            = new Dictionary<string, string>
-            {
-                { Folder, DefaultCacheFolder }
-            };
 
         /// <inheritdoc/>
         public async Task<IImageResolver> GetAsync(string key)
@@ -148,7 +127,8 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="path">The root path.</param>
         /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="string"/>.</returns>
-        private string ToImageFilePath(string path, in ImageMetaData metaData) => $"{path}.{this.formatUtilies.GetExtensionFromContentType(metaData.ContentType)}";
+        private string ToImageFilePath(string path, in ImageMetaData metaData)
+            => $"{path}.{this.formatUtilies.GetExtensionFromContentType(metaData.ContentType)}";
 
         /// <summary>
         /// Gets the path to the image file based on the supplied root.
@@ -162,6 +142,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <returns>The <see cref="string"/>.</returns>
-        private string ToFilePath(string key) => $"{this.Settings[Folder]}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
+        private string ToFilePath(string key) // TODO: Avoid the allocation here.
+            => $"{this.cacheOptions.CacheFolder}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
     }
 }
