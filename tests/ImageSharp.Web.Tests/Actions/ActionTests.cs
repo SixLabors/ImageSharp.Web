@@ -51,9 +51,11 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
                 complete = true;
             }
 
-            TestServer server = ImageSharpTestServer.CreateWithActions(OnParseCommands);
+            using (TestServer server = ImageSharpTestServer.CreateWithActions(OnParseCommands))
+            {
+                await server.CreateClient().GetAsync(url + "?width=20").ConfigureAwait(false);
+            }
 
-            await server.CreateClient().GetAsync(url + "?width=20").ConfigureAwait(false);
             Assert.True(complete);
         }
 
@@ -69,9 +71,10 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
                 complete = true;
             }
 
-            TestServer server = ImageSharpTestServer.CreateWithActions(null, OnBeforeSave);
-
-            await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
+            using (TestServer server = ImageSharpTestServer.CreateWithActions(null, OnBeforeSave))
+            {
+                await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
+            }
             Assert.True(complete);
         }
 
@@ -88,9 +91,10 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
                 complete = true;
             }
 
-            TestServer server = ImageSharpTestServer.CreateWithActions(null, null, OnProcessed);
-
-            await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
+            using (TestServer server = ImageSharpTestServer.CreateWithActions(null, null, OnProcessed))
+            {
+                await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
+            }
             Assert.True(complete);
         }
 
@@ -105,9 +109,10 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
                 complete = true;
             }
 
-            TestServer server = ImageSharpTestServer.CreateWithActions(null, null, null, OnPrepareResponse);
-
-            await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
+            using (TestServer server = ImageSharpTestServer.CreateWithActions(null, null, null, OnPrepareResponse))
+            {
+                await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
+            }
             Assert.True(complete);
         }
     }

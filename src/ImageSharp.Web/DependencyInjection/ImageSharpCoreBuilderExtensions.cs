@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -164,7 +165,16 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpBuilder RemoveProvider<TProvider>(this IImageSharpBuilder builder)
             where TProvider : class, IImageProvider
         {
-            builder.Services.Remove(ServiceDescriptor.Singleton<IImageProvider, TProvider>());
+            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
+                x.ServiceType == typeof(IImageProvider)
+                && x.Lifetime == ServiceLifetime.Singleton
+                && x.ImplementationType == typeof(TProvider));
+
+            if (descriptor != null)
+            {
+                builder.Services.Remove(descriptor);
+            }
+
             return builder;
         }
 
@@ -204,7 +214,16 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpBuilder RemoveProcessor<TProcessor>(this IImageSharpBuilder builder)
             where TProcessor : class, IImageWebProcessor
         {
-            builder.Services.Remove(ServiceDescriptor.Singleton<IImageWebProcessor, TProcessor>());
+            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
+                x.ServiceType == typeof(IImageWebProcessor)
+                && x.Lifetime == ServiceLifetime.Singleton
+                && x.ImplementationType == typeof(TProcessor));
+
+            if (descriptor != null)
+            {
+                builder.Services.Remove(descriptor);
+            }
+
             return builder;
         }
 
