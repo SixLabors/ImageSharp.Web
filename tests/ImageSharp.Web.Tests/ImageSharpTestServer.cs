@@ -28,9 +28,6 @@ namespace SixLabors.ImageSharp.Web.Tests
         private const string ImagePath = "SubFolder/imagesharp-logo.png";
         public const string PhysicalTestImage = "http://localhost/" + ImagePath;
         public const string AzureTestImage = "http://localhost/" + AzureContainerName + "/" + ImagePath;
-        private static readonly object SyncLock = new object();
-        private static bool AzureCreated = false;
-
 
         public static Action<IApplicationBuilder> DefaultConfig = app => app.UseImageSharp();
 
@@ -125,13 +122,8 @@ namespace SixLabors.ImageSharp.Web.Tests
 
         private static void InitializeAzureStorage(TestServer server)
         {
-            lock (SyncLock)
+            try
             {
-                if (AzureCreated)
-                {
-                    return;
-                }
-
                 // Upload an image to the Azure Test Storage;
                 var storageAccount = CloudStorageAccount.Parse(AzureConnectionString);
                 CloudBlobClient client = storageAccount.CreateCloudBlobClient();
@@ -153,8 +145,27 @@ namespace SixLabors.ImageSharp.Web.Tests
                         blob.UploadFromStream(stream);
                     }
                 }
-
-                AzureCreated = true;
+            }
+            catch (StorageException)
+            {
+                // On Appveyor "Exists" appears to fail and the following exception is thrown.
+                // I cannot replicate this locally via Visual Studio Test Explorer or "dotnet test".
+                //
+                // Failed CanAddRemoveImageProcessors
+                // Error Message:
+                // Microsoft.Azure.Storage.StorageException : The specified container already exists.
+                // Stack Trace:
+                //   at Microsoft.Azure.Storage.Core.Executor.Executor.ExecuteAsync[T](RESTCommand`1 cmd, IRetryPolicy policy, OperationContext operationContext, CancellationToken token)
+                //   at Microsoft.Azure.Storage.Core.Executor.Executor.<> c__DisplayClass0_0`1.< ExecuteSync > b__0()
+                //   at Microsoft.Azure.Storage.Core.Util.CommonUtility.RunWithoutSynchronizationContext[T](Func`1 actionToRun)
+                //   at Microsoft.Azure.Storage.Core.Executor.Executor.ExecuteSync[T](RESTCommand`1 cmd, IRetryPolicy policy, OperationContext operationContext)
+                //   at Microsoft.Azure.Storage.Blob.CloudBlobContainer.Create(BlobContainerPublicAccessType accessType, BlobRequestOptions requestOptions, OperationContext operationContext)
+                //   at Microsoft.Azure.Storage.Blob.CloudBlobContainer.Create(BlobRequestOptions requestOptions, OperationContext operationContext)
+                //   at SixLabors.ImageSharp.Web.Tests.ImageSharpTestServer.InitializeAzureStorage(TestServer server) in C:\projects\imagesharp - web\tests\ImageSharp.Web.Tests\ImageSharpTestServer.cs:line 143
+                //   at SixLabors.ImageSharp.Web.Tests.ImageSharpTestServer.Create(Action`1 configureApp, Action`1 configureServices)
+                //   in C:\projects\imagesharp - web\tests\ImageSharp.Web.Tests\ImageSharpTestServer.cs:line 123
+                //   at SixLabors.ImageSharp.Web.Tests.DependencyInjection.ServiceRegistrationExtensionsTests.CanAddRemoveImageProcessors()
+                //   in C:\projects\imagesharp - web\tests\ImageSharp.Web.Tests\DependencyInjection\ServiceRegistrationExtensionsTests.cs:line 46
             }
         }
 
