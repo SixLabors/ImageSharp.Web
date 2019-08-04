@@ -28,6 +28,9 @@ namespace SixLabors.ImageSharp.Web.Tests
         private const string ImagePath = "SubFolder/imagesharp-logo.png";
         public const string PhysicalTestImage = "http://localhost/" + ImagePath;
         public const string AzureTestImage = "http://localhost/" + AzureContainerName + "/" + ImagePath;
+        private static readonly object SyncLock = new object();
+        private static bool AzureCreated = false;
+
 
         public static Action<IApplicationBuilder> DefaultConfig = app => app.UseImageSharp();
 
@@ -122,26 +125,36 @@ namespace SixLabors.ImageSharp.Web.Tests
 
         private static void InitializeAzureStorage(TestServer server)
         {
-            // Upload an image to the Azure Test Storage;
-            var storageAccount = CloudStorageAccount.Parse(AzureConnectionString);
-            CloudBlobClient client = storageAccount.CreateCloudBlobClient();
-            CloudBlobContainer container = client.GetContainerReference(AzureContainerName);
-
-            if (!container.Exists())
+            lock (SyncLock)
             {
-                container.Create();
-                container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
-            }
-
-            IHostingEnvironment environment = server.Host.Services.GetRequiredService<IHostingEnvironment>();
-            CloudBlockBlob blob = container.GetBlockBlobReference(ImagePath);
-            if (!blob.Exists())
-            {
-                IFileInfo file = environment.WebRootFileProvider.GetFileInfo(ImagePath);
-                using (System.IO.Stream stream = file.CreateReadStream())
+                if (AzureCreated)
                 {
-                    blob.UploadFromStream(stream);
+                    return;
                 }
+
+                // Upload an image to the Azure Test Storage;
+                var storageAccount = CloudStorageAccount.Parse(AzureConnectionString);
+                CloudBlobClient client = storageAccount.CreateCloudBlobClient();
+                CloudBlobContainer container = client.GetContainerReference(AzureContainerName);
+
+                if (!container.Exists())
+                {
+                    container.Create();
+                    container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
+                }
+
+                IHostingEnvironment environment = server.Host.Services.GetRequiredService<IHostingEnvironment>();
+                CloudBlockBlob blob = container.GetBlockBlobReference(ImagePath);
+                if (!blob.Exists())
+                {
+                    IFileInfo file = environment.WebRootFileProvider.GetFileInfo(ImagePath);
+                    using (System.IO.Stream stream = file.CreateReadStream())
+                    {
+                        blob.UploadFromStream(stream);
+                    }
+                }
+
+                AzureCreated = true;
             }
         }
 
