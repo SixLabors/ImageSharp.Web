@@ -27,7 +27,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// SpinLock used to protect access to the Keys and Pool collections.
         /// </summary>
-        private static readonly SpinLock SpinLock = new SpinLock(false);
+        private static SpinLock spinLock = new SpinLock(false);
 
         /// <summary>
         /// Maximum size of the doorman pool. If the pool is already full when releasing
@@ -76,7 +76,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             bool lockTaken = false;
             try
             {
-                SpinLock.Enter(ref lockTaken);
+                spinLock.Enter(ref lockTaken);
 
                 if (!Keys.TryGetValue(key, out doorman))
                 {
@@ -91,7 +91,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             {
                 if (lockTaken)
                 {
-                    SpinLock.Exit();
+                    spinLock.Exit();
                 }
             }
 
@@ -109,7 +109,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             bool lockTaken = false;
             try
             {
-                SpinLock.Enter(ref lockTaken);
+                spinLock.Enter(ref lockTaken);
 
                 if (--doorman.RefCount == 0)
                 {
@@ -125,7 +125,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             {
                 if (lockTaken)
                 {
-                    SpinLock.Exit();
+                    spinLock.Exit();
                 }
             }
         }
