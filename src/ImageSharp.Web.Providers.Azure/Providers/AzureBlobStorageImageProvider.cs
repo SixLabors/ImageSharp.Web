@@ -2,11 +2,13 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Shared.Protocol;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -62,14 +64,27 @@ namespace SixLabors.ImageSharp.Web.Providers
             this.formatUtilities = formatUtilities;
             this.storageAccount = CloudStorageAccount.Parse(this.storageOptions.ConnectionString);
 
-            // It's ok to create a single reusable client since we are not altering it.
-            CloudBlobClient client = this.storageAccount.CreateCloudBlobClient();
-            this.container = client.GetContainerReference(this.storageOptions.ContainerName);
-
-            if (!this.container.Exists())
+            try
             {
-                this.container.Create();
-                this.container.SetPermissions(new BlobContainerPermissions { PublicAccess = this.storageOptions.AccessType });
+                // It's ok to create a single reusable client since we are not altering it.
+                CloudBlobClient client = this.storageAccount.CreateCloudBlobClient();
+                this.container = client.GetContainerReference(this.storageOptions.ContainerName);
+
+                if (!this.container.Exists())
+                {
+                    this.container.Create();
+                    this.container.SetPermissions(new BlobContainerPermissions { PublicAccess = this.storageOptions.AccessType });
+                }
+            }
+            catch (StorageException storageException)
+            {
+                // https://github.com/Azure/azure-sdk-for-net/issues/109
+                // We do not fire exception if container exists - there is no need in such actions
+                if (storageException.RequestInformation.HttpStatusCode != (int)HttpStatusCode.Conflict
+                && storageException.RequestInformation.ExtendedErrorInformation.ErrorCode != StorageErrorCodeStrings.ContainerAlreadyExists)
+                {
+                    throw;
+                }
             }
         }
 
