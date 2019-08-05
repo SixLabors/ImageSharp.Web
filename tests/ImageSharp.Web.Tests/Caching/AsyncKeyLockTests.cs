@@ -5,7 +5,6 @@ using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.Caching
 {
-    [Collection(nameof(NonParallelFixture))]
     public class AsyncKeyLockTests
     {
         private static readonly AsyncKeyLock AsyncLock = new AsyncKeyLock();
@@ -14,14 +13,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         private const string AsyncKey2 = "ASYNC_KEY2";
 
         [Fact]
-        public void AsyncLockActsAsDoorman()
-        {
-            // Run the two tests from a single test to see if we can stop tests freezing on Travis.
-            this.AsyncLockCanLockByKey();
-            this.AsyncLockAllowsDifferentKeysToRun();
-        }
-
-        private void AsyncLockCanLockByKey()
+        public async Task AsyncLockCanLockByKey()
         {
             bool zeroEntered = false;
             bool entered = false;
@@ -46,11 +38,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
                 }
             })).ToArray();
 
-            Task.WaitAll(tasks);
+            await Task.WhenAll(tasks);
             Assert.Equal(5, index);
         }
 
-        private void AsyncLockAllowsDifferentKeysToRun()
+        [Fact]
+        public async Task AsyncLockAllowsDifferentKeysToRun()
         {
             bool zeroEntered = false;
             bool entered = false;
@@ -76,7 +69,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
 
             })).ToArray();
 
-            Task.WaitAll(tasks);
+            await Task.WhenAll(tasks);
             Assert.Equal(5, index);
         }
     }

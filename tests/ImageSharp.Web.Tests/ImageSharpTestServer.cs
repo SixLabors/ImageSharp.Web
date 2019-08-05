@@ -3,12 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Shared.Protocol;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -146,26 +148,15 @@ namespace SixLabors.ImageSharp.Web.Tests
                     }
                 }
             }
-            catch (StorageException)
+            catch (StorageException storageException)
             {
-                // On Appveyor "Exists" appears to fail and the following exception is thrown.
-                // I cannot replicate this locally via Visual Studio Test Explorer or "dotnet test".
-                //
-                // Failed CanAddRemoveImageProcessors
-                // Error Message:
-                // Microsoft.Azure.Storage.StorageException : The specified container already exists.
-                // Stack Trace:
-                //   at Microsoft.Azure.Storage.Core.Executor.Executor.ExecuteAsync[T](RESTCommand`1 cmd, IRetryPolicy policy, OperationContext operationContext, CancellationToken token)
-                //   at Microsoft.Azure.Storage.Core.Executor.Executor.<> c__DisplayClass0_0`1.< ExecuteSync > b__0()
-                //   at Microsoft.Azure.Storage.Core.Util.CommonUtility.RunWithoutSynchronizationContext[T](Func`1 actionToRun)
-                //   at Microsoft.Azure.Storage.Core.Executor.Executor.ExecuteSync[T](RESTCommand`1 cmd, IRetryPolicy policy, OperationContext operationContext)
-                //   at Microsoft.Azure.Storage.Blob.CloudBlobContainer.Create(BlobContainerPublicAccessType accessType, BlobRequestOptions requestOptions, OperationContext operationContext)
-                //   at Microsoft.Azure.Storage.Blob.CloudBlobContainer.Create(BlobRequestOptions requestOptions, OperationContext operationContext)
-                //   at SixLabors.ImageSharp.Web.Tests.ImageSharpTestServer.InitializeAzureStorage(TestServer server) in C:\projects\imagesharp - web\tests\ImageSharp.Web.Tests\ImageSharpTestServer.cs:line 143
-                //   at SixLabors.ImageSharp.Web.Tests.ImageSharpTestServer.Create(Action`1 configureApp, Action`1 configureServices)
-                //   in C:\projects\imagesharp - web\tests\ImageSharp.Web.Tests\ImageSharpTestServer.cs:line 123
-                //   at SixLabors.ImageSharp.Web.Tests.DependencyInjection.ServiceRegistrationExtensionsTests.CanAddRemoveImageProcessors()
-                //   in C:\projects\imagesharp - web\tests\ImageSharp.Web.Tests\DependencyInjection\ServiceRegistrationExtensionsTests.cs:line 46
+                // https://github.com/Azure/azure-sdk-for-net/issues/109
+                // We do not fire exception if container exists - there is no need in such actions
+                if (storageException.RequestInformation.HttpStatusCode != (int)HttpStatusCode.Conflict
+                && storageException.RequestInformation.ExtendedErrorInformation.ErrorCode != StorageErrorCodeStrings.ContainerAlreadyExists)
+                {
+                    throw;
+                }
             }
         }
 
