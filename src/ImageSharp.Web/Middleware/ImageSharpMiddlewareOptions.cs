@@ -39,18 +39,23 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// This is called once the commands have been gathered and before an <see cref="IImageProvider"/> has been assigned.
         /// </summary>
         public Action<ImageCommandContext> OnParseCommands { get; set; } = c =>
+        {
+            if (c.Commands.Count == 0)
             {
-                // It's a good idea to have this to provide very basic security.
-                // We can safely use the static resize processor properties.
-                uint width = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Width));
-                uint height = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Height));
+                return;
+            }
 
-                if (width > 4000 && height > 4000)
-                {
-                    c.Commands.Remove(ResizeWebProcessor.Width);
-                    c.Commands.Remove(ResizeWebProcessor.Height);
-                }
-            };
+            // It's a good idea to have this to provide very basic security.
+            // We can safely use the static resize processor properties.
+            uint width = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Width));
+            uint height = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Height));
+
+            if (width > 4000 && height > 4000)
+            {
+                c.Commands.Remove(ResizeWebProcessor.Width);
+                c.Commands.Remove(ResizeWebProcessor.Height);
+            }
+        };
 
         /// <summary>
         /// Gets or sets the additional method that can be used for final manipulation before the image is saved.

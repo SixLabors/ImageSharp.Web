@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace SixLabors.ImageSharp.Web
 {
@@ -23,18 +24,26 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="parameterName">The name of the parameter that is to be checked.</param>
         /// <param name="message">The error message, if any to add to the exception.</param>
         /// <exception cref="ArgumentNullException"><paramref name="target"/> is null.</exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void NotNull<T>(T target, string parameterName, string message = "")
             where T : class
         {
             if (target == null)
             {
-                if (!string.IsNullOrWhiteSpace(message))
-                {
-                    throw new ArgumentNullException(parameterName, message);
-                }
-
-                throw new ArgumentNullException(parameterName);
+                ThrowArgumentNull<T>(parameterName, message);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowArgumentNull<T>(string parameterName, string message)
+            where T : class
+        {
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentNullException(parameterName, message);
+            }
+
+            throw new ArgumentNullException(parameterName);
         }
 
         /// <summary>
@@ -47,19 +56,26 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="message">The error message, if any to add to the exception.</param>
         /// <exception cref="ArgumentNullException"><paramref name="target"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="target"/> is empty or contains only blanks.</exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void NotNullOrWhiteSpace(string target, string parameterName, string message = "")
         {
             NotNull(target, parameterName, message);
 
             if (string.IsNullOrWhiteSpace(target))
             {
-                if (!string.IsNullOrWhiteSpace(message))
-                {
-                    throw new ArgumentException(message, parameterName);
-                }
-
-                throw new ArgumentException("Value cannot be null, empty, or cannot contain only whitespace.", parameterName);
+                ThrowArgumentException(parameterName, message);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowArgumentException(string parameterName, string message)
+        {
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentException(message, parameterName);
+            }
+
+            throw new ArgumentException("Value cannot be null, empty, or cannot contain only whitespace.", parameterName);
         }
 
         /// <summary>
