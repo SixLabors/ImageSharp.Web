@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -57,12 +58,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// The collection of image resolvers.
         /// </summary>
-        private readonly List<IImageProvider> resolvers;
+        private readonly IImageProvider[] resolvers;
 
         /// <summary>
         /// The collection of image processors.
         /// </summary>
-        private readonly List<IImageWebProcessor> processors;
+        private readonly IImageWebProcessor[] processors;
 
         /// <summary>
         /// The image cache.
@@ -124,8 +125,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.options = options.Value;
             this.memoryAllocator = memoryAllocator;
             this.requestParser = requestParser;
-            this.resolvers = new List<IImageProvider>(resolvers);
-            this.processors = new List<IImageWebProcessor>(processors);
+            this.resolvers = resolvers as IImageProvider[] ?? resolvers.ToArray();
+            this.processors = processors as IImageWebProcessor[] ?? processors.ToArray();
             this.cache = cache;
             this.cacheHash = cacheHash;
 
@@ -167,15 +168,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             // Get the correct service for the request.
             IImageProvider provider = null;
-            if (this.resolvers.Count > 0)
+            foreach (var resolver in this.resolvers)
             {
-                foreach (var resolver in this.resolvers)
+                if (resolver.Match(context))
                 {
-                    if (resolver.Match(context))
-                    {
-                        provider = resolver;
-                        break;
-                    }
+                    provider = resolver;
+                    break;
                 }
             }
 
