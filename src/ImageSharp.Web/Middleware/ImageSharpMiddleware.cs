@@ -58,12 +58,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// The collection of image resolvers.
         /// </summary>
-        private readonly IEnumerable<IImageProvider> resolvers;
+        private readonly IImageProvider[] resolvers;
 
         /// <summary>
         /// The collection of image processors.
         /// </summary>
-        private readonly IEnumerable<IImageWebProcessor> processors;
+        private readonly IImageWebProcessor[] processors;
 
         /// <summary>
         /// The image cache.
@@ -78,7 +78,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// The collection of known commands gathered from the processors.
         /// </summary>
-        private readonly IEnumerable<string> knownCommands;
+        private readonly HashSet<string> knownCommands;
 
         /// <summary>
         /// Contains various helper methods based on the current configuration.
@@ -125,15 +125,18 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.options = options.Value;
             this.memoryAllocator = memoryAllocator;
             this.requestParser = requestParser;
-            this.resolvers = resolvers;
-            this.processors = processors;
+            this.resolvers = resolvers as IImageProvider[] ?? resolvers.ToArray();
+            this.processors = processors as IImageWebProcessor[] ?? processors.ToArray();
             this.cache = cache;
             this.cacheHash = cacheHash;
 
-            var commands = new List<string>();
-            foreach (IImageWebProcessor processor in this.processors)
+            var commands = new HashSet<string>();
+            foreach (var processor in this.processors)
             {
-                commands.AddRange(processor.Commands);
+                foreach (var command in processor.Commands)
+                {
+                    commands.Add(command);
+                }
             }
 
             this.knownCommands = commands;
@@ -149,14 +152,30 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <returns>The <see cref="Task"/>.</returns>
         public async Task Invoke(HttpContext context)
         {
-            IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context)
-                .Where(kvp => this.knownCommands.Contains(kvp.Key))
-                .ToDictionary(p => p.Key, p => p.Value);
+            IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context);
+            if (commands.Count > 0)
+            {
+                foreach (var command in commands.Keys)
+                {
+                    if (!this.knownCommands.Contains(command))
+                    {
+                        commands.Remove(command);
+                    }
+                }
+            }
 
             this.options.OnParseCommands?.Invoke(new ImageCommandContext(context, commands, CommandParser.Instance));
 
             // Get the correct service for the request.
-            IImageProvider provider = this.resolvers.FirstOrDefault(r => r.Match(context));
+            IImageProvider provider = null;
+            foreach (var resolver in this.resolvers)
+            {
+                if (resolver.Match(context))
+                {
+                    provider = resolver;
+                    break;
+                }
+            }
 
             if (provider?.IsValidRequest(context) != true)
             {
@@ -165,20 +184,32 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 return;
             }
 
-            // Create a cache key based on all the components of the requested url
-            string uri = GetUri(context, commands);
-            string key = this.cacheHash.Create(uri, this.options.CachedNameLength);
-
             bool processRequest = true;
-            var imageContext = new ImageContext(context, this.options);
             IImageResolver sourceImageResolver = await provider.GetAsync(context).ConfigureAwait(false);
 
             if (sourceImageResolver == null)
             {
                 // Log the error but let the pipeline handle the 404
+                var imageContext = new ImageContext(context, this.options);
                 this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
                 processRequest = false;
             }
+
+            if (!processRequest)
+            {
+                // Call the next delegate/middleware in the pipeline
+                await this.next(context).ConfigureAwait(false);
+                return;
+            }
+
+            await this.ProcessRequest(context, processRequest, sourceImageResolver, new ImageContext(context, this.options), commands);
+        }
+
+        private async Task ProcessRequest(HttpContext context, bool processRequest, IImageResolver sourceImageResolver, ImageContext imageContext, IDictionary<string, string> commands)
+        {
+            // Create a cache key based on all the components of the requested url
+            string uri = GetUri(context, commands);
+            string key = this.cacheHash.Create(uri, this.options.CachedNameLength);
 
             ImageMetaData sourceImageMetadata = default;
             if (processRequest)
@@ -266,12 +297,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 {
                     outStream?.Dispose();
                 }
-            }
-
-            if (!processRequest)
-            {
-                // Call the next delegate/middleware in the pipeline
-                await this.next(context).ConfigureAwait(false);
             }
         }
 

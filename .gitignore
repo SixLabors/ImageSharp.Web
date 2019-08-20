@@ -218,3 +218,7 @@ artifacts/
 docs/
 
 **/is-cache/
+
+# Rider
+.idea
+
