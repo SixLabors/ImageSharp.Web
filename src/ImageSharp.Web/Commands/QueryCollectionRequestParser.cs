@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
 namespace SixLabors.ImageSharp.Web.Commands
 {
@@ -21,7 +22,7 @@ namespace SixLabors.ImageSharp.Web.Commands
                 return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
 
-            var parsed = QueryHelpers.ParseQuery(context.Request.QueryString.ToUriComponent());
+            Dictionary<string, StringValues> parsed = QueryHelpers.ParseQuery(context.Request.QueryString.ToUriComponent());
             var transformed = new Dictionary<string, string>(parsed.Count);
             foreach (var pair in parsed)
             {

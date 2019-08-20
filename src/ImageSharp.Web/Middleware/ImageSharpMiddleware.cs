@@ -152,7 +152,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <returns>The <see cref="Task"/>.</returns>
         public async Task Invoke(HttpContext context)
         {
-            var commands = this.requestParser.ParseRequestCommands(context);
+            IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context);
             if (commands.Count > 0)
             {
                 foreach (var command in commands.Keys)
@@ -199,6 +199,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             {
                 // Call the next delegate/middleware in the pipeline
                 await this.next(context).ConfigureAwait(false);
+                return;
             }
 
             await this.ProcessRequest(context, processRequest, sourceImageResolver, new ImageContext(context, this.options), commands);

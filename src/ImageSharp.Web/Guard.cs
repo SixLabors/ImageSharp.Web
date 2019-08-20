@@ -30,13 +30,12 @@ namespace SixLabors.ImageSharp.Web
         {
             if (target == null)
             {
-                ThrowArgumentNull<T>(parameterName, message);
+                ThrowArgumentNull(parameterName, message);
             }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowArgumentNull<T>(string parameterName, string message)
-            where T : class
+        private static void ThrowArgumentNull(string parameterName, string message)
         {
             if (!string.IsNullOrWhiteSpace(message))
             {
