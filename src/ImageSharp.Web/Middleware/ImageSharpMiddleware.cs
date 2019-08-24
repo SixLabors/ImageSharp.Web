@@ -152,20 +152,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <returns>The <see cref="Task"/>.</returns>
         public async Task Invoke(HttpContext context)
         {
-            IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context);
-            if (commands.Count > 0)
-            {
-                foreach (var command in commands.Keys)
-                {
-                    if (!this.knownCommands.Contains(command))
-                    {
-                        commands.Remove(command);
-                    }
-                }
-            }
-
-            this.options.OnParseCommands?.Invoke(new ImageCommandContext(context, commands, CommandParser.Instance));
-
             // Get the correct service for the request.
             IImageProvider provider = null;
             foreach (var resolver in this.resolvers)
@@ -201,6 +187,21 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 await this.next(context).ConfigureAwait(false);
                 return;
             }
+
+            // Process commands
+            IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context);
+            if (commands.Count > 0)
+            {
+                foreach (var command in commands.Keys)
+                {
+                    if (!this.knownCommands.Contains(command))
+                    {
+                        commands.Remove(command);
+                    }
+                }
+            }
+
+            this.options.OnParseCommands?.Invoke(new ImageCommandContext(context, commands, CommandParser.Instance));
 
             await this.ProcessRequest(context, processRequest, sourceImageResolver, new ImageContext(context, this.options), commands);
         }

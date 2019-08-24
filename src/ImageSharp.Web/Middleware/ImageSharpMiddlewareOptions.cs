@@ -36,7 +36,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
         /// <summary>
         /// Gets or sets the additional command parsing method that can be used to used to augment commands.
-        /// This is called once the commands have been gathered and before an <see cref="IImageProvider"/> has been assigned.
+        /// This is called once the commands have been gathered and before the request is processed.
         /// </summary>
         public Action<ImageCommandContext> OnParseCommands { get; set; } = c =>
         {
