@@ -36,6 +36,8 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
                 var builder = services.AddImageSharp()
                                       .AddProvider(sp => new MockImageProvider());
 
+                Assert.DoesNotContain(services, x => x.ImplementationType == typeof(MockImageProvider));
+
                 Assert.Contains(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockImageProvider));
 
                 builder.RemoveProvider<MockImageProvider>();
@@ -75,6 +77,8 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
             {
                 var builder = services.AddImageSharp()
                                       .AddProcessor(sp => new MockWebProcessor());
+
+                Assert.DoesNotContain(services, x => x.ImplementationType == typeof(MockWebProcessor));
 
                 Assert.Contains(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockWebProcessor));
 
