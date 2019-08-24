@@ -29,6 +29,26 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
         }
 
         [Fact]
+        public void CanAddRemoveFactoryImageProviders()
+        {
+            void RemoveServices(IServiceCollection services)
+            {
+                var builder = services.AddImageSharp()
+                                      .AddProvider(sp => new MockImageProvider());
+
+                Assert.Contains(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockImageProvider));
+
+                builder.RemoveProvider<MockImageProvider>();
+
+                Assert.DoesNotContain(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockImageProvider));
+            }
+
+            using (TestServer server = ImageSharpTestServer.Create(ImageSharpTestServer.DefaultConfig, RemoveServices))
+            {
+            }
+        }
+
+        [Fact]
         public void CanAddRemoveImageProcessors()
         {
             void RemoveServices(IServiceCollection services)
@@ -41,6 +61,26 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
                 builder.RemoveProcessor<MockWebProcessor>();
 
                 Assert.DoesNotContain(services, x => x.ImplementationType == typeof(MockWebProcessor));
+            }
+
+            using (TestServer server = ImageSharpTestServer.Create(ImageSharpTestServer.DefaultConfig, RemoveServices))
+            {
+            }
+        }
+
+        [Fact]
+        public void CanAddRemoveFactoryImageProcessors()
+        {
+            void RemoveServices(IServiceCollection services)
+            {
+                var builder = services.AddImageSharp()
+                                      .AddProcessor(sp => new MockWebProcessor());
+
+                Assert.Contains(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockWebProcessor));
+
+                builder.RemoveProcessor<MockWebProcessor>();
+
+                Assert.DoesNotContain(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockWebProcessor));
             }
 
             using (TestServer server = ImageSharpTestServer.Create(ImageSharpTestServer.DefaultConfig, RemoveServices))

@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -168,7 +169,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
                 x.ServiceType == typeof(IImageProvider)
                 && x.Lifetime == ServiceLifetime.Singleton
-                && x.ImplementationType == typeof(TProvider));
+                && (x.ImplementationType == typeof(TProvider)
+                || (x.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TProvider))));
 
             if (descriptor != null)
             {
@@ -217,7 +219,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
                 x.ServiceType == typeof(IImageWebProcessor)
                 && x.Lifetime == ServiceLifetime.Singleton
-                && x.ImplementationType == typeof(TProcessor));
+                && (x.ImplementationType == typeof(TProcessor)
+                || (x.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TProcessor))));
 
             if (descriptor != null)
             {
