@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -22,10 +22,10 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         public AzureBlobStorageImageResolver(CloudBlob blob) => this.blob = blob;
 
         /// <inheritdoc/>
-        public async Task<ImageMetaData> GetMetaDataAsync()
+        public async Task<ImageMetadata> GetMetaDataAsync()
         {
             await this.blob.FetchAttributesAsync().ConfigureAwait(false);
-            return new ImageMetaData(this.blob.Properties?.LastModified?.DateTime ?? DateTime.UtcNow);
+            return new ImageMetadata(this.blob.Properties?.LastModified?.DateTime ?? DateTime.UtcNow);
         }
 
         /// <inheritdoc/>

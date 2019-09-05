@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Security.Cryptography;
@@ -26,17 +26,15 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             Assert.Equal(expected, actual);
         }
 
-
         private static byte[] Hash()
         {
             using (var hashAlgorithm = SHA256.Create())
             {
-
                 // Concatenate the hash bytes into one long string.
-                string value = "http://testwebsite.com/image-12345.jpeg?width=400";
-                int byteCount = Encoding.ASCII.GetByteCount(value);
+                const string Value = "http://testwebsite.com/image-12345.jpeg?width=400";
+                int byteCount = Encoding.ASCII.GetByteCount(Value);
                 byte[] buffer = new byte[byteCount];
-                Encoding.ASCII.GetBytes(value, 0, value.Length, buffer, 0);
+                Encoding.ASCII.GetBytes(Value, 0, Value.Length, buffer, 0);
                 return hashAlgorithm.ComputeHash(buffer, 0, byteCount);
             }
         }

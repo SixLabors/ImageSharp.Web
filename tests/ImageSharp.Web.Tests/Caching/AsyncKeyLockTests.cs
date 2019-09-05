@@ -1,4 +1,7 @@
-﻿using System.Linq;
+// Copyright (c) Six Labors and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using System.Linq;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp.Web.Caching;
 using Xunit;
@@ -13,7 +16,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         private const string AsyncKey2 = "ASYNC_KEY2";
 
         [Fact]
-        public async Task AsyncLockCanLockByKey()
+        public async Task AsyncLockCanLockByKeyAsync()
         {
             bool zeroEntered = false;
             bool entered = false;
@@ -43,7 +46,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         }
 
         [Fact]
-        public async Task AsyncLockAllowsDifferentKeysToRun()
+        public async Task AsyncLockAllowsDifferentKeysToRunAsync()
         {
             bool zeroEntered = false;
             bool entered = false;
@@ -66,7 +69,6 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
 
                     index++;
                 }
-
             })).ToArray();
 
             await Task.WhenAll(tasks);

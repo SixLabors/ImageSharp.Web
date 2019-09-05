@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AssemblyTitle>SixLabors.ImageSharp.Web.Providers.Azure</AssemblyTitle>
@@ -43,12 +43,12 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <CodeAnalysisRuleSet>..\..\standards\SixLabors.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\shared-infrastructure\SixLabors.ruleset</CodeAnalysisRuleSet>
     <RootNamespace>SixLabors.ImageSharp.Web</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="..\..\standards\stylecop.json" />
+    <AdditionalFiles Include="..\..\shared-infrastructure\stylecop.json" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

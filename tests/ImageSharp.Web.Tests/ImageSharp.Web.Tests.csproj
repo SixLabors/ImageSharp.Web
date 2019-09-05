@@ -20,12 +20,22 @@
     <PackageReference Include="Microsoft.Azure.KeyVault.Core" Version="3.0.1" />
     <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="10.0.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="xunit" Version="2.3.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>..\..\shared-infrastructure\SixLabors.Tests.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
   <ItemGroup>
-    <AdditionalFiles Include="..\..\stylecop.json" />
+    <AdditionalFiles Include="..\..\shared-infrastructure\stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\ImageSharp.Web.Providers.Azure\ImageSharp.Web.Providers.Azure.csproj" />
     <ProjectReference Include="..\..\src\ImageSharp.Web\ImageSharp.Web.csproj" />
   </ItemGroup>

@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.TestHost;
+// Copyright (c) Six Labors and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Web.DependencyInjection;
-using System;
 using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
@@ -13,7 +15,7 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
         {
             void RemoveServices(IServiceCollection services)
             {
-                var builder = services.AddImageSharp()
+                IImageSharpBuilder builder = services.AddImageSharp()
                                       .AddProvider<MockImageProvider>();
 
                 Assert.Contains(services, x => x.ImplementationType == typeof(MockImageProvider));
@@ -33,8 +35,8 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
         {
             void RemoveServices(IServiceCollection services)
             {
-                var builder = services.AddImageSharp()
-                                      .AddProvider(sp => new MockImageProvider());
+                IImageSharpBuilder builder = services.AddImageSharp()
+                                      .AddProvider(_ => new MockImageProvider());
 
                 Assert.DoesNotContain(services, x => x.ImplementationType == typeof(MockImageProvider));
 
@@ -55,7 +57,7 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
         {
             void RemoveServices(IServiceCollection services)
             {
-                var builder = services.AddImageSharp()
+                IImageSharpBuilder builder = services.AddImageSharp()
                                       .AddProcessor<MockWebProcessor>();
 
                 Assert.Contains(services, x => x.ImplementationType == typeof(MockWebProcessor));
@@ -75,8 +77,8 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
         {
             void RemoveServices(IServiceCollection services)
             {
-                var builder = services.AddImageSharp()
-                                      .AddProcessor(sp => new MockWebProcessor());
+                IImageSharpBuilder builder = services.AddImageSharp()
+                                      .AddProcessor(_ => new MockWebProcessor());
 
                 Assert.DoesNotContain(services, x => x.ImplementationType == typeof(MockWebProcessor));
 

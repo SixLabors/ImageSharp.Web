@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -11,7 +11,6 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
     {
         private static readonly DateTime LastWriteTimeUtc = new DateTime(1980, 11, 4);
         private static readonly TimeSpan MaxAge = TimeSpan.FromDays(7);
-        private const string ContentType = "image/jpeg";
 
         public ImageMetaDataTests(ITestOutputHelper output) => this.Output = output;
 
@@ -20,20 +19,19 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         [Fact]
         public void ConstructorAssignsProperties()
         {
-            var meta = new ImageMetaData(LastWriteTimeUtc, ContentType, MaxAge);
+            var meta = new ImageMetadata(LastWriteTimeUtc, MaxAge);
             Assert.Equal(LastWriteTimeUtc, meta.LastWriteTimeUtc);
-            Assert.Equal(ContentType, meta.ContentType);
             Assert.Equal(MaxAge, meta.CacheControlMaxAge);
         }
 
         [Fact]
         public void EqualityChecksAreCorrect()
         {
-            var meta = new ImageMetaData(LastWriteTimeUtc, ContentType);
-            var meta2 = new ImageMetaData(meta.LastWriteTimeUtc, meta.ContentType);
+            var meta = new ImageMetadata(LastWriteTimeUtc, MaxAge);
+            var meta2 = new ImageMetadata(meta.LastWriteTimeUtc, meta.CacheControlMaxAge);
             Assert.Equal(meta, meta2);
 
-            var meta3 = new ImageMetaData(meta.LastWriteTimeUtc, "image/png");
+            var meta3 = new ImageMetadata(meta.LastWriteTimeUtc, TimeSpan.FromDays(1));
             Assert.NotEqual(meta, meta3);
         }
     }
