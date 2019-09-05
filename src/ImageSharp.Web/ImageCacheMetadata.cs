@@ -1,0 +1,178 @@
+// Copyright (c) Six Labors and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SixLabors.ImageSharp.Web
+{
+    /// <summary>
+    /// Represents the metadata associated with an image file.
+    /// </summary>
+    public readonly struct ImageCacheMetadata : IEquatable<ImageCacheMetadata>
+    {
+        private const string ContentTypeKey = "CT";
+        private const string SourceLastModifiedKey = "SM";
+        private const string CacheLastModifiedKey = "LM";
+        private const string CacheControlKey = "MA";
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageCacheMetadata"/> struct.
+        /// </summary>
+        /// <param name="sourceLastWriteTimeUtc">The date and time in coordinated universal time (UTC) since the source file was last modified.</param>
+        /// <param name="cacheLastWriteTimeUtc">The date and time in coordinated universal time (UTC) since the cache file was last modified.</param>
+        /// <param name="contentType">The content type for the source file.</param>
+        /// <param name="cacheControlMaxAge">The maximum amount of time a resource will be considered fresh.</param>
+        public ImageCacheMetadata(
+            DateTime sourceLastWriteTimeUtc,
+            DateTime cacheLastWriteTimeUtc,
+            string contentType,
+            TimeSpan cacheControlMaxAge)
+        {
+            this.SourceLastWriteTimeUtc = sourceLastWriteTimeUtc;
+            this.CacheLastWriteTimeUtc = cacheLastWriteTimeUtc;
+            this.ContentType = contentType;
+            this.CacheControlMaxAge = cacheControlMaxAge;
+        }
+
+        /// <summary>
+        /// Gets the date and time in coordinated universal time (UTC) since the source file was last modified.
+        /// </summary>
+        public DateTime SourceLastWriteTimeUtc { get; }
+
+        /// <summary>
+        /// Gets the date and time in coordinated universal time (UTC) since the cached file was last modified.
+        /// </summary>
+        public DateTime CacheLastWriteTimeUtc { get; }
+
+        /// <summary>
+        /// Gets the content type of the source file.
+        /// </summary>
+        public string ContentType { get; }
+
+        /// <summary>
+        /// Gets the maximum amount of time a resource will be considered fresh.
+        /// </summary>
+        public TimeSpan CacheControlMaxAge { get; }
+
+        /// <summary>
+        /// Compares two <see cref="ImageCacheMetadata"/> objects for equality.
+        /// </summary>
+        /// <param name="left">The <see cref="ImageCacheMetadata"/> on the left side of the operand.</param>
+        /// <param name="right">The <see cref="ImageCacheMetadata"/> on the right side of the operand.</param>
+        /// <returns>
+        /// True if the current left is equal to the <paramref name="right"/> parameter; otherwise, false.
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in ImageCacheMetadata left, in ImageCacheMetadata right) => left.Equals(right);
+
+        /// <summary>
+        /// Compares two <see cref="ImageCacheMetadata"/> objects for inequality.
+        /// </summary>
+        /// <param name="left">The <see cref="ImageCacheMetadata"/> on the left side of the operand.</param>
+        /// <param name="right">The <see cref="ImageCacheMetadata"/> on the right side of the operand.</param>
+        /// <returns>
+        /// True if the current left is unequal to the <paramref name="right"/> parameter; otherwise, false.
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in ImageCacheMetadata left, in ImageCacheMetadata right) => !left.Equals(right);
+
+        /// <summary>
+        /// Asynchronously reads and returns an <see cref="ImageCacheMetadata"/> from the input stream.
+        /// </summary>
+        /// <param name="stream">The input stream.</param>
+        /// <returns>The <see cref="ImageCacheMetadata"/>.</returns>
+        public static async Task<ImageCacheMetadata> ReadAsync(Stream stream)
+        {
+            var keyValuePairs = new Dictionary<string, string>();
+            using (var reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                string line;
+                while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+                {
+                    int idx = line.IndexOf(':');
+                    if (idx > 0)
+                    {
+                        string key = line.Substring(0, idx);
+                        keyValuePairs[key] = line.Substring(idx + 1);
+                    }
+                }
+            }
+
+            // DateTime.TryParse(null) ==  DateTime.MinValue so no need for conditional;
+            keyValuePairs.TryGetValue(SourceLastModifiedKey, out string sourceLastWriteTimeUtcString);
+            DateTime.TryParse(sourceLastWriteTimeUtcString, null, DateTimeStyles.RoundtripKind, out DateTime sourceLastWriteTimeUtc);
+
+            keyValuePairs.TryGetValue(CacheLastModifiedKey, out string cacheLastWriteTimeUtcString);
+            DateTime.TryParse(cacheLastWriteTimeUtcString, null, DateTimeStyles.RoundtripKind, out DateTime cacheLastWriteTimeUtc);
+
+            keyValuePairs.TryGetValue(ContentTypeKey, out string contentType);
+
+            // int.TryParse(null) == 0 and we want to return TimeSpan.MinValue not TimeSpan.Zero
+            TimeSpan cacheControlMaxAge = TimeSpan.MinValue;
+            if (keyValuePairs.TryGetValue(CacheControlKey, out string cacheControlMaxAgeString))
+            {
+                int.TryParse(cacheControlMaxAgeString, out int maxAge);
+                cacheControlMaxAge = TimeSpan.FromSeconds(maxAge);
+            }
+
+            return new ImageCacheMetadata(sourceLastWriteTimeUtc, cacheLastWriteTimeUtc, contentType ?? string.Empty, cacheControlMaxAge);
+        }
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(ImageCacheMetadata other)
+        {
+            return this.SourceLastWriteTimeUtc == other.SourceLastWriteTimeUtc
+                   && this.CacheLastWriteTimeUtc == other.CacheLastWriteTimeUtc
+                   && this.ContentType == other.ContentType
+                   && this.CacheControlMaxAge == other.CacheControlMaxAge;
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => obj is ImageCacheMetadata data && this.Equals(data);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => HashCode.Combine(
+                this.SourceLastWriteTimeUtc,
+                this.CacheLastWriteTimeUtc,
+                this.ContentType,
+                this.CacheControlMaxAge);
+
+        /// <inheritdoc/>
+        public override string ToString()
+            => FormattableString.Invariant(
+                $"ImageCacheMetaData({this.SourceLastWriteTimeUtc}, {this.CacheLastWriteTimeUtc}, {this.ContentType}, {this.CacheControlMaxAge})");
+
+        /// <summary>
+        /// Asynchronously writes the metadata to the target stream.
+        /// </summary>
+        /// <param name="stream">The target stream.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task WriteAsync(Stream stream)
+        {
+            var keyValuePairs = new Dictionary<string, string>
+            {
+                { SourceLastModifiedKey, this.SourceLastWriteTimeUtc.ToString("o") },
+                { CacheLastModifiedKey, this.CacheLastWriteTimeUtc.ToString("o") },
+                { ContentTypeKey, this.ContentType },
+                { CacheControlKey, this.CacheControlMaxAge.TotalSeconds.ToString(NumberFormatInfo.InvariantInfo) }
+            };
+
+            using (var writer = new StreamWriter(stream, Encoding.UTF8))
+            {
+                foreach (KeyValuePair<string, string> keyValuePair in keyValuePairs)
+                {
+                    await writer.WriteLineAsync($"{keyValuePair.Key}:{keyValuePair.Value}").ConfigureAwait(false);
+                }
+
+                await writer.FlushAsync().ConfigureAwait(false);
+            }
+        }
+    }
+}

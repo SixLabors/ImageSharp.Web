@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -125,7 +125,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="statusCode">The status code.</param>
         /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public Task SendStatusAsync(int statusCode, in ImageMetaData metaData)
+        public Task SendStatusAsync(int statusCode, in ImageCacheMetadata metaData)
         {
             this.ApplyResponseHeaders(statusCode, metaData.ContentType, this.ComputeMaxAge(metaData));
 
@@ -139,7 +139,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="stream">The output stream.</param>
         /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public async Task SendAsync(Stream stream, ImageMetaData metaData)
+        public async Task SendAsync(Stream stream, ImageCacheMetadata metaData)
         {
             this.ApplyResponseHeaders(ResponseConstants.Status200Ok, metaData.ContentType, this.ComputeMaxAge(metaData));
 
@@ -268,7 +268,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
         }
 
-        private TimeSpan ComputeMaxAge(in ImageMetaData metaData)
+        private TimeSpan ComputeMaxAge(in ImageCacheMetadata metaData)
         {
             // 14.9.3 CacheControl Max-Age
             var maxAge = TimeSpan.FromDays(this.options.MaxBrowserCacheDays);

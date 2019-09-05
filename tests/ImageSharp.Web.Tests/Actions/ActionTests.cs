@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Runtime.InteropServices;
@@ -15,10 +15,10 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
         [Theory]
         [InlineData(ImageSharpTestServer.PhysicalTestImage)]
         [InlineData(ImageSharpTestServer.AzureTestImage)]
-        public async Task ShouldRunOnValidateAction(string url)
+        public async Task ShouldRunOnValidateActionAsync(string url)
         {
             // Running this test with Azurite https://github.com/Azure/Azurite/ on Travis results in the following exception.
-            // 
+            //
             // Error Message:
             // Microsoft.Azure.Storage.StorageException : Unexpected response code, Expected:PartialContent, Received:OK
             // Stack Trace:
@@ -60,7 +60,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
         }
 
         [Fact]
-        public async Task ShouldRunOnBeforeSaveAction()
+        public async Task ShouldRunOnBeforeSaveActionAsync()
         {
             bool complete = false;
             void OnBeforeSave(FormattedImage image)
@@ -75,11 +75,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
             {
                 await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
             }
+
             Assert.True(complete);
         }
 
         [Fact]
-        public async Task ShouldRunOnProcessedAction()
+        public async Task ShouldRunOnProcessedActionAsync()
         {
             bool complete = false;
             void OnProcessed(ImageProcessingContext context)
@@ -95,11 +96,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
             {
                 await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
             }
+
             Assert.True(complete);
         }
 
         [Fact]
-        public async Task ShouldRunOnPrepareResponseAction()
+        public async Task ShouldRunOnPrepareResponseActionAsync()
         {
             bool complete = false;
             void OnPrepareResponse(HttpContext context)
@@ -113,6 +115,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
             {
                 await server.CreateClient().GetAsync(ImageSharpTestServer.PhysicalTestImage + "?width=20").ConfigureAwait(false);
             }
+
             Assert.True(complete);
         }
     }

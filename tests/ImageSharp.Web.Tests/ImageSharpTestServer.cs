@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -100,10 +100,6 @@ namespace SixLabors.ImageSharp.Web.Tests
 
         public static TestServer Create(Action<IApplicationBuilder> configureApp, Action<IServiceCollection> configureServices = null)
         {
-            void DefaultConfigureServices(IServiceCollection services)
-            {
-            }
-
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(new[]
                 {
@@ -113,7 +109,7 @@ namespace SixLabors.ImageSharp.Web.Tests
             IWebHostBuilder builder = new WebHostBuilder()
                 .UseConfiguration(configuration)
                 .Configure(configureApp)
-                .ConfigureServices(configureServices ?? DefaultConfigureServices);
+                .ConfigureServices(configureServices ?? default);
 
             var server = new TestServer(builder);
 
@@ -148,15 +144,9 @@ namespace SixLabors.ImageSharp.Web.Tests
                     }
                 }
             }
-            catch (StorageException storageException)
+            catch (StorageException storageException) when (storageException.RequestInformation.HttpStatusCode == (int)HttpStatusCode.Conflict
+                || storageException.RequestInformation.ExtendedErrorInformation.ErrorCode == StorageErrorCodeStrings.ContainerAlreadyExists)
             {
-                // https://github.com/Azure/azure-sdk-for-net/issues/109
-                // We do not fire exception if container exists - there is no need in such actions
-                if (storageException.RequestInformation.HttpStatusCode != (int)HttpStatusCode.Conflict
-                && storageException.RequestInformation.ExtendedErrorInformation.ErrorCode != StorageErrorCodeStrings.ContainerAlreadyExists)
-                {
-                    throw;
-                }
             }
         }
 
@@ -166,10 +156,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                 provider.GetRequiredService<IHostingEnvironment>(),
                 provider.GetRequiredService<FormatUtilities>())
             {
-                Match = context =>
-                {
-                    return !context.Request.Path.StartsWithSegments("/" + AzureContainerName);
-                }
+                Match = context => !context.Request.Path.StartsWithSegments("/" + AzureContainerName)
             };
         }
     }

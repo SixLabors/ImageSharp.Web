@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.IO;
@@ -18,16 +18,15 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <returns>The <see cref="IImageResolver"/>.</returns>
-        Task<IImageResolver> GetAsync(string key);
+        Task<IImageCacheResolver> GetAsync(string key);
 
         /// <summary>
         /// Sets the value associated with the specified key.
-        /// Returns the date and time, in coordinated universal time (UTC), that the value was last written to.
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <param name="stream">The stream containing the image to store.</param>
-        /// <param name="metadata">The <see cref="ImageMetaData"/> associated with the image to store.</param>
+        /// <param name="metadata">The <see cref="ImageCacheMetadata"/> associated with the image to store.</param>
         /// <returns>The task.</returns>
-        Task SetAsync(string key, Stream stream, ImageMetaData metadata);
+        Task SetAsync(string key, Stream stream, ImageCacheMetadata metadata);
     }
 }

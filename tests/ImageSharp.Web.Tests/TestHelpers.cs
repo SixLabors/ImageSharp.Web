@@ -1,11 +1,11 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using Microsoft.AspNetCore.Http;
 
 namespace SixLabors.ImageSharp.Web.Tests
 {
-    public class TestHelpers
+    public static class TestHelpers
     {
         public static HttpContext CreateHttpContext()
         {

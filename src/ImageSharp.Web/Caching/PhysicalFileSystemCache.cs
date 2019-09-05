@@ -44,8 +44,8 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
-        /// <param name="environment">The hosting environment the application is running in.</param>
         /// <param name="cacheOptions">The cache configuraiton options.</param>
+        /// <param name="environment">The hosting environment the application is running in.</param>
         /// <param name="options">The middleware configuration options.</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public PhysicalFileSystemCache(
@@ -70,7 +70,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         }
 
         /// <inheritdoc/>
-        public async Task<IImageResolver> GetAsync(string key)
+        public async Task<IImageCacheResolver> GetAsync(string key)
         {
             string path = this.ToFilePath(key);
 
@@ -80,10 +80,10 @@ namespace SixLabors.ImageSharp.Web.Caching
                 return null;
             }
 
-            ImageMetaData metadata = default;
+            ImageCacheMetadata metadata = default;
             using (Stream stream = metaFileInfo.CreateReadStream())
             {
-                metadata = await ImageMetaData.ReadAsync(stream).ConfigureAwait(false);
+                metadata = await ImageCacheMetadata.ReadAsync(stream).ConfigureAwait(false);
             }
 
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToImageFilePath(path, metadata));
@@ -94,11 +94,11 @@ namespace SixLabors.ImageSharp.Web.Caching
                 return null;
             }
 
-            return new PhysicalFileSystemResolver(fileInfo, metadata);
+            return new PhysicalFileSystemCacheResolver(fileInfo, metadata);
         }
 
         /// <inheritdoc/>
-        public async Task SetAsync(string key, Stream stream, ImageMetaData metadata)
+        public async Task SetAsync(string key, Stream stream, ImageCacheMetadata metadata)
         {
             string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
             string imagePath = this.ToImageFilePath(path, metadata);
@@ -127,7 +127,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="path">The root path.</param>
         /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="string"/>.</returns>
-        private string ToImageFilePath(string path, in ImageMetaData metaData)
+        private string ToImageFilePath(string path, in ImageCacheMetadata metaData)
             => $"{path}.{this.formatUtilies.GetExtensionFromContentType(metaData.ContentType)}";
 
         /// <summary>

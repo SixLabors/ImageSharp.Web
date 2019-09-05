@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -59,8 +59,7 @@ namespace SixLabors.ImageSharp.Web.Providers
                 return Task.FromResult<IImageResolver>(null);
             }
 
-            // We don't care about the content type nor cache control max age here.
-            var metadata = new ImageMetaData(fileInfo.LastModified.UtcDateTime);
+            var metadata = new ImageMetadata(fileInfo.LastModified.UtcDateTime);
             return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
         }
     }
