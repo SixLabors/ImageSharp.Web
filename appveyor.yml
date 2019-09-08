@@ -14,23 +14,19 @@ install:
 
       cmd /c start /wait msiexec /i $msiPath /quiet
 
-      $minioPath = "$($env:USERPROFILE)\minio.exe"
+      $minioPath = "$($env:TEMP)\minio.exe"
 
       (New-Object Net.WebClient).DownloadFile('https://dl.min.io/server/minio/release/windows-amd64/minio.exe', $minioPath)
 
       $nssmZipPath = "$($env:TEMP)\nssm.zip"
 
       (New-Object Net.WebClient).DownloadFile('https://nssm.cc/release/nssm-2.24.zip', $nssmZipPath)
+       
+      Expand-Archive -path $nssmZipPath -destinationpath "$($env:TEMP)\" -Force
+       
+      cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" install minio $minioPath "server  --address 127.0.0.1:9999 C:\dev\Git\andymac4182\ImageSharp.Web\tests\ImageSharp.Web.Tests\SubFolder"
 
-      Expand-Archive -path $nssmZipPath -destinationpath "$($env:TEMP)\"
-
-      $environmentVariables = "MINIO_ACCESS_KEY=minio`nMINIO_SECRET_KEY=miniostorage"
-
-      cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" install minio $minioPath
-
-      cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" set minio AppEnvironmentExtra $environmentVariables
-
-      cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" get minio *
+      cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" set minio AppEnvironmentExtra MINIO_ACCESS_KEY=minio MINIO_SECRET_KEY=miniostorage
 
       cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" start minio
 
