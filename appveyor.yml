@@ -30,6 +30,8 @@ install:
 
       cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" set minio AppEnvironmentExtra $environmentVariables
 
+      cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" get minio *
+
       cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" start minio
 
 before_build:
