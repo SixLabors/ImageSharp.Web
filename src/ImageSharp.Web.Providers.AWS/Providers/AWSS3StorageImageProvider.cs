@@ -5,12 +5,10 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.Util;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -27,22 +25,25 @@ namespace SixLabors.ImageSharp.Web.Providers
         private static readonly char[] SlashChars = { '\\', '/' };
 
         private readonly IAmazonS3 amazonS3Client;
-        private readonly ILogger<AWSS3StorageImageProvider> logger;
         private readonly AWSS3StorageImageProviderOptions storageOptions;
         private Func<HttpContext, bool> match;
+
+        /// <summary>
+        /// Contains various helper methods based on the current configuration.
+        /// </summary>
+        private readonly FormatUtilities formatUtilities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AWSS3StorageImageProvider"/> class.
         /// </summary>
         /// <param name="amazonS3Client">Amazon S3 client</param>
-        /// <param name="logger">Microsoft.Extensions.Logging ILogger</param>
         /// <param name="storageOptions">The S3 storage options</param>
-        public AWSS3StorageImageProvider(IAmazonS3 amazonS3Client, ILogger<AWSS3StorageImageProvider> logger, IOptions<AWSS3StorageImageProviderOptions> storageOptions)
+        public AWSS3StorageImageProvider(IAmazonS3 amazonS3Client, IOptions<AWSS3StorageImageProviderOptions> storageOptions, FormatUtilities formatUtilities)
         {
             Guard.NotNull(storageOptions, nameof(storageOptions));
 
             this.amazonS3Client = amazonS3Client;
-            this.logger = logger;
+            this.formatUtilities = formatUtilities;
             this.storageOptions = storageOptions.Value;
         }
 
@@ -55,32 +56,21 @@ namespace SixLabors.ImageSharp.Web.Providers
 
         /// <inheritdoc />
         public bool IsValidRequest(HttpContext context)
-        {
-            var displayUrl = context.Request.Path;
-            return Path.GetExtension(displayUrl).EndsWith(".jpg") || Path.GetExtension(displayUrl).EndsWith(".png");
-        }
+            => this.formatUtilities.GetExtensionFromUri(context.Request.GetDisplayUrl()) != null;
 
         /// <inheritdoc />
         public async Task<IImageResolver> GetAsync(HttpContext context)
         {
-            PathString displayUrl = context.Request.Path;
-            this.logger.LogDebug("Getting image for {ImageUri}", displayUrl);
-            string imageId = Path.GetFileNameWithoutExtension(displayUrl);
-            this.logger.LogDebug("Image id is {ImageId}", imageId);
+            // Strip the leading slash and bucket name from the HTTP request path and treat
+            // the remaining path string as the file key.
+            // Path has already been correctly parsed before here.
+            string key = context.Request.Path.Value.TrimStart(SlashChars)
+                            .Substring(this.storageOptions.BucketName.Length)
+                            .TrimStart(SlashChars);
 
-            string imagePath = $"{imageId}.png";
+            bool imageExists = await this.KeyExists(this.storageOptions.BucketName, key);
 
-            bool imageExists = await this.KeyExists(this.storageOptions.BucketName, imagePath);
-
-            if (!imageExists)
-            {
-                this.logger.LogDebug("No image found for {ImageId}", imageId);
-                return null;
-            }
-
-            this.logger.LogDebug("Found image {ImageId}", imageId);
-
-            return new AWSS3FileSystemResolver(this.amazonS3Client, this.storageOptions.BucketName, imagePath);
+            return !imageExists ? null : new AWSS3FileSystemResolver(this.amazonS3Client, this.storageOptions.BucketName, key);
         }
 
         private bool IsMatch(HttpContext context)
@@ -90,10 +80,8 @@ namespace SixLabors.ImageSharp.Web.Providers
         }
 
         // ref https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/S3/Custom/_bcl/IO/S3FileInfo.cs#L118
-        private async Task<bool> KeyExists(string bucketName, string key, CancellationToken cancellationToken = default(CancellationToken))
+        private async Task<bool> KeyExists(string bucketName, string key)
         {
-            this.logger.LogDebug("Checking for the existence of key {Key} in bucket {BucketName}", key, bucketName);
-
             try
             {
                 var request = new GetObjectMetadataRequest
@@ -102,11 +90,8 @@ namespace SixLabors.ImageSharp.Web.Providers
                     Key = key
                 };
 
-                ((Amazon.Runtime.Internal.IAmazonWebServiceRequest)request)
-                    .AddBeforeRequestHandler(FileIORequestEventHandler);
-
                 // If the object doesn't exist then a "NotFound" will be thrown
-                await this.amazonS3Client.GetObjectMetadataAsync(request, cancellationToken).ConfigureAwait(false);
+                await this.amazonS3Client.GetObjectMetadataAsync(request).ConfigureAwait(false);
                 return true;
             }
             catch (AmazonS3Exception e)
@@ -122,15 +107,6 @@ namespace SixLabors.ImageSharp.Web.Providers
                 }
 
                 throw;
-            }
-        }
-
-        private static void FileIORequestEventHandler(object sender, RequestEventArgs args)
-        {
-            if (args is WebServiceRequestEventArgs wsArgs)
-            {
-                string currentUserAgent = wsArgs.Headers[AWSSDKUtils.UserAgentHeader];
-                wsArgs.Headers[AWSSDKUtils.UserAgentHeader] = currentUserAgent + " FileIO";
             }
         }
     }
