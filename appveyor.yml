@@ -14,6 +14,24 @@ install:
 
       cmd /c start /wait msiexec /i $msiPath /quiet
 
+      $minioPath = "$($env:USERPROFILE)\minio.exe"
+
+      (New-Object Net.WebClient).DownloadFile('https://dl.min.io/server/minio/release/windows-amd64/minio.exe', $minioPath)
+
+      $nssmZipPath = "$($env:TEMP)\nssm.zip"
+
+      (New-Object Net.WebClient).DownloadFile('https://nssm.cc/release/nssm-2.24.zip', $nssmZipPath)
+
+      Expand-Archive -path $nssmZipPath -destinationpath "$($env:TEMP)\"
+
+      $environmentVariables = "MINIO_ACCESS_KEY=minio`nMINIO_SECRET_KEY=miniostorage"
+
+      cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" install minio $minioPath
+
+      cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" set minio AppEnvironmentExtra $environmentVariables
+
+      cmd /c "$($env:TEMP)\nssm-2.24\win64\nssm.exe" start minio
+
 before_build:
   - git submodule -q update --init
   - cmd: dotnet --info
