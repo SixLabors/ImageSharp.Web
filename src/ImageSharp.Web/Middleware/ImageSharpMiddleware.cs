@@ -157,7 +157,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context);
             if (commands.Count > 0)
             {
-                foreach (string command in commands.Keys)
+                List<string> commandKeys = new List<string>(commands.Keys);
+                foreach (string command in commandKeys)
                 {
                     if (!this.knownCommands.Contains(command))
                     {
