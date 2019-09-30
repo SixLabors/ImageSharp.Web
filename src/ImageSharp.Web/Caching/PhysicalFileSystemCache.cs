@@ -143,6 +143,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="key">The cache key.</param>
         /// <returns>The <see cref="string"/>.</returns>
         private string ToFilePath(string key) // TODO: Avoid the allocation here.
-            => $"{this.cacheOptions.CacheFolder}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
+            => $"/{this.cacheOptions.CacheFolder}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
     }
 }
