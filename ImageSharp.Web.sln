@@ -41,6 +41,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Web.Benchmarks",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Web.Providers.Azure", "src\ImageSharp.Web.Providers.Azure\ImageSharp.Web.Providers.Azure.csproj", "{E2A545EC-B909-4EAD-B95F-397F68588BE3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageSharp.Web.Providers.AWS", "src\ImageSharp.Web.Providers.AWS\ImageSharp.Web.Providers.AWS.csproj", "{E631D300-ACD5-40EA-A6BB-08E22092EC76}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,18 @@ Global
 		{E2A545EC-B909-4EAD-B95F-397F68588BE3}.Release|x64.Build.0 = Release|Any CPU
 		{E2A545EC-B909-4EAD-B95F-397F68588BE3}.Release|x86.ActiveCfg = Release|Any CPU
 		{E2A545EC-B909-4EAD-B95F-397F68588BE3}.Release|x86.Build.0 = Release|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Debug|x64.Build.0 = Debug|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Debug|x86.Build.0 = Debug|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Release|x64.ActiveCfg = Release|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Release|x64.Build.0 = Release|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Release|x86.ActiveCfg = Release|Any CPU
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -122,6 +136,7 @@ Global
 		{BD73DBBD-6859-44C2-99FC-84148A6239A5} = {EA4178FC-11E3-496A-B630-0680B35E0AF8}
 		{0B15E490-7821-42DF-86A5-4DEAE921DE59} = {56801022-D71A-4FBE-BC5B-CBA08E2284EC}
 		{E2A545EC-B909-4EAD-B95F-397F68588BE3} = {815C0625-CD3D-440F-9F80-2D83856AB7AE}
+		{E631D300-ACD5-40EA-A6BB-08E22092EC76} = {815C0625-CD3D-440F-9F80-2D83856AB7AE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C5B38B65-A19E-4359-859C-5B2205429BD1}
