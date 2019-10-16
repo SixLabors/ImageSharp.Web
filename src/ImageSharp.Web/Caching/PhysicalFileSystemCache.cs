@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.IO;
@@ -17,9 +17,9 @@ namespace SixLabors.ImageSharp.Web.Caching
     public class PhysicalFileSystemCache : IImageCache
     {
         /// <summary>
-        /// The hosting environment the application is running in.
+        /// The root path for the cache.
         /// </summary>
-        private readonly IHostingEnvironment environment;
+        private readonly string cacheRootPath;
 
         /// <summary>
         /// The file provider abstraction.
@@ -62,9 +62,14 @@ namespace SixLabors.ImageSharp.Web.Caching
               nameof(environment.WebRootPath),
               "The folder 'wwwroot' that contains the web-servable application content files is missing. Please add this folder to the application root to allow caching.");
 
-            this.environment = environment;
-            this.fileProvider = this.environment.WebRootFileProvider;
             this.cacheOptions = cacheOptions != null ? cacheOptions.Value : new PhysicalFileSystemCacheOptions();
+            this.cacheRootPath = Path.Combine(environment.WebRootPath, this.cacheOptions.CacheFolder);
+            if (!Directory.Exists(this.cacheRootPath))
+            {
+                Directory.CreateDirectory(this.cacheRootPath);
+            }
+
+            this.fileProvider = new PhysicalFileProvider(this.cacheRootPath);
             this.options = options.Value;
             this.formatUtilies = formatUtilities;
         }
@@ -100,7 +105,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <inheritdoc/>
         public async Task SetAsync(string key, Stream stream, ImageCacheMetadata metadata)
         {
-            string path = Path.Combine(this.environment.WebRootPath, this.ToFilePath(key));
+            string path = Path.Combine(this.cacheRootPath, this.ToFilePath(key));
             string imagePath = this.ToImageFilePath(path, metadata);
             string metaPath = this.ToMetaDataFilePath(path);
             string directory = Path.GetDirectoryName(path);
@@ -143,6 +148,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="key">The cache key.</param>
         /// <returns>The <see cref="string"/>.</returns>
         private string ToFilePath(string key) // TODO: Avoid the allocation here.
-            => $"{this.cacheOptions.CacheFolder}/{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
+            => $"{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
     }
 }
