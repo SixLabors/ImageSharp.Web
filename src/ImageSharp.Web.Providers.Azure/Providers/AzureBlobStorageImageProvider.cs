@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -28,11 +29,6 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// The cloud storage account.
         /// </summary>
         private readonly CloudStorageAccount storageAccount;
-
-        /// <summary>
-        /// The container in the blob service.
-        /// </summary>
-        private readonly CloudBlobContainer container;
 
         /// <summary>
         /// The blob storage options.
@@ -63,25 +59,6 @@ namespace SixLabors.ImageSharp.Web.Providers
             this.storageOptions = storageOptions.Value;
             this.formatUtilities = formatUtilities;
             this.storageAccount = CloudStorageAccount.Parse(this.storageOptions.ConnectionString);
-
-            try
-            {
-                // It's ok to create a single reusable client since we are not altering it.
-                CloudBlobClient client = this.storageAccount.CreateCloudBlobClient();
-                this.container = client.GetContainerReference(this.storageOptions.ContainerName);
-
-                if (!this.container.Exists())
-                {
-                    this.container.Create();
-                    this.container.SetPermissions(new BlobContainerPermissions { PublicAccess = this.storageOptions.AccessType });
-                }
-            }
-            catch (StorageException storageException) when (storageException.RequestInformation.HttpStatusCode == (int)HttpStatusCode.Conflict
-                || storageException.RequestInformation.ExtendedErrorInformation.ErrorCode == StorageErrorCodeStrings.ContainerAlreadyExists)
-            {
-                // https://github.com/Azure/azure-sdk-for-net/issues/109
-                // We do not fire exception if container exists - there is no need in such actions
-            }
         }
 
         /// <inheritdoc/>
@@ -97,16 +74,45 @@ namespace SixLabors.ImageSharp.Web.Providers
             // Strip the leading slash and container name from the HTTP request path and treat
             // the remaining path string as the blob name.
             // Path has already been correctly parsed before here.
-            string blobName = context.Request.Path.Value.TrimStart(SlashChars)
-                                     .Substring(this.storageOptions.ContainerName.Length)
+
+            string pathMinusPrefix = context.Request.Path.Value.TrimStart(SlashChars)
+                                     .Substring(this.storageOptions.RoutePrefix.Length)
                                      .TrimStart(SlashChars);
+
+            string blobName = null;
+            string containerName = null;
+
+            foreach (char slash in SlashChars)
+            {
+                int indexOfSlash = pathMinusPrefix.IndexOf(slash);
+
+                if (indexOfSlash < 0 || pathMinusPrefix.Length <= (indexOfSlash + 1))
+                {
+                    continue;
+                }
+
+                containerName = pathMinusPrefix.Substring(0, indexOfSlash);
+                blobName = pathMinusPrefix.Substring(indexOfSlash + 1);
+
+                break;
+            }
 
             if (string.IsNullOrWhiteSpace(blobName))
             {
                 return null;
             }
 
-            CloudBlockBlob blob = this.container.GetBlockBlobReference(blobName);
+            CloudBlobClient client = this.storageAccount.CreateCloudBlobClient();
+
+            CloudBlobContainer container = client.GetContainerReference(containerName);
+
+            if (!container.Exists())
+            {
+                return null;
+            }
+
+            CloudBlockBlob blob = container.GetBlockBlobReference(blobName);
+
             if (!await blob.ExistsAsync().ConfigureAwait(false))
             {
                 return null;
@@ -122,7 +128,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         private bool IsMatch(HttpContext context)
         {
             string path = context.Request.Path.Value.TrimStart(SlashChars);
-            return path.StartsWith(this.storageOptions.ContainerName, StringComparison.OrdinalIgnoreCase);
+            return path.StartsWith(this.storageOptions.RoutePrefix, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

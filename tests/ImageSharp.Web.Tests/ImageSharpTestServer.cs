@@ -27,9 +27,10 @@ namespace SixLabors.ImageSharp.Web.Tests
     {
         private const string AzureConnectionString = "UseDevelopmentStorage=true";
         private const string AzureContainerName = "azure";
+        private const string AzureRoutePrefix = "assets";
         private const string ImagePath = "SubFolder/imagesharp-logo.png";
         public const string PhysicalTestImage = "http://localhost/" + ImagePath;
-        public const string AzureTestImage = "http://localhost/" + AzureContainerName + "/" + ImagePath;
+        public const string AzureTestImage = "http://localhost/" + AzureRoutePrefix + "/" + AzureContainerName + "/" + ImagePath;
 
         public static Action<IApplicationBuilder> DefaultConfig = app => app.UseImageSharp();
 
@@ -55,7 +56,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                     .Configure<AzureBlobStorageImageProviderOptions>(options =>
                     {
                         options.ConnectionString = AzureConnectionString;
-                        options.ContainerName = AzureContainerName;
+                        options.RoutePrefix = AzureRoutePrefix;
                     })
                     .AddProvider<AzureBlobStorageImageProvider>()
                     .AddProcessor<ResizeWebProcessor>();
@@ -89,7 +90,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                 .Configure<AzureBlobStorageImageProviderOptions>(options =>
                 {
                     options.ConnectionString = AzureConnectionString;
-                    options.ContainerName = AzureContainerName;
+                    options.RoutePrefix = AzureRoutePrefix;
                 })
                 .AddProvider<AzureBlobStorageImageProvider>()
                 .AddProcessor<ResizeWebProcessor>();

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using Microsoft.Azure.Storage.Blob;
@@ -11,20 +11,14 @@ namespace SixLabors.ImageSharp.Web.Providers
     public class AzureBlobStorageImageProviderOptions
     {
         /// <summary>
-        /// Gets or sets the connection string.
+        /// Gets or sets the Azure Blob Storage connection string.
         /// </summary>
         public string ConnectionString { get; set; }
 
         /// <summary>
-        /// Gets or sets the container name.
-        /// Must conform to Azure Blob Storage containiner naming guidlines.
-        /// <see href="https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names"/>
+        /// Gets or sets the route prefix for processing azure assets.
+        /// Url format would be: /{RoutePrefix}/{ContainerName}/{FileName}
         /// </summary>
-        public string ContainerName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the value indicating the level of public access that is allowed on the container.
-        /// </summary>
-        public BlobContainerPublicAccessType AccessType { get; set; } = BlobContainerPublicAccessType.Blob;
+        public string RoutePrefix { get; set; }
     }
 }
