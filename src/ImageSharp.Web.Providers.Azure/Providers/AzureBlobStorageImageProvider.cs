@@ -71,47 +71,23 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <inheritdoc/>
         public async Task<IImageResolver> GetAsync(HttpContext context)
         {
-            // Strip the leading slash and container name from the HTTP request path and treat
-            // the remaining path string as the blob name.
-            // Path has already been correctly parsed before here.
+            var parts = new AzureBlobStoragePathParts(context.Request.Path.Value, this.storageOptions.RoutePrefix);
 
-            string pathMinusPrefix = context.Request.Path.Value.TrimStart(SlashChars)
-                                     .Substring(this.storageOptions.RoutePrefix.Length)
-                                     .TrimStart(SlashChars);
-
-            string blobName = null;
-            string containerName = null;
-
-            foreach (char slash in SlashChars)
-            {
-                int indexOfSlash = pathMinusPrefix.IndexOf(slash);
-
-                if (indexOfSlash < 0 || pathMinusPrefix.Length <= (indexOfSlash + 1))
-                {
-                    continue;
-                }
-
-                containerName = pathMinusPrefix.Substring(0, indexOfSlash);
-                blobName = pathMinusPrefix.Substring(indexOfSlash + 1);
-
-                break;
-            }
-
-            if (string.IsNullOrWhiteSpace(blobName))
+            if (string.IsNullOrEmpty(parts.BlobFilename))
             {
                 return null;
             }
 
             CloudBlobClient client = this.storageAccount.CreateCloudBlobClient();
 
-            CloudBlobContainer container = client.GetContainerReference(containerName);
+            CloudBlobContainer container = client.GetContainerReference(parts.ContainerName);
 
             if (!container.Exists())
             {
                 return null;
             }
 
-            CloudBlockBlob blob = container.GetBlockBlobReference(blobName);
+            CloudBlockBlob blob = container.GetBlockBlobReference(parts.BlobFilename);
 
             if (!await blob.ExistsAsync().ConfigureAwait(false))
             {
