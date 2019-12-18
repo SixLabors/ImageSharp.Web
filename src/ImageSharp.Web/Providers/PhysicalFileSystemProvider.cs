@@ -27,6 +27,11 @@ namespace SixLabors.ImageSharp.Web.Providers
         private readonly FormatUtilities formatUtilities;
 
         /// <summary>
+        /// A match function used by the resolver to identify itself as the correct resolver to use.
+        /// </summary>
+        private Func<HttpContext, bool> match;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemProvider"/> class.
         /// </summary>
         /// <param name="environment">The <see cref="IHostingEnvironment"/> used by this middleware.</param>
@@ -42,7 +47,11 @@ namespace SixLabors.ImageSharp.Web.Providers
         }
 
         /// <inheritdoc/>
-        public Func<HttpContext, bool> Match { get; set; } = _ => true;
+        public Func<HttpContext, bool> Match
+        {
+            get => this.match ?? this.IsMatch;
+            set => this.match = value;
+        }
 
         /// <inheritdoc/>
         public bool IsValidRequest(HttpContext context) => this.formatUtilities.GetExtensionFromUri(context.Request.GetDisplayUrl()) != null;
@@ -61,6 +70,14 @@ namespace SixLabors.ImageSharp.Web.Providers
 
             var metadata = new ImageMetadata(fileInfo.LastModified.UtcDateTime);
             return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
+        }
+
+        private bool IsMatch(HttpContext context)
+        {
+            IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
+
+            // Check to see if the file exists.
+            return fileInfo.Exists;
         }
     }
 }
