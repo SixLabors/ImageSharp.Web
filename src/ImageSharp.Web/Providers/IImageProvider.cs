@@ -15,6 +15,12 @@ namespace SixLabors.ImageSharp.Web.Providers
     public interface IImageProvider
     {
         /// <summary>
+        /// Gets or sets a value indicating whether this provider should process
+        /// an image when no commands have been supplied.
+        /// </summary>
+        bool ProcessWhenNoCommands { get; set; }
+
+        /// <summary>
         /// Gets or sets the method used by the resolver to identify itself as the correct resolver to use.
         /// </summary>
         Func<HttpContext, bool> Match { get; set; }

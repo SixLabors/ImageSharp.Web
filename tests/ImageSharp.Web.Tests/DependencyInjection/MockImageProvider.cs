@@ -11,6 +11,8 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
 {
     public class MockImageProvider : IImageProvider
     {
+        public bool ProcessWhenNoCommands { get; set; } = true;
+
         public Func<HttpContext, bool> Match { get; set; } = _ => true;
 
         public Task<IImageResolver> GetAsync(HttpContext context) => Task.FromResult<IImageResolver>(null);

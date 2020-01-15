@@ -42,6 +42,9 @@ namespace SixLabors.ImageSharp.Web.Providers
         }
 
         /// <inheritdoc/>
+        public bool ProcessWhenNoCommands { get; set; } = false;
+
+        /// <inheritdoc/>
         public Func<HttpContext, bool> Match { get; set; } = _ => true;
 
         /// <inheritdoc/>
