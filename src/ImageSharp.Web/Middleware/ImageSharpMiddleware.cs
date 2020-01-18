@@ -180,7 +180,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
             }
 
-            if ((commands.Count == 0 && provider?.ProcessWhenNoCommands != true) || provider?.IsValidRequest(context) != true)
+            if ((commands.Count == 0 && provider?.ProcessingBehavior != ProcessingBehavior.All) || provider?.IsValidRequest(context) != true)
             {
                 // Nothing to do. call the next delegate/middleware in the pipeline
                 await this.next(context).ConfigureAwait(false);

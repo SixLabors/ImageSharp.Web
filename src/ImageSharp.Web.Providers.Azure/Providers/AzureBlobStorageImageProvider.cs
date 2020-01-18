@@ -85,7 +85,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         }
 
         /// <inheritdoc/>
-        public bool ProcessWhenNoCommands { get; set; } = true;
+        public ProcessingBehavior ProcessingBehavior { get; set; } = ProcessingBehavior.All;
 
         /// <inheritdoc/>
         public Func<HttpContext, bool> Match

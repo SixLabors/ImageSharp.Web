@@ -11,7 +11,7 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
 {
     public class MockImageProvider : IImageProvider
     {
-        public bool ProcessWhenNoCommands { get; set; } = true;
+        public ProcessingBehavior ProcessingBehavior { get; set; } = ProcessingBehavior.All;
 
         public Func<HttpContext, bool> Match { get; set; } = _ => true;
 

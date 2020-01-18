@@ -15,10 +15,9 @@ namespace SixLabors.ImageSharp.Web.Providers
     public interface IImageProvider
     {
         /// <summary>
-        /// Gets or sets a value indicating whether this provider should process
-        /// an image when no commands have been supplied.
+        /// Gets the processing behavior.
         /// </summary>
-        bool ProcessWhenNoCommands { get; set; }
+        ProcessingBehavior ProcessingBehavior { get; }
 
         /// <summary>
         /// Gets or sets the method used by the resolver to identify itself as the correct resolver to use.
