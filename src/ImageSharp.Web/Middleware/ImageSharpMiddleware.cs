@@ -169,13 +169,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             this.options.OnParseCommands?.Invoke(new ImageCommandContext(context, commands, CommandParser.Instance));
 
-            if (commands.Count == 0)
-            {
-                // Nothing to do. call the next delegate/middleware in the pipeline
-                await this.next(context).ConfigureAwait(false);
-                return;
-            }
-
             // Get the correct service for the request.
             IImageProvider provider = null;
             foreach (IImageProvider resolver in this.providers)
@@ -187,7 +180,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
             }
 
-            if (provider?.IsValidRequest(context) != true)
+            if ((commands.Count == 0 && provider?.ProcessingBehavior != ProcessingBehavior.All) || provider?.IsValidRequest(context) != true)
             {
                 // Nothing to do. call the next delegate/middleware in the pipeline
                 await this.next(context).ConfigureAwait(false);

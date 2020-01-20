@@ -85,6 +85,9 @@ namespace SixLabors.ImageSharp.Web.Providers
         }
 
         /// <inheritdoc/>
+        public ProcessingBehavior ProcessingBehavior { get; } = ProcessingBehavior.All;
+
+        /// <inheritdoc/>
         public Func<HttpContext, bool> Match
         {
             get => this.match ?? this.IsMatch;
