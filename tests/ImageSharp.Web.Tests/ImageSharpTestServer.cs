@@ -153,7 +153,13 @@ namespace SixLabors.ImageSharp.Web.Tests
         private static PhysicalFileSystemProvider PhysicalProviderFactory(IServiceProvider provider)
         {
             return new PhysicalFileSystemProvider(
+#pragma warning disable SA1114 // Parameter list should follow declaration
+#if NETCOREAPP2_1
                 provider.GetRequiredService<IHostingEnvironment>(),
+#else
+                provider.GetRequiredService<IWebHostEnvironment>(),
+#pragma warning restore SA1114 // Parameter list should follow declaration
+#endif
                 provider.GetRequiredService<FormatUtilities>())
             {
                 Match = context => !context.Request.Path.StartsWithSegments("/" + AzureContainerName)

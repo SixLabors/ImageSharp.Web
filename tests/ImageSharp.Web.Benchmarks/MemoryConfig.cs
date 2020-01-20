@@ -1,4 +1,8 @@
-﻿using BenchmarkDotNet.Configs;
+// Copyright (c) Six Labors and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
 
 namespace SixLabors.ImageSharp.Web.Benchmarks
 {
@@ -6,7 +10,7 @@ namespace SixLabors.ImageSharp.Web.Benchmarks
     {
         public MemoryConfig()
         {
-            this.Add(new BenchmarkDotNet.Diagnosers.MemoryDiagnoser());
+            this.Add(MemoryDiagnoser.Default);
         }
     }
 }

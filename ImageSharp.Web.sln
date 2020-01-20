@@ -3,30 +3,30 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.452
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{C317F1B1-D75E-4C6D-83EB-80367343E0D7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C317F1B1-D75E-4C6D-83EB-80367343E0D7}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
-		build.cmd = build.cmd
-		build.ps1 = build.ps1
-		codecov.yml = codecov.yml
-		CodeCoverage.runsettings = CodeCoverage.runsettings
 		.github\CONTRIBUTING.md = .github\CONTRIBUTING.md
-		NuGet.config = NuGet.config
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
 		README.md = README.md
 		shared-infrastructure\SixLabors.ruleset = shared-infrastructure\SixLabors.ruleset
 		shared-infrastructure\SixLabors.Tests.ruleset = shared-infrastructure\SixLabors.Tests.ruleset
 		shared-infrastructure\stylecop.json = shared-infrastructure\stylecop.json
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{815C0625-CD3D-440F-9F80-2D83856AB7AE}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{56801022-D71A-4FBE-BC5B-CBA08E2284EC}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{9E574A07-F879-4811-9C41-5CBDC6BAFDB7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{815C0625-CD3D-440F-9F80-2D83856AB7AE}"
 	ProjectSection(SolutionItems) = preProject
-		src\Shared\AssemblyInfo.Common.cs = src\Shared\AssemblyInfo.Common.cs
+		src\Directory.Build.props = src\Directory.Build.props
+		src\Directory.Build.targets = src\Directory.Build.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{56801022-D71A-4FBE-BC5B-CBA08E2284EC}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+		tests\Directory.Build.targets = tests\Directory.Build.targets
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Web", "src\ImageSharp.Web\ImageSharp.Web.csproj", "{2F1B36E2-5D92-4442-B816-D2A978246435}"
@@ -116,7 +116,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{9E574A07-F879-4811-9C41-5CBDC6BAFDB7} = {815C0625-CD3D-440F-9F80-2D83856AB7AE}
 		{2F1B36E2-5D92-4442-B816-D2A978246435} = {815C0625-CD3D-440F-9F80-2D83856AB7AE}
 		{8864C96C-94AA-454D-BAF5-779216C3745A} = {56801022-D71A-4FBE-BC5B-CBA08E2284EC}
 		{BD73DBBD-6859-44C2-99FC-84148A6239A5} = {EA4178FC-11E3-496A-B630-0680B35E0AF8}

@@ -1,4 +1,7 @@
-﻿using BenchmarkDotNet.Attributes;
+// Copyright (c) Six Labors and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using BenchmarkDotNet.Attributes;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Middleware;
@@ -9,8 +12,8 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
     public class CacheHashBenchmarks
     {
         private const string URL = "http://testwebsite.com/image-12345.jpeg?width=400";
-        private static readonly IOptions<ImageSharpMiddlewareOptions> options = Options.Create(new ImageSharpMiddlewareOptions());
-        private static readonly CacheHash Sha256Hasher = new CacheHash(options, options.Value.Configuration.MemoryAllocator);
+        private static readonly IOptions<ImageSharpMiddlewareOptions> Options = Microsoft.Extensions.Options.Options.Create(new ImageSharpMiddlewareOptions());
+        private static readonly CacheHash Sha256Hasher = new CacheHash(Options, Options.Value.Configuration.MemoryAllocator);
         private static readonly CacheHashBaseline NaiveSha256Hasher = new CacheHashBaseline();
 
         [Benchmark(Baseline = true, Description = "Baseline Sha256Hasher")]

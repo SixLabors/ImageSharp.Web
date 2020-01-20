@@ -29,10 +29,14 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemProvider"/> class.
         /// </summary>
-        /// <param name="environment">The <see cref="IHostingEnvironment"/> used by this middleware.</param>
+        /// <param name="environment">The environment used by this middleware.</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public PhysicalFileSystemProvider(
+#if NETCOREAPP2_1
             IHostingEnvironment environment,
+#else
+            IWebHostEnvironment environment,
+#endif
             FormatUtilities formatUtilities)
         {
             Guard.NotNull(environment, nameof(environment));

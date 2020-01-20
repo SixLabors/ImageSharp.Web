@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore;
+// Copyright (c) Six Labors and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
 namespace SixLabors.ImageSharp.Web.Sample

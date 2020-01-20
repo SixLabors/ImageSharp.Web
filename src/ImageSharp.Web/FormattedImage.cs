@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -12,7 +12,7 @@ namespace SixLabors.ImageSharp.Web
     /// A class encapsulating an image with a particular file encoding.
     /// </summary>
     /// <seealso cref="System.IDisposable" />
-    public class FormattedImage : IDisposable
+    public sealed class FormattedImage : IDisposable
     {
         private IImageFormat format;
 
@@ -21,7 +21,7 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="image">The image.</param>
         /// <param name="format">The format.</param>
-        protected FormattedImage(Image<Rgba32> image, IImageFormat format)
+        public FormattedImage(Image<Rgba32> image, IImageFormat format)
         {
             this.format = format;
             this.Image = image;

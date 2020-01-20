@@ -1,84 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <AssemblyTitle>ImageSharp.Web</AssemblyTitle>
-    <Authors>Six Labors and contributors</Authors>
-    <Company>Six Labors</Company>
-    <Copyright>Copyright (c) Six Labors and contributors.</Copyright>
-    <TargetFrameworks>netstandard1.4;netstandard2.0</TargetFrameworks>
-    <LangVersion>7.3</LangVersion>
-    <Product>SixLabors.ImageSharp.Web</Product>
-    <Description>ImageSharp Middleware for serving images via a url based API.</Description>
-    <NeutralLanguage>en</NeutralLanguage>
 
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  <PropertyGroup>
+    <AssemblyTitle>SixLabors.ImageSharp.Web</AssemblyTitle>
     <AssemblyName>SixLabors.ImageSharp.Web</AssemblyName>
-    <PackageId>SixLabors.ImageSharp.Web</PackageId>
-    <PackageTags>Image Middleware Resize Crop Gif Jpg Jpeg Bitmap Png Core Cache</PackageTags>
-    <PackageIconUrl>https://raw.githubusercontent.com/SixLabors/Branding/master/icons/imagesharp/sixlabors.imagesharp.128.png</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/SixLabors/ImageSharp.Web</PackageProjectUrl>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/SixLabors/ImageSharp.Web</RepositoryUrl>
-
-    <DebugType Condition="$(codecov) != ''">full</DebugType>
-    <DebugType Condition="$(codecov) == ''">portable</DebugType>
-  </PropertyGroup>
-
-  <!-- TODO: Include .NETSTANDARD2.1 when released-->
-  <PropertyGroup Condition=" $(TargetFramework.StartsWith('netcoreapp2')) ">
-    <DefineConstants>$(DefineConstants);SUPPORTS_MATHF</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" $(TargetFramework.StartsWith('netcoreapp2.1')) ">
-    <DefineConstants>$(DefineConstants);SUPPORTS_HASHCODE</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="..\..\shared-infrastructure\**\*.cs" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.4'">
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="1.1.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="1.1.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="1.1.2" />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="1.1.2" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="1.1.2" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.1.1"/>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="2.0.0"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <PropertyGroup>
-    <CodeAnalysisRuleSet>..\..\shared-infrastructure\SixLabors.ruleset</CodeAnalysisRuleSet>
     <RootNamespace>SixLabors.ImageSharp.Web</RootNamespace>
+    <Description>ImageSharp Middleware for serving images via a url based API.</Description>
+    <PackageId>SixLabors.ImageSharp.Web</PackageId>
+    <PackageTags>Image Middleware Resize Crop Gif Jpg Jpeg Bitmap Png Core Cache ASP</PackageTags>
+
+    <TargetFrameworks>netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <AdditionalFiles Include="..\..\shared-infrastructure\stylecop.json" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions"  />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions"  />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities"  />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions"  />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"  />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp" />
+  </ItemGroup>
+
+
+  <Import Project="..\..\shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems" Label="Shared" />
+
 </Project>

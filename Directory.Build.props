@@ -14,7 +14,7 @@
   <PropertyGroup>
     <BaseArtifactsPath>$(MSBuildThisFileDirectory)artifacts/</BaseArtifactsPath>
     <BaseArtifactsPathSuffix>$(ImageSharpProjectCategory)/$(MSBuildProjectName)</BaseArtifactsPathSuffix>
-    <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/SixLabors/ImageSharp.Drawing/</RepositoryUrl>
+    <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/SixLabors/ImageSharp.Web/</RepositoryUrl>
   </PropertyGroup>
 
   <!-- Default settings that explicitly differ from the Sdk.props defaults  -->
@@ -69,7 +69,7 @@
     <BaseOutputPath>$(BaseArtifactsPath)bin/$(BaseArtifactsPathSuffix)/</BaseOutputPath>
     <Company>Six Labors</Company>
     <PackageOutputPath>$(BaseArtifactsPath)pkg/$(BaseArtifactsPathSuffix)/$(Configuration)/</PackageOutputPath>
-    <Product>SixLabors.ImageSharp.Drawing</Product>
+    <Product>SixLabors.ImageSharp.Web</Product>
     <VersionPrefix>0.0.1</VersionPrefix>
     <VersionPrefix Condition="'$(packageversion)' != ''">$(PackageVersion)</VersionPrefix>
     <VersionSuffix></VersionSuffix>
@@ -100,12 +100,10 @@
   <!-- Package references and additional files which are consumed by all projects -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Net.Compilers.Toolset" IsImplicitlyDefined="true" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" IsImplicitlyDefined="true"  />
-    <!--TODO: Enable this once tests Stylecop issues are fixed-->
-    <!--<PackageReference Include="StyleCop.Analyzers" IsImplicitlyDefined="true"  />-->
+    <PackageReference Include="StyleCop.Analyzers" IsImplicitlyDefined="true"  />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)shared-infrastructure\stylecop.json" />
     <!--NuGet package icon source-->
-    <None Include="$(MSBuildThisFileDirectory)shared-infrastructure\branding\icons\imagesharp.drawing\sixlabors.imagesharp.drawing.128.png" Pack="true" PackagePath="\icon.png" />
+    <None Include="$(MSBuildThisFileDirectory)shared-infrastructure\branding\icons\imagesharp.web\sixlabors.imagesharp.web.128.png" Pack="true" PackagePath="\icon.png" />
   </ItemGroup>
 
 </Project>

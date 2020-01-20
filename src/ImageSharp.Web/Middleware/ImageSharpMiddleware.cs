@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.ImageSharp.Web.Resolvers;
-using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Middleware
 {
@@ -157,8 +157,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context);
             if (commands.Count > 0)
             {
-                List<string> commandKeys = new List<string>(commands.Keys);
-                foreach (string command in commandKeys)
+                foreach (string command in new List<string>(commands.Keys))
                 {
                     if (!this.knownCommands.Contains(command))
                     {
