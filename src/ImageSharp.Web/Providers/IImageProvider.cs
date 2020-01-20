@@ -15,6 +15,11 @@ namespace SixLabors.ImageSharp.Web.Providers
     public interface IImageProvider
     {
         /// <summary>
+        /// Gets the processing behavior.
+        /// </summary>
+        ProcessingBehavior ProcessingBehavior { get; }
+
+        /// <summary>
         /// Gets or sets the method used by the resolver to identify itself as the correct resolver to use.
         /// </summary>
         Func<HttpContext, bool> Match { get; set; }
