@@ -14,7 +14,7 @@ SixLabors.ImageSharp.Web
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ImageSharp/General?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=flat&logo=twitter)](https://twitter.com/intent/tweet?hashtags=imagesharp,dotnet,oss&text=ImageSharp.+A+new+cross-platform+2D+graphics+API+in+C%23&url=https%3a%2f%2fgithub.com%2fSixLabors%2fImageSharp&via=sixlabors)
-[![OpenCollective](https://opencollective.com/imagesharp/backers/badge.svg)](#backers) 
+[![OpenCollective](https://opencollective.com/imagesharp/backers/badge.svg)](#backers)
 [![OpenCollective](https://opencollective.com/imagesharp/sponsors/badge.svg)](#sponsors)
 
 </div>
@@ -24,19 +24,18 @@ SixLabors.ImageSharp.Web
 > Pre-release downloads are available from the [MyGet package repository](https://www.myget.org/feed/sixlabors/package/nuget/SixLabors.ImageSharp.Web).
 
 
+|Build Status|Code Coverage|
+|:----------:|:-----------:|
+|[![Build Status](https://img.shields.io/github/workflow/status/SixLabors/ImageSharp.Web/Build/master)](https://github.com/SixLabors/ImageSharp.Web/actions)|[![Code coverage](https://codecov.io/gh/SixLabors/ImageSharp.Web/branch/master/graph/badge.svg)](https://codecov.io/gh/SixLabors/ImageSharp.Web)|
 
-|             |Build Status|
-|-------------|:----------:|
-|**Linux/Mac**|[![Build Status](https://travis-ci.org/SixLabors/ImageSharp.Web.svg)](https://travis-ci.org/SixLabors/ImageSharp.Web)|
-|**Windows**  |[![Build status](https://ci.appveyor.com/api/projects/status/hdxihg1x58uo8wab/branch/master?svg=true)](https://ci.appveyor.com/project/six-labors/imagesharp-web/branch/master)|
 
 ### Installation
 
 Install stable releases via Nuget; development releases are available via MyGet.
 
-| Package Name                   | Release (NuGet) | Nightly (MyGet) |
-|--------------------------------|-----------------|-----------------|
-| `SixLabors.ImageSharp.Web`         | [![NuGet](https://img.shields.io/nuget/v/SixLabors.ImageSharp.Web.svg)](https://www.nuget.org/packages/SixLabors.ImageSharp.Web/) | [![MyGet](https://img.shields.io/myget/sixlabors/v/SixLabors.ImageSharp.Web.svg)](https://www.myget.org/feed/sixlabors/package/nuget/SixLabors.ImageSharp.Web) |
+| Package Name               | Release (NuGet)                                                                                                                   | Nightly (MyGet)                                                                                                                                                |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SixLabors.ImageSharp.Web` | [![NuGet](https://img.shields.io/nuget/v/SixLabors.ImageSharp.Web.svg)](https://www.nuget.org/packages/SixLabors.ImageSharp.Web/) | [![MyGet](https://img.shields.io/myget/sixlabors/v/SixLabors.ImageSharp.Web.svg)](https://www.myget.org/feed/sixlabors/package/nuget/SixLabors.ImageSharp.Web) |
 
 
 ### Packages
@@ -44,7 +43,7 @@ Install stable releases via Nuget; development releases are available via MyGet.
 - **ImageSharp.Web**
   - Contains the middleware to integrate a dynamic image manipulation workflow into an ASP.NET Core application.
 
-Once installed you will need to add the following code  to `ConfigureServices` in your `Startup.cs` file. 
+Once installed you will need to add the following code  to `ConfigureServices` in your `Startup.cs` file.
 
 This installs the the default service and options.
 
@@ -115,7 +114,7 @@ services.AddImageSharpCore(
 
 If you prefer, you can compile ImageSharp.Web yourself (please do and help!), you'll need:
 
-- [Visual Studio 2017 (or above)](https://www.visualstudio.com/en-us/news/releasenotes/vs2017-relnotes)
+- [Visual Studio 2019 (or above)](https://www.visualstudio.com/en-us/news/releasenotes/vs2019-relnotes)
 - The [.NET Core SDK Installer](https://www.microsoft.com/net/core#windows) - Non VSCode link.
 
 Alternatively on Linux you can use:
@@ -123,10 +122,12 @@ Alternatively on Linux you can use:
 - [Visual Studio Code](https://code.visualstudio.com/) with [C# Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.csharp)
 - [.Net Core](https://www.microsoft.com/net/core#linuxubuntu)
 
-To clone it locally click the "Clone in Windows" button above or run the following git commands.
+To clone it locally click the "Clone in [YOUR_OS]" button above or run the following git commands.
 
 ```bash
 git clone https://github.com/SixLabors/ImageSharp.Web
+
+git submodule update --init --recursive
 ```
 
 ### How can you help?

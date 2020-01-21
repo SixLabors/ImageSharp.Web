@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Caching;
@@ -17,14 +17,26 @@ using SixLabors.ImageSharp.Web.Providers;
 
 namespace SixLabors.ImageSharp.Web.Sample
 {
+    /// <summary>
+    /// Contains application configuration allowing the addition of services to the container.
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// </summary>
+        /// <param name="configuration">The configuration properties.</param>
         public Startup(IConfiguration configuration) => this.AppConfiguration = configuration;
 
+        /// <summary>
+        /// Gets the configuration properties.
+        /// </summary>
         public IConfiguration AppConfiguration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services">The collection of service desscriptors.</param>
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddImageSharpCore()
@@ -37,7 +49,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                 {
                     return new PhysicalFileSystemCache(
                                 provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
-                                provider.GetRequiredService<IHostingEnvironment>(),
+                                provider.GetRequiredService<IWebHostEnvironment>(),
                                 provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
                                 provider.GetRequiredService<FormatUtilities>());
                 })
@@ -112,7 +124,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                 {
                     return new PhysicalFileSystemCache(
                         provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
-                        provider.GetRequiredService<IHostingEnvironment>(),
+                        provider.GetRequiredService<IWebHostEnvironment>(),
                         provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
                         provider.GetRequiredService<FormatUtilities>());
                 })
@@ -123,8 +135,12 @@ namespace SixLabors.ImageSharp.Web.Sample
                 .AddProcessor<BackgroundColorWebProcessor>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app">The application builder.</param>
+        /// <param name="env">The hosting environment the application is running in.</param>
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
