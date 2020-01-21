@@ -44,8 +44,11 @@
     <PackageReference Include="Microsoft.Azure.KeyVault.Core" Version="3.0.4" />
     <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.1.2" />
     <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.4.0" />
-    <PackageReference Update="xunit" Version="2.4.1" />
-    <PackageReference Update="xunit.runner.visualstudio" Version="2.4.1" />
+
+    <!--Don't update these. We're getting AmbiguousMatchException on Linux-->
+    <!--See https://github.com/xunit/xunit/issues/1771-->
+    <PackageReference Update="xunit" Version="2.3.1" />
+    <PackageReference Update="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
