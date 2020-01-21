@@ -68,11 +68,11 @@ jobs:
 
             - name: Setup Azurite
               shell: bash
-              run: npm install azurite
+              run: sudo npm install -g azurite
 
             - name: Use Azurite
               shell: bash
-              run: azurite --loose &
+              run: sudo azurite --loose &
 
             - name: Build
               shell: pwsh
