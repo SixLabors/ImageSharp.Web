@@ -67,22 +67,22 @@ jobs:
                   dotnet-version: "3.1.101"
 
             - name: Setup Azurite Linux
-              if: matrix.options.os == ubuntu-latest
+              if: matrix.options.os == 'ubuntu-latest'
               shell: bash
               run: sudo npm install -g azurite
 
             - name: Use Azurite Linux
-              if: matrix.options.os == ubuntu-latest
+              if: matrix.options.os == 'ubuntu-latest'
               shell: bash
               run: sudo azurite --loose &
 
             - name: Setup Azurite Windows
-              if: matrix.options.os == windows-latest
+              if: matrix.options.os == 'windows-latest'
               shell: cmd
               run: npm install -g azurite
 
             - name: Use Azurite Windows
-              if: matrix.options.os == windows-latest
+              if: matrix.options.os == 'windows-latest'
               shell: cmd
               run: start /B azurite --loose
 
