@@ -130,6 +130,24 @@ git clone https://github.com/SixLabors/ImageSharp.Web
 git submodule update --init --recursive
 ```
 
+### Running the Tests
+
+The unit tests require [Azurite Azure Storage Emulator](https://github.com/Azure/Azurite) in order to run.
+
+On Windows to install and run the server as a background process run the following command
+
+```bash
+npm install -g azurite
+start /B azurite --loose
+```
+
+On Linux
+
+```bash
+sudo npm install -g azurite
+sudo azurite --loose &
+```
+
 ### How can you help?
 
 Please... Spread the word, contribute algorithms, submit performance improvements, unit tests, no input is too little. Make sure to read our [Contribution Guide](https://github.com/SixLabors/ImageSharp.Web/blob/master/.github/CONTRIBUTING.md) before opening a PR.
