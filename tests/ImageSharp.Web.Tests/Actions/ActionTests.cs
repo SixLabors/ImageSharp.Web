@@ -59,6 +59,33 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
             Assert.True(complete);
         }
 
+        [Theory]
+        [InlineData(ImageSharpTestServer.AzureTestImage)]
+        public async Task ShouldRunOnValidateActionNoCommandsAsync(string url)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return;
+            }
+
+            bool complete = false;
+            void OnParseCommands(ImageCommandContext context)
+            {
+                Assert.NotNull(context);
+                Assert.NotNull(context.Context);
+                Assert.NotNull(context.Commands);
+                Assert.NotNull(context.Parser);
+                complete = true;
+            }
+
+            using (TestServer server = ImageSharpTestServer.CreateWithActions(OnParseCommands))
+            {
+                await server.CreateClient().GetAsync(url).ConfigureAwait(false);
+            }
+
+            Assert.True(complete);
+        }
+
         [Fact]
         public async Task ShouldRunOnBeforeSaveActionAsync()
         {

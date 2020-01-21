@@ -11,7 +11,7 @@ namespace SixLabors.ImageSharp.Web
     /// <summary>
     /// A class encapsulating an image with a particular file encoding.
     /// </summary>
-    /// <seealso cref="System.IDisposable" />
+    /// <seealso cref="IDisposable" />
     public sealed class FormattedImage : IDisposable
     {
         private IImageFormat format;
@@ -46,7 +46,7 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <param name="source">The source.</param>
-        /// <returns>A formatted image.</returns>
+        /// <returns>The <see cref="FormattedImage"/>.</returns>
         public static FormattedImage Load(Configuration configuration, Stream source)
         {
             var image = ImageSharp.Image.Load<Rgba32>(configuration, source, out IImageFormat format);
