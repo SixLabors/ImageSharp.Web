@@ -68,7 +68,7 @@ jobs:
 
             - name: Setup Azurite
               shell: bash
-              run: npm install -g azurite
+              run: npm install azurite
 
             - name: Use Azurite
               shell: bash
