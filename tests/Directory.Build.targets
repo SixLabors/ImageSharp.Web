@@ -28,10 +28,12 @@
   <PropertyGroup Condition="'$(codecov)' == 'true' AND '$(IsTestProject)' == 'true'">
     <CollectCoverage>true</CollectCoverage>
     <UseSourceLink>true</UseSourceLink>
-    <CoverletOutputFormat>opencover</CoverletOutputFormat>
+    <Include>[SixLabors.*]*</Include>
+    <CoverletOutputFormat>lcov</CoverletOutputFormat>
     <!--Output injects target framework into name despite explicit config. See build yml-->
-    <CoverletOutput>$(MSBuildThisFileDirectory)..\coverage.xml</CoverletOutput>
-    <!--Used by coverlet dues to reference issues with SixLabors.Core-->
+    <CoverletOutputPath>$(MSBuildThisFileDirectory)..\</CoverletOutputPath>
+    <CoverletOutput>$(CoverletOutputPath)$(AssemblyName).$(TargetFramework).lcov</CoverletOutput>
+    <!--Used by coverlet dues to reference issues-->
     <!--https://github.com/tonerdo/coverlet/blob/master/Documentation/KnowIssues.md#4-failed-to-resolve-assembly-during-instrumentation-->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>

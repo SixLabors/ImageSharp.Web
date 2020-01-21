@@ -214,8 +214,7 @@ artifacts/
 *.csproj.bak
 
 #CodeCoverage
-**/CodeCoverage/*
-docs/
+*.lcov 
 
 **/is-cache/
 

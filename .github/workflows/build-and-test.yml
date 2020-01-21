@@ -66,7 +66,7 @@ jobs:
               with:
                   dotnet-version: "3.1.101"
 
-            - name: Setup Azurite Linux
+            - name: Install Azurite Linux
               if: matrix.options.os == 'ubuntu-latest'
               shell: bash
               run: sudo npm install -g azurite
@@ -76,7 +76,7 @@ jobs:
               shell: bash
               run: sudo azurite --loose &
 
-            - name: Use Azurite Windows
+            - name: Use Azure Storage Emulator Windows
               if: matrix.options.os == 'windows-latest'
               shell: cmd
               run: |
@@ -99,16 +99,56 @@ jobs:
               if: matrix.options.codecov == true
               with:
                   token: ${{secrets.CODECOV_TOKEN}}
-                  file: "coverage.${{matrix.options.framework}}.xml"
                   flags: unittests
 
-            - name: Pack # We can use this filter as we know it happens only once and takes the most time to complete.
-              if: (github.event_name == 'push') && (matrix.options.codecov == true)
+    Publish:
+        needs: [Build]
+
+        runs-on: windows-latest
+
+        if: (github.event_name == 'push')
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Install NuGet
+              uses: NuGet/setup-nuget@v1
+
+            - name: Setup Git
+              shell: bash
+              run: |
+                  git config --global core.autocrlf false
+                  git config --global core.longpaths true
+                  git fetch --prune --unshallow
+                  git submodule -q update --init --recursive
+
+            - name: Fetch Tags for GitVersion
+              run: |
+                  git fetch --tags
+
+            - name: Fetch master for GitVersion
+              if: github.ref != 'refs/heads/master'
+              run: git branch --create-reflog master origin/master
+
+            - name: Install GitVersion
+              uses: gittools/actions/setup-gitversion@v0.3
+              with:
+                  versionSpec: "5.1.x"
+
+            - name: Use GitVersion
+              id: gitversion # step id used as reference for output values
+              uses: gittools/actions/execute-gitversion@v0.3
+
+            - name: Setup DotNet SDK
+              uses: actions/setup-dotnet@v1
+              with:
+                  dotnet-version: "3.1.101"
+
+            - name: Pack
               shell: pwsh
-              run: ./ci-build.ps1 "${{steps.gitversion.outputs.nuGetVersion}}"
+              run: ./ci-pack.ps1 "${{steps.gitversion.outputs.nuGetVersion}}"
 
             - name: Publish to MyGet
-              if: (github.event_name == 'push') && (matrix.options.codecov == true)
               shell: pwsh
               run: nuget.exe push .\artifacts\*.nupkg ${{secrets.MYGET_TOKEN}} -Source https://www.myget.org/F/sixlabors/api/v2/package
               # TODO: If github.ref starts with 'refs/tags' then it was tag push and we can optionally push out package to nuget.org
