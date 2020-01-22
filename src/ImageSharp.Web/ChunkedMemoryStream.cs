@@ -1,9 +1,9 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
 using System.IO;
-using SixLabors.Memory;
+using SixLabors.ImageSharp.Memory;
 
 namespace SixLabors.ImageSharp.Web
 {
@@ -16,7 +16,7 @@ namespace SixLabors.ImageSharp.Web
         /// <summary>
         /// The default length in bytes of each buffer chunk.
         /// </summary>
-        public static readonly int DefaultBufferLength = 4096;
+        public const int DefaultBufferLength = 4096;
 
         // Data
         private MemoryChunk memoryChunks;
@@ -131,7 +131,7 @@ namespace SixLabors.ImageSharp.Web
 
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 // Back up current position in case new position is out of range
@@ -164,7 +164,7 @@ namespace SixLabors.ImageSharp.Web
                     // Position is out of range
                     this.readChunk = backupReadChunk;
                     this.readOffset = backupReadOffset;
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
             }
         }

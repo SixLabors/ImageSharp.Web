@@ -1,12 +1,12 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Middleware;
-using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Caching
 {

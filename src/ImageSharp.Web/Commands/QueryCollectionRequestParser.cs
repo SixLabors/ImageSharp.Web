@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -24,7 +24,7 @@ namespace SixLabors.ImageSharp.Web.Commands
 
             Dictionary<string, StringValues> parsed = QueryHelpers.ParseQuery(context.Request.QueryString.ToUriComponent());
             var transformed = new Dictionary<string, string>(parsed.Count);
-            foreach (var pair in parsed)
+            foreach (KeyValuePair<string, StringValues> pair in parsed)
             {
                 transformed[pair.Key] = pair.Value.ToString();
             }

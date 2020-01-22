@@ -1,11 +1,14 @@
-﻿using System.Reflection;
+// Copyright (c) Six Labors and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using System.Reflection;
 using BenchmarkDotNet.Running;
 
 namespace SixLabors.ImageSharp.Web.Benchmarks
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             new BenchmarkSwitcher(typeof(Program).GetTypeInfo().Assembly).Run(args);
         }

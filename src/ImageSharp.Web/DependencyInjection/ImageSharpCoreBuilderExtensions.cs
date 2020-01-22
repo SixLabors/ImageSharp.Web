@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -8,12 +8,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
-using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.DependencyInjection
 {
@@ -265,7 +265,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         internal static IImageSharpBuilder SetMemoryAllocatorFromMiddlewareOptions(this IImageSharpBuilder builder)
         {
-            MemoryAllocator AllocatorFactory(IServiceProvider s)
+            static MemoryAllocator AllocatorFactory(IServiceProvider s)
             {
                 return s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration.MemoryAllocator;
             }
@@ -281,7 +281,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         internal static IImageSharpBuilder SetFormatUtilitesFromMiddlewareOptions(this IImageSharpBuilder builder)
         {
-            FormatUtilities FormatUtilitiesFactory(IServiceProvider s)
+            static FormatUtilities FormatUtilitiesFactory(IServiceProvider s)
             {
                 return new FormatUtilities(s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration);
             }

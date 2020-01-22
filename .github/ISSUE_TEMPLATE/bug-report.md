@@ -1,3 +1,9 @@
+---
+name: Bug report
+about: Create a report to help us improve
+
+---
+
 ### Prerequisites
 
 - [ ] I have written a descriptive issue title
@@ -15,7 +21,7 @@
 <!-- Tell us about the environment where you are experiencing the bug -->
 
 - ImageSharp.Web version:
-- Other SixLabors packages and versions:
+- Other ImageSharp packages and versions:
 - Environment (Operating system, version and so on):
 - .NET Framework version:
 - Additional information:

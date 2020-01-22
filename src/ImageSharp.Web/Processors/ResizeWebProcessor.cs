@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using SixLabors.ImageSharp.Web.Commands;
-using SixLabors.Primitives;
 
 namespace SixLabors.ImageSharp.Web.Processors
 {
@@ -117,8 +116,17 @@ namespace SixLabors.ImageSharp.Web.Processors
             return new Size((int)width, (int)height);
         }
 
-        private static float[] GetCenter(IDictionary<string, string> commands, CommandParser parser)
-            => parser.ParseValue<float[]>(commands.GetValueOrDefault(Xy));
+        private static PointF GetCenter(IDictionary<string, string> commands, CommandParser parser)
+        {
+            float[] coordinates = parser.ParseValue<float[]>(commands.GetValueOrDefault(Xy));
+
+            if (coordinates.Length != 2)
+            {
+                return PointF.Empty;
+            }
+
+            return new PointF(coordinates[0], coordinates[1]);
+        }
 
         private static ResizeMode GetMode(IDictionary<string, string> commands, CommandParser parser)
             => parser.ParseValue<ResizeMode>(commands.GetValueOrDefault(Mode));

@@ -51,7 +51,34 @@ namespace SixLabors.ImageSharp.Web.Tests
                     .Configure<PhysicalFileSystemCacheOptions>(_ => { })
                     .SetCache<PhysicalFileSystemCache>()
                     .SetCacheHash<CacheHash>()
-                    .AddProvider<PhysicalFileSystemProvider>(PhysicalProviderFactory)
+                    .AddProvider(PhysicalProviderFactory)
+                    .Configure<AzureBlobStorageImageProviderOptions>(options =>
+                    {
+                        options.ConnectionString = AzureConnectionString;
+                        options.ContainerName = AzureContainerName;
+                    })
+                    .AddProvider<AzureBlobStorageImageProvider>()
+                    .AddProcessor<ResizeWebProcessor>();
+        };
+
+        public static Action<IServiceCollection> AzureProviderServices = services =>
+        {
+            services.AddImageSharpCore(
+                    options =>
+                    {
+                        options.Configuration = Configuration.Default;
+                        options.MaxBrowserCacheDays = -1;
+                        options.MaxCacheDays = -1;
+                        options.CachedNameLength = 12;
+                        options.OnParseCommands = _ => { };
+                        options.OnBeforeSave = _ => { };
+                        options.OnProcessed = _ => { };
+                        options.OnPrepareResponse = _ => { };
+                    })
+                    .SetRequestParser<QueryCollectionRequestParser>()
+                    .Configure<PhysicalFileSystemCacheOptions>(_ => { })
+                    .SetCache<PhysicalFileSystemCache>()
+                    .SetCacheHash<CacheHash>()
                     .Configure<AzureBlobStorageImageProviderOptions>(options =>
                     {
                         options.ConnectionString = AzureConnectionString;
@@ -62,6 +89,8 @@ namespace SixLabors.ImageSharp.Web.Tests
         };
 
         public static TestServer CreateDefault() => Create(DefaultConfig, DefaultServices);
+
+        public static TestServer CreateAzure() => Create(DefaultConfig, DefaultServices);
 
         public static TestServer CreateWithActions(
             Action<ImageCommandContext> onParseCommands,
@@ -85,7 +114,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                 .Configure<PhysicalFileSystemCacheOptions>(_ => { })
                 .SetCache<PhysicalFileSystemCache>()
                 .SetCacheHash<CacheHash>()
-                .AddProvider<PhysicalFileSystemProvider>(PhysicalProviderFactory)
+                .AddProvider(PhysicalProviderFactory)
                 .Configure<AzureBlobStorageImageProviderOptions>(options =>
                 {
                     options.ConnectionString = AzureConnectionString;
@@ -133,7 +162,12 @@ namespace SixLabors.ImageSharp.Web.Tests
                     container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
                 }
 
+#if NETCOREAPP3_1
+                IWebHostEnvironment environment = server.Host.Services.GetRequiredService<IWebHostEnvironment>();
+#else
                 IHostingEnvironment environment = server.Host.Services.GetRequiredService<IHostingEnvironment>();
+#endif
+
                 CloudBlockBlob blob = container.GetBlockBlobReference(ImagePath);
                 if (!blob.Exists())
                 {
@@ -153,7 +187,13 @@ namespace SixLabors.ImageSharp.Web.Tests
         private static PhysicalFileSystemProvider PhysicalProviderFactory(IServiceProvider provider)
         {
             return new PhysicalFileSystemProvider(
+#pragma warning disable SA1114 // Parameter list should follow declaration
+#if NETCOREAPP2_1
                 provider.GetRequiredService<IHostingEnvironment>(),
+#else
+                provider.GetRequiredService<IWebHostEnvironment>(),
+#pragma warning restore SA1114 // Parameter list should follow declaration
+#endif
                 provider.GetRequiredService<FormatUtilities>())
             {
                 Match = context => !context.Request.Path.StartsWithSegments("/" + AzureContainerName)

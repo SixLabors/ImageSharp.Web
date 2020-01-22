@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Six Labors and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using System;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,7 +13,7 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
     [Config(typeof(MemoryConfig))]
     public class ToHexBenchmarks
     {
-        private static readonly byte[] bytes = Hash();
+        private static readonly byte[] Bytes = Hash();
 
         [Benchmark(Baseline = true, Description = "StringBuilder ToHex")]
         public string StringBuilderToHex()
@@ -19,7 +22,7 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
             var sb = new StringBuilder(len);
             for (int i = 0; i < len / 2; i++)
             {
-                sb.Append(bytes[i].ToString("x2"));
+                sb.Append(Bytes[i].ToString("x2"));
             }
 
             return sb.ToString();
@@ -28,10 +31,10 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
         [Benchmark(Description = "Custom ToHex")]
         public string CustomToHex()
         {
-            int length = bytes.Length;
+            int length = Bytes.Length;
             char[] c = new char[length * 2];
             ref char charRef = ref c[0];
-            ref byte bytesRef = ref bytes[0];
+            ref byte bytesRef = ref Bytes[0];
             const int padHi = 0x37 + 0x20;
             const int padLo = 0x30;
 
@@ -50,13 +53,12 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
         }
 
         [Benchmark(Description = "HexEncoder.Encode with LUT")]
-        public string CustomToHexUnsafe() => HexEncoder.Encode(new Span<byte>(bytes).Slice(0, 6));
+        public string CustomToHexUnsafe() => HexEncoder.Encode(new Span<byte>(Bytes).Slice(0, 6));
 
         private static byte[] Hash()
         {
             using (var hashAlgorithm = SHA256.Create())
             {
-
                 // Concatenate the hash bytes into one long string.
                 string value = "http://testwebsite.com/image-12345.jpeg?width=400";
                 int byteCount = Encoding.ASCII.GetByteCount(value);

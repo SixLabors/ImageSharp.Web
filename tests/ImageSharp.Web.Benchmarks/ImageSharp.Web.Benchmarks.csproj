@@ -2,13 +2,16 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AssemblyName>ImageSharp.Web.Benchmarks</AssemblyName>
+    <TargetFrameworks>netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
+    <AssemblyName>SixLabors.ImageSharp.Web.Benchmarks</AssemblyName>
     <RootNamespace>SixLabors.ImageSharp.Web.Benchmarks</RootNamespace>
+    <GenerateProgramFile>false</GenerateProgramFile>
+    <!--Used to hide test project from dotnet test-->
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.10.13" />
+    <PackageReference Include="BenchmarkDotNet"/>
   </ItemGroup>
 
   <ItemGroup>

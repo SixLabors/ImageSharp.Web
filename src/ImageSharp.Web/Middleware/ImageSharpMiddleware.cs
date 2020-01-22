@@ -11,12 +11,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.ImageSharp.Web.Resolvers;
-using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Middleware
 {
@@ -157,8 +158,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context);
             if (commands.Count > 0)
             {
-                List<string> commandKeys = new List<string>(commands.Keys);
-                foreach (string command in commandKeys)
+                foreach (string command in new List<string>(commands.Keys))
                 {
                     if (!this.knownCommands.Contains(command))
                     {
@@ -260,11 +260,25 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             ImageCacheMetadata cachedImageMetadata = default;
                             outStream = new ChunkedMemoryStream(this.memoryAllocator);
                             using (Stream inStream = await sourceImageResolver.OpenReadAsync().ConfigureAwait(false))
-                            using (var image = FormattedImage.Load(this.options.Configuration, inStream))
                             {
-                                image.Process(this.logger, this.processors, commands);
-                                this.options.OnBeforeSave?.Invoke(image);
-                                image.Save(outStream);
+                                IImageFormat format;
+
+                                // No commands? We simply copy the stream across.
+                                if (commands.Count == 0)
+                                {
+                                    format = Image.DetectFormat(this.options.Configuration, inStream);
+                                    await inStream.CopyToAsync(outStream).ConfigureAwait(false);
+                                }
+                                else
+                                {
+                                    using (var image = FormattedImage.Load(this.options.Configuration, inStream))
+                                    {
+                                        image.Process(this.logger, this.processors, commands);
+                                        this.options.OnBeforeSave?.Invoke(image);
+                                        image.Save(outStream);
+                                        format = image.Format;
+                                    }
+                                }
 
                                 // Check to see if the source metadata has a cachecontrol max-age value and use it to
                                 // override the default max age from our options.
@@ -277,7 +291,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 cachedImageMetadata = new ImageCacheMetadata(
                                     sourceImageMetadata.LastWriteTimeUtc,
                                     DateTime.UtcNow,
-                                    image.Format.DefaultMimeType,
+                                    format.DefaultMimeType,
                                     maxAge);
                             }
 
