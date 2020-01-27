@@ -258,7 +258,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             // No allocations here for inStream since we are passing the raw input stream.
                             // outStream allocation depends on the memory allocator used.
                             ImageCacheMetadata cachedImageMetadata = default;
-                            outStream = new ChunkedMemoryStream(this.memoryAllocator);
+                            outStream = new ChunkedMemoryStream();
                             using (Stream inStream = await sourceImageResolver.OpenReadAsync().ConfigureAwait(false))
                             {
                                 IImageFormat format;
