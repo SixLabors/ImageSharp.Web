@@ -29,6 +29,15 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         }
 
         /// <inheritdoc/>
-        public Task<Stream> OpenReadAsync() => this.blob.OpenReadAsync();
+        public async Task<Stream> OpenReadAsync()
+        {
+            Stream blobStream = await this.blob.OpenReadAsync();
+            var memoryStream = new ChunkedMemoryStream();
+
+            await blobStream.CopyToAsync(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            return memoryStream;
+        }
     }
 }
