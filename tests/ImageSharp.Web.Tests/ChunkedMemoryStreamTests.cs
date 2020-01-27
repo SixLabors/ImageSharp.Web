@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -14,19 +14,16 @@ namespace SixLabors.ImageSharp.Web.Tests
     public class ChunkedMemoryStreamTests
     {
         [Fact]
-        public static void MemoryStream_Ctor_NullAllocator() => Assert.Throws<ArgumentNullException>(() => new ChunkedMemoryStream(null));
-
-        [Fact]
         public static void MemoryStream_Ctor_InvalidCapacities()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ChunkedMemoryStream(Configuration.Default.MemoryAllocator, int.MinValue));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ChunkedMemoryStream(Configuration.Default.MemoryAllocator, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ChunkedMemoryStream(int.MinValue));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ChunkedMemoryStream(0));
         }
 
         [Fact]
         public static void ChunkedMemoryStream_GetPositionTest_Negative()
         {
-            using (var ms = new ChunkedMemoryStream(Configuration.Default.MemoryAllocator))
+            using (var ms = new ChunkedMemoryStream())
             {
                 long iCurrentPos = ms.Position;
                 for (int i = -1; i > -6; i--)
@@ -40,7 +37,7 @@ namespace SixLabors.ImageSharp.Web.Tests
         [Fact]
         public static void MemoryStream_ReadTest_Negative()
         {
-            var ms2 = new ChunkedMemoryStream(Configuration.Default.MemoryAllocator);
+            var ms2 = new ChunkedMemoryStream();
 
             Assert.Throws<ArgumentNullException>(() => ms2.Read(null, 0, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => ms2.Read(new byte[] { 1 }, -1, 0));
@@ -56,7 +53,7 @@ namespace SixLabors.ImageSharp.Web.Tests
         [Fact]
         public static void MemoryStream_WriteToTests()
         {
-            using (var ms2 = new ChunkedMemoryStream(Configuration.Default.MemoryAllocator))
+            using (var ms2 = new ChunkedMemoryStream())
             {
                 byte[] bytArrRet;
                 byte[] bytArr = new byte[] { byte.MinValue, byte.MaxValue, 1, 2, 3, 4, 5, 6, 128, 250 };
@@ -64,7 +61,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                 // [] Write to FileStream, check the filestream
                 ms2.Write(bytArr, 0, bytArr.Length);
 
-                using (var readonlyStream = new ChunkedMemoryStream(Configuration.Default.MemoryAllocator))
+                using (var readonlyStream = new ChunkedMemoryStream())
                 {
                     ms2.WriteTo(readonlyStream);
                     readonlyStream.Flush();
@@ -79,8 +76,8 @@ namespace SixLabors.ImageSharp.Web.Tests
             }
 
             // [] Write to memoryStream, check the memoryStream
-            using (var ms2 = new ChunkedMemoryStream(Configuration.Default.MemoryAllocator))
-            using (var ms3 = new ChunkedMemoryStream(Configuration.Default.MemoryAllocator))
+            using (var ms2 = new ChunkedMemoryStream())
+            using (var ms3 = new ChunkedMemoryStream())
             {
                 byte[] bytArrRet;
                 byte[] bytArr = new byte[] { byte.MinValue, byte.MaxValue, 1, 2, 3, 4, 5, 6, 128, 250 };
@@ -100,7 +97,7 @@ namespace SixLabors.ImageSharp.Web.Tests
         [Fact]
         public static void MemoryStream_WriteToTests_Negative()
         {
-            using (var ms2 = new ChunkedMemoryStream(Configuration.Default.MemoryAllocator))
+            using (var ms2 = new ChunkedMemoryStream())
             {
                 Assert.Throws<ArgumentNullException>(() => ms2.WriteTo(null));
 
@@ -120,7 +117,7 @@ namespace SixLabors.ImageSharp.Web.Tests
         {
             ChunkedMemoryStream memoryStream;
             const string bufferSize = "bufferSize";
-            using (memoryStream = new ChunkedMemoryStream(Configuration.Default.MemoryAllocator))
+            using (memoryStream = new ChunkedMemoryStream())
             {
                 const string destination = "destination";
                 Assert.Throws<ArgumentNullException>(destination, () => memoryStream.CopyTo(destination: null));
@@ -144,7 +141,7 @@ namespace SixLabors.ImageSharp.Web.Tests
             Assert.Throws<ObjectDisposedException>(() => memoryStream.CopyTo(disposedStream, 1));
 
             // Then for the destination being disposed.
-            memoryStream = new ChunkedMemoryStream(Configuration.Default.MemoryAllocator);
+            memoryStream = new ChunkedMemoryStream();
             Assert.Throws<ObjectDisposedException>(() => memoryStream.CopyTo(disposedStream, 1));
         }
 
@@ -152,7 +149,7 @@ namespace SixLabors.ImageSharp.Web.Tests
         [MemberData(nameof(CopyToData))]
         public void CopyTo(Stream source, byte[] expected)
         {
-            using (var destination = new ChunkedMemoryStream(Configuration.Default.MemoryAllocator))
+            using (var destination = new ChunkedMemoryStream())
             {
                 source.CopyTo(destination);
                 Assert.InRange(source.Position, source.Length, int.MaxValue); // Copying the data should have read to the end of the stream or stayed past the end.

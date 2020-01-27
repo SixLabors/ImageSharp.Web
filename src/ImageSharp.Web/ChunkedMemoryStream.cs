@@ -2,16 +2,17 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Buffers;
 using System.IO;
-using SixLabors.ImageSharp.Memory;
 
+// Adapted from<see href="https://referencesource.microsoft.com/#System.Runtime.Remoting/channels/core/chunkedmemorystream.cs"/>.
 namespace SixLabors.ImageSharp.Web
 {
     /// <summary>
     /// A Memory stream that uses buffer pooling and doesn't need to be resized.
-    /// Adapted from <see href="https://referencesource.microsoft.com/#System.Runtime.Remoting/channels/core/chunkedmemorystream.cs"/>.
+    /// Disposing of the stream returns the buffers back to the pool.
     /// </summary>
-    internal sealed class ChunkedMemoryStream : Stream
+    public sealed class ChunkedMemoryStream : Stream
     {
         /// <summary>
         /// The default length in bytes of each buffer chunk.
@@ -19,14 +20,13 @@ namespace SixLabors.ImageSharp.Web
         public const int DefaultBufferLength = 4096;
 
         // Data
-        private MemoryChunk memoryChunks;
+        private MemoryChunk memoryChunk;
 
-        // Pool of byte buffers to use
-        private readonly MemoryAllocator memoryAllocator;
+        // The length of each buffer chunk
         private readonly int chunkLength;
 
-        // Has the stream been closed.
-        private bool streamClosed;
+        // Has the stream been disposed.
+        private bool isDisposed;
 
         // Current chunk to write to
         private MemoryChunk writeChunk;
@@ -43,44 +43,40 @@ namespace SixLabors.ImageSharp.Web
         /// <summary>
         /// Initializes a new instance of the <see cref="ChunkedMemoryStream"/> class.
         /// </summary>
-        /// <param name="allocator">The memory manager for allocating buffers.</param>
-        public ChunkedMemoryStream(MemoryAllocator allocator)
-            : this(allocator, DefaultBufferLength)
+        public ChunkedMemoryStream()
+            : this(DefaultBufferLength)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChunkedMemoryStream"/> class.
         /// </summary>
-        /// <param name="allocator">The memory manager for allocating buffers.</param>
         /// <param name="bufferLength">The length, in bytes of each buffer chunk.</param>
-        public ChunkedMemoryStream(MemoryAllocator allocator, int bufferLength)
+        public ChunkedMemoryStream(int bufferLength)
         {
-            Guard.NotNull(allocator, nameof(allocator));
             Guard.MustBeGreaterThan(bufferLength, 0, nameof(bufferLength));
 
-            this.memoryAllocator = allocator;
             this.chunkLength = bufferLength;
         }
 
         /// <inheritdoc/>
-        public override bool CanRead => !this.streamClosed;
+        public override bool CanRead => !this.isDisposed;
 
         /// <inheritdoc/>
-        public override bool CanSeek => !this.streamClosed;
+        public override bool CanSeek => !this.isDisposed;
 
         /// <inheritdoc/>
-        public override bool CanWrite => !this.streamClosed;
+        public override bool CanWrite => !this.isDisposed;
 
         /// <inheritdoc/>
         public override long Length
         {
             get
             {
-                this.EnsureNotClosed();
+                this.EnsureNotDisposed();
 
                 int length = 0;
-                MemoryChunk chunk = this.memoryChunks;
+                MemoryChunk chunk = this.memoryChunk;
                 while (chunk != null)
                 {
                     MemoryChunk next = chunk.Next;
@@ -105,7 +101,7 @@ namespace SixLabors.ImageSharp.Web
         {
             get
             {
-                this.EnsureNotClosed();
+                this.EnsureNotDisposed();
 
                 if (this.readChunk == null)
                 {
@@ -113,7 +109,7 @@ namespace SixLabors.ImageSharp.Web
                 }
 
                 int pos = 0;
-                MemoryChunk chunk = this.memoryChunks;
+                MemoryChunk chunk = this.memoryChunk;
                 while (chunk != this.readChunk)
                 {
                     pos += chunk.Length;
@@ -127,7 +123,7 @@ namespace SixLabors.ImageSharp.Web
 
             set
             {
-                this.EnsureNotClosed();
+                this.EnsureNotDisposed();
 
                 if (value < 0)
                 {
@@ -142,7 +138,7 @@ namespace SixLabors.ImageSharp.Web
                 this.readOffset = 0;
 
                 int leftUntilAtPos = (int)value;
-                MemoryChunk chunk = this.memoryChunks;
+                MemoryChunk chunk = this.memoryChunk;
                 while (chunk != null)
                 {
                     if ((leftUntilAtPos < chunk.Length)
@@ -172,7 +168,7 @@ namespace SixLabors.ImageSharp.Web
         /// <inheritdoc/>
         public override long Seek(long offset, SeekOrigin origin)
         {
-            this.EnsureNotClosed();
+            this.EnsureNotDisposed();
 
             switch (origin)
             {
@@ -198,15 +194,20 @@ namespace SixLabors.ImageSharp.Web
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
+            if (this.isDisposed)
+            {
+                return;
+            }
+
             try
             {
-                this.streamClosed = true;
+                this.isDisposed = true;
                 if (disposing)
                 {
-                    this.ReleaseMemoryChunks(this.memoryChunks);
+                    this.ReleaseMemoryChunks(this.memoryChunk);
                 }
 
-                this.memoryChunks = null;
+                this.memoryChunk = null;
                 this.writeChunk = null;
                 this.readChunk = null;
             }
@@ -232,20 +233,20 @@ namespace SixLabors.ImageSharp.Web
                 throw new ArgumentException($"{offset} subtracted from the buffer length is less than {count}");
             }
 
-            this.EnsureNotClosed();
+            this.EnsureNotDisposed();
 
             if (this.readChunk == null)
             {
-                if (this.memoryChunks == null)
+                if (this.memoryChunk == null)
                 {
                     return 0;
                 }
 
-                this.readChunk = this.memoryChunks;
+                this.readChunk = this.memoryChunk;
                 this.readOffset = 0;
             }
 
-            byte[] chunkBuffer = this.readChunk.Buffer.Array;
+            byte[] chunkBuffer = this.readChunk.Buffer;
             int chunkSize = this.readChunk.Length;
             if (this.readChunk.Next == null)
             {
@@ -266,7 +267,7 @@ namespace SixLabors.ImageSharp.Web
 
                     this.readChunk = this.readChunk.Next;
                     this.readOffset = 0;
-                    chunkBuffer = this.readChunk.Buffer.Array;
+                    chunkBuffer = this.readChunk.Buffer;
                     chunkSize = this.readChunk.Length;
                     if (this.readChunk.Next == null)
                     {
@@ -288,20 +289,20 @@ namespace SixLabors.ImageSharp.Web
         /// <inheritdoc/>
         public override int ReadByte()
         {
-            this.EnsureNotClosed();
+            this.EnsureNotDisposed();
 
             if (this.readChunk == null)
             {
-                if (this.memoryChunks == null)
+                if (this.memoryChunk == null)
                 {
                     return 0;
                 }
 
-                this.readChunk = this.memoryChunks;
+                this.readChunk = this.memoryChunk;
                 this.readOffset = 0;
             }
 
-            byte[] chunkBuffer = this.readChunk.Buffer.Array;
+            byte[] chunkBuffer = this.readChunk.Buffer;
             int chunkSize = this.readChunk.Length;
             if (this.readChunk.Next == null)
             {
@@ -318,7 +319,7 @@ namespace SixLabors.ImageSharp.Web
 
                 this.readChunk = this.readChunk.Next;
                 this.readOffset = 0;
-                chunkBuffer = this.readChunk.Buffer.Array;
+                chunkBuffer = this.readChunk.Buffer;
             }
 
             return chunkBuffer[this.readOffset++];
@@ -327,16 +328,16 @@ namespace SixLabors.ImageSharp.Web
         /// <inheritdoc/>
         public override void Write(byte[] buffer, int offset, int count)
         {
-            this.EnsureNotClosed();
+            this.EnsureNotDisposed();
 
-            if (this.memoryChunks == null)
+            if (this.memoryChunk == null)
             {
-                this.memoryChunks = this.AllocateMemoryChunk();
-                this.writeChunk = this.memoryChunks;
+                this.memoryChunk = this.AllocateMemoryChunk();
+                this.writeChunk = this.memoryChunk;
                 this.writeOffset = 0;
             }
 
-            byte[] chunkBuffer = this.writeChunk.Buffer.Array;
+            byte[] chunkBuffer = this.writeChunk.Buffer;
             int chunkSize = this.writeChunk.Length;
 
             while (count > 0)
@@ -347,7 +348,7 @@ namespace SixLabors.ImageSharp.Web
                     this.writeChunk.Next = this.AllocateMemoryChunk();
                     this.writeChunk = this.writeChunk.Next;
                     this.writeOffset = 0;
-                    chunkBuffer = this.writeChunk.Buffer.Array;
+                    chunkBuffer = this.writeChunk.Buffer;
                     chunkSize = this.writeChunk.Length;
                 }
 
@@ -362,16 +363,16 @@ namespace SixLabors.ImageSharp.Web
         /// <inheritdoc/>
         public override void WriteByte(byte value)
         {
-            this.EnsureNotClosed();
+            this.EnsureNotDisposed();
 
-            if (this.memoryChunks == null)
+            if (this.memoryChunk == null)
             {
-                this.memoryChunks = this.AllocateMemoryChunk();
-                this.writeChunk = this.memoryChunks;
+                this.memoryChunk = this.AllocateMemoryChunk();
+                this.writeChunk = this.memoryChunk;
                 this.writeOffset = 0;
             }
 
-            byte[] chunkBuffer = this.writeChunk.Buffer.Array;
+            byte[] chunkBuffer = this.writeChunk.Buffer;
             int chunkSize = this.writeChunk.Length;
 
             if (this.writeOffset == chunkSize)
@@ -380,7 +381,7 @@ namespace SixLabors.ImageSharp.Web
                 this.writeChunk.Next = this.AllocateMemoryChunk();
                 this.writeChunk = this.writeChunk.Next;
                 this.writeOffset = 0;
-                chunkBuffer = this.writeChunk.Buffer.Array;
+                chunkBuffer = this.writeChunk.Buffer;
             }
 
             chunkBuffer[this.writeOffset++] = value;
@@ -398,7 +399,7 @@ namespace SixLabors.ImageSharp.Web
             MemoryChunk backupReadChunk = this.readChunk;
             int backupReadOffset = this.readOffset;
 
-            this.readChunk = this.memoryChunks;
+            this.readChunk = this.memoryChunk;
             this.readOffset = 0;
             this.Read(copy, 0, length);
 
@@ -414,22 +415,22 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="stream">The stream to write to.</param>
         public void WriteTo(Stream stream)
         {
-            this.EnsureNotClosed();
+            this.EnsureNotDisposed();
 
             Guard.NotNull(stream, nameof(stream));
 
             if (this.readChunk == null)
             {
-                if (this.memoryChunks == null)
+                if (this.memoryChunk == null)
                 {
                     return;
                 }
 
-                this.readChunk = this.memoryChunks;
+                this.readChunk = this.memoryChunk;
                 this.readOffset = 0;
             }
 
-            byte[] chunkBuffer = this.readChunk.Buffer.Array;
+            byte[] chunkBuffer = this.readChunk.Buffer;
             int chunkSize = this.readChunk.Length;
             if (this.readChunk.Next == null)
             {
@@ -439,9 +440,7 @@ namespace SixLabors.ImageSharp.Web
             // Following code mirrors Read() logic (readChunk/readOffset should
             // point just past last byte of last chunk when done)
             // loop until end of chunks is found
-#pragma warning disable SA1009 // Closing parenthesis should be spaced correctly
-            for (; ; )
-#pragma warning restore SA1009 // Closing parenthesis should be spaced correctly
+            while (true)
             {
                 if (this.readOffset == chunkSize)
                 {
@@ -453,7 +452,7 @@ namespace SixLabors.ImageSharp.Web
 
                     this.readChunk = this.readChunk.Next;
                     this.readOffset = 0;
-                    chunkBuffer = this.readChunk.Buffer.Array;
+                    chunkBuffer = this.readChunk.Buffer;
                     chunkSize = this.readChunk.Length;
                     if (this.readChunk.Next == null)
                     {
@@ -467,9 +466,9 @@ namespace SixLabors.ImageSharp.Web
             }
         }
 
-        private void EnsureNotClosed()
+        private void EnsureNotDisposed()
         {
-            if (this.streamClosed)
+            if (this.isDisposed)
             {
                 throw new ObjectDisposedException(null, "The stream is closed.");
             }
@@ -477,12 +476,12 @@ namespace SixLabors.ImageSharp.Web
 
         private MemoryChunk AllocateMemoryChunk()
         {
-            IManagedByteBuffer buffer = this.memoryAllocator.AllocateManagedByteBuffer(this.chunkLength);
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(this.chunkLength);
             return new MemoryChunk
             {
                 Buffer = buffer,
                 Next = null,
-                Length = buffer.Memory.Length
+                Length = buffer.Length
             };
         }
 
@@ -490,14 +489,14 @@ namespace SixLabors.ImageSharp.Web
         {
             while (chunk != null)
             {
-                chunk.Buffer.Dispose();
+                ArrayPool<byte>.Shared.Return(chunk.Buffer);
                 chunk = chunk.Next;
             }
         }
 
         private class MemoryChunk
         {
-            public IManagedByteBuffer Buffer { get; set; }
+            public byte[] Buffer { get; set; }
 
             public MemoryChunk Next { get; set; }
 
