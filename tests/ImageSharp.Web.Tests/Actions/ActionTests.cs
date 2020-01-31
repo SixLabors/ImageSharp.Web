@@ -38,7 +38,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
             //   at SixLabors.ImageSharp.Web.Tests.Actions.ActionTests.ShouldRunOnValidateAction(String url) in /home/travis/build/SixLabors/ImageSharp.Web/tests/ImageSharp.Web.Tests/Actions/ActionTests.cs:line 31
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return;
+                // return;
             }
 
             bool complete = false;
@@ -65,7 +65,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return;
+               // return;
             }
 
             bool complete = false;
