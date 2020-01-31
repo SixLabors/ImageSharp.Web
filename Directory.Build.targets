@@ -22,9 +22,8 @@
     <PackageReference Update="StyleCop.Analyzers" PrivateAssets="All" Version="1.1.118" />
 
     <!--Src Dependencies-->
-    <PackageReference Update="SixLabors.ImageSharp" Version="1.0.0-unstable0591" />
-    <PackageReference Update="Microsoft.Azure.KeyVault.Core" Version="3.0.1" />
-    <PackageReference Update="Microsoft.Azure.Storage.Blob" Version="10.0.2" />
+    <PackageReference Update="SixLabors.ImageSharp" Version="1.0.0-unstable0611" />
+    <PackageReference Update="Azure.Storage.Blobs" Version="12.2.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">

@@ -183,12 +183,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
             if ((commands.Count == 0 && provider?.ProcessingBehavior != ProcessingBehavior.All) || provider?.IsValidRequest(context) != true)
             {
                 // Nothing to do. call the next delegate/middleware in the pipeline
-                await this.next(context).ConfigureAwait(false);
+                await this.next(context);
                 return;
             }
 
             bool processRequest = true;
-            IImageResolver sourceImageResolver = await provider.GetAsync(context).ConfigureAwait(false);
+            IImageResolver sourceImageResolver = await provider.GetAsync(context);
 
             if (sourceImageResolver == null)
             {
@@ -201,12 +201,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
             if (!processRequest)
             {
                 // Call the next delegate/middleware in the pipeline
-                await this.next(context).ConfigureAwait(false);
+                await this.next(context);
                 return;
             }
 
-            await this.ProcessRequestAsync(context, processRequest, sourceImageResolver, new ImageContext(context, this.options), commands)
-                      .ConfigureAwait(false);
+            await this.ProcessRequestAsync(context, processRequest, sourceImageResolver, new ImageContext(context, this.options), commands);
         }
 
         private async Task ProcessRequestAsync(HttpContext context, bool processRequest, IImageResolver sourceImageResolver, ImageContext imageContext, IDictionary<string, string> commands)
@@ -219,14 +218,14 @@ namespace SixLabors.ImageSharp.Web.Middleware
             if (processRequest)
             {
                 // Lock any reads when a write is being done for the same key to prevent potential file locks.
-                using (await AsyncLock.ReaderLockAsync(key).ConfigureAwait(false))
+                using (await AsyncLock.ReaderLockAsync(key))
                 {
                     // Check to see if the cache contains this image
-                    sourceImageMetadata = await sourceImageResolver.GetMetaDataAsync().ConfigureAwait(false);
-                    IImageCacheResolver cachedImageResolver = await this.cache.GetAsync(key).ConfigureAwait(false);
+                    sourceImageMetadata = await sourceImageResolver.GetMetaDataAsync();
+                    IImageCacheResolver cachedImageResolver = await this.cache.GetAsync(key);
                     if (cachedImageResolver != null)
                     {
-                        ImageCacheMetadata cachedImageMetadata = await cachedImageResolver.GetMetaDataAsync().ConfigureAwait(false);
+                        ImageCacheMetadata cachedImageMetadata = await cachedImageResolver.GetMetaDataAsync();
                         if (cachedImageMetadata != default)
                         {
                             // Has the cached image expired or has the source image been updated?
@@ -234,9 +233,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 && cachedImageMetadata.CacheLastWriteTimeUtc > DateTimeOffset.Now.AddDays(-this.options.MaxCacheDays))
                             {
                                 // We're pulling the image from the cache.
-                                using (Stream cachedBuffer = await cachedImageResolver.OpenReadAsync().ConfigureAwait(false))
+                                using (Stream cachedBuffer = await cachedImageResolver.OpenReadAsync())
                                 {
-                                    await this.SendResponseAsync(imageContext, key, cachedBuffer, cachedImageMetadata).ConfigureAwait(false);
+                                    await this.SendResponseAsync(imageContext, key, cachedBuffer, cachedImageMetadata);
                                 }
 
                                 return;
@@ -253,13 +252,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     {
                         // Enter a write lock which locks writing and any reads for the same request.
                         // This reduces the overheads of unnecessary processing plus avoids file locks.
-                        using (await AsyncLock.WriterLockAsync(key).ConfigureAwait(false))
+                        using (await AsyncLock.WriterLockAsync(key))
                         {
                             // No allocations here for inStream since we are passing the raw input stream.
                             // outStream allocation depends on the memory allocator used.
                             ImageCacheMetadata cachedImageMetadata = default;
                             outStream = new ChunkedMemoryStream();
-                            using (Stream inStream = await sourceImageResolver.OpenReadAsync().ConfigureAwait(false))
+                            using (Stream inStream = await sourceImageResolver.OpenReadAsync())
                             {
                                 IImageFormat format;
 
@@ -267,7 +266,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 if (commands.Count == 0)
                                 {
                                     format = Image.DetectFormat(this.options.Configuration, inStream);
-                                    await inStream.CopyToAsync(outStream).ConfigureAwait(false);
+                                    await inStream.CopyToAsync(outStream);
                                 }
                                 else
                                 {
@@ -303,8 +302,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             outStream.Position = 0;
 
                             // Save the image to the cache and send the response to the caller.
-                            await this.cache.SetAsync(key, outStream, cachedImageMetadata).ConfigureAwait(false);
-                            await this.SendResponseAsync(imageContext, key, outStream, cachedImageMetadata).ConfigureAwait(false);
+                            await this.cache.SetAsync(key, outStream, cachedImageMetadata);
+                            await this.SendResponseAsync(imageContext, key, outStream, cachedImageMetadata);
                         }
                     }
                 }
@@ -332,21 +331,21 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 case ImageContext.PreconditionState.ShouldProcess:
                     if (imageContext.IsHeadRequest())
                     {
-                        await imageContext.SendStatusAsync(ResponseConstants.Status200Ok, metadata).ConfigureAwait(false);
+                        await imageContext.SendStatusAsync(ResponseConstants.Status200Ok, metadata);
                     }
 
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
-                    await imageContext.SendAsync(stream, metadata).ConfigureAwait(false);
+                    await imageContext.SendAsync(stream, metadata);
 
                     break;
 
                 case ImageContext.PreconditionState.NotModified:
                     this.logger.LogImageNotModified(imageContext.GetDisplayUrl());
-                    await imageContext.SendStatusAsync(ResponseConstants.Status304NotModified, metadata).ConfigureAwait(false);
+                    await imageContext.SendStatusAsync(ResponseConstants.Status304NotModified, metadata);
                     break;
                 case ImageContext.PreconditionState.PreconditionFailed:
                     this.logger.LogImagePreconditionFailed(imageContext.GetDisplayUrl());
-                    await imageContext.SendStatusAsync(ResponseConstants.Status412PreconditionFailed, metadata).ConfigureAwait(false);
+                    await imageContext.SendStatusAsync(ResponseConstants.Status412PreconditionFailed, metadata);
                     break;
                 default:
                     var exception = new NotImplementedException(imageContext.GetPreconditionState().ToString());

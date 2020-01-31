@@ -11,8 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.KeyVault.Core" />
-    <PackageReference Include="Microsoft.Azure.Storage.Blob" />
+    <PackageReference Include="Azure.Storage.Blobs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
