@@ -149,7 +149,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
 
             // We don't need to directly cancel this, if the client disconnects it will fail silently.
-            await stream.CopyToAsync(this.response.Body).ConfigureAwait(false);
+            await stream.CopyToAsync(this.response.Body);
             if (this.response.Body.CanSeek)
             {
                 this.response.Body.Position = 0;

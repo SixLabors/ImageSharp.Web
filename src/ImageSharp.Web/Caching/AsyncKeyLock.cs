@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -46,7 +46,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         {
             Doorman doorman = GetDoorman(key);
 
-            return await doorman.ReaderLockAsync().ConfigureAwait(false);
+            return await doorman.ReaderLockAsync();
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         {
             Doorman doorman = GetDoorman(key);
 
-            return await doorman.WriterLockAsync().ConfigureAwait(false);
+            return await doorman.WriterLockAsync();
         }
 
         /// <summary>

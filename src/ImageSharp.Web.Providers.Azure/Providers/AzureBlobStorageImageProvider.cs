@@ -2,13 +2,10 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Net;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Azure.Storage;
-using Microsoft.Azure.Storage.Blob;
-using Microsoft.Azure.Storage.Shared.Protocol;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -25,14 +22,9 @@ namespace SixLabors.ImageSharp.Web.Providers
         private static readonly char[] SlashChars = { '\\', '/' };
 
         /// <summary>
-        /// The cloud storage account.
-        /// </summary>
-        private readonly CloudStorageAccount storageAccount;
-
-        /// <summary>
         /// The container in the blob service.
         /// </summary>
-        private readonly CloudBlobContainer container;
+        private readonly BlobContainerClient container;
 
         /// <summary>
         /// The blob storage options.
@@ -62,26 +54,8 @@ namespace SixLabors.ImageSharp.Web.Providers
 
             this.storageOptions = storageOptions.Value;
             this.formatUtilities = formatUtilities;
-            this.storageAccount = CloudStorageAccount.Parse(this.storageOptions.ConnectionString);
 
-            try
-            {
-                // It's ok to create a single reusable client since we are not altering it.
-                CloudBlobClient client = this.storageAccount.CreateCloudBlobClient();
-                this.container = client.GetContainerReference(this.storageOptions.ContainerName);
-
-                if (!this.container.Exists())
-                {
-                    this.container.Create();
-                    this.container.SetPermissions(new BlobContainerPermissions { PublicAccess = this.storageOptions.AccessType });
-                }
-            }
-            catch (StorageException storageException) when (storageException.RequestInformation.HttpStatusCode == (int)HttpStatusCode.Conflict
-                || storageException.RequestInformation.ExtendedErrorInformation.ErrorCode == StorageErrorCodeStrings.ContainerAlreadyExists)
-            {
-                // https://github.com/Azure/azure-sdk-for-net/issues/109
-                // We do not fire exception if container exists - there is no need in such actions
-            }
+            this.container = new BlobContainerClient(this.storageOptions.ConnectionString, this.storageOptions.ContainerName);
         }
 
         /// <inheritdoc/>
@@ -109,8 +83,9 @@ namespace SixLabors.ImageSharp.Web.Providers
                 return null;
             }
 
-            CloudBlockBlob blob = this.container.GetBlockBlobReference(blobName);
-            if (!await blob.ExistsAsync().ConfigureAwait(false))
+            BlobClient blob = this.container.GetBlobClient(blobName);
+
+            if (!await blob.ExistsAsync())
             {
                 return null;
             }

@@ -3,14 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net;
+using System.IO;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Azure.Storage;
-using Microsoft.Azure.Storage.Blob;
-using Microsoft.Azure.Storage.Shared.Protocol;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -149,38 +148,26 @@ namespace SixLabors.ImageSharp.Web.Tests
 
         private static void InitializeAzureStorage(TestServer server)
         {
-            try
-            {
-                // Upload an image to the Azure Test Storage;
-                var storageAccount = CloudStorageAccount.Parse(AzureConnectionString);
-                CloudBlobClient client = storageAccount.CreateCloudBlobClient();
-                CloudBlobContainer container = client.GetContainerReference(AzureContainerName);
+            // Upload an image to the Azure Test Storage;
+            var container = new BlobContainerClient(AzureConnectionString, AzureContainerName);
 
-                if (!container.Exists())
-                {
-                    container.Create();
-                    container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
-                }
+            container.CreateIfNotExists(PublicAccessType.Blob);
 
 #if NETCOREAPP3_1
-                IWebHostEnvironment environment = server.Host.Services.GetRequiredService<IWebHostEnvironment>();
+            IWebHostEnvironment environment = server.Host.Services.GetRequiredService<IWebHostEnvironment>();
 #else
-                IHostingEnvironment environment = server.Host.Services.GetRequiredService<IHostingEnvironment>();
+            IHostingEnvironment environment = server.Host.Services.GetRequiredService<IHostingEnvironment>();
 #endif
 
-                CloudBlockBlob blob = container.GetBlockBlobReference(ImagePath);
-                if (!blob.Exists())
-                {
-                    IFileInfo file = environment.WebRootFileProvider.GetFileInfo(ImagePath);
-                    using (System.IO.Stream stream = file.CreateReadStream())
-                    {
-                        blob.UploadFromStream(stream);
-                    }
-                }
-            }
-            catch (StorageException storageException) when (storageException.RequestInformation.HttpStatusCode == (int)HttpStatusCode.Conflict
-                || storageException.RequestInformation.ExtendedErrorInformation.ErrorCode == StorageErrorCodeStrings.ContainerAlreadyExists)
+            BlobClient blob = container.GetBlobClient(ImagePath);
+
+            if (!blob.Exists())
             {
+                IFileInfo file = environment.WebRootFileProvider.GetFileInfo(ImagePath);
+                using (Stream stream = file.CreateReadStream())
+                {
+                    blob.Upload(stream, true);
+                }
             }
         }
 

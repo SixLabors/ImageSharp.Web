@@ -93,7 +93,7 @@ namespace SixLabors.ImageSharp.Web
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
                 string line;
-                while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+                while ((line = await reader.ReadLineAsync()) != null)
                 {
                     int idx = line.IndexOf(':');
                     if (idx > 0)
@@ -168,10 +168,10 @@ namespace SixLabors.ImageSharp.Web
             {
                 foreach (KeyValuePair<string, string> keyValuePair in keyValuePairs)
                 {
-                    await writer.WriteLineAsync($"{keyValuePair.Key}:{keyValuePair.Value}").ConfigureAwait(false);
+                    await writer.WriteLineAsync($"{keyValuePair.Key}:{keyValuePair.Value}");
                 }
 
-                await writer.FlushAsync().ConfigureAwait(false);
+                await writer.FlushAsync();
             }
         }
     }

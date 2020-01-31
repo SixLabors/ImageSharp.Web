@@ -1,7 +1,5 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-
-using Microsoft.Azure.Storage.Blob;
 
 namespace SixLabors.ImageSharp.Web.Providers
 {
@@ -21,10 +19,5 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <see href="https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names"/>
         /// </summary>
         public string ContainerName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the value indicating the level of public access that is allowed on the container.
-        /// </summary>
-        public BlobContainerPublicAccessType AccessType { get; set; } = BlobContainerPublicAccessType.Blob;
     }
 }
