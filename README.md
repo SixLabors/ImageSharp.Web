@@ -39,13 +39,19 @@ Install stable releases via Nuget; development releases are available via MyGet.
 - **ImageSharp.Web**
   - Contains the middleware to integrate a dynamic image manipulation workflow into an ASP.NET Core application.
 
-Once installed you will need to add the following code  to `ConfigureServices` in your `Startup.cs` file.
+Once installed you will need to add the following code  to `ConfigureServices` and `Configure` in your `Startup.cs` file.
 
 This installs the the default service and options.
 
 ``` c#
-// Add the default service and options.
-services.AddImageSharp();
+public void ConfigureServices(IServiceCollection services) {
+    // Add the default service and options.
+    services.AddImageSharp();
+}
+
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
+    app.UseImageSharp();
+}
 ```
 
 Or add the default service and custom options.
@@ -105,6 +111,30 @@ services.AddImageSharpCore(
     .AddProcessor<FormatWebProcessor>()
     .AddProcessor<BackgroundColorWebProcessor>();
 ```
+
+### URI API Samples
+
+#### Resize
+
+```
+imagesharp-logo.png?width=300&height=200&rmode=pad
+```
+
+#### Format
+
+```
+imagesharp-logo.png?width=300&format=gif
+```
+
+#### Background Color
+
+```
+imagesharp-logo.png?width=300&bgcolor=FFFF00
+```
+
+For more examples check out:
+
+* Our [Samples](https://github.com/SixLabors/ImageSharp.Web/tree/master/samples)
 
 ### Manual build
 
