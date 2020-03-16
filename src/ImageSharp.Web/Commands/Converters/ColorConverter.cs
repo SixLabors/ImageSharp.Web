@@ -6,14 +6,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace SixLabors.ImageSharp.Web.Commands.Converters
 {
     /// <summary>
     /// Allows the conversion of strings into rgba32 pixel colors.
     /// </summary>
-    internal class Rgba32Converter : CommandConverter
+    internal class ColorConverter : CommandConverter
     {
         /// <summary>
         /// The web color hexadecimal regex. Matches strings arranged
@@ -29,21 +28,21 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// <summary>
         /// The color constants table map.
         /// </summary>
-        private static readonly Lazy<IDictionary<string, Rgba32>> ColorConstantsTable = new Lazy<IDictionary<string, Rgba32>>(InitializeRgba32ConstantsTable);
+        private static readonly Lazy<IDictionary<string, Color>> ColorConstantsTable = new Lazy<IDictionary<string, Color>>(InitializeColorConstantsTable);
 
         /// <inheritdoc/>
         public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                return default(Rgba32);
+                return default(Color);
             }
 
             // Special case. HTML requires LightGrey, but NamedColors has LightGray to conform with System.Drawing
             // Check early on.
             if (value.Equals("LightGrey", StringComparison.OrdinalIgnoreCase))
             {
-                return Rgba32.LightGray;
+                return Color.LightGray;
             }
 
             // Numeric r,g,b - r,g,b,a
@@ -67,34 +66,34 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
                     List<byte> rgba = CommandParser.Instance.ParseValue<List<byte>>(value);
 
                     return rgba.Count == 4
-                        ? new Rgba32(rgba[0], rgba[1], rgba[2], rgba[3])
-                        : new Rgba32(rgba[0], rgba[1], rgba[2]);
+                        ? Color.FromRgba(rgba[0], rgba[1], rgba[2], rgba[3])
+                        : Color.FromRgb(rgba[0], rgba[1], rgba[2]);
                 }
             }
 
             // Hex colors rgb, rrggbb, rrggbbaa
             if (HexColorRegex.IsMatch(value))
             {
-                return Rgba32.FromHex(value);
+                return Color.ParseHex(value);
             }
 
             // Named colors
-            IDictionary<string, Rgba32> table = ColorConstantsTable.Value;
+            IDictionary<string, Color> table = ColorConstantsTable.Value;
             return table.ContainsKey(value) ? table[value] : base.ConvertFrom(culture, value, propertyType);
         }
 
         /// <summary>
         /// Initializes color table mapping color constants.
         /// </summary>
-        /// <returns>The <see cref="IDictionary{String, Rgba32}"/>.</returns>
-        private static IDictionary<string, Rgba32> InitializeRgba32ConstantsTable()
+        /// <returns>The <see cref="IDictionary{String, Color}"/>.</returns>
+        private static IDictionary<string, Color> InitializeColorConstantsTable()
         {
-            IDictionary<string, Rgba32> table = new Dictionary<string, Rgba32>(StringComparer.OrdinalIgnoreCase);
-            foreach (FieldInfo field in TypeConstants.Rgba32.GetFields(BindingFlags.Public | BindingFlags.Static))
+            IDictionary<string, Color> table = new Dictionary<string, Color>(StringComparer.OrdinalIgnoreCase);
+            foreach (FieldInfo field in TypeConstants.Color.GetFields(BindingFlags.Public | BindingFlags.Static))
             {
-                if (field.FieldType == TypeConstants.Rgba32)
+                if (field.FieldType == TypeConstants.Color)
                 {
-                    table[field.Name] = (Rgba32)field.GetValue(null);
+                    table[field.Name] = (Color)field.GetValue(null);
                 }
             }
 
