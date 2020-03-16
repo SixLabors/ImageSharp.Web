@@ -157,6 +157,6 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// <summary>
         /// Adds the default color converters.
         /// </summary>
-        private void AddColorConverters() => this.AddConverter(TypeConstants.Rgba32, typeof(Rgba32Converter));
+        private void AddColorConverters() => this.AddConverter(TypeConstants.Color, typeof(ColorConverter));
     }
 }

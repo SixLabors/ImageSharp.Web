@@ -44,7 +44,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
-        /// <param name="cacheOptions">The cache configuraiton options.</param>
+        /// <param name="cacheOptions">The cache configuration options.</param>
         /// <param name="environment">The hosting environment the application is running in.</param>
         /// <param name="options">The middleware configuration options.</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
