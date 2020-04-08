@@ -75,10 +75,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
 
         public static TheoryData<object, string> Rgba32Values = new TheoryData<object, string>
         {
-            { Rgba32.White, "255,255,255" },
-            { Rgba32.Transparent, "255,255,255,0" },
-            { Rgba32.Orange, "orange" },
-            { Rgba32.Lime, "00FF00" },
+            { Color.White, "255,255,255" },
+            { Color.Transparent, "0,0,0,0" },
+            { Color.Orange, "orange" },
+            { Color.RoyalBlue, "4169E1FF" },
+            { Color.Lime, "00FF00FF" },
+            { Color.YellowGreen, "9ACD32FF" },
         };
 
         [Theory]
