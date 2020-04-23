@@ -116,13 +116,13 @@ namespace SixLabors.ImageSharp.Web.Processors
             return new Size((int)width, (int)height);
         }
 
-        private static PointF GetCenter(IDictionary<string, string> commands, CommandParser parser)
+        private static PointF? GetCenter(IDictionary<string, string> commands, CommandParser parser)
         {
             float[] coordinates = parser.ParseValue<float[]>(commands.GetValueOrDefault(Xy));
 
             if (coordinates.Length != 2)
             {
-                return PointF.Empty;
+                return null;
             }
 
             return new PointF(coordinates[0], coordinates[1]);
