@@ -84,10 +84,15 @@ namespace SixLabors.ImageSharp.Web.Providers
             string containerName = string.Empty;
             BlobContainerClient container = null;
 
+            // We want an exact match here to ensure that container names starting with
+            // the same prefix are not mixed up.
             string path = context.Request.Path.Value.TrimStart(SlashChars);
+            int index = path.IndexOfAny(SlashChars);
+            string nameToMatch = index != -1 ? path.Substring(index) : path;
+
             foreach (string key in this.containers.Keys)
             {
-                if (path.StartsWith(key, StringComparison.OrdinalIgnoreCase))
+                if (nameToMatch.Equals(key, StringComparison.OrdinalIgnoreCase))
                 {
                     containerName = key;
                     container = this.containers[key];
@@ -125,6 +130,8 @@ namespace SixLabors.ImageSharp.Web.Providers
 
         private bool IsMatch(HttpContext context)
         {
+            // Only match loosly here for performance.
+            // Path matching conflicts should be dealt with by configuration.
             string path = context.Request.Path.Value.TrimStart(SlashChars);
             foreach (string container in this.containers.Keys)
             {
