@@ -32,4 +32,16 @@
 
   <Import Project="..\..\shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems" Label="Shared" />
 
+  <ItemGroup>
+    <!--Shared config files that have to exist at root level.-->
+    <ConfigFilesToCopy Include="..\..\shared-infrastructure\.editorconfig;..\..\shared-infrastructure\.gitattributes" />
+  </ItemGroup>
+
+  <!--Ensures our config files are up to date.-->
+  <Target Name="CopyFiles" BeforeTargets="Build">
+    <Copy SourceFiles="@(ConfigFilesToCopy)"
+          SkipUnchangedFiles = "true"
+          DestinationFolder="..\..\" />
+  </Target>
+  
 </Project>
