@@ -76,14 +76,14 @@
   <!-- Default settings that are otherwise undefined -->
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)shared-infrastructure/SixLabors.snk</AssemblyOriginatorKeyFile>
-    <Copyright>Copyright © Six Labors and Contributors</Copyright>
+    <Copyright>Copyright © Six Labors</Copyright>
     <Features>strict;IOperation</Features>
     <HighEntropyVA>true</HighEntropyVA>
     <LangVersion>8.0</LangVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <OverwriteReadOnlyFiles>true</OverwriteReadOnlyFiles>
     <PackageIcon>sixlabors.imagesharp.web.128.png</PackageIcon>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
     <RepositoryType>git</RepositoryType>
@@ -98,11 +98,12 @@
 
   <!-- Package references and additional files which are consumed by all projects -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.Net.Compilers.Toolset" IsImplicitlyDefined="true" />
+    <PackageReference Include="Microsoft.Net.Compilers.Toolset" IsImplicitlyDefined="true" PrivateAssets="All"/>
     <PackageReference Include="StyleCop.Analyzers" IsImplicitlyDefined="true"  />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)shared-infrastructure\stylecop.json" />
     <!--NuGet package icon source-->
     <None Include="$(MSBuildThisFileDirectory)shared-infrastructure\branding\icons\imagesharp.web\sixlabors.imagesharp.web.128.png" Pack="true" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)shared-infrastructure\LICENSE.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
