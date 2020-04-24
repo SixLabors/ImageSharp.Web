@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Http;
@@ -22,9 +23,10 @@ namespace SixLabors.ImageSharp.Web.Providers
         private static readonly char[] SlashChars = { '\\', '/' };
 
         /// <summary>
-        /// The container in the blob service.
+        /// The containers for the blob services.
         /// </summary>
-        private readonly BlobContainerClient container;
+        private readonly Dictionary<string, BlobContainerClient> containers
+            = new Dictionary<string, BlobContainerClient>();
 
         /// <summary>
         /// The blob storage options.
@@ -55,7 +57,12 @@ namespace SixLabors.ImageSharp.Web.Providers
             this.storageOptions = storageOptions.Value;
             this.formatUtilities = formatUtilities;
 
-            this.container = new BlobContainerClient(this.storageOptions.ConnectionString, this.storageOptions.ContainerName);
+            foreach (AzureBlobContainerClientOptions container in this.storageOptions.BlobContainers)
+            {
+                this.containers.Add(
+                    container.ContainerName,
+                    new BlobContainerClient(container.ConnectionString, container.ContainerName));
+            }
         }
 
         /// <inheritdoc/>
@@ -74,16 +81,40 @@ namespace SixLabors.ImageSharp.Web.Providers
             // Strip the leading slash and container name from the HTTP request path and treat
             // the remaining path string as the blob name.
             // Path has already been correctly parsed before here.
-            string blobName = context.Request.Path.Value.TrimStart(SlashChars)
-                                     .Substring(this.storageOptions.ContainerName.Length)
-                                     .TrimStart(SlashChars);
+            string containerName = string.Empty;
+            BlobContainerClient container = null;
+
+            // We want an exact match here to ensure that container names starting with
+            // the same prefix are not mixed up.
+            string path = context.Request.Path.Value.TrimStart(SlashChars);
+            int index = path.IndexOfAny(SlashChars);
+            string nameToMatch = index != -1 ? path.Substring(index) : path;
+
+            foreach (string key in this.containers.Keys)
+            {
+                if (nameToMatch.Equals(key, StringComparison.OrdinalIgnoreCase))
+                {
+                    containerName = key;
+                    container = this.containers[key];
+                    break;
+                }
+            }
+
+            // Something has gone horribly wrong for this to happen but check anyway.
+            if (container is null)
+            {
+                return null;
+            }
+
+            // Blob name should be the remaining path string.
+            string blobName = path.Substring(containerName.Length).TrimStart(SlashChars);
 
             if (string.IsNullOrWhiteSpace(blobName))
             {
                 return null;
             }
 
-            BlobClient blob = this.container.GetBlobClient(blobName);
+            BlobClient blob = container.GetBlobClient(blobName);
 
             if (!await blob.ExistsAsync())
             {
@@ -99,8 +130,18 @@ namespace SixLabors.ImageSharp.Web.Providers
 
         private bool IsMatch(HttpContext context)
         {
+            // Only match loosly here for performance.
+            // Path matching conflicts should be dealt with by configuration.
             string path = context.Request.Path.Value.TrimStart(SlashChars);
-            return path.StartsWith(this.storageOptions.ContainerName, StringComparison.OrdinalIgnoreCase);
+            foreach (string container in this.containers.Keys)
+            {
+                if (path.StartsWith(container, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
