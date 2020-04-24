@@ -53,8 +53,11 @@ namespace SixLabors.ImageSharp.Web.Tests
                     .AddProvider(PhysicalProviderFactory)
                     .Configure<AzureBlobStorageImageProviderOptions>(options =>
                     {
-                        options.ConnectionString = AzureConnectionString;
-                        options.ContainerName = AzureContainerName;
+                        options.BlobContainers.Add(new AzureBlobContainerClientOptions
+                        {
+                            ConnectionString = AzureConnectionString,
+                            ContainerName = AzureContainerName
+                        });
                     })
                     .AddProvider<AzureBlobStorageImageProvider>()
                     .AddProcessor<ResizeWebProcessor>();
@@ -80,8 +83,11 @@ namespace SixLabors.ImageSharp.Web.Tests
                     .SetCacheHash<CacheHash>()
                     .Configure<AzureBlobStorageImageProviderOptions>(options =>
                     {
-                        options.ConnectionString = AzureConnectionString;
-                        options.ContainerName = AzureContainerName;
+                        options.BlobContainers.Add(new AzureBlobContainerClientOptions
+                        {
+                            ConnectionString = AzureConnectionString,
+                            ContainerName = AzureContainerName
+                        });
                     })
                     .AddProvider<AzureBlobStorageImageProvider>()
                     .AddProcessor<ResizeWebProcessor>();
@@ -116,8 +122,11 @@ namespace SixLabors.ImageSharp.Web.Tests
                 .AddProvider(PhysicalProviderFactory)
                 .Configure<AzureBlobStorageImageProviderOptions>(options =>
                 {
-                    options.ConnectionString = AzureConnectionString;
-                    options.ContainerName = AzureContainerName;
+                    options.BlobContainers.Add(new AzureBlobContainerClientOptions
+                    {
+                        ConnectionString = AzureConnectionString,
+                        ContainerName = AzureContainerName
+                    });
                 })
                 .AddProvider<AzureBlobStorageImageProvider>()
                 .AddProcessor<ResizeWebProcessor>();
