@@ -19,6 +19,7 @@ using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
+using SixLabors.ImageSharp.Web.Providers.Azure;
 
 namespace SixLabors.ImageSharp.Web.Tests
 {

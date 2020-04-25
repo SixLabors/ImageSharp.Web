@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace SixLabors.ImageSharp.Web.Providers
+namespace SixLabors.ImageSharp.Web.Providers.Azure
 {
     /// <summary>
     /// Configuration options for the <see cref="AzureBlobStorageImageProvider"/> provider.

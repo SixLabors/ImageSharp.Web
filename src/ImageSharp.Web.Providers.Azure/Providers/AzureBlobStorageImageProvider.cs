@@ -9,8 +9,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.ImageSharp.Web.Resolvers.Azure;
 
-namespace SixLabors.ImageSharp.Web.Providers
+namespace SixLabors.ImageSharp.Web.Providers.Azure
 {
     /// <summary>
     /// Returns images stored in Azure Blob Storage.
