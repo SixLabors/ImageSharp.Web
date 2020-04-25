@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ImageSharp.Web\ImageSharp.Web.csproj" />
+    <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.0-unstable0044" />
   </ItemGroup>
 
 </Project>
