@@ -31,5 +31,5 @@
 
 
   <Import Project="..\..\shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems" Label="Shared" />
-
+  
 </Project>

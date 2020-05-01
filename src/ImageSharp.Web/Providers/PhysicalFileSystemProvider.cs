@@ -1,5 +1,5 @@
 // Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the GNU Affero General Public License, Version 3.
 
 using System;
 using System.Threading.Tasks;
@@ -40,6 +40,7 @@ namespace SixLabors.ImageSharp.Web.Providers
             FormatUtilities formatUtilities)
         {
             Guard.NotNull(environment, nameof(environment));
+            Guard.NotNull(environment.WebRootFileProvider, nameof(environment.WebRootFileProvider));
 
             this.fileProvider = environment.WebRootFileProvider;
             this.formatUtilities = formatUtilities;

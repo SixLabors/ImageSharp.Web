@@ -1,5 +1,5 @@
 // Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the GNU Affero General Public License, Version 3.
 
 using System.IO;
 using System.Threading.Tasks;
@@ -60,11 +60,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         {
             Guard.NotNull(environment, nameof(environment));
             Guard.NotNull(options, nameof(options));
-
-            Guard.NotNullOrWhiteSpace(
-              environment.WebRootPath,
-              nameof(environment.WebRootPath),
-              "The folder 'wwwroot' that contains the web-servable application content files is missing. Please add this folder to the application root to allow caching.");
+            Guard.NotNullOrWhiteSpace(environment.WebRootPath, nameof(environment.WebRootPath));
 
             this.cacheOptions = cacheOptions != null ? cacheOptions.Value : new PhysicalFileSystemCacheOptions();
             this.cacheRootPath = Path.Combine(environment.WebRootPath, this.cacheOptions.CacheFolder);
