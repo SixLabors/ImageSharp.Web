@@ -89,7 +89,7 @@ namespace SixLabors.ImageSharp.Web.Providers.Azure
             // the same prefix are not mixed up.
             string path = context.Request.Path.Value.TrimStart(SlashChars);
             int index = path.IndexOfAny(SlashChars);
-            string nameToMatch = index != -1 ? path.Substring(index) : path;
+            string nameToMatch = index != -1 ? path.Substring(0, index) : path;
 
             foreach (string key in this.containers.Keys)
             {
