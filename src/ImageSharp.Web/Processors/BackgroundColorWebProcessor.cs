@@ -31,7 +31,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <inheritdoc/>
         public FormattedImage Process(FormattedImage image, ILogger logger, IDictionary<string, string> commands)
         {
-            Rgba32 background = CommandParser.Instance.ParseValue<Rgba32>(commands.GetValueOrDefault(Color));
+            Color background = CommandParser.Instance.ParseValue<Color>(commands.GetValueOrDefault(Color));
 
             if (background != default)
             {
