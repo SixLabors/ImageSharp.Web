@@ -73,7 +73,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             { new List<float> { 1.667F, 2.667F, 3.667F, 4.667F }, "1.667,2.667,3.667,4.667" },
         };
 
-        public static TheoryData<object, string> Rgba32Values = new TheoryData<object, string>
+        public static TheoryData<object, string> ColorValues = new TheoryData<object, string>
         {
             { Color.White, "255,255,255" },
             { Color.Transparent, "0,0,0,0" },
@@ -91,7 +91,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         [MemberData(nameof(RealArrays))]
         [MemberData(nameof(IntegralLists))]
         [MemberData(nameof(RealLists))]
-        [MemberData(nameof(Rgba32Values))]
+        [MemberData(nameof(ColorValues))]
         public void CommandParses<T>(T expected, string param)
         {
             T sb = CommandParser.Instance.ParseValue<T>(param);
