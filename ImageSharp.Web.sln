@@ -40,11 +40,20 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Web.Providers.Azure", "src\ImageSharp.Web.Providers.Azure\ImageSharp.Web.Providers.Azure.csproj", "{E2A545EC-B909-4EAD-B95F-397F68588BE3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{B8152C86-B657-4967-B297-42F89A10D23A}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedInfrastructure", "shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.shproj", "{68A8CC40-6AED-4E96-B524-31B1158FDEEA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEMPLATE", "{04955CD1-F249-4899-9F61-6C7487BEECE1}"
+	ProjectSection(SolutionItems) = preProject
+		.github\ISSUE_TEMPLATE\commercial-bug-report.md = .github\ISSUE_TEMPLATE\commercial-bug-report.md
+		.github\ISSUE_TEMPLATE\config.yml = .github\ISSUE_TEMPLATE\config.yml
+		.github\ISSUE_TEMPLATE\oss-bug-report.md = .github\ISSUE_TEMPLATE\oss-bug-report.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{2A5EF4AC-E228-42C1-970B-35630A9AF250}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build-and-test.yml = .github\workflows\build-and-test.yml
 	EndProjectSection
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedInfrastructure", "shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.shproj", "{68A8CC40-6AED-4E96-B524-31B1158FDEEA}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -120,6 +129,8 @@ Global
 		{E2A545EC-B909-4EAD-B95F-397F68588BE3} = {815C0625-CD3D-440F-9F80-2D83856AB7AE}
 		{B8152C86-B657-4967-B297-42F89A10D23A} = {C317F1B1-D75E-4C6D-83EB-80367343E0D7}
 		{68A8CC40-6AED-4E96-B524-31B1158FDEEA} = {815C0625-CD3D-440F-9F80-2D83856AB7AE}
+		{04955CD1-F249-4899-9F61-6C7487BEECE1} = {B8152C86-B657-4967-B297-42F89A10D23A}
+		{2A5EF4AC-E228-42C1-970B-35630A9AF250} = {B8152C86-B657-4967-B297-42F89A10D23A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C5B38B65-A19E-4359-859C-5B2205429BD1}
