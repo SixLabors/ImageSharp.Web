@@ -22,7 +22,7 @@
     <PackageReference Update="StyleCop.Analyzers" PrivateAssets="All" Version="1.1.118" />
 
     <!--Src Dependencies-->
-    <PackageReference Update="SixLabors.ImageSharp" Version="1.0.0-rc0001" />
+    <PackageReference Update="SixLabors.ImageSharp" Version="1.0.0-rc0002" />
     <PackageReference Update="Azure.Storage.Blobs" Version="12.4.0" />
   </ItemGroup>
 

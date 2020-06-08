@@ -1,6 +1,7 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: "OSS : Bug Report"
+about: Create a report to help us improve the project.
+labels: needs triage
 
 ---
 
@@ -21,9 +22,9 @@ about: Create a report to help us improve
 <!-- Tell us about the environment where you are experiencing the bug -->
 
 - ImageSharp.Web version:
-- Other ImageSharp packages and versions:
+- Other Six Labors packages and versions:
 - Environment (Operating system, version and so on):
 - .NET Framework version:
 - Additional information:
 
-<!-- Thanks for reporting the issue to ImageSharp! -->
+<!-- Thanks for reporting the issue to ImageSharp.Web! -->
