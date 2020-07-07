@@ -167,7 +167,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
             }
 
-            await this.options.OnParseCommands?.Invoke(new ImageCommandContext(context, commands, CommandParser.Instance));
+            if (this.options.OnParseCommands != null)
+            {
+                await this.options.OnParseCommands.Invoke(new ImageCommandContext(context, commands, CommandParser.Instance));
+            }
 
             // Get the correct service for the request.
             IImageProvider provider = null;
@@ -273,7 +276,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                     using (var image = FormattedImage.Load(this.options.Configuration, inStream))
                                     {
                                         image.Process(this.logger, this.processors, commands);
-                                        await this.options.OnBeforeSave?.Invoke(image);
+                                        if (this.options.OnBeforeSave != null)
+                                        {
+                                            await this.options.OnBeforeSave.Invoke(image);
+                                        }
+
                                         image.Save(outStream);
                                         format = image.Format;
                                     }
@@ -298,7 +305,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             outStream.Position = 0;
                             string contentType = cachedImageMetadata.ContentType;
                             string extension = this.formatUtilities.GetExtensionFromContentType(contentType);
-                            await this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, contentType, extension));
+                            if (this.options.OnProcessed != null)
+                            {
+                                await this.options.OnProcessed.Invoke(new ImageProcessingContext(context, outStream, commands, contentType, extension));
+                            }
+
                             outStream.Position = 0;
 
                             // Save the image to the cache and send the response to the caller.

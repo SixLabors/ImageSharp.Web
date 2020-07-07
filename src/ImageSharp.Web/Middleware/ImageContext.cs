@@ -192,7 +192,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     MustRevalidate = true
                 };
 
-                await this.options.OnPrepareResponse?.Invoke(this.context);
+                if (this.options.OnPrepareResponse != null)
+                {
+                    await this.options.OnPrepareResponse.Invoke(this.context);
+                }
             }
 
             if (statusCode == ResponseConstants.Status200Ok)
