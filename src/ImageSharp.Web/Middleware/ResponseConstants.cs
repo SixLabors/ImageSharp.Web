@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Threading.Tasks;
@@ -26,17 +26,5 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// resource has been denied.
         /// </summary>
         internal const int Status412PreconditionFailed = 412;
-
-        /// <summary>
-        /// An empty completed task.
-        /// </summary>
-        internal static readonly Task CompletedTask = CreateCompletedTask();
-
-        private static Task CreateCompletedTask()
-        {
-            var tcs = new TaskCompletionSource<object>();
-            tcs.SetResult(null);
-            return tcs.Task;
-        }
     }
 }

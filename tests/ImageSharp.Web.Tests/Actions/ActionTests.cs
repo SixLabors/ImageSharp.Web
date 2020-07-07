@@ -42,13 +42,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
             }
 
             bool complete = false;
-            void OnParseCommands(ImageCommandContext context)
+            Task OnParseCommands(ImageCommandContext context)
             {
                 Assert.NotNull(context);
                 Assert.NotNull(context.Context);
                 Assert.NotNull(context.Commands);
                 Assert.NotNull(context.Parser);
                 complete = true;
+                return Task.CompletedTask;
             }
 
             using (TestServer server = ImageSharpTestServer.CreateWithActions(OnParseCommands))
@@ -69,13 +70,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
             }
 
             bool complete = false;
-            void OnParseCommands(ImageCommandContext context)
+            Task OnParseCommands(ImageCommandContext context)
             {
                 Assert.NotNull(context);
                 Assert.NotNull(context.Context);
                 Assert.NotNull(context.Commands);
                 Assert.NotNull(context.Parser);
                 complete = true;
+                return Task.CompletedTask;
             }
 
             using (TestServer server = ImageSharpTestServer.CreateWithActions(OnParseCommands))
@@ -90,12 +92,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
         public async Task ShouldRunOnBeforeSaveActionAsync()
         {
             bool complete = false;
-            void OnBeforeSave(FormattedImage image)
+            Task OnBeforeSave(FormattedImage image)
             {
                 Assert.NotNull(image);
                 Assert.NotNull(image.Format);
                 Assert.NotNull(image.Image);
                 complete = true;
+                return Task.CompletedTask;
             }
 
             using (TestServer server = ImageSharpTestServer.CreateWithActions(null, OnBeforeSave))
@@ -110,13 +113,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
         public async Task ShouldRunOnProcessedActionAsync()
         {
             bool complete = false;
-            void OnProcessed(ImageProcessingContext context)
+            Task OnProcessed(ImageProcessingContext context)
             {
                 Assert.NotNull(context);
                 Assert.NotNull(context.Context);
                 Assert.NotNull(context.Extension);
                 Assert.NotNull(context.Stream);
                 complete = true;
+                return Task.CompletedTask;
             }
 
             using (TestServer server = ImageSharpTestServer.CreateWithActions(null, null, OnProcessed))
@@ -131,11 +135,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
         public async Task ShouldRunOnPrepareResponseActionAsync()
         {
             bool complete = false;
-            void OnPrepareResponse(HttpContext context)
+            Task OnPrepareResponse(HttpContext context)
             {
                 Assert.NotNull(context);
                 Assert.NotNull(context.Response);
                 complete = true;
+                return Task.CompletedTask;
             }
 
             using (TestServer server = ImageSharpTestServer.CreateWithActions(null, null, null, OnPrepareResponse))

@@ -1,7 +1,8 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
@@ -38,23 +39,23 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// Gets or sets the additional command parsing method that can be used to used to augment commands.
         /// This is called once the commands have been gathered and before an <see cref="IImageProvider"/> has been assigned.
         /// </summary>
-        public Action<ImageCommandContext> OnParseCommands { get; set; } = c =>
+        public Func<ImageCommandContext, Task> OnParseCommands { get; set; } = c =>
         {
-            if (c.Commands.Count == 0)
+            if (c.Commands.Count != 0)
             {
-                return;
+                // It's a good idea to have this to provide very basic security.
+                // We can safely use the static resize processor properties.
+                uint width = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Width));
+                uint height = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Height));
+
+                if (width > 4000 && height > 4000)
+                {
+                    c.Commands.Remove(ResizeWebProcessor.Width);
+                    c.Commands.Remove(ResizeWebProcessor.Height);
+                }
             }
 
-            // It's a good idea to have this to provide very basic security.
-            // We can safely use the static resize processor properties.
-            uint width = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Width));
-            uint height = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Height));
-
-            if (width > 4000 && height > 4000)
-            {
-                c.Commands.Remove(ResizeWebProcessor.Width);
-                c.Commands.Remove(ResizeWebProcessor.Height);
-            }
+            return Task.CompletedTask;
         };
 
         /// <summary>
@@ -62,20 +63,20 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// This is called after image has been processed, but before the image has been saved to the output stream for caching.
         /// This can be used to alter the metadata of the resultant image.
         /// </summary>
-        public Action<FormattedImage> OnBeforeSave { get; set; } = _ => { };
+        public Func<FormattedImage, Task> OnBeforeSave { get; set; } = _ => Task.CompletedTask;
 
         /// <summary>
         /// Gets or sets the additional processing method.
         /// This is called after image has been processed, but before the result has been cached.
         /// This can be used to further optimize the resultant image.
         /// </summary>
-        public Action<ImageProcessingContext> OnProcessed { get; set; } = _ => { };
+        public Func<ImageProcessingContext, Task> OnProcessed { get; set; } = _ => Task.CompletedTask;
 
         /// <summary>
         /// Gets or sets the additional response method.
         /// This is called after the status code and headers have been set, but before the body has been written.
         /// This can be used to add or change the response headers.
         /// </summary>
-        public Action<HttpContext> OnPrepareResponse { get; set; } = _ => { };
+        public Func<HttpContext, Task> OnPrepareResponse { get; set; } = _ => Task.CompletedTask;
     }
 }

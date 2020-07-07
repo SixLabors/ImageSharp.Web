@@ -125,12 +125,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="statusCode">The status code.</param>
         /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public Task SendStatusAsync(int statusCode, in ImageCacheMetadata metaData)
+        public async Task SendStatusAsync(int statusCode, ImageCacheMetadata metaData)
         {
-            this.ApplyResponseHeaders(statusCode, metaData.ContentType, this.ComputeMaxAge(metaData));
+            await this.ApplyResponseHeadersAsync(statusCode, metaData.ContentType, this.ComputeMaxAge(metaData));
 
             // this.logger.LogHandled(statusCode, SubPath);
-            return ResponseConstants.CompletedTask;
         }
 
         /// <summary>
@@ -141,7 +140,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <returns>The <see cref="Task"/>.</returns>
         public async Task SendAsync(Stream stream, ImageCacheMetadata metaData)
         {
-            this.ApplyResponseHeaders(ResponseConstants.Status200Ok, metaData.ContentType, this.ComputeMaxAge(metaData));
+            await this.ApplyResponseHeadersAsync(ResponseConstants.Status200Ok, metaData.ContentType, this.ComputeMaxAge(metaData));
 
             if (stream.CanSeek)
             {
@@ -170,7 +169,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             return max;
         }
 
-        private void ApplyResponseHeaders(int statusCode, string contentType, TimeSpan maxAge)
+        private async Task ApplyResponseHeadersAsync(int statusCode, string contentType, TimeSpan maxAge)
         {
             this.response.StatusCode = statusCode;
             if (statusCode < 400)
@@ -193,7 +192,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     MustRevalidate = true
                 };
 
-                this.options.OnPrepareResponse?.Invoke(this.context);
+                await this.options.OnPrepareResponse?.Invoke(this.context);
             }
 
             if (statusCode == ResponseConstants.Status200Ok)
