@@ -42,14 +42,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
             }
 
             bool complete = false;
-            Task OnParseCommands(ImageCommandContext context)
+            ValueTask OnParseCommands(ImageCommandContext context)
             {
                 Assert.NotNull(context);
                 Assert.NotNull(context.Context);
                 Assert.NotNull(context.Commands);
                 Assert.NotNull(context.Parser);
                 complete = true;
-                return Task.CompletedTask;
+                return default;
             }
 
             using (TestServer server = ImageSharpTestServer.CreateWithActions(OnParseCommands))
@@ -70,14 +70,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
             }
 
             bool complete = false;
-            Task OnParseCommands(ImageCommandContext context)
+            ValueTask OnParseCommands(ImageCommandContext context)
             {
                 Assert.NotNull(context);
                 Assert.NotNull(context.Context);
                 Assert.NotNull(context.Commands);
                 Assert.NotNull(context.Parser);
                 complete = true;
-                return Task.CompletedTask;
+                return default;
             }
 
             using (TestServer server = ImageSharpTestServer.CreateWithActions(OnParseCommands))
@@ -92,13 +92,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
         public async Task ShouldRunOnBeforeSaveActionAsync()
         {
             bool complete = false;
-            Task OnBeforeSave(FormattedImage image)
+            ValueTask OnBeforeSave(FormattedImage image)
             {
                 Assert.NotNull(image);
                 Assert.NotNull(image.Format);
                 Assert.NotNull(image.Image);
                 complete = true;
-                return Task.CompletedTask;
+                return default;
             }
 
             using (TestServer server = ImageSharpTestServer.CreateWithActions(null, OnBeforeSave))
@@ -113,14 +113,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
         public async Task ShouldRunOnProcessedActionAsync()
         {
             bool complete = false;
-            Task OnProcessed(ImageProcessingContext context)
+            ValueTask OnProcessed(ImageProcessingContext context)
             {
                 Assert.NotNull(context);
                 Assert.NotNull(context.Context);
                 Assert.NotNull(context.Extension);
                 Assert.NotNull(context.Stream);
                 complete = true;
-                return Task.CompletedTask;
+                return default;
             }
 
             using (TestServer server = ImageSharpTestServer.CreateWithActions(null, null, OnProcessed))
@@ -135,12 +135,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Actions
         public async Task ShouldRunOnPrepareResponseActionAsync()
         {
             bool complete = false;
-            Task OnPrepareResponse(HttpContext context)
+            ValueTask OnPrepareResponse(HttpContext context)
             {
                 Assert.NotNull(context);
                 Assert.NotNull(context.Response);
                 complete = true;
-                return Task.CompletedTask;
+                return default;
             }
 
             using (TestServer server = ImageSharpTestServer.CreateWithActions(null, null, null, OnPrepareResponse))

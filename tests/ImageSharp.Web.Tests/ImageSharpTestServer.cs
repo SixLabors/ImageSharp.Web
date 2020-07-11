@@ -100,10 +100,10 @@ namespace SixLabors.ImageSharp.Web.Tests
         public static TestServer CreateAzure() => Create(DefaultConfig, DefaultServices);
 
         public static TestServer CreateWithActions(
-            Func<ImageCommandContext, Task> onParseCommands,
-            Func<FormattedImage, Task> onBeforeSave = null,
-            Func<ImageProcessingContext, Task> onProcessed = null,
-            Func<HttpContext, Task> onPrepareResponse = null)
+            Func<ImageCommandContext, ValueTask> onParseCommands,
+            Func<FormattedImage, ValueTask> onBeforeSave = null,
+            Func<ImageProcessingContext, ValueTask> onProcessed = null,
+            Func<HttpContext, ValueTask> onPrepareResponse = null)
         {
             void ConfigureServices(IServiceCollection services)
             {
@@ -112,10 +112,10 @@ namespace SixLabors.ImageSharp.Web.Tests
                     options.Configuration = Configuration.Default;
                     options.MaxBrowserCacheDays = -1;
                     options.MaxCacheDays = -1;
-                    options.OnParseCommandsAsync = null;
-                    options.OnBeforeSaveAsync = null;
-                    options.OnProcessedAsync = null;
-                    options.OnPrepareResponseAsync = null;
+                    options.OnParseCommandsAsync = onParseCommands;
+                    options.OnBeforeSaveAsync = onBeforeSave;
+                    options.OnProcessedAsync = onProcessed;
+                    options.OnPrepareResponseAsync = onPrepareResponse;
                 })
                 .SetRequestParser<QueryCollectionRequestParser>()
                 .Configure<PhysicalFileSystemCacheOptions>(_ => { })
