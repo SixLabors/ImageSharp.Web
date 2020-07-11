@@ -125,9 +125,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="statusCode">The status code.</param>
         /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public async Task SendStatusAsync(int statusCode, ImageCacheMetadata metaData)
+        public Task SendStatusAsync(int statusCode, ImageCacheMetadata metaData)
         {
-            await this.ApplyResponseHeadersAsync(statusCode, metaData.ContentType, this.ComputeMaxAge(metaData));
+            return this.ApplyResponseHeadersAsync(statusCode, metaData.ContentType, this.ComputeMaxAge(metaData));
 
             // this.logger.LogHandled(statusCode, SubPath);
         }
@@ -192,9 +192,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     MustRevalidate = true
                 };
 
-                if (this.options.OnPrepareResponse != null)
+                if (this.options.OnPrepareResponseAsync != null)
                 {
-                    await this.options.OnPrepareResponse.Invoke(this.context);
+                    await this.options.OnPrepareResponseAsync.Invoke(this.context);
                 }
             }
 

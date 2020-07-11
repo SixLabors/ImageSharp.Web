@@ -167,9 +167,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
             }
 
-            if (this.options.OnParseCommands != null)
+            if (this.options.OnParseCommandsAsync != null)
             {
-                await this.options.OnParseCommands.Invoke(new ImageCommandContext(context, commands, CommandParser.Instance));
+                await this.options.OnParseCommandsAsync.Invoke(new ImageCommandContext(context, commands, CommandParser.Instance));
             }
 
             // Get the correct service for the request.
@@ -276,9 +276,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                     using (var image = FormattedImage.Load(this.options.Configuration, inStream))
                                     {
                                         image.Process(this.logger, this.processors, commands);
-                                        if (this.options.OnBeforeSave != null)
+                                        if (this.options.OnBeforeSaveAsync != null)
                                         {
-                                            await this.options.OnBeforeSave.Invoke(image);
+                                            await this.options.OnBeforeSaveAsync.Invoke(image);
                                         }
 
                                         image.Save(outStream);
@@ -305,9 +305,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             outStream.Position = 0;
                             string contentType = cachedImageMetadata.ContentType;
                             string extension = this.formatUtilities.GetExtensionFromContentType(contentType);
-                            if (this.options.OnProcessed != null)
+                            if (this.options.OnProcessedAsync != null)
                             {
-                                await this.options.OnProcessed.Invoke(new ImageProcessingContext(context, outStream, commands, contentType, extension));
+                                await this.options.OnProcessedAsync.Invoke(new ImageProcessingContext(context, outStream, commands, contentType, extension));
                             }
 
                             outStream.Position = 0;

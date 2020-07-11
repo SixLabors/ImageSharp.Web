@@ -39,7 +39,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// Gets or sets the additional command parsing method that can be used to used to augment commands.
         /// This is called once the commands have been gathered and before an <see cref="IImageProvider"/> has been assigned.
         /// </summary>
-        public Func<ImageCommandContext, Task> OnParseCommands { get; set; } = c =>
+        public Func<ImageCommandContext, ValueTask> OnParseCommandsAsync { get; set; } = c =>
         {
             if (c.Commands.Count != 0)
             {
@@ -55,7 +55,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
             }
 
-            return Task.CompletedTask;
+            return default;
         };
 
         /// <summary>
@@ -63,20 +63,20 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// This is called after image has been processed, but before the image has been saved to the output stream for caching.
         /// This can be used to alter the metadata of the resultant image.
         /// </summary>
-        public Func<FormattedImage, Task> OnBeforeSave { get; set; } = _ => Task.CompletedTask;
+        public Func<FormattedImage, ValueTask> OnBeforeSaveAsync { get; set; }
 
         /// <summary>
         /// Gets or sets the additional processing method.
         /// This is called after image has been processed, but before the result has been cached.
         /// This can be used to further optimize the resultant image.
         /// </summary>
-        public Func<ImageProcessingContext, Task> OnProcessed { get; set; } = _ => Task.CompletedTask;
+        public Func<ImageProcessingContext, ValueTask> OnProcessedAsync { get; set; }
 
         /// <summary>
         /// Gets or sets the additional response method.
         /// This is called after the status code and headers have been set, but before the body has been written.
         /// This can be used to add or change the response headers.
         /// </summary>
-        public Func<HttpContext, Task> OnPrepareResponse { get; set; } = _ => Task.CompletedTask;
+        public Func<HttpContext, ValueTask> OnPrepareResponseAsync { get; set; }
     }
 }
