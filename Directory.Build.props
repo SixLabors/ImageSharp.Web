@@ -24,7 +24,6 @@
     <DebugType Condition="'$(codecov)' != ''">full</DebugType>
     <NullableContextOptions>disable</NullableContextOptions>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <SignAssembly>false</SignAssembly>
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
   </PropertyGroup>
 
@@ -67,6 +66,12 @@
     <VersionSuffix></VersionSuffix>
   </PropertyGroup>
 
+  <!--MinVer Properties for versioning-->
+  <PropertyGroup>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <MinVerVerbosity>normal</MinVerVerbosity>
+  </PropertyGroup>
+  
   <!-- Default settings that are otherwise undefined -->
   <PropertyGroup>
     <Copyright>Copyright © Six Labors</Copyright>
