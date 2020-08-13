@@ -230,7 +230,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         {
                             // Has the cached image expired or has the source image been updated?
                             if (cachedImageMetadata.SourceLastWriteTimeUtc == sourceImageMetadata.LastWriteTimeUtc
-                                && cachedImageMetadata.CacheLastWriteTimeUtc > DateTimeOffset.Now.AddDays(-this.options.MaxCacheDays))
+                                && cachedImageMetadata.CacheLastWriteTimeUtc > DateTimeOffset.UtcNow.AddDays(-this.options.MaxCacheDays))
                             {
                                 // We're pulling the image from the cache.
                                 using (Stream cachedBuffer = await cachedImageResolver.OpenReadAsync())
