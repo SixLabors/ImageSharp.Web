@@ -265,7 +265,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 // No commands? We simply copy the stream across.
                                 if (commands.Count == 0)
                                 {
-                                    format = Image.DetectFormat(this.options.Configuration, inStream);
+                                    format = await Image.DetectFormatAsync(this.options.Configuration, inStream);
                                     await inStream.CopyToAsync(outStream);
                                 }
                                 else
