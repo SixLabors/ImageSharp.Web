@@ -13,13 +13,14 @@
   <!-- Default settings that are used by other settings -->
   <PropertyGroup>
     <BaseArtifactsPath>$(MSBuildThisFileDirectory)artifacts/</BaseArtifactsPath>
-    <BaseArtifactsPathSuffix>$(ImageSharpProjectCategory)/$(MSBuildProjectName)</BaseArtifactsPathSuffix>
+    <BaseArtifactsPathSuffix>$(SixLaborsProjectCategory)/$(MSBuildProjectName)</BaseArtifactsPathSuffix>
     <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/SixLabors/ImageSharp.Web/</RepositoryUrl>
   </PropertyGroup>
 
   <!-- Default settings that explicitly differ from the Sdk.props defaults  -->
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <BaseIntermediateOutputPath>$(BaseArtifactsPath)obj/$(BaseArtifactsPathSuffix)/</BaseIntermediateOutputPath>
     <DebugType>portable</DebugType>
     <DebugType Condition="'$(codecov)' != ''">full</DebugType>
     <NullableContextOptions>disable</NullableContextOptions>
@@ -58,6 +59,7 @@
   <!-- Default settings that explicitly differ from the Sdk.targets defaults-->
   <PropertyGroup>
     <Authors>Six Labors and contributors</Authors>
+    <BaseOutputPath>$(BaseArtifactsPath)bin/$(BaseArtifactsPathSuffix)/</BaseOutputPath>
     <Company>Six Labors</Company>
     <PackageOutputPath>$(BaseArtifactsPath)pkg/$(BaseArtifactsPathSuffix)/$(Configuration)/</PackageOutputPath>
     <Product>SixLabors.ImageSharp.Web</Product>

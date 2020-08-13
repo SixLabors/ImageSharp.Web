@@ -16,11 +16,11 @@ namespace SixLabors.ImageSharp.Web.Benchmarks
         /// <inheritdoc/>
         public string Create(string value, uint length)
         {
-            if (length.CompareTo(2) < 0 || length.CompareTo(64) > 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(length), $"Value must be greater than or equal to {2} and less than or equal to {64}.");
-            }
-
+            // Don't use in benchmark.
+            // if (length.CompareTo(2) < 0 || length.CompareTo(64) > 0)
+            // {
+            //    throw new ArgumentOutOfRangeException(nameof(length), $"Value must be greater than or equal to {2} and less than or equal to {64}.");
+            // }
             using (var hashAlgorithm = SHA256.Create())
             {
                 // Concatenate the hash bytes into one long string.

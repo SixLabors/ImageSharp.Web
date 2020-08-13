@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -28,24 +28,28 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="bytes">The bytes.</param>
         /// <returns>The <see cref="string"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string Encode(Span<byte> bytes)
+        public static unsafe string Encode(ReadOnlySpan<byte> bytes)
         {
-            int length = bytes.Length;
-            char[] chars = new char[length * 2];
-            ref char charRef = ref MemoryMarshal.GetReference<char>(chars);
-            ref byte bytesRef = ref MemoryMarshal.GetReference(bytes);
-            ref char hiRef = ref MemoryMarshal.GetReference<char>(HexLutHi);
-            ref char lowRef = ref MemoryMarshal.GetReference<char>(HexLutLo);
-
-            int index = 0;
-            for (int i = 0; i < length; i++)
+            fixed (byte* bytesPtr = bytes)
             {
-                byte byteIndex = Unsafe.Add(ref bytesRef, i);
-                Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref hiRef, byteIndex);
-                Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref lowRef, byteIndex);
-            }
+                return string.Create(bytes.Length * 2, (Ptr: (IntPtr)bytesPtr, bytes.Length), (chars, args) =>
+                {
+                    var ros = new ReadOnlySpan<byte>((byte*)args.Ptr, args.Length);
 
-            return new string(chars, 0, chars.Length);
+                    ref char charRef = ref MemoryMarshal.GetReference(chars);
+                    ref byte bytesRef = ref MemoryMarshal.GetReference(ros);
+                    ref char hiRef = ref MemoryMarshal.GetReference<char>(HexLutHi);
+                    ref char lowRef = ref MemoryMarshal.GetReference<char>(HexLutLo);
+
+                    int index = 0;
+                    for (int i = 0; i < ros.Length; i++)
+                    {
+                        byte byteIndex = Unsafe.Add(ref bytesRef, i);
+                        Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref hiRef, byteIndex);
+                        Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref lowRef, byteIndex);
+                    }
+                });
+            }
         }
     }
 }
