@@ -32,14 +32,6 @@ namespace SixLabors.ImageSharp.Web.Resolvers.Azure
 
         /// <inheritdoc/>
         public async Task<Stream> OpenReadAsync()
-        {
-            Stream blobStream = (await this.blob.DownloadAsync()).Value.Content;
-            var memoryStream = new ChunkedMemoryStream();
-
-            await blobStream.CopyToAsync(memoryStream);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-
-            return memoryStream;
-        }
+            => (await this.blob.DownloadAsync()).Value.Content;
     }
 }
