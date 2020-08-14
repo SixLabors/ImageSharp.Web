@@ -316,9 +316,31 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
                 finally
                 {
-                    outStream?.Dispose();
+                    await this.StreamDisposeAsync(outStream);
                 }
             }
+        }
+
+        private ValueTask StreamDisposeAsync(Stream stream)
+        {
+            if (stream is null)
+            {
+                return default;
+            }
+
+#if NETCOREAPP2_1
+            try
+            {
+                stream.Dispose();
+                return default;
+            }
+            catch (Exception ex)
+            {
+                return new ValueTask(Task.FromException(ex));
+            }
+#else
+            return stream.DisposeAsync();
+#endif
         }
 
         private async Task SendResponseAsync(ImageContext imageContext, string key, Stream stream, ImageCacheMetadata metadata)
