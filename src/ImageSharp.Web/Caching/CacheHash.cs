@@ -51,7 +51,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string HashValue(string value, uint length, Span<byte> bufferSpan)
+        private static string HashValue(ReadOnlySpan<char> value, uint length, Span<byte> bufferSpan)
         {
             using var hashAlgorithm = SHA256.Create();
             Encoding.ASCII.GetBytes(value, bufferSpan);
