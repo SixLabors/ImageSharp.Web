@@ -2,10 +2,9 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using BenchmarkDotNet.Attributes;
+using SixLabors.ImageSharp.Web.Caching;
 
 namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
 {
@@ -39,34 +38,22 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
         }
 
         [Benchmark(Description = "String.Create")]
-        public unsafe string JoinUsingStringCreate()
-        {
-            ReadOnlySpan<char> keySpan = Key;
-            const char separator = '/';
+        public string JoinUsingStringCreate()
+            => PhysicalFileSystemCache.ToFilePath(Key, CachedNameLength);
 
-            // Each key substring char + separator + key
-            int length = (CachedNameLength * 2) + Key.Length;
-            fixed (char* keyPtr = Key)
-            {
-                return string.Create(length, (Ptr: (IntPtr)keyPtr, Key.Length), (chars, args) =>
-                {
-                    var keySpan = new ReadOnlySpan<char>((char*)args.Ptr, args.Length);
-                    ref char keyRef = ref MemoryMarshal.GetReference(keySpan);
-                    ref char charRef = ref MemoryMarshal.GetReference(chars);
+        /*
+        BenchmarkDotNet=v0.12.0, OS=Windows 10.0.18363
+        Intel Core i7-8650U CPU 1.90GHz (Kaby Lake R), 1 CPU, 8 logical and 4 physical cores
+        .NET Core SDK=3.1.401
+          [Host]     : .NET Core 3.1.7 (CoreCLR 4.700.20.36602, CoreFX 4.700.20.37001), X64 RyuJIT
+          DefaultJob : .NET Core 3.1.7 (CoreCLR 4.700.20.36602, CoreFX 4.700.20.37001), X64 RyuJIT
 
-                    int index = 0;
-                    for (int i = 0; i < CachedNameLength; i++)
-                    {
-                        Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref keyRef, i);
-                        Unsafe.Add(ref charRef, index++) = separator;
-                    }
 
-                    for (int i = 0; i < keySpan.Length; i++)
-                    {
-                        Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref keyRef, i);
-                    }
-                });
-            }
-        }
+        |               Method |      Mean |    Error |   StdDev | Ratio |  Gen 0 | Gen 1 | Gen 2 | Allocated |
+        |--------------------- |----------:|---------:|---------:|------:|-------:|------:|------:|----------:|
+        |          String.Join | 285.17 ns | 5.006 ns | 4.180 ns |  1.00 | 0.1278 |     - |     - |     536 B |
+        | StringBuilder.Append |  96.72 ns | 0.549 ns | 0.487 ns |  0.34 | 0.0573 |     - |     - |     240 B |
+        |        String.Create |  42.03 ns | 0.186 ns | 0.165 ns |  0.15 | 0.0440 |     - |     - |     184 B |
+        */
     }
 }

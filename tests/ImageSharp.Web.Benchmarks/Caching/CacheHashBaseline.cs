@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using SixLabors.ImageSharp.Web.Caching;
 
-namespace SixLabors.ImageSharp.Web.Benchmarks
+namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
 {
     /// <summary>
     /// A baseline naive SHA256 hashing implementation
