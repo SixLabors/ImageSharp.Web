@@ -77,9 +77,9 @@ namespace SixLabors.ImageSharp.Web.Caching
                 Directory.CreateDirectory(this.cacheRootPath);
             }
 
-            this.cachedNameLength = (int)this.options.CachedNameLength;
             this.fileProvider = new PhysicalFileProvider(this.cacheRootPath);
             this.options = options.Value;
+            this.cachedNameLength = (int)this.options.CachedNameLength;
             this.formatUtilies = formatUtilities;
         }
 
