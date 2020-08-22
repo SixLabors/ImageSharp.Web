@@ -70,6 +70,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             Guard.NotNull(options, nameof(options));
             Guard.NotNullOrWhiteSpace(environment.WebRootPath, nameof(environment.WebRootPath));
 
+            // Allow configuration of the cache without having to register everything.
             this.cacheOptions = cacheOptions != null ? cacheOptions.Value : new PhysicalFileSystemCacheOptions();
             this.cacheRootPath = Path.Combine(environment.WebRootPath, this.cacheOptions.CacheFolder);
             if (!Directory.Exists(this.cacheRootPath))
@@ -160,14 +161,13 @@ namespace SixLabors.ImageSharp.Web.Caching
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe string ToFilePath(string key, int cachedNameLength)
         {
-            const char separator = '/';
-
             // Each key substring char + separator + key
             int length = (cachedNameLength * 2) + key.Length;
             fixed (char* keyPtr = key)
             {
                 return string.Create(length, (Ptr: (IntPtr)keyPtr, key.Length), (chars, args) =>
                 {
+                    const char separator = '/';
                     var keySpan = new ReadOnlySpan<char>((char*)args.Ptr, args.Length);
                     ref char keyRef = ref MemoryMarshal.GetReference(keySpan);
                     ref char charRef = ref MemoryMarshal.GetReference(chars);

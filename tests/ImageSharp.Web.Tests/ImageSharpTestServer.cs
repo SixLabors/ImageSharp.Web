@@ -141,7 +141,7 @@ namespace SixLabors.ImageSharp.Web.Tests
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(new[]
                 {
-                    new KeyValuePair<string, string>("webroot", "../../../")
+                    new KeyValuePair<string, string>("webroot", string.Empty)
                 }).Build();
 
             IWebHostBuilder builder = new WebHostBuilder()
