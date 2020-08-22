@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
@@ -33,17 +34,34 @@ namespace SixLabors.ImageSharp.Web.Caching
         }
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string Create(string value, uint length)
         {
-            int len = (int)length;
             int byteCount = Encoding.ASCII.GetByteCount(value);
-            using (var hashAlgorithm = SHA256.Create())
-            using (IManagedByteBuffer buffer = this.memoryAllocator.AllocateManagedByteBuffer(byteCount))
+
+            // Allocating a buffer from the pool is ~27% slower than stackalloc so use
+            // that for short strings
+            if (byteCount < 257)
             {
-                Encoding.ASCII.GetBytes(value, 0, byteCount, buffer.Array, 0);
-                byte[] hash = hashAlgorithm.ComputeHash(buffer.Array, 0, byteCount);
-                return $"{HexEncoder.Encode(new Span<byte>(hash).Slice(0, len / 2))}";
+                return HashValue(value, length, stackalloc byte[byteCount]);
             }
+
+            using IManagedByteBuffer buffer = this.memoryAllocator.AllocateManagedByteBuffer(byteCount);
+            return HashValue(value, length, buffer.Memory.Span);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static string HashValue(ReadOnlySpan<char> value, uint length, Span<byte> bufferSpan)
+        {
+            using var hashAlgorithm = SHA256.Create();
+            Encoding.ASCII.GetBytes(value, bufferSpan);
+
+            // Hashed output maxes out at 32 bytes @ 256bit/8 so we're safe to use stackalloc.
+            Span<byte> hash = stackalloc byte[32];
+            hashAlgorithm.TryComputeHash(bufferSpan, hash, out int _);
+
+            // length maxes out at 64 since we throw if options is greater.
+            return HexEncoder.Encode(hash.Slice(0, (int)(length / 2)));
         }
     }
 }

@@ -33,6 +33,8 @@ namespace SixLabors.ImageSharp.Web.Resolvers.Azure
         /// <inheritdoc/>
         public async Task<Stream> OpenReadAsync()
         {
+            // Copy to a MemoryStream first because RetriableStreamImpl
+            // doesn't support Position.
             Stream blobStream = (await this.blob.DownloadAsync()).Value.Content;
             var memoryStream = new ChunkedMemoryStream();
 

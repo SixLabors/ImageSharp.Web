@@ -1,7 +1,10 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
@@ -20,6 +23,11 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// The root path for the cache.
         /// </summary>
         private readonly string cacheRootPath;
+
+        /// <summary>
+        /// The length of the filename to use (minus the extension) when storing images in the image cache.
+        /// </summary>
+        private readonly int cachedNameLength;
 
         /// <summary>
         /// The file provider abstraction.
@@ -62,6 +70,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             Guard.NotNull(options, nameof(options));
             Guard.NotNullOrWhiteSpace(environment.WebRootPath, nameof(environment.WebRootPath));
 
+            // Allow configuration of the cache without having to register everything.
             this.cacheOptions = cacheOptions != null ? cacheOptions.Value : new PhysicalFileSystemCacheOptions();
             this.cacheRootPath = Path.Combine(environment.WebRootPath, this.cacheOptions.CacheFolder);
             if (!Directory.Exists(this.cacheRootPath))
@@ -71,13 +80,14 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             this.fileProvider = new PhysicalFileProvider(this.cacheRootPath);
             this.options = options.Value;
+            this.cachedNameLength = (int)this.options.CachedNameLength;
             this.formatUtilies = formatUtilities;
         }
 
         /// <inheritdoc/>
         public async Task<IImageCacheResolver> GetAsync(string key)
         {
-            string path = this.ToFilePath(key);
+            string path = ToFilePath(key, this.cachedNameLength);
 
             IFileInfo metaFileInfo = this.fileProvider.GetFileInfo(this.ToMetaDataFilePath(path));
             if (!metaFileInfo.Exists)
@@ -105,7 +115,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <inheritdoc/>
         public async Task SetAsync(string key, Stream stream, ImageCacheMetadata metadata)
         {
-            string path = Path.Combine(this.cacheRootPath, this.ToFilePath(key));
+            string path = Path.Combine(this.cacheRootPath, ToFilePath(key, this.cachedNameLength));
             string imagePath = this.ToImageFilePath(path, metadata);
             string metaPath = this.ToMetaDataFilePath(path);
             string directory = Path.GetDirectoryName(path);
@@ -146,8 +156,35 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Converts the key into a nested file path.
         /// </summary>
         /// <param name="key">The cache key.</param>
+        /// <param name="cachedNameLength">The length of the cached file name minus the extension.</param>
         /// <returns>The <see cref="string"/>.</returns>
-        private string ToFilePath(string key) // TODO: Avoid the allocation here.
-            => $"{string.Join("/", key.Substring(0, (int)this.options.CachedNameLength).ToCharArray())}/{key}";
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe string ToFilePath(string key, int cachedNameLength)
+        {
+            // Each key substring char + separator + key
+            int length = (cachedNameLength * 2) + key.Length;
+            fixed (char* keyPtr = key)
+            {
+                return string.Create(length, (Ptr: (IntPtr)keyPtr, key.Length), (chars, args) =>
+                {
+                    const char separator = '/';
+                    var keySpan = new ReadOnlySpan<char>((char*)args.Ptr, args.Length);
+                    ref char keyRef = ref MemoryMarshal.GetReference(keySpan);
+                    ref char charRef = ref MemoryMarshal.GetReference(chars);
+
+                    int index = 0;
+                    for (int i = 0; i < cachedNameLength; i++)
+                    {
+                        Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref keyRef, i);
+                        Unsafe.Add(ref charRef, index++) = separator;
+                    }
+
+                    for (int i = 0; i < keySpan.Length; i++)
+                    {
+                        Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref keyRef, i);
+                    }
+                });
+            }
+        }
     }
 }

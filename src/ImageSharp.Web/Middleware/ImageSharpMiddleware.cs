@@ -230,7 +230,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         {
                             // Has the cached image expired or has the source image been updated?
                             if (cachedImageMetadata.SourceLastWriteTimeUtc == sourceImageMetadata.LastWriteTimeUtc
-                                && cachedImageMetadata.CacheLastWriteTimeUtc > DateTimeOffset.Now.AddDays(-this.options.MaxCacheDays))
+                                && cachedImageMetadata.CacheLastWriteTimeUtc > DateTimeOffset.UtcNow.AddDays(-this.options.MaxCacheDays))
                             {
                                 // We're pulling the image from the cache.
                                 using (Stream cachedBuffer = await cachedImageResolver.OpenReadAsync())
@@ -265,7 +265,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 // No commands? We simply copy the stream across.
                                 if (commands.Count == 0)
                                 {
-                                    format = Image.DetectFormat(this.options.Configuration, inStream);
+                                    format = await Image.DetectFormatAsync(this.options.Configuration, inStream);
                                     await inStream.CopyToAsync(outStream);
                                 }
                                 else
@@ -316,9 +316,31 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
                 finally
                 {
-                    outStream?.Dispose();
+                    await this.StreamDisposeAsync(outStream);
                 }
             }
+        }
+
+        private ValueTask StreamDisposeAsync(Stream stream)
+        {
+            if (stream is null)
+            {
+                return default;
+            }
+
+#if NETCOREAPP2_1
+            try
+            {
+                stream.Dispose();
+                return default;
+            }
+            catch (Exception ex)
+            {
+                return new ValueTask(Task.FromException(ex));
+            }
+#else
+            return stream.DisposeAsync();
+#endif
         }
 
         private async Task SendResponseAsync(ImageContext imageContext, string key, Stream stream, ImageCacheMetadata metadata)
