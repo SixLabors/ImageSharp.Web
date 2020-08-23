@@ -245,7 +245,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
 
                 // Not cached? Let's get it from the image resolver.
-                ChunkedMemoryStream outStream = null;
+                ArrayPoolStream outStream = null;
                 try
                 {
                     if (processRequest)
@@ -257,7 +257,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             // No allocations here for inStream since we are passing the raw input stream.
                             // outStream allocation depends on the memory allocator used.
                             ImageCacheMetadata cachedImageMetadata = default;
-                            outStream = new ChunkedMemoryStream();
+                            outStream = new ArrayPoolStream();
                             using (Stream inStream = await sourceImageResolver.OpenReadAsync())
                             {
                                 IImageFormat format;

@@ -36,7 +36,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers.Azure
             // Copy to a MemoryStream first because RetriableStreamImpl
             // doesn't support Position.
             Stream blobStream = (await this.blob.DownloadAsync()).Value.Content;
-            var memoryStream = new ChunkedMemoryStream();
+            var memoryStream = new ArrayPoolStream();
 
             await blobStream.CopyToAsync(memoryStream);
             memoryStream.Seek(0, SeekOrigin.Begin);
