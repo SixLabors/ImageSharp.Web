@@ -147,6 +147,65 @@ namespace SixLabors.ImageSharp.Web.Tests
         }
 
         [Fact]
+        public static async Task ArrayPoolStream_ReadTest_NegativeAsync()
+        {
+            var ms2 = new ArrayPoolStream();
+
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await ms2.ReadAsync(null, 0, 0));
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await ms2.ReadAsync(new byte[] { 1 }, -1, 0));
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await ms2.ReadAsync(new byte[] { 1 }, 0, -1));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await ms2.ReadAsync(new byte[] { 1 }, 2, 0));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await ms2.ReadAsync(new byte[] { 1 }, 0, 2));
+
+            await StreamDisposeAsync(ms2);
+
+            await Assert.ThrowsAsync<ObjectDisposedException>(async () => await ms2.ReadAsync(new byte[] { 1 }, 0, 1));
+        }
+
+        [Fact]
+        public static async Task ArrayPoolStream_WriteToTests_ReadAsync()
+        {
+            using (var ms2 = new ArrayPoolStream())
+            {
+                byte[] bytArrRet;
+                byte[] bytArr = new byte[] { byte.MinValue, byte.MaxValue, 1, 2, 3, 4, 5, 6, 128, 250 };
+
+                // [] Write to memoryStream, check the memorystream
+                await ms2.WriteAsync(bytArr, 0, bytArr.Length);
+
+                using var readonlyStream = new ArrayPoolStream();
+
+                ms2.WriteTo(readonlyStream);
+                await readonlyStream.FlushAsync();
+                readonlyStream.Position = 0;
+                bytArrRet = new byte[(int)readonlyStream.Length];
+                await readonlyStream.ReadAsync(bytArrRet, 0, (int)readonlyStream.Length);
+                for (int i = 0; i < bytArr.Length; i++)
+                {
+                    Assert.Equal(bytArr[i], bytArrRet[i]);
+                }
+            }
+
+            // [] Write to memoryStream, check the memoryStream
+            using (var ms2 = new ArrayPoolStream())
+            using (var ms3 = new ArrayPoolStream())
+            {
+                byte[] bytArrRet;
+                byte[] bytArr = new byte[] { byte.MinValue, byte.MaxValue, 1, 2, 3, 4, 5, 6, 128, 250 };
+
+                await ms2.WriteAsync(bytArr, 0, bytArr.Length);
+                ms2.WriteTo(ms3);
+                ms3.Position = 0;
+                bytArrRet = new byte[(int)ms3.Length];
+                await ms3.ReadAsync(bytArrRet, 0, (int)ms3.Length);
+                for (int i = 0; i < bytArr.Length; i++)
+                {
+                    Assert.Equal(bytArr[i], bytArrRet[i]);
+                }
+            }
+        }
+
+        [Fact]
         public static void ArrayPoolStream_WriteToTests()
         {
             using (var ms2 = new ArrayPoolStream())
@@ -281,18 +340,7 @@ namespace SixLabors.ImageSharp.Web.Tests
 
             await Assert.ThrowsAsync<NotSupportedException>(async () => await memoryStream.CopyToAsync(readOnlyStream, 1));
 
-#if NETCOREAPP2_1
-            try
-            {
-                memoryStream.Dispose();
-            }
-            catch (Exception ex)
-            {
-                await new ValueTask(Task.FromException(ex));
-            }
-#else
-            await memoryStream.DisposeAsync();
-#endif
+            await StreamDisposeAsync(memoryStream);
         }
 
         [Theory]
@@ -531,6 +579,28 @@ namespace SixLabors.ImageSharp.Web.Tests
             var stream3 = new MemoryStream(data3) { Position = data3.Length + 1 };
 
             yield return new object[] { stream3, Array.Empty<byte>() };
+        }
+
+        private static ValueTask StreamDisposeAsync(Stream stream)
+        {
+            if (stream is null)
+            {
+                return default;
+            }
+
+#if NETCOREAPP2_1
+            try
+            {
+                stream.Dispose();
+                return default;
+            }
+            catch (Exception ex)
+            {
+                return new ValueTask(Task.FromException(ex));
+            }
+#else
+            return stream.DisposeAsync();
+#endif
         }
     }
 
