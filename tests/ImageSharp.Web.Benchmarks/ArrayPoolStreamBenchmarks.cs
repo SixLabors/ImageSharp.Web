@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
 
 namespace SixLabors.ImageSharp.Web.Benchmarks
@@ -25,6 +26,7 @@ namespace SixLabors.ImageSharp.Web.Benchmarks
         [Benchmark]
         public long ArrayPoolStream() => this.Write<ArrayPoolStream>();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long Write<T>()
             where T : Stream, new()
         {
@@ -45,6 +47,7 @@ namespace SixLabors.ImageSharp.Web.Benchmarks
             return stream.Length;
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowInvalidOperation()
         {
             throw new InvalidOperationException("Length mismatch!");
@@ -87,6 +90,6 @@ namespace SixLabors.ImageSharp.Web.Benchmarks
     | ArrayPoolStream | 10000000 | 17,774,926.54 ns |   351,848.912 ns |   889,167.099 ns | 17,748,900.00 ns |  1.23 |    0.06 |  843.7500 |  656.2500 |  656.2500 |  32317038 B |
     |                 |          |                  |                  |                  |                  |       |         |           |           |           |             |
     |    MemoryStream | 50000000 | 64,290,899.11 ns |   443,201.966 ns |   392,886.999 ns | 64,369,756.25 ns |  1.00 |    0.00 | 3875.0000 | 3875.0000 | 3875.0000 | 134216304 B |
-    | ArrayPoolStream | 50000000 | 56,506,362.44 ns | 1,116,487.780 ns | 2,013,257.770 ns | 55,936,050.00 ns |  0.89 |    0.04 | 2400.0000 | 1400.0000 | 1400.0000 | 136420398 B | 
+    | ArrayPoolStream | 50000000 | 56,506,362.44 ns | 1,116,487.780 ns | 2,013,257.770 ns | 55,936,050.00 ns |  0.89 |    0.04 | 2400.0000 | 1400.0000 | 1400.0000 | 136420398 B |
     */
 }
