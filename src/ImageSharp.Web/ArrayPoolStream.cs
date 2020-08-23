@@ -191,7 +191,9 @@ namespace SixLabors.ImageSharp.Web
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustBeGreaterThanOrEqualTo(offset, 0, nameof(offset));
             Guard.MustBeGreaterThanOrEqualTo(count, 0, nameof(count));
-            Guard.IsFalse(buffer.Length - offset < count, nameof(buffer), $"{offset} subtracted from the buffer length is less than {count}");
+
+            const string BufferMessage = "offset subtracted from the buffer length is less than count";
+            Guard.IsFalse(buffer.Length - offset < count, nameof(buffer), BufferMessage);
 
             this.EnsureNotDisposed();
 
@@ -301,8 +303,9 @@ namespace SixLabors.ImageSharp.Web
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustBeGreaterThanOrEqualTo(offset, 0, nameof(offset));
             Guard.MustBeGreaterThanOrEqualTo(count, 0, nameof(count));
-            Guard.IsFalse(buffer.Length - offset < count, nameof(buffer), $"{offset} subtracted from the buffer length is less than {count}");
 
+            const string BufferMessage = "offset subtracted from the buffer length is less than count";
+            Guard.IsFalse(buffer.Length - offset < count, nameof(buffer), BufferMessage);
             this.EnsureNotDisposed();
 
             int positionAfter = this.position + count;
