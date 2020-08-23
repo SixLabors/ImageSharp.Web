@@ -163,6 +163,37 @@ namespace SixLabors.ImageSharp.Web.Tests
         }
 
         [Fact]
+        public static void ArrayPoolStream_ReadByte()
+        {
+            // Short length so we hit optimized loop code.
+            const int Length = 8;
+            byte[] data = new byte[Length];
+            new Random().NextBytes(data);
+
+            using var ms1 = new ArrayPoolStream();
+            ms1.Write(data);
+            ms1.Position = 0;
+
+            using var ms2 = new ArrayPoolStream();
+            ms1.CopyTo(ms2);
+            ms1.Position = 0;
+            ms2.Position = 0;
+
+            byte[] buffer = new byte[Length];
+            ms1.Read(buffer);
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                Assert.Equal(data[i], buffer[i]);
+                Assert.Equal(data[i], ms2.ReadByte());
+            }
+
+            // Test read past stream length.
+            Assert.Equal(0, ms1.Read(buffer));
+            Assert.Equal(-1, ms2.ReadByte());
+        }
+
+        [Fact]
         public static async Task ArrayPoolStream_WriteToTests_ReadAsync()
         {
             using (var ms2 = new ArrayPoolStream())
@@ -558,6 +589,7 @@ namespace SixLabors.ImageSharp.Web.Tests
         public void ArrayPoolStream_ValidateRoundUpBehavior(int capacity, int expected)
         {
             Assert.Equal(expected, ArrayPoolStream.RoundUp(capacity));
+            Assert.Equal(expected, ArrayPoolStream.RoundUpScalar(capacity));
         }
 
         public static IEnumerable<object[]> CopyToData()

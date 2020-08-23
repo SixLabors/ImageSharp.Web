@@ -9,6 +9,10 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+#if SUPPORTS_RUNTIME_INTRINSICS
+using System.Runtime.Intrinsics.X86;
+#endif
+
 // Adapted from Pipelines.Sockets.Unofficial. MIT Licensed
 // https://github.com/mgravell/Pipelines.Sockets.Unofficial/blob/6740ea4f79a9ae75fda9de23d06ae4a614a516cf/src/Pipelines.Sockets.Unofficial/ArrayPoolStream.cs
 namespace SixLabors.ImageSharp.Web
@@ -535,13 +539,9 @@ namespace SixLabors.ImageSharp.Web
         public override string ToString()
             => $"{nameof(ArrayPoolStream)} at position {this.Position} of {this.Length}";
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int RoundUp(int capacity)
         {
-            if (capacity <= 1)
-            {
-                return capacity;
-            }
-
             // We need to do this because array-pools stop buffering beyond
             // a certain point, and just give us what we ask for; if we don't
             // apply upwards rounding *ourselves*, then beyond that limit, we
@@ -554,41 +554,65 @@ namespace SixLabors.ImageSharp.Web
             // so lz is 22; 32-22=10, 1 << 10= 1024
             //
             // or for 2: lz of 2-1 is 31, 32-31=1; 1<<1=2
-            int limit = 1 << (32 - LeadingZeros(capacity - 1));
-            return limit < 0 ? int.MaxValue : limit;
+#if SUPPORTS_RUNTIME_INTRINSICS
+            return RoundUpLzcnt(capacity);
+#else
+            return RoundUpScalar(capacity);
+#endif
+        }
 
-            // https://stackoverflow.com/questions/10439242/count-leading-zeroes-in-an-int32
+#if SUPPORTS_RUNTIME_INTRINSICS
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int RoundUpLzcnt(int capacity)
+        {
+            if (Lzcnt.IsSupported)
+            {
+                if (capacity <= 1)
+                {
+                    return capacity;
+                }
+
+                int limit = 1 << (32 - (int)Lzcnt.LeadingZeroCount((uint)(capacity - 1)));
+                return limit < 0 ? int.MaxValue : limit;
+            }
+
+            return RoundUpScalar(capacity);
+        }
+#endif
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int RoundUpScalar(int capacity)
+        {
+            if (capacity <= 1)
+            {
+                return capacity;
+            }
+
             static int LeadingZeros(int x)
             {
-#if SUPPORTS_RUNTIME_INTRINSICS
-                if (System.Runtime.Intrinsics.X86.Lzcnt.IsSupported)
-                {
-                    return (int)System.Runtime.Intrinsics.X86.Lzcnt.LeadingZeroCount((uint)x);
-                }
-                else
-#endif
-                {
-                    // Compile time constant
-                    const int NumIntBits = sizeof(int) * 8;
+                // Compile time constant
+                const int NumIntBits = sizeof(int) * 8;
 
-                    // Do the smearing
-                    x |= x >> 1;
-                    x |= x >> 2;
-                    x |= x >> 4;
-                    x |= x >> 8;
-                    x |= x >> 16;
+                // Do the smearing
+                x |= x >> 1;
+                x |= x >> 2;
+                x |= x >> 4;
+                x |= x >> 8;
+                x |= x >> 16;
 
-                    // Count the ones
-                    x -= x >> 1 & 0x55555555;
-                    x = (x >> 2 & 0x33333333) + (x & 0x33333333);
-                    x = (x >> 4) + x & 0x0f0f0f0f;
-                    x += x >> 8;
-                    x += x >> 16;
+                // Count the ones
+                x -= x >> 1 & 0x55555555;
+                x = (x >> 2 & 0x33333333) + (x & 0x33333333);
+                x = (x >> 4) + x & 0x0f0f0f0f;
+                x += x >> 8;
+                x += x >> 16;
 
-                    // Subtract # of 1s from 32
-                    return NumIntBits - (x & 0x0000003f);
-                }
+                // Subtract # of 1s from 32
+                return NumIntBits - (x & 0x0000003f);
             }
+
+            int limit = 1 << (32 - LeadingZeros(capacity - 1));
+            return limit < 0 ? int.MaxValue : limit;
         }
 
         private int InternalEmulateRead(int count)
