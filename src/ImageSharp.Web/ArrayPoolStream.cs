@@ -417,18 +417,18 @@ namespace SixLabors.ImageSharp.Web
         private void TakeNewBuffer(int capacity)
         {
             byte[] oldArr = this.array;
-            var oldLen = oldArr.Length;
+            int oldLength = this.length;
             byte[] newArr = this.pool.Rent(RoundUp(capacity));
             if (this.length != 0)
             {
-                Buffer.BlockCopy(oldArr, 0, newArr, 0, this.length);
+                Buffer.BlockCopy(oldArr, 0, newArr, 0, oldLength);
             }
 
             // Zero the contents when growing
-            new Span<byte>(newArr, oldLen, capacity - oldLen).Clear();
+            new Span<byte>(newArr, oldLength, capacity - oldLength).Clear();
 
             this.array = newArr;
-            if (oldLen != 0)
+            if (oldLength != 0)
             {
                 this.pool.Return(oldArr);
             }
