@@ -1,8 +1,9 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IO;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
@@ -18,6 +19,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// Gets or sets the base library configuration.
         /// </summary>
         public Configuration Configuration { get; set; } = Configuration.Default;
+
+        /// <summary>
+        /// Gets or sets the recyclable memorystream manager used for managing pooled stream
+        /// buffers independently from image buffer pooling.
+        /// </summary>
+        public RecyclableMemoryStreamManager MemoryStreamManager { get; set; } = new RecyclableMemoryStreamManager();
 
         /// <summary>
         /// Gets or sets the number of days to store images in the browser cache.

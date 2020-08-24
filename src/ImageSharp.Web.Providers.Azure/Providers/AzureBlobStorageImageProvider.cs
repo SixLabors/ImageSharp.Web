@@ -8,6 +8,7 @@ using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
+using Microsoft.IO;
 using SixLabors.ImageSharp.Web.Resolvers;
 using SixLabors.ImageSharp.Web.Resolvers.Azure;
 
@@ -35,6 +36,12 @@ namespace SixLabors.ImageSharp.Web.Providers.Azure
         private readonly AzureBlobStorageImageProviderOptions storageOptions;
 
         /// <summary>
+        /// The recyclable memorystream manager used for managing pooled stream
+        /// buffers independently from image buffer pooling.
+        /// </summary>
+        private readonly RecyclableMemoryStreamManager memoryStreamManager;
+
+        /// <summary>
         /// Contains various helper methods based on the current configuration.
         /// </summary>
         private readonly FormatUtilities formatUtilities;
@@ -48,14 +55,21 @@ namespace SixLabors.ImageSharp.Web.Providers.Azure
         /// Initializes a new instance of the <see cref="AzureBlobStorageImageProvider"/> class.
         /// </summary>
         /// <param name="storageOptions">The blob storage options.</param>
+        /// <param name="memoryStreamManager">
+        /// The recyclable memorystream manager used for managing pooled stream
+        /// buffers independently from image buffer pooling.
+        /// </param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public AzureBlobStorageImageProvider(
             IOptions<AzureBlobStorageImageProviderOptions> storageOptions,
+            RecyclableMemoryStreamManager memoryStreamManager,
             FormatUtilities formatUtilities)
         {
             Guard.NotNull(storageOptions, nameof(storageOptions));
+            Guard.NotNull(memoryStreamManager, nameof(memoryStreamManager));
 
             this.storageOptions = storageOptions.Value;
+            this.memoryStreamManager = memoryStreamManager;
             this.formatUtilities = formatUtilities;
 
             foreach (AzureBlobContainerClientOptions container in this.storageOptions.BlobContainers)
@@ -122,7 +136,7 @@ namespace SixLabors.ImageSharp.Web.Providers.Azure
                 return null;
             }
 
-            return new AzureBlobStorageImageResolver(blob);
+            return new AzureBlobStorageImageResolver(blob, this.memoryStreamManager);
         }
 
         /// <inheritdoc/>

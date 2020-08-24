@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.IO;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
@@ -39,6 +40,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                     options =>
                         {
                             options.Configuration = Configuration.Default;
+                            options.MemoryStreamManager = new RecyclableMemoryStreamManager();
                             options.MaxBrowserCacheDays = -1;
                             options.MaxCacheDays = -1;
                             options.CachedNameLength = 12;
@@ -70,6 +72,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                     options =>
                     {
                         options.Configuration = Configuration.Default;
+                        options.MemoryStreamManager = new RecyclableMemoryStreamManager();
                         options.MaxBrowserCacheDays = -1;
                         options.MaxCacheDays = -1;
                         options.CachedNameLength = 12;
@@ -109,6 +112,7 @@ namespace SixLabors.ImageSharp.Web.Tests
                 services.AddImageSharpCore(options =>
                 {
                     options.Configuration = Configuration.Default;
+                    options.MemoryStreamManager = new RecyclableMemoryStreamManager();
                     options.MaxBrowserCacheDays = -1;
                     options.MaxCacheDays = -1;
                     options.OnParseCommands = onParseCommands;
