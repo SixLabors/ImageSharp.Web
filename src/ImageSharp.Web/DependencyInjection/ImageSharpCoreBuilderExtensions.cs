@@ -78,19 +78,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the given <see cref="RecyclableMemoryStreamManager"/> adding it to the service collection.
-        /// </summary>
-        /// <param name="builder">The core builder.</param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="RecyclableMemoryStreamManager"/>.</param>
-        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        public static IImageSharpBuilder SetMemoryStreamManager(this IImageSharpBuilder builder, Func<IServiceProvider, RecyclableMemoryStreamManager> implementationFactory)
-        {
-            var descriptor = new ServiceDescriptor(typeof(RecyclableMemoryStreamManager), implementationFactory, ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
-            return builder;
-        }
-
-        /// <summary>
         /// Sets the given <see cref="IImageCache"/> adding it to the service collection.
         /// </summary>
         /// <typeparam name="TCache">The type of class implementing <see cref="IImageCache"/>to add.</typeparam>
@@ -301,6 +288,19 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             }
 
             builder.SetMemoryStreamManager(AllocatorFactory);
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the given <see cref="RecyclableMemoryStreamManager"/> adding it to the service collection.
+        /// </summary>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="RecyclableMemoryStreamManager"/>.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        private static IImageSharpBuilder SetMemoryStreamManager(this IImageSharpBuilder builder, Func<IServiceProvider, RecyclableMemoryStreamManager> implementationFactory)
+        {
+            var descriptor = new ServiceDescriptor(typeof(RecyclableMemoryStreamManager), implementationFactory, ServiceLifetime.Singleton);
+            builder.Services.Replace(descriptor);
             return builder;
         }
 
