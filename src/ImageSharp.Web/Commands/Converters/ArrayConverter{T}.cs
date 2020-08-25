@@ -1,10 +1,9 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 
 namespace SixLabors.ImageSharp.Web.Commands.Converters
 {
@@ -16,11 +15,6 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     {
         /// <inheritdoc/>
         public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
-        {
-            object result = base.ConvertFrom(culture, value, propertyType);
-
-            var list = result as IList<T>;
-            return list?.ToArray() ?? result;
-        }
+            => ((List<T>)base.ConvertFrom(culture, value, propertyType)).ToArray();
     }
 }
