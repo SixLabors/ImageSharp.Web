@@ -49,7 +49,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         public static TheoryData<ResizeMode, string> EnumValues = new TheoryData<ResizeMode, string>
         {
             { ResizeMode.Max, "max" },
-            { ResizeMode.Crop, "this is not an enum value" }, // Unknown returns default
+            { ResizeMode.Crop, "this is not, an enum value" }, // Unknown returns default
         };
 
         public static TheoryData<int[], string> IntegralArrays = new TheoryData<int[], string>
