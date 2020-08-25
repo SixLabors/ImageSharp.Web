@@ -45,15 +45,15 @@ jobs:
                   git fetch --prune --unshallow
                   git submodule -q update --init --recursive
 
-            - name: Setup DotNet SDK 2.1
-              uses: actions/setup-dotnet@v1
-              with:
-                  dotnet-version: "2.1.x"
-
             - name: Setup DotNet SDK 3.1
               uses: actions/setup-dotnet@v1
               with:
                   dotnet-version: "3.1.x"
+
+            - name: Setup DotNet SDK 2.1
+              uses: actions/setup-dotnet@v1
+              with:
+                  dotnet-version: "2.1.x"
 
             - name: Install Azurite Linux
               if: matrix.options.os == 'ubuntu-latest'
@@ -110,15 +110,15 @@ jobs:
                   git fetch --prune --unshallow
                   git submodule -q update --init --recursive
 
-            - name: Setup DotNet SDK 2.1
-              uses: actions/setup-dotnet@v1
-              with:
-                  dotnet-version: "2.1.x"
-
             - name: Setup DotNet SDK 3.1
               uses: actions/setup-dotnet@v1
               with:
                   dotnet-version: "3.1.x"
+
+            - name: Setup DotNet SDK 2.1
+              uses: actions/setup-dotnet@v1
+              with:
+                  dotnet-version: "2.1.x"
 
             - name: Pack
               shell: pwsh
