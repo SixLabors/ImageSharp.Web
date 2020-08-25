@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IO;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Caching;
@@ -49,7 +50,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// The buffer data pool.
         /// </summary>
-        private readonly MemoryAllocator memoryAllocator;
+        private readonly RecyclableMemoryStreamManager memoryStreamManager;
 
         /// <summary>
         /// The parser for parsing commands from the current request.
@@ -92,7 +93,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="next">The next middleware in the pipeline.</param>
         /// <param name="options">The middleware configuration options.</param>
         /// <param name="loggerFactory">An <see cref="ILoggerFactory"/> instance used to create loggers.</param>
-        /// <param name="memoryAllocator">An <see cref="MemoryAllocator"/> instance used to allocate arrays transporting encoded image data.</param>
         /// <param name="requestParser">An <see cref="IRequestParser"/> instance used to parse image requests for commands.</param>
         /// <param name="resolvers">A collection of <see cref="IImageProvider"/> instances used to resolve images.</param>
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images.</param>
@@ -103,7 +103,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
             RequestDelegate next,
             IOptions<ImageSharpMiddlewareOptions> options,
             ILoggerFactory loggerFactory,
-            MemoryAllocator memoryAllocator,
             IRequestParser requestParser,
             IEnumerable<IImageProvider> resolvers,
             IEnumerable<IImageWebProcessor> processors,
@@ -114,7 +113,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
             Guard.NotNull(next, nameof(next));
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
-            Guard.NotNull(memoryAllocator, nameof(memoryAllocator));
             Guard.NotNull(requestParser, nameof(requestParser));
             Guard.NotNull(resolvers, nameof(resolvers));
             Guard.NotNull(processors, nameof(processors));
@@ -124,7 +122,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             this.next = next;
             this.options = options.Value;
-            this.memoryAllocator = memoryAllocator;
+            this.memoryStreamManager = this.options.MemoryStreamManager;
             this.requestParser = requestParser;
             this.providers = resolvers as IImageProvider[] ?? resolvers.ToArray();
             this.processors = processors as IImageWebProcessor[] ?? processors.ToArray();
@@ -245,7 +243,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
 
                 // Not cached? Let's get it from the image resolver.
-                ChunkedMemoryStream outStream = null;
+                RecyclableMemoryStream outStream = null;
                 try
                 {
                     if (processRequest)
@@ -257,7 +255,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             // No allocations here for inStream since we are passing the raw input stream.
                             // outStream allocation depends on the memory allocator used.
                             ImageCacheMetadata cachedImageMetadata = default;
-                            outStream = new ChunkedMemoryStream();
+                            outStream = new RecyclableMemoryStream(this.options.MemoryStreamManager);
                             using (Stream inStream = await sourceImageResolver.OpenReadAsync())
                             {
                                 IImageFormat format;
