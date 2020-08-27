@@ -65,7 +65,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             builder.Services.Configure(setupAction);
 
             builder.SetMemoryAllocatorFromMiddlewareOptions();
-            builder.SetMemoryStreamManagerFromMiddlewareOptions();
             builder.SetFormatUtilitesFromMiddlewareOptions();
 
             return builder;
