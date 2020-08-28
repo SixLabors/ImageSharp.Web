@@ -8,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using Microsoft.IO;
 using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
@@ -272,35 +271,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             }
 
             builder.SetMemoryAllocator(AllocatorFactory);
-            return builder;
-        }
-
-        /// <summary>
-        /// Sets the <see cref="RecyclableMemoryStream"/> configured in  <see cref="ImageSharpMiddlewareOptions"/>.
-        /// </summary>
-        /// <param name="builder">The core builder.</param>
-        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        internal static IImageSharpBuilder SetMemoryStreamManagerFromMiddlewareOptions(this IImageSharpBuilder builder)
-        {
-            static RecyclableMemoryStreamManager AllocatorFactory(IServiceProvider s)
-            {
-                return s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.MemoryStreamManager;
-            }
-
-            builder.SetMemoryStreamManager(AllocatorFactory);
-            return builder;
-        }
-
-        /// <summary>
-        /// Sets the given <see cref="RecyclableMemoryStreamManager"/> adding it to the service collection.
-        /// </summary>
-        /// <param name="builder">The core builder.</param>
-        /// <param name="implementationFactory">The factory method for returning a <see cref="RecyclableMemoryStreamManager"/>.</param>
-        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        private static IImageSharpBuilder SetMemoryStreamManager(this IImageSharpBuilder builder, Func<IServiceProvider, RecyclableMemoryStreamManager> implementationFactory)
-        {
-            var descriptor = new ServiceDescriptor(typeof(RecyclableMemoryStreamManager), implementationFactory, ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
             return builder;
         }
 

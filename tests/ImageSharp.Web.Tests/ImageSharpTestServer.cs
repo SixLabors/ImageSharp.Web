@@ -101,25 +101,54 @@ namespace SixLabors.ImageSharp.Web.Tests
 
         public static TestServer CreateAzure() => Create(DefaultConfig, DefaultServices);
 
-        public static TestServer CreateWithActions(
+        public static TestServer CreateWithActionsNoCache(
             Action<ImageCommandContext> onParseCommands,
             Action<FormattedImage> onBeforeSave = null,
             Action<ImageProcessingContext> onProcessed = null,
             Action<HttpContext> onPrepareResponse = null)
         {
+            Action<ImageSharpMiddlewareOptions> config = options =>
+            {
+                options.Configuration = Configuration.Default;
+                options.MemoryStreamManager = new RecyclableMemoryStreamManager();
+                options.MaxBrowserCacheDays = -1;
+                options.MaxCacheDays = -1;
+                options.OnParseCommands = onParseCommands;
+                options.OnBeforeSave = onBeforeSave;
+                options.OnProcessed = onProcessed;
+                options.OnPrepareResponse = onPrepareResponse;
+            };
+
+            return CreateWithActionsImpl(config);
+        }
+
+        public static TestServer CreateWithActionsCache(
+            Action<ImageCommandContext> onParseCommands,
+            Action<FormattedImage> onBeforeSave = null,
+            Action<ImageProcessingContext> onProcessed = null,
+            Action<HttpContext> onPrepareResponse = null)
+        {
+            Action<ImageSharpMiddlewareOptions> config = options =>
+            {
+                options.Configuration = Configuration.Default;
+                options.MemoryStreamManager = new RecyclableMemoryStreamManager();
+                options.MaxBrowserCacheDays = 7;
+                options.MaxCacheDays = 365;
+                options.OnParseCommands = onParseCommands;
+                options.OnBeforeSave = onBeforeSave;
+                options.OnProcessed = onProcessed;
+                options.OnPrepareResponse = onPrepareResponse;
+            };
+
+            return CreateWithActionsImpl(config);
+        }
+
+        private static TestServer CreateWithActionsImpl(
+            Action<ImageSharpMiddlewareOptions> config)
+        {
             void ConfigureServices(IServiceCollection services)
             {
-                services.AddImageSharpCore(options =>
-                {
-                    options.Configuration = Configuration.Default;
-                    options.MemoryStreamManager = new RecyclableMemoryStreamManager();
-                    options.MaxBrowserCacheDays = -1;
-                    options.MaxCacheDays = -1;
-                    options.OnParseCommands = onParseCommands;
-                    options.OnBeforeSave = onBeforeSave;
-                    options.OnProcessed = onProcessed;
-                    options.OnPrepareResponse = onPrepareResponse;
-                })
+                services.AddImageSharpCore(config)
                 .SetRequestParser<QueryCollectionRequestParser>()
                 .Configure<PhysicalFileSystemCacheOptions>(_ => { })
                 .SetCache<PhysicalFileSystemCache>()
@@ -140,7 +169,9 @@ namespace SixLabors.ImageSharp.Web.Tests
             return Create(DefaultConfig, ConfigureServices);
         }
 
-        public static TestServer Create(Action<IApplicationBuilder> configureApp, Action<IServiceCollection> configureServices = null)
+        public static TestServer Create(
+            Action<IApplicationBuilder> configureApp,
+            Action<IServiceCollection> configureServices = null)
         {
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(new[]
