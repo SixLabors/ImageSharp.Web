@@ -37,6 +37,16 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public int MaxCacheDays { get; set; } = 365;
 
         /// <summary>
+        /// Gets or sets the number of seconds to store images in the image cache.
+        /// </summary>
+        public int MaxCacheMinutes { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of minutes to store images in the image cache.
+        /// </summary>
+        public int MaxCacheSeconds { get; set; }
+
+        /// <summary>
         /// Gets or sets the length of the filename to use (minus the extension) when storing images in the image cache.
         /// </summary>
         public uint CachedNameLength { get; set; } = 12;
