@@ -127,7 +127,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <returns>The <see cref="Task"/>.</returns>
         public Task SendStatusAsync(int statusCode, in ImageCacheMetadata metaData)
         {
-            this.ApplyResponseHeaders(statusCode, metaData.ContentType, this.ComputeMaxAge(metaData));
+            this.ApplyResponseHeaders(statusCode, metaData.ContentType, metaData.CacheControlMaxAge);
 
             // this.logger.LogHandled(statusCode, SubPath);
             return ResponseConstants.CompletedTask;
@@ -141,7 +141,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <returns>The <see cref="Task"/>.</returns>
         public async Task SendAsync(Stream stream, ImageCacheMetadata metaData)
         {
-            this.ApplyResponseHeaders(ResponseConstants.Status200Ok, metaData.ContentType, this.ComputeMaxAge(metaData));
+            this.ApplyResponseHeaders(ResponseConstants.Status200Ok, metaData.ContentType, metaData.CacheControlMaxAge);
 
             if (stream.CanSeek)
             {
@@ -266,18 +266,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 bool unmodified = ifUnmodifiedSince >= this.fileLastModified;
                 this.ifUnmodifiedSinceState = unmodified ? PreconditionState.ShouldProcess : PreconditionState.PreconditionFailed;
             }
-        }
-
-        private TimeSpan ComputeMaxAge(in ImageCacheMetadata metaData)
-        {
-            // 14.9.3 CacheControl Max-Age
-            var maxAge = TimeSpan.FromDays(this.options.MaxBrowserCacheDays);
-            if (!metaData.CacheControlMaxAge.Equals(TimeSpan.MinValue))
-            {
-                maxAge = metaData.CacheControlMaxAge;
-            }
-
-            return maxAge;
         }
     }
 }

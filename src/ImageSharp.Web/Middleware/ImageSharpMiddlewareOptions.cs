@@ -28,11 +28,23 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
         /// <summary>
         /// Gets or sets the number of days to store images in the browser cache.
+        /// Defaults to 7.
         /// </summary>
         public int MaxBrowserCacheDays { get; set; } = 7;
 
         /// <summary>
+        /// Gets or sets the number of minutes to store images in the browser cache.
+        /// </summary>
+        public int MaxBrowserCacheMinutes { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of seconds to store images in the browser cache.
+        /// </summary>
+        public int MaxBrowserCacheSeconds { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of days to store images in the image cache.
+        /// Defaults to 365.
         /// </summary>
         public int MaxCacheDays { get; set; } = 365;
 
@@ -47,7 +59,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public int MaxCacheSeconds { get; set; }
 
         /// <summary>
-        /// Gets or sets the length of the filename to use (minus the extension) when storing images in the image cache.
+        /// Gets or sets the length of the filename to use (minus the extension) when storing
+        /// images in the image cache. Defaults to 12.
         /// </summary>
         public uint CachedNameLength { get; set; } = 12;
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -78,6 +79,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private readonly DateTimeOffset minCacheLastWriteTimeUtc;
 
         /// <summary>
+        /// The maximum time to store the response in a browser cache.
+        /// </summary>
+        private readonly TimeSpan maxBrowserCacheDuration;
+
+        /// <summary>
         /// The collection of known commands gathered from the processors.
         /// </summary>
         private readonly HashSet<string> knownCommands;
@@ -128,6 +134,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.cache = cache;
             this.cacheHash = cacheHash;
             this.minCacheLastWriteTimeUtc = this.GetMaxCacheDateTimeOffset();
+            this.maxBrowserCacheDuration = this.GetMaxBrowserCacheDuration();
 
             var commands = new HashSet<string>();
             foreach (IImageWebProcessor processor in this.processors)
@@ -256,9 +263,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             format = image.Format;
                         }
 
-                        // Check to see if the source metadata has a cachecontrol max-age value and use it to
-                        // override the default max age from our options.
-                        var maxAge = TimeSpan.FromDays(this.options.MaxBrowserCacheDays);
+                        // 14.9.3 CacheControl Max-Age
+                        // Check to see if the source metadata has a CacheControl Max-Age value
+                        // and use it to override the default max age from our options.
+                        TimeSpan maxAge = this.maxBrowserCacheDuration;
                         if (!sourceImageMetadata.CacheControlMaxAge.Equals(TimeSpan.MinValue))
                         {
                             maxAge = sourceImageMetadata.CacheControlMaxAge;
@@ -415,6 +423,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 .AddDays(-this.options.MaxCacheDays)
                 .AddMinutes(-this.options.MaxCacheMinutes)
                 .AddSeconds(-this.options.MaxCacheSeconds);
+        }
+
+        private TimeSpan GetMaxBrowserCacheDuration()
+        {
+            return TimeSpan.FromDays(this.options.MaxBrowserCacheDays)
+                .Add(TimeSpan.FromMinutes(this.options.MaxBrowserCacheMinutes))
+                .Add(TimeSpan.FromSeconds(this.options.MaxBrowserCacheSeconds));
         }
     }
 }
