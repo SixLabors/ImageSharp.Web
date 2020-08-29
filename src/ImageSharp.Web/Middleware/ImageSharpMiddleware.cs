@@ -73,17 +73,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private readonly ICacheHash cacheHash;
 
         /// <summary>
-        /// The minimum allowable last write time for source files.
-        /// Used to determine whether a file has expired its cache duration.
-        /// </summary>
-        private readonly DateTimeOffset minCacheLastWriteTimeUtc;
-
-        /// <summary>
-        /// The maximum time to store the response in a browser cache.
-        /// </summary>
-        private readonly TimeSpan maxBrowserCacheDuration;
-
-        /// <summary>
         /// The collection of known commands gathered from the processors.
         /// </summary>
         private readonly HashSet<string> knownCommands;
@@ -133,8 +122,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.processors = processors as IImageWebProcessor[] ?? processors.ToArray();
             this.cache = cache;
             this.cacheHash = cacheHash;
-            this.minCacheLastWriteTimeUtc = this.GetMaxCacheDateTimeOffset();
-            this.maxBrowserCacheDuration = this.GetMaxBrowserCacheDuration();
 
             var commands = new HashSet<string>();
             foreach (IImageWebProcessor processor in this.processors)
@@ -266,7 +253,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         // 14.9.3 CacheControl Max-Age
                         // Check to see if the source metadata has a CacheControl Max-Age value
                         // and use it to override the default max age from our options.
-                        TimeSpan maxAge = this.maxBrowserCacheDuration;
+                        TimeSpan maxAge = this.options.BrowserMaxAge;
                         if (!sourceImageMetadata.CacheControlMaxAge.Equals(TimeSpan.MinValue))
                         {
                             maxAge = sourceImageMetadata.CacheControlMaxAge;
@@ -344,7 +331,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     {
                         // Has the cached image expired or has the source image been updated?
                         if (cachedImageMetadata.SourceLastWriteTimeUtc == sourceImageMetadata.LastWriteTimeUtc
-                            && cachedImageMetadata.CacheLastWriteTimeUtc > this.minCacheLastWriteTimeUtc)
+                            && cachedImageMetadata.CacheLastWriteTimeUtc > (DateTimeOffset.UtcNow - this.options.CacheMaxAge))
                         {
                             // We're pulling the image from the cache.
                             using Stream cachedBuffer = await cachedImageResolver.OpenReadAsync();
@@ -415,21 +402,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
             sb.Append(QueryString.Create(commands));
 
             return sb.ToString().ToLowerInvariant();
-        }
-
-        private DateTimeOffset GetMaxCacheDateTimeOffset()
-        {
-            return DateTimeOffset.UtcNow
-                .AddDays(-this.options.MaxCacheDays)
-                .AddMinutes(-this.options.MaxCacheMinutes)
-                .AddSeconds(-this.options.MaxCacheSeconds);
-        }
-
-        private TimeSpan GetMaxBrowserCacheDuration()
-        {
-            return TimeSpan.FromDays(this.options.MaxBrowserCacheDays)
-                .Add(TimeSpan.FromMinutes(this.options.MaxBrowserCacheMinutes))
-                .Add(TimeSpan.FromSeconds(this.options.MaxBrowserCacheSeconds));
         }
     }
 }

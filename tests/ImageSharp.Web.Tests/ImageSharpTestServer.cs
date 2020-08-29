@@ -41,8 +41,8 @@ namespace SixLabors.ImageSharp.Web.Tests
                         {
                             options.Configuration = Configuration.Default;
                             options.MemoryStreamManager = new RecyclableMemoryStreamManager();
-                            options.MaxBrowserCacheDays = -1;
-                            options.MaxCacheDays = -1;
+                            options.BrowserMaxAge = TimeSpan.FromDays(-1);
+                            options.CacheMaxAge = TimeSpan.FromDays(-1);
                             options.CachedNameLength = 12;
                             options.OnParseCommands = _ => { };
                             options.OnBeforeSave = _ => { };
@@ -73,8 +73,8 @@ namespace SixLabors.ImageSharp.Web.Tests
                     {
                         options.Configuration = Configuration.Default;
                         options.MemoryStreamManager = new RecyclableMemoryStreamManager();
-                        options.MaxBrowserCacheDays = -1;
-                        options.MaxCacheDays = -1;
+                        options.BrowserMaxAge = TimeSpan.FromDays(-1);
+                        options.CacheMaxAge = TimeSpan.FromDays(-1);
                         options.CachedNameLength = 12;
                         options.OnParseCommands = _ => { };
                         options.OnBeforeSave = _ => { };
@@ -111,8 +111,8 @@ namespace SixLabors.ImageSharp.Web.Tests
             {
                 options.Configuration = Configuration.Default;
                 options.MemoryStreamManager = new RecyclableMemoryStreamManager();
-                options.MaxBrowserCacheDays = -1;
-                options.MaxCacheDays = -1;
+                options.BrowserMaxAge = TimeSpan.FromDays(-1);
+                options.CacheMaxAge = TimeSpan.FromDays(-1);
                 options.OnParseCommands = onParseCommands;
                 options.OnBeforeSave = onBeforeSave;
                 options.OnProcessed = onProcessed;
@@ -132,8 +132,8 @@ namespace SixLabors.ImageSharp.Web.Tests
             {
                 options.Configuration = Configuration.Default;
                 options.MemoryStreamManager = new RecyclableMemoryStreamManager();
-                options.MaxBrowserCacheDays = 7;
-                options.MaxCacheDays = 365;
+                options.BrowserMaxAge = TimeSpan.FromDays(7);
+                options.CacheMaxAge = TimeSpan.FromDays(365);
                 options.OnParseCommands = onParseCommands;
                 options.OnBeforeSave = onBeforeSave;
                 options.OnProcessed = onProcessed;

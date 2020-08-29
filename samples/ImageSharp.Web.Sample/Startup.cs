@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -82,8 +83,8 @@ namespace SixLabors.ImageSharp.Web.Sample
                 options =>
                     {
                         options.Configuration = Configuration.Default;
-                        options.MaxBrowserCacheDays = 7;
-                        options.MaxCacheDays = 365;
+                        options.BrowserMaxAge = TimeSpan.FromDays(7);
+                        options.CacheMaxAge = TimeSpan.FromDays(365);
                         options.CachedNameLength = 8;
                         options.OnParseCommands = _ => { };
                         options.OnBeforeSave = _ => { };
@@ -105,8 +106,8 @@ namespace SixLabors.ImageSharp.Web.Sample
                 options =>
                     {
                         options.Configuration = Configuration.Default;
-                        options.MaxBrowserCacheDays = 7;
-                        options.MaxCacheDays = 365;
+                        options.BrowserMaxAge = TimeSpan.FromDays(7);
+                        options.CacheMaxAge = TimeSpan.FromDays(365);
                         options.CachedNameLength = 8;
                         options.OnParseCommands = _ => { };
                         options.OnBeforeSave = _ => { };
