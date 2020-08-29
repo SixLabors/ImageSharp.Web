@@ -8,7 +8,7 @@ See https://t.co/0A4WzeGMZS
   <Target Name="RemoveSamples">
     <ItemGroup>
       <ProjectReference
-        Remove="$(MSBuildThisFileDirectory)\samples\ImageSharp.Web.Sample\ImageSharp.Web.Sample.csproj"
+        Remove="$(MSBuildThisFileDirectory)samples\ImageSharp.Web.Sample\ImageSharp.Web.Sample.csproj"
         Condition="'$(GITHUB_ACTIONS)' == 'true'"/>
     </ItemGroup>
   </Target>
