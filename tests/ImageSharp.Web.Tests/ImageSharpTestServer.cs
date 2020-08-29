@@ -28,6 +28,7 @@ namespace SixLabors.ImageSharp.Web.Tests
     {
         private const string AzureConnectionString = "UseDevelopmentStorage=true";
         private const string AzureContainerName = "azure";
+        private const string AzureCacheContainerName = "is-cache";
         private const string ImagePath = "SubFolder/imagesharp-logo.png";
         public const string PhysicalTestImage = "http://localhost/" + ImagePath;
         public const string AzureTestImage = "http://localhost/" + AzureContainerName + "/" + ImagePath;
@@ -97,9 +98,9 @@ namespace SixLabors.ImageSharp.Web.Tests
                     .AddProcessor<ResizeWebProcessor>();
         };
 
-        public static TestServer CreateDefault() => Create(DefaultConfig, DefaultServices);
+        public static TestServer CreateDefault() => CreateTestServer(DefaultConfig, DefaultServices);
 
-        public static TestServer CreateAzure() => Create(DefaultConfig, DefaultServices);
+        public static TestServer CreateAzure() => CreateTestServer(DefaultConfig, DefaultServices);
 
         public static TestServer CreateWithActionsNoCache(
             Action<ImageCommandContext> onParseCommands,
@@ -166,12 +167,12 @@ namespace SixLabors.ImageSharp.Web.Tests
                 .AddProcessor<ResizeWebProcessor>();
             }
 
-            return Create(DefaultConfig, ConfigureServices);
+            return CreateTestServer(DefaultConfig, ConfigureServices);
         }
 
-        public static TestServer Create(
+        private static TestServer CreateTestServer(
             Action<IApplicationBuilder> configureApp,
-            Action<IServiceCollection> configureServices = null)
+            Action<IServiceCollection> configureServices)
         {
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(new[]
@@ -182,10 +183,11 @@ namespace SixLabors.ImageSharp.Web.Tests
             IWebHostBuilder builder = new WebHostBuilder()
                 .UseConfiguration(configuration)
                 .Configure(configureApp)
-                .ConfigureServices(configureServices ?? default);
+                .ConfigureServices(configureServices);
 
             var server = new TestServer(builder);
 
+            // TODO: Move me to the factory.
             InitializeAzureStorage(server);
 
             return server;
@@ -195,13 +197,12 @@ namespace SixLabors.ImageSharp.Web.Tests
         {
             // Upload an image to the Azure Test Storage;
             var container = new BlobContainerClient(AzureConnectionString, AzureContainerName);
-
             container.CreateIfNotExists(PublicAccessType.Blob);
 
-#if NETCOREAPP3_1
-            IWebHostEnvironment environment = server.Host.Services.GetRequiredService<IWebHostEnvironment>();
-#else
+#if NETCOREAPP2_1
             IHostingEnvironment environment = server.Host.Services.GetRequiredService<IHostingEnvironment>();
+#else
+            IWebHostEnvironment environment = server.Host.Services.GetRequiredService<IWebHostEnvironment>();
 #endif
 
             BlobClient blob = container.GetBlobClient(ImagePath);
@@ -209,10 +210,8 @@ namespace SixLabors.ImageSharp.Web.Tests
             if (!blob.Exists())
             {
                 IFileInfo file = environment.WebRootFileProvider.GetFileInfo(ImagePath);
-                using (Stream stream = file.CreateReadStream())
-                {
-                    blob.Upload(stream, true);
-                }
+                using Stream stream = file.CreateReadStream();
+                blob.Upload(stream, true);
             }
         }
 

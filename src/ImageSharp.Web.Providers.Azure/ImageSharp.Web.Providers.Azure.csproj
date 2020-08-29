@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" />
     <PackageReference Include="MinVer" PrivateAssets="All" />
   </ItemGroup>
 

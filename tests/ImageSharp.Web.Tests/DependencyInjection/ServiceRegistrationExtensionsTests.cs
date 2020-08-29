@@ -25,7 +25,7 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
                 Assert.DoesNotContain(services, x => x.ImplementationType == typeof(MockImageProvider));
             }
 
-            using (TestServer server = ImageSharpTestServer.Create(ImageSharpTestServer.DefaultConfig, RemoveServices))
+            using (TestServer server = ImageSharpTestServer.CreateTestServer(ImageSharpTestServer.DefaultConfig, RemoveServices))
             {
             }
         }
@@ -47,7 +47,7 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
                 Assert.DoesNotContain(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockImageProvider));
             }
 
-            using (TestServer server = ImageSharpTestServer.Create(ImageSharpTestServer.DefaultConfig, RemoveServices))
+            using (TestServer server = ImageSharpTestServer.CreateTestServer(ImageSharpTestServer.DefaultConfig, RemoveServices))
             {
             }
         }
@@ -67,7 +67,7 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
                 Assert.DoesNotContain(services, x => x.ImplementationType == typeof(MockWebProcessor));
             }
 
-            using (TestServer server = ImageSharpTestServer.Create(ImageSharpTestServer.DefaultConfig, RemoveServices))
+            using (TestServer server = ImageSharpTestServer.CreateTestServer(ImageSharpTestServer.DefaultConfig, RemoveServices))
             {
             }
         }
@@ -89,7 +89,7 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
                 Assert.DoesNotContain(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockWebProcessor));
             }
 
-            using (TestServer server = ImageSharpTestServer.Create(ImageSharpTestServer.DefaultConfig, RemoveServices))
+            using (TestServer server = ImageSharpTestServer.CreateTestServer(ImageSharpTestServer.DefaultConfig, RemoveServices))
             {
             }
         }
