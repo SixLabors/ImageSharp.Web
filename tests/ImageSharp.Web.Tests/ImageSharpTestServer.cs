@@ -170,7 +170,7 @@ namespace SixLabors.ImageSharp.Web.Tests
             return CreateTestServer(DefaultConfig, ConfigureServices);
         }
 
-        private static TestServer CreateTestServer(
+        public static TestServer CreateTestServer(
             Action<IApplicationBuilder> configureApp,
             Action<IServiceCollection> configureServices)
         {
