@@ -2,11 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <CodeAnalysisRuleSet>..\..\shared-infrastructure\SixLabors.Tests.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SixLabors.ImageSharp.Web" Version="1.0.0-unstable0056" />
+    <ProjectReference Include="..\..\src\ImageSharp.Web\ImageSharp.Web.csproj" />
   </ItemGroup>
-
 </Project>
