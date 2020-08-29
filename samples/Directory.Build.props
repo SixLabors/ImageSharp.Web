@@ -12,8 +12,9 @@
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileDirectory)..\Directory.Build.props</MSBuildAllProjects>
-    <SixLaborsProjectCategory>tests</SixLaborsProjectCategory>
+    <SixLaborsProjectCategory>samples</SixLaborsProjectCategory>
     <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -26,15 +27,5 @@
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.props" />
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" IsImplicitlyDefined="true" />
-    <PackageReference Include="xunit" IsImplicitlyDefined="true" />
-    <PackageReference Include="xunit.runner.visualstudio" IsImplicitlyDefined="true" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(codecov)' == 'true' AND '$(IsTestProject)' == 'true'">
-    <PackageReference Include="coverlet.collector" IsImplicitlyDefined="true" />
-  </ItemGroup>
   
 </Project>

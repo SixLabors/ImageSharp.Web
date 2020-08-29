@@ -3,10 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.452
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C317F1B1-D75E-4C6D-83EB-80367343E0D7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_root", "_root", "{C317F1B1-D75E-4C6D-83EB-80367343E0D7}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		before.ImageSharp.Web.sln.targets = before.ImageSharp.Web.sln.targets
 		ci-build.ps1 = ci-build.ps1
 		ci-pack.ps1 = ci-pack.ps1
 		ci-test.ps1 = ci-test.ps1
@@ -54,6 +55,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build-and-test.yml = .github\workflows\build-and-test.yml
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{8B4A805D-D780-4A18-9BDA-4D27B4BD11AA}"
+	ProjectSection(SolutionItems) = preProject
+		samples\Directory.Build.props = samples\Directory.Build.props
+		samples\Directory.Build.targets = samples\Directory.Build.targets
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Web.Sample", "samples\ImageSharp.Web.Sample\ImageSharp.Web.Sample.csproj", "{8F40DEC6-A97F-4002-A504-13E188665A98}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -118,6 +127,18 @@ Global
 		{E2A545EC-B909-4EAD-B95F-397F68588BE3}.Release|x64.Build.0 = Release|Any CPU
 		{E2A545EC-B909-4EAD-B95F-397F68588BE3}.Release|x86.ActiveCfg = Release|Any CPU
 		{E2A545EC-B909-4EAD-B95F-397F68588BE3}.Release|x86.Build.0 = Release|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Debug|x64.Build.0 = Debug|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Debug|x86.Build.0 = Debug|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Release|x64.ActiveCfg = Release|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Release|x64.Build.0 = Release|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Release|x86.ActiveCfg = Release|Any CPU
+		{8F40DEC6-A97F-4002-A504-13E188665A98}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -131,6 +152,7 @@ Global
 		{68A8CC40-6AED-4E96-B524-31B1158FDEEA} = {815C0625-CD3D-440F-9F80-2D83856AB7AE}
 		{04955CD1-F249-4899-9F61-6C7487BEECE1} = {B8152C86-B657-4967-B297-42F89A10D23A}
 		{2A5EF4AC-E228-42C1-970B-35630A9AF250} = {B8152C86-B657-4967-B297-42F89A10D23A}
+		{8F40DEC6-A97F-4002-A504-13E188665A98} = {8B4A805D-D780-4A18-9BDA-4D27B4BD11AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C5B38B65-A19E-4359-859C-5B2205429BD1}

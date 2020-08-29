@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -249,9 +250,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             format = image.Format;
                         }
 
-                        // Check to see if the source metadata has a cachecontrol max-age value and use it to
-                        // override the default max age from our options.
-                        var maxAge = TimeSpan.FromDays(this.options.MaxBrowserCacheDays);
+                        // 14.9.3 CacheControl Max-Age
+                        // Check to see if the source metadata has a CacheControl Max-Age value
+                        // and use it to override the default max age from our options.
+                        TimeSpan maxAge = this.options.BrowserMaxAge;
                         if (!sourceImageMetadata.CacheControlMaxAge.Equals(TimeSpan.MinValue))
                         {
                             maxAge = sourceImageMetadata.CacheControlMaxAge;
@@ -329,7 +331,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     {
                         // Has the cached image expired or has the source image been updated?
                         if (cachedImageMetadata.SourceLastWriteTimeUtc == sourceImageMetadata.LastWriteTimeUtc
-                            && cachedImageMetadata.CacheLastWriteTimeUtc > DateTimeOffset.UtcNow.AddDays(-this.options.MaxCacheDays))
+                            && cachedImageMetadata.CacheLastWriteTimeUtc > (DateTimeOffset.UtcNow - this.options.CacheMaxAge))
                         {
                             // We're pulling the image from the cache.
                             using Stream cachedBuffer = await cachedImageResolver.OpenReadAsync();
