@@ -73,6 +73,20 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
             Assert.Equal(HttpStatusCode.NotModified, response.StatusCode);
             Assert.Equal(0, response.Content.Headers.ContentLength);
             Assert.Equal(format.DefaultMimeType, response.Content.Headers.ContentType.MediaType);
+
+            // 412 response
+            request = new HttpRequestMessage
+            {
+                RequestUri = new Uri(url + Command),
+                Method = HttpMethod.Get,
+            };
+
+            request.Headers.IfUnmodifiedSince = DateTimeOffset.MinValue;
+
+            response = await this.HttpClient.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.PreconditionFailed, response.StatusCode);
+            Assert.Equal(0, response.Content.Headers.ContentLength);
         }
     }
 }
