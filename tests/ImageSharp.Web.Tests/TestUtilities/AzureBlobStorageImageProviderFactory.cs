@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Hosting;
@@ -44,7 +45,21 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             {
                 IFileInfo file = environment.WebRootFileProvider.GetFileInfo(TestConstants.ImagePath);
                 using Stream stream = file.CreateReadStream();
-                blob.Upload(stream, true);
+
+                // Set the max-age property so we get coverage for testing is in our Azure provider.
+                var cacheControl = new CacheControlHeaderValue
+                {
+                    Public = true,
+                    MaxAge = TimeSpan.FromDays(7),
+                    MustRevalidate = true
+                };
+
+                var headers = new BlobHttpHeaders
+                {
+                    CacheControl = cacheControl.ToString(),
+                };
+
+                blob.Upload(stream, httpHeaders: headers);
             }
         }
     }
