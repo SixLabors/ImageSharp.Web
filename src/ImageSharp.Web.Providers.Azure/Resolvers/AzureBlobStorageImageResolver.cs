@@ -37,10 +37,9 @@ namespace SixLabors.ImageSharp.Web.Resolvers.Azure
             if (CacheControlHeaderValue.TryParse(properties.CacheControl, out CacheControlHeaderValue cacheControl))
             {
                 // Weirdly passing null to TryParse returns true.
-                TimeSpan sourceMaxAge = cacheControl?.MaxAge.GetValueOrDefault() ?? TimeSpan.Zero;
-                if (sourceMaxAge != TimeSpan.Zero)
+                if (cacheControl != null)
                 {
-                    maxAge = sourceMaxAge;
+                    maxAge = cacheControl.MaxAge.GetValueOrDefault();
                 }
             }
 
