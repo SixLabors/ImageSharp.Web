@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -17,6 +17,12 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// <inheritdoc/>
         public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
         {
+            var result = new List<T>();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return result;
+            }
+
             Type type = typeof(T);
             ICommandConverter paramConverter = CommandDescriptor.GetConverter(type);
 
@@ -25,17 +31,12 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
                 throw new InvalidOperationException("No type converter exists for type " + type.FullName);
             }
 
-            var result = new List<T>();
-
-            if (value != null)
+            foreach (string pill in this.GetStringArray(value, culture))
             {
-                foreach (string pill in this.GetStringArray(value, culture))
+                object item = paramConverter.ConvertFromInvariantString(pill, type);
+                if (item != null)
                 {
-                    object item = paramConverter.ConvertFromInvariantString(pill, type);
-                    if (item != null)
-                    {
-                        result.Add((T)item);
-                    }
+                    result.Add((T)item);
                 }
             }
 
