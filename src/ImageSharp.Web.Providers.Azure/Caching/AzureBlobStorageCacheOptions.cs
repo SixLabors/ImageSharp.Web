@@ -10,6 +10,7 @@ namespace SixLabors.ImageSharp.Web.Caching.Azure
     {
         /// <summary>
         /// Gets or sets the Azure Blob Storage connection string.
+        /// <see href="https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string."/>
         /// </summary>
         public string ConnectionString { get; set; }
 

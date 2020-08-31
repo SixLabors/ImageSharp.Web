@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Web.Caching.Azure;
@@ -64,6 +65,8 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 {
                     options.ConnectionString = TestConstants.AzureConnectionString;
                     options.ContainerName = TestConstants.AzureCacheContainerName;
+
+                    AzureBlobStorageCache.CreateIfNotExists(options, PublicAccessType.None);
                 })
                 .SetCache<AzureBlobStorageCache>();
         }
