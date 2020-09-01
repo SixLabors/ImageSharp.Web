@@ -2,13 +2,33 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Microsoft.Extensions.DependencyInjection;
+using SixLabors.ImageSharp.Web.Caching;
+using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
+using SixLabors.ImageSharp.Web.Processors;
+using SixLabors.ImageSharp.Web.Providers;
 using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
 {
     public class ServiceRegistrationExtensionsTests
     {
+        [Fact]
+        public void DefaultServicesAreRegistered()
+        {
+            var services = new ServiceCollection();
+            services.AddImageSharp();
+
+            Assert.Contains(services, x => x.ServiceType == typeof(FormatUtilities));
+            Assert.Contains(services, x => x.ServiceType == typeof(IRequestParser) && x.ImplementationType == typeof(QueryCollectionRequestParser));
+            Assert.Contains(services, x => x.ServiceType == typeof(IImageCache) && x.ImplementationType == typeof(PhysicalFileSystemCache));
+            Assert.Contains(services, x => x.ServiceType == typeof(ICacheHash) && x.ImplementationType == typeof(CacheHash));
+            Assert.Contains(services, x => x.ServiceType == typeof(IImageProvider) && x.ImplementationType == typeof(PhysicalFileSystemProvider));
+            Assert.Contains(services, x => x.ServiceType == typeof(IImageWebProcessor) && x.ImplementationType == typeof(ResizeWebProcessor));
+            Assert.Contains(services, x => x.ServiceType == typeof(IImageWebProcessor) && x.ImplementationType == typeof(FormatWebProcessor));
+            Assert.Contains(services, x => x.ServiceType == typeof(IImageWebProcessor) && x.ImplementationType == typeof(BackgroundColorWebProcessor));
+        }
+
         [Fact]
         public void CanAddRemoveImageProviders()
         {
