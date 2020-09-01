@@ -67,7 +67,7 @@ namespace SixLabors.ImageSharp.Web.Providers
                 return Task.FromResult<IImageResolver>(null);
             }
 
-            var metadata = new ImageMetadata(fileInfo.LastModified.UtcDateTime);
+            var metadata = new ImageMetadata(fileInfo.LastModified.UtcDateTime, fileInfo.Length);
             return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
         }
     }

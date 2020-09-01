@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -263,7 +262,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             sourceImageMetadata.LastWriteTimeUtc,
                             DateTime.UtcNow,
                             format.DefaultMimeType,
-                            maxAge);
+                            maxAge,
+                            outStream.Length);
                     }
 
                     // Allow for any further optimization of the image.
@@ -275,7 +275,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                     // Save the image to the cache and send the response to the caller.
                     await this.cache.SetAsync(key, outStream, cachedImageMetadata);
-                    await this.SendResponseAsync(imageContext, key, outStream, cachedImageMetadata);
+                    await this.SendResponseAsync(imageContext, key, cachedImageMetadata, outStream, null);
                 }
             }
             catch (Exception ex)
@@ -331,12 +331,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     {
                         // Has the cached image expired or has the source image been updated?
                         if (cachedImageMetadata.SourceLastWriteTimeUtc == sourceImageMetadata.LastWriteTimeUtc
+                            && cachedImageMetadata.ContentLength > 0 // Fix for old cache without length property
                             && cachedImageMetadata.CacheLastWriteTimeUtc > (DateTimeOffset.UtcNow - this.options.CacheMaxAge))
                         {
                             // We're pulling the image from the cache.
-                            using Stream cachedBuffer = await cachedImageResolver.OpenReadAsync();
-                            await this.SendResponseAsync(imageContext, key, cachedBuffer, cachedImageMetadata);
-
+                            await this.SendResponseAsync(imageContext, key, cachedImageMetadata, null, cachedImageResolver);
                             return (false, sourceImageMetadata);
                         }
                     }
@@ -349,10 +348,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private async Task SendResponseAsync(
             ImageContext imageContext,
             string key,
+            ImageCacheMetadata metadata,
             Stream stream,
-            ImageCacheMetadata metadata)
+            IImageCacheResolver cacheResolver)
         {
-            imageContext.ComprehendRequestHeaders(metadata.CacheLastWriteTimeUtc, stream.Length);
+            imageContext.ComprehendRequestHeaders(metadata.CacheLastWriteTimeUtc, metadata.ContentLength);
 
             switch (imageContext.GetPreconditionState())
             {
@@ -364,7 +364,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     }
 
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
-                    await imageContext.SendAsync(stream, metadata);
+
+                    // When stream is null we're sending from the cache.
+                    await imageContext.SendAsync(stream ?? await cacheResolver.OpenReadAsync(), metadata);
 
                     break;
 
