@@ -4,11 +4,12 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
+using SixLabors.ImageSharp.Web.Caching;
 
 namespace SixLabors.ImageSharp.Web.Resolvers
 {
     /// <summary>
-    /// Provides means to manage image buffers within the physical file system cache.
+    /// Provides means to manage image buffers within the <see cref="PhysicalFileSystemCache"/>.
     /// </summary>
     public class PhysicalFileSystemCacheResolver : IImageCacheResolver
     {

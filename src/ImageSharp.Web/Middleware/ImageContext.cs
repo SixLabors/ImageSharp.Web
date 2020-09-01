@@ -206,7 +206,15 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private void ComputeLastModified()
         {
             // Truncate to the second.
-            this.fileLastModified = new DateTimeOffset(this.fileLastModified.Year, this.fileLastModified.Month, this.fileLastModified.Day, this.fileLastModified.Hour, this.fileLastModified.Minute, this.fileLastModified.Second, this.fileLastModified.Offset).ToUniversalTime();
+            this.fileLastModified = new DateTimeOffset(
+                this.fileLastModified.Year,
+                this.fileLastModified.Month,
+                this.fileLastModified.Day,
+                this.fileLastModified.Hour,
+                this.fileLastModified.Minute,
+                this.fileLastModified.Second,
+                this.fileLastModified.Offset)
+                .ToUniversalTime();
 
             long etagHash = this.fileLastModified.ToFileTime() ^ this.fileLength;
             this.fileEtag = new EntityTagHeaderValue($"{'\"'}{Convert.ToString(etagHash, 16)}{'\"'}");

@@ -47,7 +47,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Contains various format helper methods based on the current configuration.
         /// </summary>
-        private readonly FormatUtilities formatUtilies;
+        private readonly FormatUtilities formatUtilities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
@@ -81,7 +81,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             this.fileProvider = new PhysicalFileProvider(this.cacheRootPath);
             this.options = options.Value;
             this.cachedNameLength = (int)this.options.CachedNameLength;
-            this.formatUtilies = formatUtilities;
+            this.formatUtilities = formatUtilities;
         }
 
         /// <inheritdoc/>
@@ -143,7 +143,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="string"/>.</returns>
         private string ToImageFilePath(string path, in ImageCacheMetadata metaData)
-            => $"{path}.{this.formatUtilies.GetExtensionFromContentType(metaData.ContentType)}";
+            => $"{path}.{this.formatUtilities.GetExtensionFromContentType(metaData.ContentType)}";
 
         /// <summary>
         /// Gets the path to the image file based on the supplied root.

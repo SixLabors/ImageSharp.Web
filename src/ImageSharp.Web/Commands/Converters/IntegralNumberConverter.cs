@@ -16,9 +16,10 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// <inheritdoc/>
         public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
         {
-            if (value == null || Array.IndexOf(TypeConstants.IntegralTypes, propertyType) < 0)
+            if (string.IsNullOrWhiteSpace(value)
+                || Array.IndexOf(TypeConstants.IntegralTypes, propertyType) < 0)
             {
-                return base.ConvertFrom(culture, null, propertyType);
+                return default(T);
             }
 
             // Round the value to the nearest decimal value

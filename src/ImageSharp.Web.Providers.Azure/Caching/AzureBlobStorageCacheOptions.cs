@@ -1,25 +1,12 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System.Collections.Generic;
-
-namespace SixLabors.ImageSharp.Web.Providers.Azure
+namespace SixLabors.ImageSharp.Web.Caching.Azure
 {
     /// <summary>
-    /// Configuration options for the <see cref="AzureBlobStorageImageProvider"/> provider.
+    /// Configuration options for the <see cref="AzureBlobStorageCache"/>.
     /// </summary>
-    public class AzureBlobStorageImageProviderOptions
-    {
-        /// <summary>
-        /// Gets or sets the collection of blob container client options.
-        /// </summary>
-        public ICollection<AzureBlobContainerClientOptions> BlobContainers { get; set; } = new HashSet<AzureBlobContainerClientOptions>();
-    }
-
-    /// <summary>
-    /// Represents a single Azure Blob Storage connection and container.
-    /// </summary>
-    public class AzureBlobContainerClientOptions
+    public class AzureBlobStorageCacheOptions
     {
         /// <summary>
         /// Gets or sets the Azure Blob Storage connection string.

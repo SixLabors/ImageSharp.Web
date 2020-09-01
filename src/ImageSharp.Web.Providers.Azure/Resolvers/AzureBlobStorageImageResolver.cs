@@ -1,9 +1,10 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.IO;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
@@ -20,15 +21,29 @@ namespace SixLabors.ImageSharp.Web.Resolvers.Azure
         /// Initializes a new instance of the <see cref="AzureBlobStorageImageResolver"/> class.
         /// </summary>
         /// <param name="blob">The Azure blob.</param>
-        public AzureBlobStorageImageResolver(BlobClient blob) => this.blob = blob;
+        public AzureBlobStorageImageResolver(BlobClient blob)
+            => this.blob = blob;
 
         /// <inheritdoc/>
         public async Task<ImageMetadata> GetMetaDataAsync()
         {
             // I've had a good read through the SDK source and I believe we cannot get
             // a 304 here since 'If-Modified-Since' header is not set by default.
-            Response<BlobProperties> properties = await this.blob.GetPropertiesAsync();
-            return new ImageMetadata(properties.Value.LastModified.DateTime);
+            BlobProperties properties = (await this.blob.GetPropertiesAsync()).Value;
+
+            // Try to parse the max age from the source. If it's not zero then we pass it along
+            // to set the cache control headers for the response.
+            TimeSpan maxAge = TimeSpan.MinValue;
+            if (CacheControlHeaderValue.TryParse(properties.CacheControl, out CacheControlHeaderValue cacheControl))
+            {
+                // Weirdly passing null to TryParse returns true.
+                if (cacheControl?.MaxAge.HasValue == true)
+                {
+                    maxAge = cacheControl.MaxAge.Value;
+                }
+            }
+
+            return new ImageMetadata(properties.LastModified.UtcDateTime, maxAge, properties.ContentLength);
         }
 
         /// <inheritdoc/>
