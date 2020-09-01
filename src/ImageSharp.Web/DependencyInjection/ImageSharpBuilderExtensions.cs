@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +20,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
     /// <summary>
     /// Extension methods for <see cref="IImageSharpBuilder"/> that allow configuration of services.
     /// </summary>
-    public static class ImageSharpCoreBuilderExtensions
+    public static class ImageSharpBuilderExtensions
     {
         /// <summary>
         /// Sets the given <see cref="IRequestParser"/> adding it to the service collection.
@@ -239,6 +238,18 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             {
                 builder.Services.Remove(descriptor);
             }
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Removes all <see cref="IImageWebProcessor"/> instances from the processor collection within the service collection.
+        /// </summary>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder ClearProcessors(this IImageSharpBuilder builder)
+        {
+            builder.Services.RemoveAll(typeof(IImageWebProcessor));
 
             return builder;
         }

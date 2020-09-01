@@ -39,7 +39,7 @@ namespace SixLabors.ImageSharp.Web.Sample
         /// <param name="services">The collection of service desscriptors.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddImageSharpCore()
+            services.AddImageSharp()
                 .SetRequestParser<QueryCollectionRequestParser>()
                 .Configure<PhysicalFileSystemCacheOptions>(options =>
                 {
@@ -102,7 +102,7 @@ namespace SixLabors.ImageSharp.Web.Sample
 
         private void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
         {
-            services.AddImageSharpCore(
+            services.AddImageSharp(
                 options =>
                     {
                         options.Configuration = Configuration.Default;
@@ -128,7 +128,9 @@ namespace SixLabors.ImageSharp.Web.Sample
                         provider.GetRequiredService<FormatUtilities>());
                 })
                 .SetCacheHash<CacheHash>()
+                .ClearProviders()
                 .AddProvider<PhysicalFileSystemProvider>()
+                .ClearProcessors()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
                 .AddProcessor<BackgroundColorWebProcessor>();
