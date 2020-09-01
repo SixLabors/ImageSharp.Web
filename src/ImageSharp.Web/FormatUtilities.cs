@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 
 namespace SixLabors.ImageSharp.Web
@@ -23,12 +25,14 @@ namespace SixLabors.ImageSharp.Web
         /// <summary>
         /// Initializes a new instance of the <see cref="FormatUtilities"/> class.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        public FormatUtilities(Configuration configuration)
+        /// <param name="options">The middleware options.</param>
+        public FormatUtilities(IOptions<ImageSharpMiddlewareOptions> options)
         {
+            Guard.NotNull(options, nameof(options));
+
             // The formats contained in the configuration are used a lot in hash generation
             // so we need them to be enumerated to remove allocations and allow indexing.
-            this.imageFormats = configuration.ImageFormats.ToArray();
+            this.imageFormats = options.Value.Configuration.ImageFormats.ToArray();
             for (int i = 0; i < this.imageFormats.Length; i++)
             {
                 string[] extensions = this.imageFormats[i].FileExtensions.ToArray();

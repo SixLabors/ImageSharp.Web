@@ -281,21 +281,5 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             builder.Services.Configure(configureOptions);
             return builder;
         }
-
-        /// <summary>
-        /// Sets the <see cref="FormatUtilities"/> configured by <see cref="ImageSharpMiddlewareOptions.Configuration"/>.
-        /// </summary>
-        /// <param name="builder">The core builder.</param>
-        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        internal static IImageSharpBuilder SetFormatUtilitesFromMiddlewareOptions(this IImageSharpBuilder builder)
-        {
-            static FormatUtilities FormatUtilitiesFactory(IServiceProvider s)
-            {
-                return new FormatUtilities(s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration);
-            }
-
-            builder.Services.AddSingleton(FormatUtilitiesFactory);
-            return builder;
-        }
     }
 }
