@@ -283,22 +283,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
-        /// Sets the memory allocator configured in <see cref="Configuration.MemoryAllocator"/> of <see cref="ImageSharpMiddlewareOptions.Configuration"/>.
-        /// </summary>
-        /// <param name="builder">The core builder.</param>
-        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        internal static IImageSharpBuilder SetMemoryAllocatorFromMiddlewareOptions(this IImageSharpBuilder builder)
-        {
-            static MemoryAllocator AllocatorFactory(IServiceProvider s)
-            {
-                return s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration.MemoryAllocator;
-            }
-
-            builder.SetMemoryAllocator(AllocatorFactory);
-            return builder;
-        }
-
-        /// <summary>
         /// Sets the <see cref="FormatUtilities"/> configured by <see cref="ImageSharpMiddlewareOptions.Configuration"/>.
         /// </summary>
         /// <param name="builder">The core builder.</param>

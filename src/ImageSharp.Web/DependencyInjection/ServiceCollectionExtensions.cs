@@ -54,7 +54,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         {
             builder.Services.Configure(setupAction);
 
-            builder.SetMemoryAllocatorFromMiddlewareOptions();
             builder.SetFormatUtilitesFromMiddlewareOptions();
 
             builder.SetRequestParser<QueryCollectionRequestParser>();

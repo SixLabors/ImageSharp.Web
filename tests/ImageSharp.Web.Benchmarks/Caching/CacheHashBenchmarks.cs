@@ -13,7 +13,7 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
     {
         private const string URL = "http://testwebsite.com/image-12345.jpeg?width=400";
         private static readonly IOptions<ImageSharpMiddlewareOptions> MWOptions = Options.Create(new ImageSharpMiddlewareOptions());
-        private static readonly CacheHash Sha256Hasher = new CacheHash(MWOptions, MWOptions.Value.Configuration.MemoryAllocator);
+        private static readonly CacheHash Sha256Hasher = new CacheHash(MWOptions);
         private static readonly CacheHashBaseline NaiveSha256Hasher = new CacheHashBaseline();
 
         [Benchmark(Baseline = true, Description = "Baseline Sha256Hasher")]
