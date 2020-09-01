@@ -42,6 +42,38 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
         }
 
         [Fact]
+        public void CanAddRemoveAllImageProviders()
+        {
+            var services = new ServiceCollection();
+
+            IImageSharpBuilder builder = services.AddImageSharp()
+                .AddProvider<MockImageProvider>();
+
+            Assert.Contains(services, x => x.ImplementationType == typeof(MockImageProvider));
+
+            builder.ClearProviders();
+
+            Assert.DoesNotContain(services, x => x.ImplementationType == typeof(MockImageProvider));
+        }
+
+        [Fact]
+        public void CanAddRemoveAllFactoryImageProviders()
+        {
+            var services = new ServiceCollection();
+
+            IImageSharpBuilder builder = services.AddImageSharp()
+                                      .AddProvider(_ => new MockImageProvider());
+
+            Assert.DoesNotContain(services, x => x.ImplementationType == typeof(MockImageProvider));
+
+            Assert.Contains(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockImageProvider));
+
+            builder.ClearProviders();
+
+            Assert.DoesNotContain(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockImageProvider));
+        }
+
+        [Fact]
         public void CanAddRemoveImageProcessors()
         {
             var services = new ServiceCollection();
@@ -69,6 +101,38 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
             Assert.Contains(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockWebProcessor));
 
             builder.RemoveProcessor<MockWebProcessor>();
+
+            Assert.DoesNotContain(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockWebProcessor));
+        }
+
+        [Fact]
+        public void CanAddRemoveAllImageProcessors()
+        {
+            var services = new ServiceCollection();
+
+            IImageSharpBuilder builder = services.AddImageSharp()
+                                      .AddProcessor<MockWebProcessor>();
+
+            Assert.Contains(services, x => x.ImplementationType == typeof(MockWebProcessor));
+
+            builder.ClearProcessors();
+
+            Assert.DoesNotContain(services, x => x.ImplementationType == typeof(MockWebProcessor));
+        }
+
+        [Fact]
+        public void CanAddRemoveAllFactoryImageProcessors()
+        {
+            var services = new ServiceCollection();
+
+            IImageSharpBuilder builder = services.AddImageSharp()
+                                  .AddProcessor(_ => new MockWebProcessor());
+
+            Assert.DoesNotContain(services, x => x.ImplementationType == typeof(MockWebProcessor));
+
+            Assert.Contains(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockWebProcessor));
+
+            builder.ClearProcessors();
 
             Assert.DoesNotContain(services, x => x.ImplementationFactory?.Method.ReturnType == typeof(MockWebProcessor));
         }
