@@ -21,7 +21,7 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="image">The image.</param>
         /// <param name="format">The format.</param>
-        public FormattedImage(Image<Rgba32> image, IImageFormat format)
+        internal FormattedImage(Image<Rgba32> image, IImageFormat format)
         {
             this.format = format;
             this.Image = image;

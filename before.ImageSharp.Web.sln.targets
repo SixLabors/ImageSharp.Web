@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Remove the samples project from the build when running in CI.
+This prevents build issues when targeting lower, unused target frameworks.
+See https://t.co/0A4WzeGMZS
+-->
+<Project InitialTargets="RemoveSamples">
+  <Target Name="RemoveSamples">
+    <ItemGroup>
+      <ProjectReference
+        Remove="$(MSBuildThisFileDirectory)samples\ImageSharp.Web.Sample\ImageSharp.Web.Sample.csproj"
+        Condition="'$(GITHUB_ACTIONS)' == 'true'"/>
+    </ItemGroup>
+  </Target>
+</Project>

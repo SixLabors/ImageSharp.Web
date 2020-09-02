@@ -12,7 +12,7 @@
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileDirectory)..\Directory.Build.props</MSBuildAllProjects>
-    <ImageSharpProjectCategory>tests</ImageSharpProjectCategory>
+    <SixLaborsProjectCategory>tests</SixLaborsProjectCategory>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -22,8 +22,7 @@
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)..\shared-infrastructure\SixLabors.Tests.ruleset</CodeAnalysisRuleSet>
-    <!--TODO: We should remove all obsolete code from the solution-->
-    <NoWarn>$(NoWarn);CS0618</NoWarn>
+    <NoWarn>$(NoWarn);</NoWarn>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.props" />

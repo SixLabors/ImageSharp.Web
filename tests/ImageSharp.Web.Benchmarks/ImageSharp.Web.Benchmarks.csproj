@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
-    <AssemblyName>SixLabors.ImageSharp.Web.Benchmarks</AssemblyName>
+    <AssemblyName>ImageSharp.Web.Benchmarks</AssemblyName>
     <RootNamespace>SixLabors.ImageSharp.Web.Benchmarks</RootNamespace>
     <GenerateProgramFile>false</GenerateProgramFile>
     <!--Used to hide test project from dotnet test-->

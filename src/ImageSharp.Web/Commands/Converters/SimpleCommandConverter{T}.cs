@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -16,7 +16,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// <inheritdoc/>
         public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
         {
-            if (value == null)
+            if (string.IsNullOrWhiteSpace(value))
             {
                 return default(T);
             }

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Web.Commands;
 using Xunit;
@@ -47,18 +46,18 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             { (decimal)Pi, PiString },
         };
 
-        public static TheoryData<object, string> EnumValues = new TheoryData<object, string>
+        public static TheoryData<ResizeMode, string> EnumValues = new TheoryData<ResizeMode, string>
         {
             { ResizeMode.Max, "max" },
-            { ResizeMode.Crop, "this is not an enum value" }, // Unknown returns default
+            { ResizeMode.Crop, "this is not, an enum value" }, // Unknown returns default
         };
 
-        public static TheoryData<object, string> IntegralArrays = new TheoryData<object, string>
+        public static TheoryData<int[], string> IntegralArrays = new TheoryData<int[], string>
         {
             { new[] { 1, 2, 3, 4 }, "1,2,3,4" },
         };
 
-        public static TheoryData<object, string> RealArrays = new TheoryData<object, string>
+        public static TheoryData<float[], string> RealArrays = new TheoryData<float[], string>
         {
             { new[] { 1.667F, 2.667F, 3.667F, 4.667F }, "1.667,2.667,3.667,4.667" },
         };
@@ -73,8 +72,9 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             { new List<float> { 1.667F, 2.667F, 3.667F, 4.667F }, "1.667,2.667,3.667,4.667" },
         };
 
-        public static TheoryData<object, string> ColorValues = new TheoryData<object, string>
+        public static TheoryData<Color, string> ColorValues = new TheoryData<Color, string>
         {
+            { default, string.Empty },
             { Color.White, "255,255,255" },
             { Color.Transparent, "0,0,0,0" },
             { Color.Orange, "orange" },

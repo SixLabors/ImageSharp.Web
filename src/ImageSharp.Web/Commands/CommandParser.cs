@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -63,10 +63,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// <returns>The converted instance or the default.</returns>
         public T ParseValue<T>(string value, CultureInfo culture)
         {
-            if (culture == null)
-            {
-                culture = CultureInfo.InvariantCulture;
-            }
+            culture ??= CultureInfo.InvariantCulture;
 
             Type type = typeof(T);
             ICommandConverter converter = CommandDescriptor.GetConverter(type);

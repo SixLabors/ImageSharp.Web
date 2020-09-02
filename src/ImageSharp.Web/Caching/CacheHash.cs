@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Buffers;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
@@ -17,33 +19,56 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// </summary>
     public sealed class CacheHash : ICacheHash
     {
-        private readonly MemoryAllocator memoryAllocator;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheHash"/> class.
         /// </summary>
         /// <param name="options">The middleware configuration options.</param>
-        /// <param name="memoryAllocator">The memory allocator.</param>
-        public CacheHash(IOptions<ImageSharpMiddlewareOptions> options, MemoryAllocator memoryAllocator)
+        public CacheHash(IOptions<ImageSharpMiddlewareOptions> options)
         {
             Guard.NotNull(options, nameof(options));
             Guard.MustBeBetweenOrEqualTo<uint>(options.Value.CachedNameLength, 2, 64, nameof(options.Value.CachedNameLength));
-
-            this.memoryAllocator = memoryAllocator;
         }
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string Create(string value, uint length)
         {
-            int len = (int)length;
             int byteCount = Encoding.ASCII.GetByteCount(value);
-            using (var hashAlgorithm = SHA256.Create())
-            using (IManagedByteBuffer buffer = this.memoryAllocator.AllocateManagedByteBuffer(byteCount))
+
+            // Allocating a buffer from the pool is ~27% slower than stackalloc so use
+            // that for short strings
+            if (byteCount < 257)
             {
-                Encoding.ASCII.GetBytes(value, 0, byteCount, buffer.Array, 0);
-                byte[] hash = hashAlgorithm.ComputeHash(buffer.Array, 0, byteCount);
-                return $"{HexEncoder.Encode(new Span<byte>(hash).Slice(0, len / 2))}";
+                return HashValue(value, length, stackalloc byte[byteCount]);
             }
+
+            byte[] buffer = null;
+            try
+            {
+                buffer = ArrayPool<byte>.Shared.Rent(byteCount);
+                return HashValue(value, length, buffer.AsSpan(0, byteCount));
+            }
+            finally
+            {
+                if (buffer != null)
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static string HashValue(ReadOnlySpan<char> value, uint length, Span<byte> bufferSpan)
+        {
+            using var hashAlgorithm = SHA256.Create();
+            Encoding.ASCII.GetBytes(value, bufferSpan);
+
+            // Hashed output maxes out at 32 bytes @ 256bit/8 so we're safe to use stackalloc.
+            Span<byte> hash = stackalloc byte[32];
+            hashAlgorithm.TryComputeHash(bufferSpan, hash, out int _);
+
+            // length maxes out at 64 since we throw if options is greater.
+            return HexEncoder.Encode(hash.Slice(0, (int)(length / 2)));
         }
     }
 }

@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IO;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
@@ -21,17 +22,32 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public Configuration Configuration { get; set; } = Configuration.Default;
 
         /// <summary>
-        /// Gets or sets the number of days to store images in the browser cache.
+        /// Gets or sets the recyclable memorystream manager used for managing pooled stream
+        /// buffers independently from image buffer pooling.
         /// </summary>
-        public int MaxBrowserCacheDays { get; set; } = 7;
+        public RecyclableMemoryStreamManager MemoryStreamManager { get; set; } = new RecyclableMemoryStreamManager();
 
         /// <summary>
-        /// Gets or sets the number of days to store images in the image cache.
+        /// Gets or sets the duration to store images in the browser cache.
+        /// If an image provider provides a Max-Age for a source image then that will override
+        /// this value.
+        /// <para>
+        /// Defaults to 7 days.
+        /// </para>
         /// </summary>
-        public int MaxCacheDays { get; set; } = 365;
+        public TimeSpan BrowserMaxAge { get; set; } = TimeSpan.FromDays(7);
 
         /// <summary>
-        /// Gets or sets the length of the filename to use (minus the extension) when storing images in the image cache.
+        /// Gets or sets the duration to store images in the image cache.
+        /// <para>
+        /// Defaults to 365 days.
+        /// </para>
+        /// </summary>
+        public TimeSpan CacheMaxAge { get; set; } = TimeSpan.FromDays(365);
+
+        /// <summary>
+        /// Gets or sets the length of the filename to use (minus the extension) when storing
+        /// images in the image cache. Defaults to 12 characters.
         /// </summary>
         public uint CachedNameLength { get; set; } = 12;
 

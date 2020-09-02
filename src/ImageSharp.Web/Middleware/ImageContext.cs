@@ -125,11 +125,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="statusCode">The status code.</param>
         /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public Task SendStatusAsync(int statusCode, ImageCacheMetadata metaData)
+        public Task SendStatusAsync(int statusCode, in ImageCacheMetadata metaData)
         {
-            return this.ApplyResponseHeadersAsync(statusCode, metaData.ContentType, this.ComputeMaxAge(metaData));
+            this.ApplyResponseHeaders(statusCode, metaData.ContentType, metaData.CacheControlMaxAge);
 
             // this.logger.LogHandled(statusCode, SubPath);
+            return ResponseConstants.CompletedTask;
         }
 
         /// <summary>
@@ -140,7 +141,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <returns>The <see cref="Task"/>.</returns>
         public async Task SendAsync(Stream stream, ImageCacheMetadata metaData)
         {
-            await this.ApplyResponseHeadersAsync(ResponseConstants.Status200Ok, metaData.ContentType, this.ComputeMaxAge(metaData));
+            this.ApplyResponseHeaders(ResponseConstants.Status200Ok, metaData.ContentType, metaData.CacheControlMaxAge);
 
             if (stream.CanSeek)
             {
@@ -169,7 +170,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             return max;
         }
 
-        private async Task ApplyResponseHeadersAsync(int statusCode, string contentType, TimeSpan maxAge)
+        private void ApplyResponseHeaders(int statusCode, string contentType, TimeSpan maxAge)
         {
             this.response.StatusCode = statusCode;
             if (statusCode < 400)
@@ -192,10 +193,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     MustRevalidate = true
                 };
 
-                if (this.options.OnPrepareResponseAsync != null)
-                {
-                    await this.options.OnPrepareResponseAsync.Invoke(this.context);
-                }
+                this.options.OnPrepareResponse?.Invoke(this.context);
             }
 
             if (statusCode == ResponseConstants.Status200Ok)
@@ -208,7 +206,15 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private void ComputeLastModified()
         {
             // Truncate to the second.
-            this.fileLastModified = new DateTimeOffset(this.fileLastModified.Year, this.fileLastModified.Month, this.fileLastModified.Day, this.fileLastModified.Hour, this.fileLastModified.Minute, this.fileLastModified.Second, this.fileLastModified.Offset).ToUniversalTime();
+            this.fileLastModified = new DateTimeOffset(
+                this.fileLastModified.Year,
+                this.fileLastModified.Month,
+                this.fileLastModified.Day,
+                this.fileLastModified.Hour,
+                this.fileLastModified.Minute,
+                this.fileLastModified.Second,
+                this.fileLastModified.Offset)
+                .ToUniversalTime();
 
             long etagHash = this.fileLastModified.ToFileTime() ^ this.fileLength;
             this.fileEtag = new EntityTagHeaderValue($"{'\"'}{Convert.ToString(etagHash, 16)}{'\"'}");
@@ -268,18 +274,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 bool unmodified = ifUnmodifiedSince >= this.fileLastModified;
                 this.ifUnmodifiedSinceState = unmodified ? PreconditionState.ShouldProcess : PreconditionState.PreconditionFailed;
             }
-        }
-
-        private TimeSpan ComputeMaxAge(in ImageCacheMetadata metaData)
-        {
-            // 14.9.3 CacheControl Max-Age
-            var maxAge = TimeSpan.FromDays(this.options.MaxBrowserCacheDays);
-            if (!metaData.CacheControlMaxAge.Equals(TimeSpan.MinValue))
-            {
-                maxAge = metaData.CacheControlMaxAge;
-            }
-
-            return maxAge;
         }
     }
 }

@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Web.Middleware;
 using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.Helpers
@@ -12,7 +14,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Helpers
         public static IEnumerable<object[]> DefaultExtensions =
             Configuration.Default.ImageFormats.SelectMany(f => f.FileExtensions.Select(e => new object[] { e, e }));
 
-        private static readonly FormatUtilities FormatUtilities = new FormatUtilities(Configuration.Default);
+        private static readonly FormatUtilities FormatUtilities = new FormatUtilities(Options.Create(new ImageSharpMiddlewareOptions()));
 
         [Theory]
         [MemberData(nameof(DefaultExtensions))]

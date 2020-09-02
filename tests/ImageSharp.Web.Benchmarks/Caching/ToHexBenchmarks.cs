@@ -67,5 +67,20 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
                 return hashAlgorithm.ComputeHash(buffer, 0, byteCount);
             }
         }
+
+        /*
+        BenchmarkDotNet=v0.12.0, OS=Windows 10.0.18363
+        Intel Core i7-8650U CPU 1.90GHz (Kaby Lake R), 1 CPU, 8 logical and 4 physical cores
+        .NET Core SDK=3.1.401
+          [Host]     : .NET Core 3.1.7 (CoreCLR 4.700.20.36602, CoreFX 4.700.20.37001), X64 RyuJIT
+          DefaultJob : .NET Core 3.1.7 (CoreCLR 4.700.20.36602, CoreFX 4.700.20.37001), X64 RyuJIT
+
+
+        |                       Method |      Mean |    Error |   StdDev | Ratio |  Gen 0 | Gen 1 | Gen 2 | Allocated |
+        |----------------------------- |----------:|---------:|---------:|------:|-------:|------:|------:|----------:|
+        |        'StringBuilder ToHex' | 201.78 ns | 0.900 ns | 0.752 ns |  1.00 | 0.0801 |     - |     - |     336 B |
+        |               'Custom ToHex' |  83.37 ns | 0.856 ns | 0.801 ns |  0.41 | 0.0726 |     - |     - |     304 B |
+        | 'HexEncoder.Encode with LUT' |  23.17 ns | 0.235 ns | 0.196 ns |  0.11 | 0.0114 |     - |     - |      48 B |
+        */
     }
 }

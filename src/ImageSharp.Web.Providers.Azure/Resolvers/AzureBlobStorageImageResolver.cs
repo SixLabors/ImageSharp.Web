@@ -3,8 +3,8 @@
 
 using System;
 using System.IO;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
@@ -21,25 +21,33 @@ namespace SixLabors.ImageSharp.Web.Resolvers.Azure
         /// Initializes a new instance of the <see cref="AzureBlobStorageImageResolver"/> class.
         /// </summary>
         /// <param name="blob">The Azure blob.</param>
-        public AzureBlobStorageImageResolver(BlobClient blob) => this.blob = blob;
+        public AzureBlobStorageImageResolver(BlobClient blob)
+            => this.blob = blob;
 
         /// <inheritdoc/>
         public async Task<ImageMetadata> GetMetaDataAsync()
         {
-            Response<BlobProperties> properties = await this.blob.GetPropertiesAsync();
-            return new ImageMetadata(properties?.Value.LastModified.DateTime ?? DateTime.UtcNow);
+            // I've had a good read through the SDK source and I believe we cannot get
+            // a 304 here since 'If-Modified-Since' header is not set by default.
+            BlobProperties properties = (await this.blob.GetPropertiesAsync()).Value;
+
+            // Try to parse the max age from the source. If it's not zero then we pass it along
+            // to set the cache control headers for the response.
+            TimeSpan maxAge = TimeSpan.MinValue;
+            if (CacheControlHeaderValue.TryParse(properties.CacheControl, out CacheControlHeaderValue cacheControl))
+            {
+                // Weirdly passing null to TryParse returns true.
+                if (cacheControl?.MaxAge.HasValue == true)
+                {
+                    maxAge = cacheControl.MaxAge.Value;
+                }
+            }
+
+            return new ImageMetadata(properties.LastModified.UtcDateTime, maxAge, properties.ContentLength);
         }
 
         /// <inheritdoc/>
         public async Task<Stream> OpenReadAsync()
-        {
-            Stream blobStream = (await this.blob.DownloadAsync()).Value.Content;
-            var memoryStream = new ChunkedMemoryStream();
-
-            await blobStream.CopyToAsync(memoryStream);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-
-            return memoryStream;
-        }
+            => (await this.blob.DownloadAsync()).Value.Content;
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -16,9 +16,10 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// <inheritdoc/>
         public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
         {
-            if (value == null || Array.IndexOf(TypeConstants.IntegralTypes, propertyType) < 0)
+            if (string.IsNullOrWhiteSpace(value)
+                || Array.IndexOf(TypeConstants.IntegralTypes, propertyType) < 0)
             {
-                return base.ConvertFrom(culture, null, propertyType);
+                return default(T);
             }
 
             // Round the value to the nearest decimal value
@@ -27,35 +28,35 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
             // Now clamp it to the type ranges
             if (propertyType == TypeConstants.Sbyte)
             {
-                rounded = rounded.Clamp(sbyte.MinValue, sbyte.MaxValue);
+                rounded = Math.Clamp(rounded, sbyte.MinValue, sbyte.MaxValue);
             }
             else if (propertyType == TypeConstants.Byte)
             {
-                rounded = rounded.Clamp(byte.MinValue, byte.MaxValue);
+                rounded = Math.Clamp(rounded, byte.MinValue, byte.MaxValue);
             }
             else if (propertyType == TypeConstants.Short)
             {
-                rounded = rounded.Clamp(short.MinValue, short.MaxValue);
+                rounded = Math.Clamp(rounded, short.MinValue, short.MaxValue);
             }
             else if (propertyType == TypeConstants.UShort)
             {
-                rounded = rounded.Clamp(ushort.MinValue, ushort.MaxValue);
+                rounded = Math.Clamp(rounded, ushort.MinValue, ushort.MaxValue);
             }
             else if (propertyType == TypeConstants.Int)
             {
-                rounded = rounded.Clamp(int.MinValue, int.MaxValue);
+                rounded = Math.Clamp(rounded, int.MinValue, int.MaxValue);
             }
             else if (propertyType == TypeConstants.UInt)
             {
-                rounded = rounded.Clamp(uint.MinValue, uint.MaxValue);
+                rounded = Math.Clamp(rounded, uint.MinValue, uint.MaxValue);
             }
             else if (propertyType == TypeConstants.Long)
             {
-                rounded = rounded.Clamp(long.MinValue, long.MaxValue);
+                rounded = Math.Clamp(rounded, long.MinValue, long.MaxValue);
             }
             else if (propertyType == TypeConstants.ULong)
             {
-                rounded = rounded.Clamp(ulong.MinValue, ulong.MaxValue);
+                rounded = Math.Clamp(rounded, ulong.MinValue, ulong.MaxValue);
             }
 
             // Now it's rounded an clamped we should be able to correctly parse the string.

@@ -20,7 +20,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
     /// <summary>
     /// Extension methods for <see cref="IImageSharpBuilder"/> that allow configuration of services.
     /// </summary>
-    public static class ImageSharpCoreBuilderExtensions
+    public static class ImageSharpBuilderExtensions
     {
         /// <summary>
         /// Sets the given <see cref="IRequestParser"/> adding it to the service collection.
@@ -181,6 +181,18 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
+        /// Removes all <see cref="IImageProvider"/> instances from the provider collection within the service collection.
+        /// </summary>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder ClearProviders(this IImageSharpBuilder builder)
+        {
+            builder.Services.RemoveAll(typeof(IImageProvider));
+
+            return builder;
+        }
+
+        /// <summary>
         /// Adds the given <see cref="IImageWebProcessor"/> to the processor collection within the service collection.
         /// </summary>
         /// <typeparam name="TProcessor">The type of class implementing <see cref="IImageWebProcessor"/>to add.</typeparam>
@@ -231,6 +243,18 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
+        /// Removes all <see cref="IImageWebProcessor"/> instances from the processor collection within the service collection.
+        /// </summary>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder ClearProcessors(this IImageSharpBuilder builder)
+        {
+            builder.Services.RemoveAll(typeof(IImageWebProcessor));
+
+            return builder;
+        }
+
+        /// <summary>
         /// Registers an action used to configure a particular type of options.
         /// </summary>
         /// <typeparam name="TOptions">The options type to be configured.</typeparam>
@@ -255,38 +279,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
              where TOptions : class
         {
             builder.Services.Configure(configureOptions);
-            return builder;
-        }
-
-        /// <summary>
-        /// Sets the the memory allocator configured in <see cref="Configuration.MemoryAllocator"/> of <see cref="ImageSharpMiddlewareOptions.Configuration"/>.
-        /// </summary>
-        /// <param name="builder">The core builder.</param>
-        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        internal static IImageSharpBuilder SetMemoryAllocatorFromMiddlewareOptions(this IImageSharpBuilder builder)
-        {
-            static MemoryAllocator AllocatorFactory(IServiceProvider s)
-            {
-                return s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration.MemoryAllocator;
-            }
-
-            builder.SetMemoryAllocator(AllocatorFactory);
-            return builder;
-        }
-
-        /// <summary>
-        /// Sets the the <see cref="FormatUtilities"/> configured by <see cref="ImageSharpMiddlewareOptions.Configuration"/>.
-        /// </summary>
-        /// <param name="builder">The core builder.</param>
-        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        internal static IImageSharpBuilder SetFormatUtilitesFromMiddlewareOptions(this IImageSharpBuilder builder)
-        {
-            static FormatUtilities FormatUtilitiesFactory(IServiceProvider s)
-            {
-                return new FormatUtilities(s.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>().Value.Configuration);
-            }
-
-            builder.Services.AddSingleton(FormatUtilitiesFactory);
             return builder;
         }
     }

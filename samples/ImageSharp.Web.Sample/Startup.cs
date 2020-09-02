@@ -1,13 +1,13 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
@@ -39,7 +39,7 @@ namespace SixLabors.ImageSharp.Web.Sample
         /// <param name="services">The collection of service desscriptors.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddImageSharpCore()
+            services.AddImageSharp()
                 .SetRequestParser<QueryCollectionRequestParser>()
                 .Configure<PhysicalFileSystemCacheOptions>(options =>
                 {
@@ -83,8 +83,8 @@ namespace SixLabors.ImageSharp.Web.Sample
                 options =>
                     {
                         options.Configuration = Configuration.Default;
-                        options.MaxBrowserCacheDays = 7;
-                        options.MaxCacheDays = 365;
+                        options.BrowserMaxAge = TimeSpan.FromDays(7);
+                        options.CacheMaxAge = TimeSpan.FromDays(365);
                         options.CachedNameLength = 8;
                         options.OnParseCommands = _ => { };
                         options.OnBeforeSave = _ => { };
@@ -102,12 +102,12 @@ namespace SixLabors.ImageSharp.Web.Sample
 
         private void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
         {
-            services.AddImageSharpCore(
+            services.AddImageSharp(
                 options =>
                     {
                         options.Configuration = Configuration.Default;
-                        options.MaxBrowserCacheDays = 7;
-                        options.MaxCacheDays = 365;
+                        options.BrowserMaxAge = TimeSpan.FromDays(7);
+                        options.CacheMaxAge = TimeSpan.FromDays(365);
                         options.CachedNameLength = 8;
                         options.OnParseCommands = _ => { };
                         options.OnBeforeSave = _ => { };
@@ -115,7 +115,6 @@ namespace SixLabors.ImageSharp.Web.Sample
                         options.OnPrepareResponse = _ => { };
                     })
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetMemoryAllocator(provider => ArrayPoolMemoryAllocator.CreateWithMinimalPooling())
                 .Configure<PhysicalFileSystemCacheOptions>(options =>
                 {
                     options.CacheFolder = "different-cache";
@@ -129,7 +128,9 @@ namespace SixLabors.ImageSharp.Web.Sample
                         provider.GetRequiredService<FormatUtilities>());
                 })
                 .SetCacheHash<CacheHash>()
+                .ClearProviders()
                 .AddProvider<PhysicalFileSystemProvider>()
+                .ClearProcessors()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
                 .AddProcessor<BackgroundColorWebProcessor>();

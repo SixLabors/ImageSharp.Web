@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -36,13 +36,6 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
             if (string.IsNullOrWhiteSpace(value))
             {
                 return default(Color);
-            }
-
-            // Special case. HTML requires LightGrey, but NamedColors has LightGray to conform with System.Drawing
-            // Check early on.
-            if (value.Equals("LightGrey", StringComparison.OrdinalIgnoreCase))
-            {
-                return Color.LightGray;
             }
 
             // Numeric r,g,b - r,g,b,a

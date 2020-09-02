@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -50,14 +50,13 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// </exception>
         public static void AddConverter(Type type, Type converter)
         {
-            Guard.IsTrue(typeof(ICommandConverter).IsAssignableFrom(converter), nameof(converter), "Converter does not implement ICommandConverter.");
+            const string Message = "Converter does not implement ICommandConverter.";
+            Guard.IsTrue(typeof(ICommandConverter).IsAssignableFrom(converter), nameof(converter), Message);
 
-            if (ConverterCache.ContainsKey(type))
+            if (!ConverterCache.ContainsKey(type))
             {
-                return;
+                ConverterCache[type] = (ICommandConverter)Activator.CreateInstance(converter);
             }
-
-            ConverterCache[type] = (ICommandConverter)Activator.CreateInstance(converter);
         }
     }
 }
