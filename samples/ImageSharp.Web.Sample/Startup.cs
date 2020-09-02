@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -86,10 +87,10 @@ namespace SixLabors.ImageSharp.Web.Sample
                         options.BrowserMaxAge = TimeSpan.FromDays(7);
                         options.CacheMaxAge = TimeSpan.FromDays(365);
                         options.CachedNameLength = 8;
-                        options.OnParseCommands = _ => { };
-                        options.OnBeforeSave = _ => { };
-                        options.OnProcessed = _ => { };
-                        options.OnPrepareResponse = _ => { };
+                        options.OnParseCommandsAsync = _ => Task.CompletedTask;
+                        options.OnBeforeSaveAsync = _ => Task.CompletedTask;
+                        options.OnProcessedAsync = _ => Task.CompletedTask;
+                        options.OnPrepareResponseAsync = _ => Task.CompletedTask;
                     });
         }
 
@@ -109,10 +110,10 @@ namespace SixLabors.ImageSharp.Web.Sample
                         options.BrowserMaxAge = TimeSpan.FromDays(7);
                         options.CacheMaxAge = TimeSpan.FromDays(365);
                         options.CachedNameLength = 8;
-                        options.OnParseCommands = _ => { };
-                        options.OnBeforeSave = _ => { };
-                        options.OnProcessed = _ => { };
-                        options.OnPrepareResponse = _ => { };
+                        options.OnParseCommandsAsync = _ => Task.CompletedTask;
+                        options.OnBeforeSaveAsync = _ => Task.CompletedTask;
+                        options.OnProcessedAsync = _ => Task.CompletedTask;
+                        options.OnPrepareResponseAsync = _ => Task.CompletedTask;
                     })
                 .SetRequestParser<QueryCollectionRequestParser>()
                 .Configure<PhysicalFileSystemCacheOptions>(options =>
