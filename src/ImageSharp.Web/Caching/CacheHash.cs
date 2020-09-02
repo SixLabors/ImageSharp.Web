@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -18,19 +19,14 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// </summary>
     public sealed class CacheHash : ICacheHash
     {
-        private readonly MemoryAllocator memoryAllocator;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheHash"/> class.
         /// </summary>
         /// <param name="options">The middleware configuration options.</param>
-        /// <param name="memoryAllocator">The memory allocator.</param>
-        public CacheHash(IOptions<ImageSharpMiddlewareOptions> options, MemoryAllocator memoryAllocator)
+        public CacheHash(IOptions<ImageSharpMiddlewareOptions> options)
         {
             Guard.NotNull(options, nameof(options));
             Guard.MustBeBetweenOrEqualTo<uint>(options.Value.CachedNameLength, 2, 64, nameof(options.Value.CachedNameLength));
-
-            this.memoryAllocator = memoryAllocator;
         }
 
         /// <inheritdoc/>
@@ -46,8 +42,19 @@ namespace SixLabors.ImageSharp.Web.Caching
                 return HashValue(value, length, stackalloc byte[byteCount]);
             }
 
-            using IManagedByteBuffer buffer = this.memoryAllocator.AllocateManagedByteBuffer(byteCount);
-            return HashValue(value, length, buffer.Memory.Span);
+            byte[] buffer = null;
+            try
+            {
+                buffer = ArrayPool<byte>.Shared.Rent(byteCount);
+                return HashValue(value, length, buffer.AsSpan(0, byteCount));
+            }
+            finally
+            {
+                if (buffer != null)
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

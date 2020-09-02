@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System.Text;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Middleware;
@@ -13,7 +14,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
     public class CacheHashTests
     {
         private static readonly IOptions<ImageSharpMiddlewareOptions> Options = MSOptions.Create(new ImageSharpMiddlewareOptions());
-        private static readonly ICacheHash CacheHash = new CacheHash(Options, Options.Value.Configuration.MemoryAllocator);
+        private static readonly ICacheHash CacheHash = new CacheHash(Options);
 
         [Fact]
         public void CachHashProducesIdenticalResults()
@@ -42,11 +43,28 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             const int Length = 12;
             const string Input = "http://testwebsite.com/image-12345.jpeg?width=400";
             const string Input2 = "http://testwebsite.com/image-12345.jpeg";
+            string input3 = CreateLongString();
+
             int expected = CacheHash.Create(Input, Length).Length;
             int actual = CacheHash.Create(Input2, Length).Length;
+            int actual2 = CacheHash.Create(input3, Length).Length;
 
             Assert.Equal(expected, actual);
             Assert.Equal(Length, actual);
+            Assert.Equal(Length, actual2);
+        }
+
+        private static string CreateLongString()
+        {
+            const int Length = 2048;
+            var sb = new StringBuilder(Length);
+
+            for (int i = 0; i < Length; i++)
+            {
+                sb.Append(i.ToString());
+            }
+
+            return sb.ToString();
         }
     }
 }
