@@ -241,11 +241,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             // Not cached? Let's get it from the image resolver.
             RecyclableMemoryStream outStream = null;
-            try
+
+            // Enter a write lock which locks writing and any reads for the same request.
+            // This reduces the overheads of unnecessary processing plus avoids file locks.
+            using (await AsyncLock.WriterLockAsync(key))
             {
-                // Enter a write lock which locks writing and any reads for the same request.
-                // This reduces the overheads of unnecessary processing plus avoids file locks.
-                using (await AsyncLock.WriterLockAsync(key))
+                try
                 {
                     ImageCacheMetadata cachedImageMetadata = default;
                     outStream = new RecyclableMemoryStream(this.options.MemoryStreamManager);
@@ -305,17 +306,17 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     await this.cache.SetAsync(key, outStream, cachedImageMetadata);
                     await this.SendResponseAsync(imageContext, key, cachedImageMetadata, outStream, null);
                 }
-            }
-            catch (Exception ex)
-            {
-                // Log the error internally then rethrow.
-                // We don't call next here, the pipeline will automatically handle it
-                this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
-                throw;
-            }
-            finally
-            {
-                await this.StreamDisposeAsync(outStream);
+                catch (Exception ex)
+                {
+                    // Log the error internally then rethrow.
+                    // We don't call next here, the pipeline will automatically handle it
+                    this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
+                    throw;
+                }
+                finally
+                {
+                    await this.StreamDisposeAsync(outStream);
+                }
             }
         }
 
@@ -389,23 +390,24 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     if (imageContext.IsHeadRequest())
                     {
                         await imageContext.SendStatusAsync(ResponseConstants.Status200Ok, metadata);
+                        return;
                     }
 
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
 
                     // When stream is null we're sending from the cache.
                     await imageContext.SendAsync(stream ?? await cacheResolver.OpenReadAsync(), metadata);
-
-                    break;
+                    return;
 
                 case ImageContext.PreconditionState.NotModified:
                     this.logger.LogImageNotModified(imageContext.GetDisplayUrl());
                     await imageContext.SendStatusAsync(ResponseConstants.Status304NotModified, metadata);
-                    break;
+                    return;
+
                 case ImageContext.PreconditionState.PreconditionFailed:
                     this.logger.LogImagePreconditionFailed(imageContext.GetDisplayUrl());
                     await imageContext.SendStatusAsync(ResponseConstants.Status412PreconditionFailed, metadata);
-                    break;
+                    return;
                 default:
                     var exception = new NotImplementedException(imageContext.GetPreconditionState().ToString());
                     Debug.Fail(exception.ToString());
