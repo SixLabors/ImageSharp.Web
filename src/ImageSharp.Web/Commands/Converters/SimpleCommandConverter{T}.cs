@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Text;
 
 namespace SixLabors.ImageSharp.Web.Commands.Converters
 {
@@ -42,7 +43,17 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
             }
             catch (Exception)
             {
-                throw new Exception(value);
+                StringBuilder sb = new StringBuilder();
+
+                sb.AppendLine(nameof(culture.Name));
+                sb.AppendLine(culture.Name);
+                sb.AppendLine(nameof(culture.NumberFormat.NumberDecimalSeparator));
+                sb.AppendLine(culture.NumberFormat.NumberDecimalSeparator);
+                sb.AppendLine(nameof(culture.TextInfo.ListSeparator));
+                sb.AppendLine(culture.TextInfo.ListSeparator);
+                sb.AppendLine("Value");
+                sb.AppendLine(value);
+                throw new Exception(sb.ToString());
             }
         }
     }
