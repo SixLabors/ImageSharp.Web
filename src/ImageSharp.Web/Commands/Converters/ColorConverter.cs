@@ -44,7 +44,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
             // Numeric r,g,b - r,g,b,a
             char separator = culture.TextInfo.ListSeparator[0];
 
-            if (value.Contains(separator.ToString()))
+            if (value.IndexOf(separator) != -1)
             {
                 string[] components = value.Split(separator);
 

@@ -31,12 +31,19 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
             Type t = typeof(T);
             Type u = Nullable.GetUnderlyingType(t);
 
-            if (u != null)
+            try
             {
-                return (T)Convert.ChangeType(value, u, culture);
-            }
+                if (u != null)
+                {
+                    return (T)Convert.ChangeType(value, u, culture);
+                }
 
-            return (T)Convert.ChangeType(value, t, culture);
+                return (T)Convert.ChangeType(value, t, culture);
+            }
+            catch (Exception)
+            {
+                throw new Exception(value);
+            }
         }
     }
 }
