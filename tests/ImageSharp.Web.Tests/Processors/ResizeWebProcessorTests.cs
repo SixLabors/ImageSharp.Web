@@ -35,7 +35,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
 
             var commands = new Dictionary<string, string>
             {
-                { ResizeWebProcessor.Sampler, nameof(KnownResamplers.NearestNeighbor) },
+                { ResizeWebProcessor.Sampler, nameof(KnownResamplers.Box) },
                 { ResizeWebProcessor.Width, Width.ToString() },
                 { ResizeWebProcessor.Height, Height.ToString() },
                 { ResizeWebProcessor.Xy, "0,0" }
