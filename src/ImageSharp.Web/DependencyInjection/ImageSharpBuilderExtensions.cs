@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
+using SixLabors.ImageSharp.Web.Commands.Converters;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
 
@@ -248,6 +249,68 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpBuilder ClearProcessors(this IImageSharpBuilder builder)
         {
             builder.Services.RemoveAll(typeof(IImageWebProcessor));
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Adds the given <see cref="ICommandConverter"/> to the converter collection within the service collection.
+        /// </summary>
+        /// <typeparam name="TConverter">The type of class implementing <see cref="ICommandConverter"/>to add.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder AddConverter<TConverter>(this IImageSharpBuilder builder)
+            where TConverter : class, ICommandConverter
+        {
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ICommandConverter, TConverter>());
+            return builder;
+        }
+
+        /// <summary>
+        /// Adds the given <see cref="ICommandConverter"/> to the converter collection within the service collection.
+        /// </summary>
+        /// <typeparam name="TConverter">The type of class implementing <see cref="ICommandConverter"/>to add.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="ICommandConverter"/>.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder AddConverter<TConverter>(this IImageSharpBuilder builder, Func<IServiceProvider, TConverter> implementationFactory)
+            where TConverter : class, ICommandConverter
+        {
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ICommandConverter>(implementationFactory));
+            return builder;
+        }
+
+        /// <summary>
+        /// Removes the given <see cref="ICommandConverter"/> from the converter collection within the service collection.
+        /// </summary>
+        /// <typeparam name="TConverter">The type of class implementing <see cref="ICommandConverter"/>to add.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder RemoveConverter<TConverter>(this IImageSharpBuilder builder)
+            where TConverter : class, ICommandConverter
+        {
+            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
+                x.ServiceType == typeof(ICommandConverter)
+                && x.Lifetime == ServiceLifetime.Singleton
+                && (x.ImplementationType == typeof(TConverter)
+                || (x.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TConverter))));
+
+            if (descriptor != null)
+            {
+                builder.Services.Remove(descriptor);
+            }
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Removes all <see cref="ICommandConverter"/> instances from the converter collection within the service collection.
+        /// </summary>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder ClearConverters(this IImageSharpBuilder builder)
+        {
+            builder.Services.RemoveAll(typeof(ICommandConverter));
 
             return builder;
         }

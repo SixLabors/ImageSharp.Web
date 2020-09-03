@@ -10,11 +10,18 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// The generic converter for simple types that implement <see cref="IConvertible"/>.
     /// </summary>
     /// <typeparam name="T">The type of object to convert to.</typeparam>
-    internal sealed class SimpleCommandConverter<T> : CommandConverter
+    internal sealed class SimpleCommandConverter<T> : ICommandConverter
         where T : IConvertible
     {
         /// <inheritdoc/>
-        public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
+        public Type Type => typeof(T);
+
+        /// <inheritdoc/>
+        public object ConvertFrom(
+            CommandParser parser,
+            CultureInfo culture,
+            string value,
+            Type propertyType)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -26,7 +33,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
 
             if (u != null)
             {
-                return (T)Convert.ChangeType(value, u);
+                return (T)Convert.ChangeType(value, u, culture);
             }
 
             return (T)Convert.ChangeType(value, t, culture);

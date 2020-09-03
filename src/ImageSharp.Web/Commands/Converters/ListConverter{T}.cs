@@ -12,10 +12,16 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// Converts the value of an string to a generic list.
     /// </summary>
     /// <typeparam name="T">The type to convert from.</typeparam>
-    internal class ListConverter<T> : CommandConverter
+    internal class ListConverter<T> : ICommandConverter
     {
+        public virtual Type Type => typeof(List<T>);
+
         /// <inheritdoc/>
-        public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
+        public virtual object ConvertFrom(
+            CommandParser parser,
+            CultureInfo culture,
+            string value,
+            Type propertyType)
         {
             var result = new List<T>();
             if (string.IsNullOrWhiteSpace(value))
@@ -24,16 +30,9 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
             }
 
             Type type = typeof(T);
-            ICommandConverter paramConverter = CommandDescriptor.GetConverter(type);
-
-            if (paramConverter == null)
-            {
-                throw new InvalidOperationException("No type converter exists for type " + type.FullName);
-            }
-
             foreach (string pill in this.GetStringArray(value, culture))
             {
-                object item = paramConverter.ConvertFromInvariantString(pill, type);
+                object item = parser.ParseValue(type, pill, culture);
                 if (item != null)
                 {
                     result.Add((T)item);

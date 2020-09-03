@@ -14,7 +14,14 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     internal sealed class ArrayConverter<T> : ListConverter<T>
     {
         /// <inheritdoc/>
-        public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
-            => ((List<T>)base.ConvertFrom(culture, value, propertyType)).ToArray();
+        public override Type Type => typeof(T[]);
+
+        /// <inheritdoc/>
+        public override object ConvertFrom(
+            CommandParser parser,
+            CultureInfo culture,
+            string value,
+            Type propertyType)
+            => ((List<T>)base.ConvertFrom(parser, culture, value, propertyType)).ToArray();
     }
 }

@@ -10,10 +10,20 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// <summary>
     /// The enum converter. Allows conversion to enumerations.
     /// </summary>
-    internal sealed class EnumConverter : CommandConverter
+    internal sealed class EnumConverter : ICommandConverter
     {
+        public Type Type => typeof(Enum);
+
         /// <inheritdoc/>
-        public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
+        /// <remarks>
+        /// Unlike other converters the type here does not match the passed type.
+        /// This allows us to reuse the same converter for infinite enum types.
+        /// </remarks>
+        public object ConvertFrom(
+            CommandParser parser,
+            CultureInfo culture,
+            string value,
+            Type propertyType)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -36,9 +46,10 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
 
                 return Enum.Parse(propertyType, value, true);
             }
-            catch (Exception e)
+            catch
             {
-                throw new FormatException($"{value} is not a valid value for {propertyType.Name}", e);
+                // Just return the default value
+                return Activator.CreateInstance(propertyType);
             }
         }
 
@@ -48,6 +59,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// <param name="input">The input string to split.</param>
         /// <param name="separator">The separator to split string by.</param>
         /// <returns>The <see cref="T:String[]"/>.</returns>
-        private static string[] GetStringArray(string input, char separator) => input.Split(separator).Select(s => s.Trim()).ToArray();
+        private static string[] GetStringArray(string input, char separator)
+            => input.Split(separator).Select(s => s.Trim()).ToArray();
     }
 }

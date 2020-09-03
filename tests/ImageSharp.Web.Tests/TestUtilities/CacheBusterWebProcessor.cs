@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
@@ -13,9 +15,12 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 
         public IEnumerable<string> Commands { get; } = new[] { Command };
 
-        public FormattedImage Process(FormattedImage image, ILogger logger, IDictionary<string, string> commands)
-        {
-            return image;
-        }
+        public FormattedImage Process(
+            FormattedImage image,
+            ILogger logger,
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture)
+            => image;
     }
 }

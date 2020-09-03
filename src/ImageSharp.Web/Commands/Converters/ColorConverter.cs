@@ -12,7 +12,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// <summary>
     /// Allows the conversion of strings into rgba32 pixel colors.
     /// </summary>
-    internal class ColorConverter : CommandConverter
+    internal class ColorConverter : ICommandConverter
     {
         /// <summary>
         /// The web color hexadecimal regex. Matches strings arranged
@@ -31,7 +31,10 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         private static readonly Lazy<IDictionary<string, Color>> ColorConstantsTable = new Lazy<IDictionary<string, Color>>(InitializeColorConstantsTable);
 
         /// <inheritdoc/>
-        public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
+        public Type Type => typeof(Color);
+
+        /// <inheritdoc/>
+        public object ConvertFrom(CommandParser parser, CultureInfo culture, string value, Type propertyType)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -56,11 +59,14 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
 
                 if (convert)
                 {
-                    List<byte> rgba = CommandParser.Instance.ParseValue<List<byte>>(value);
+                    List<byte> rgba = parser.ParseValue<List<byte>>(value, culture);
 
-                    return rgba.Count == 4
-                        ? Color.FromRgba(rgba[0], rgba[1], rgba[2], rgba[3])
-                        : Color.FromRgb(rgba[0], rgba[1], rgba[2]);
+                    return rgba.Count switch
+                    {
+                        4 => Color.FromRgba(rgba[0], rgba[1], rgba[2], rgba[3]),
+                        3 => Color.FromRgb(rgba[0], rgba[1], rgba[2]),
+                        _ => default,
+                    };
                 }
             }
 
@@ -72,7 +78,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
 
             // Named colors
             IDictionary<string, Color> table = ColorConstantsTable.Value;
-            return table.ContainsKey(value) ? table[value] : base.ConvertFrom(culture, value, propertyType);
+            return table.ContainsKey(value) ? table[value] : default;
         }
 
         /// <summary>
@@ -82,9 +88,10 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         private static IDictionary<string, Color> InitializeColorConstantsTable()
         {
             IDictionary<string, Color> table = new Dictionary<string, Color>(StringComparer.OrdinalIgnoreCase);
-            foreach (FieldInfo field in TypeConstants.Color.GetFields(BindingFlags.Public | BindingFlags.Static))
+
+            foreach (FieldInfo field in typeof(Color).GetFields(BindingFlags.Public | BindingFlags.Static))
             {
-                if (field.FieldType == TypeConstants.Color)
+                if (field.FieldType == typeof(Color))
                 {
                     table[field.Name] = (Color)field.GetValue(null);
                 }

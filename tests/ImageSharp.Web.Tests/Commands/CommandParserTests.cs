@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Web.Commands;
+using SixLabors.ImageSharp.Web.Commands.Converters;
 using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.Commands
@@ -83,6 +84,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             { Color.YellowGreen, "9ACD32FF" },
         };
 
+        private static readonly CommandParser Parser = GetCommandParser();
+
         [Theory]
         [MemberData(nameof(IntegralValues))]
         [MemberData(nameof(RealValues))]
@@ -94,9 +97,63 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         [MemberData(nameof(ColorValues))]
         public void CommandParses<T>(T expected, string param)
         {
-            T sb = CommandParser.Instance.ParseValue<T>(param);
+            T sb = Parser.ParseValue<T>(param, CultureInfo.InvariantCulture);
             Assert.IsType<T>(sb);
             Assert.Equal(expected, sb);
+        }
+
+        private static CommandParser GetCommandParser()
+        {
+            var commands = new List<ICommandConverter>
+            {
+                new IntegralNumberConverter<sbyte>(),
+                new IntegralNumberConverter<byte>(),
+                new IntegralNumberConverter<short>(),
+                new IntegralNumberConverter<ushort>(),
+                new IntegralNumberConverter<int>(),
+                new IntegralNumberConverter<uint>(),
+                new IntegralNumberConverter<long>(),
+                new IntegralNumberConverter<ulong>(),
+
+                new SimpleCommandConverter<decimal>(),
+                new SimpleCommandConverter<float>(),
+                new SimpleCommandConverter<double>(),
+                new SimpleCommandConverter<string>(),
+                new SimpleCommandConverter<bool>(),
+
+                new ArrayConverter<sbyte>(),
+                new ArrayConverter<byte>(),
+                new ArrayConverter<short>(),
+                new ArrayConverter<ushort>(),
+                new ArrayConverter<int>(),
+                new ArrayConverter<uint>(),
+                new ArrayConverter<long>(),
+                new ArrayConverter<ulong>(),
+                new ArrayConverter<decimal>(),
+                new ArrayConverter<float>(),
+                new ArrayConverter<double>(),
+                new ArrayConverter<string>(),
+                new ArrayConverter<bool>(),
+
+                new ListConverter<sbyte>(),
+                new ListConverter<byte>(),
+                new ListConverter<short>(),
+                new ListConverter<ushort>(),
+                new ListConverter<int>(),
+                new ListConverter<uint>(),
+                new ListConverter<long>(),
+                new ListConverter<ulong>(),
+                new ListConverter<decimal>(),
+                new ListConverter<float>(),
+                new ListConverter<double>(),
+                new ListConverter<string>(),
+                new ListConverter<bool>(),
+
+                new ColorConverter(),
+                new EnumConverter()
+            };
+
+            return new CommandParser(commands);
         }
     }
 }
