@@ -95,11 +95,20 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         [MemberData(nameof(IntegralLists))]
         [MemberData(nameof(RealLists))]
         [MemberData(nameof(ColorValues))]
-        public void CommandParses<T>(T expected, string param)
+        public void CommandParserCanConvert<T>(T expected, string param)
         {
             T sb = Parser.ParseValue<T>(param, CultureInfo.InvariantCulture);
             Assert.IsType<T>(sb);
             Assert.Equal(expected, sb);
+        }
+
+        [Fact]
+        public void CommandParseThrowsCorrectly()
+        {
+            var emptyParser = new CommandParser(Array.Empty<ICommandConverter>());
+
+            Assert.Throws<NotSupportedException>(
+                () => emptyParser.ParseValue<bool>("true", CultureInfo.InvariantCulture));
         }
 
         private static CommandParser GetCommandParser()
