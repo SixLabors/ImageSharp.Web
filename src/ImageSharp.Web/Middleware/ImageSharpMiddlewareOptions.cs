@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
@@ -61,7 +62,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// Gets or sets a value indicating whether to use culture-independent (invariant)
         /// conversion when converting commands.
         /// If set to <see langword="false"/> the <see cref="CommandParser"/> will use
-        /// the current thread culture.
+        /// the <see cref="CultureInfo.CurrentCulture"/>.
         /// </summary>
         public bool UseInvariantParsingCulture { get; set; } = true;
 
