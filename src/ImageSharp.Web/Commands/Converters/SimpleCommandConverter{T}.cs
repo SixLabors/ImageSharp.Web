@@ -32,29 +32,12 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
             Type t = typeof(T);
             Type u = Nullable.GetUnderlyingType(t);
 
-            try
+            if (u != null)
             {
-                if (u != null)
-                {
-                    return (T)Convert.ChangeType(value, u, culture);
-                }
-
-                return (T)Convert.ChangeType(value, t, culture);
+                return (T)Convert.ChangeType(value, u, culture);
             }
-            catch (Exception)
-            {
-                StringBuilder sb = new StringBuilder();
 
-                sb.AppendLine(nameof(culture.Name));
-                sb.AppendLine(culture.Name);
-                sb.AppendLine(nameof(culture.NumberFormat.NumberDecimalSeparator));
-                sb.AppendLine(culture.NumberFormat.NumberDecimalSeparator);
-                sb.AppendLine(nameof(culture.TextInfo.ListSeparator));
-                sb.AppendLine(culture.TextInfo.ListSeparator);
-                sb.AppendLine("Value");
-                sb.AppendLine(value);
-                throw new Exception(sb.ToString());
-            }
+            return (T)Convert.ChangeType(value, t, culture);
         }
     }
 }
