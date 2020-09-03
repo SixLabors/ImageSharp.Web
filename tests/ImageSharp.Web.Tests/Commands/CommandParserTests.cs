@@ -13,91 +13,156 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
 {
     public class CommandParserTests
     {
-        public static TheoryData<object, string> IntegralValues = new TheoryData<object, string>
-        {
-            { (sbyte)1, "1" },
-            { (byte)1, "1" },
-            { (short)1, "1" },
-            { (ushort)1, "1" },
-            { 1, "1" },
-            { 1U, "1" },
-            { 1L, "1" },
-            { 1UL, "1" },
-            { 1F, "1" },
-            { 1D, "1" },
-            { 1M, "1" },
-        };
-
+        private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
+        private static readonly CultureInfo Danish = new CultureInfo("da-DK");
         private const double Pi = 3.14159265358979;
-        private static readonly string PiString = Pi.ToString(CultureInfo.InvariantCulture);
+        private static readonly string PiStringInvariant = Pi.ToString(CultureInfo.InvariantCulture);
+        private static readonly string PiStringDanish = Pi.ToString(Danish);
         private static readonly double RoundedPi = Math.Round(Pi, MidpointRounding.AwayFromZero);
 
-        public static TheoryData<object, string> RealValues = new TheoryData<object, string>
+        public static TheoryData<object, string, CultureInfo> IntegralValuesInvariant
+            = new TheoryData<object, string, CultureInfo>
         {
-            { (sbyte)RoundedPi, PiString },
-            { (byte)RoundedPi, PiString },
-            { (short)RoundedPi, PiString },
-            { (ushort)RoundedPi, PiString },
-            { (int)RoundedPi, PiString },
-            { (uint)RoundedPi, PiString },
-            { (long)RoundedPi, PiString },
-            { (ulong)RoundedPi, PiString },
-            { (float)Pi, PiString },
-            { (double)Pi, PiString },
-            { (decimal)Pi, PiString },
+            { (sbyte)1, "1", Invariant },
+            { (byte)1, "1", Invariant },
+            { (short)1, "1", Invariant },
+            { (ushort)1, "1", Invariant },
+            { 1, "1", Invariant },
+            { 1U, "1", Invariant },
+            { 1L, "1", Invariant },
+            { 1UL, "1", Invariant },
+            { 1F, "1", Invariant },
+            { 1D, "1", Invariant },
+            { 1M, "1", Invariant },
         };
 
-        public static TheoryData<ResizeMode, string> EnumValues = new TheoryData<ResizeMode, string>
+        public static TheoryData<object, string, CultureInfo> IntegralValuesDanish
+            = new TheoryData<object, string, CultureInfo>
         {
-            { ResizeMode.Max, "max" },
-            { ResizeMode.Crop, "this is not, an enum value" }, // Unknown returns default
+                    { (sbyte)1, "1", Danish },
+                    { (byte)1, "1", Danish },
+                    { (short)1, "1", Danish },
+                    { (ushort)1, "1", Danish },
+                    { 1, "1", Danish },
+                    { 1U, "1", Danish },
+                    { 1L, "1", Danish },
+                    { 1UL, "1", Danish },
+                    { 1F, "1", Danish },
+                    { 1D, "1", Danish },
+                    { 1M, "1", Danish },
         };
 
-        public static TheoryData<int[], string> IntegralArrays = new TheoryData<int[], string>
+        public static TheoryData<object, string, CultureInfo> RealValuesInvariant
+            = new TheoryData<object, string, CultureInfo>
         {
-            { new[] { 1, 2, 3, 4 }, "1,2,3,4" },
+            { (sbyte)RoundedPi, PiStringInvariant, Invariant },
+            { (byte)RoundedPi, PiStringInvariant, Invariant },
+            { (short)RoundedPi, PiStringInvariant, Invariant },
+            { (ushort)RoundedPi, PiStringInvariant, Invariant },
+            { (int)RoundedPi, PiStringInvariant, Invariant },
+            { (uint)RoundedPi, PiStringInvariant, Invariant },
+            { (long)RoundedPi, PiStringInvariant, Invariant },
+            { (ulong)RoundedPi, PiStringInvariant, Invariant },
+            { (float)Pi, PiStringInvariant, Invariant },
+            { (double)Pi, PiStringInvariant, Invariant },
+            { (decimal)Pi, PiStringInvariant, Invariant },
         };
 
-        public static TheoryData<float[], string> RealArrays = new TheoryData<float[], string>
+        public static TheoryData<object, string, CultureInfo> RealValuesDanish
+            = new TheoryData<object, string, CultureInfo>
         {
-            { new[] { 1.667F, 2.667F, 3.667F, 4.667F }, "1.667,2.667,3.667,4.667" },
+            { (sbyte)RoundedPi, PiStringDanish, Danish },
+            { (byte)RoundedPi, PiStringDanish, Danish },
+            { (short)RoundedPi, PiStringDanish, Danish },
+            { (ushort)RoundedPi, PiStringDanish, Danish },
+            { (int)RoundedPi, PiStringDanish, Danish },
+            { (uint)RoundedPi, PiStringDanish, Danish },
+            { (long)RoundedPi, PiStringDanish, Danish },
+            { (ulong)RoundedPi, PiStringDanish, Danish },
+            { (float)Pi, PiStringDanish, Danish },
+            { (double)Pi, PiStringDanish, Danish },
+            { (decimal)Pi, PiStringDanish, Danish },
         };
 
-        public static TheoryData<object, string> IntegralLists = new TheoryData<object, string>
+        public static TheoryData<ResizeMode, string, CultureInfo> EnumValues
+            = new TheoryData<ResizeMode, string, CultureInfo>
         {
-            { new List<int> { 1, 2, 3, 4 }, "1,2,3,4" },
+            { ResizeMode.Max, "max", Invariant },
+            { ResizeMode.Crop, "this is not, an enum value", Invariant }, // Unknown returns default
         };
 
-        public static TheoryData<object, string> RealLists = new TheoryData<object, string>
+        public static TheoryData<int[], string, CultureInfo> IntegralArrays
+            = new TheoryData<int[], string, CultureInfo>
         {
-            { new List<float> { 1.667F, 2.667F, 3.667F, 4.667F }, "1.667,2.667,3.667,4.667" },
+            { new[] { 1, 2, 3, 4 }, "1,2,3,4", Invariant },
         };
 
-        public static TheoryData<Color, string> ColorValues = new TheoryData<Color, string>
+        public static TheoryData<float[], string, CultureInfo> RealArraysInvariant
+            = new TheoryData<float[], string, CultureInfo>
         {
-            { default, string.Empty },
-            { Color.White, "255,255,255" },
-            { Color.Transparent, "0,0,0,0" },
-            { Color.Orange, "orange" },
-            { Color.RoyalBlue, "4169E1FF" },
-            { Color.Lime, "00FF00FF" },
-            { Color.YellowGreen, "9ACD32FF" },
+            { new[] { 1.667F, 2.667F, 3.667F, 4.667F }, "1.667,2.667,3.667,4.667", Invariant },
+        };
+
+        public static TheoryData<float[], string, CultureInfo> RealArraysDanish
+            = new TheoryData<float[], string, CultureInfo>
+        {
+            { new[] { 1.667F, 2.667F, 3.667F, 4.667F }, "1,667;2,667;3,667;4,667", Danish },
+        };
+
+        public static TheoryData<object, string, CultureInfo> IntegralLists
+            = new TheoryData<object, string, CultureInfo>
+        {
+            { new List<int> { 1, 2, 3, 4 }, "1,2,3,4", Invariant },
+        };
+
+        public static TheoryData<List<float>, string, CultureInfo> RealLists
+            = new TheoryData<List<float>, string, CultureInfo>
+        {
+            { new List<float> { 1.667F, 2.667F, 3.667F, 4.667F }, "1.667,2.667,3.667,4.667", Invariant },
+        };
+
+        public static TheoryData<Color, string, CultureInfo> ColorValuesInvariant
+            = new TheoryData<Color, string, CultureInfo>
+        {
+            { default, string.Empty, Invariant },
+            { Color.White, "255,255,255", Invariant },
+            { Color.Transparent, "0,0,0,0", Invariant },
+            { Color.Orange, "orange", Invariant },
+            { Color.RoyalBlue, "4169E1FF", Invariant },
+            { Color.Lime, "00FF00FF", Invariant },
+            { Color.YellowGreen, "9ACD32FF", Invariant },
+        };
+
+        public static TheoryData<Color, string, CultureInfo> ColorValuesDanish
+            = new TheoryData<Color, string, CultureInfo>
+        {
+            { default, string.Empty, Danish },
+            { Color.White, "255;255;255", Danish },
+            { Color.Transparent, "0;0;0;0", Danish },
+            { Color.Orange, "orange", Danish },
+            { Color.RoyalBlue, "4169E1FF", Danish },
+            { Color.Lime, "00FF00FF", Danish },
+            { Color.YellowGreen, "9ACD32FF", Danish },
         };
 
         private static readonly CommandParser Parser = GetCommandParser();
 
         [Theory]
-        [MemberData(nameof(IntegralValues))]
-        [MemberData(nameof(RealValues))]
+        [MemberData(nameof(IntegralValuesInvariant))]
+        [MemberData(nameof(IntegralValuesDanish))]
+        [MemberData(nameof(RealValuesInvariant))]
+        [MemberData(nameof(RealValuesDanish))]
         [MemberData(nameof(EnumValues))]
         [MemberData(nameof(IntegralArrays))]
-        [MemberData(nameof(RealArrays))]
+        [MemberData(nameof(RealArraysInvariant))]
+        [MemberData(nameof(RealArraysDanish))]
         [MemberData(nameof(IntegralLists))]
         [MemberData(nameof(RealLists))]
-        [MemberData(nameof(ColorValues))]
-        public void CommandParserCanConvert<T>(T expected, string param)
+        [MemberData(nameof(ColorValuesInvariant))]
+        [MemberData(nameof(ColorValuesDanish))]
+        public void CommandParserCanConvert<T>(T expected, string param, CultureInfo culture)
         {
-            T sb = Parser.ParseValue<T>(param, CultureInfo.InvariantCulture);
+            T sb = Parser.ParseValue<T>(param, culture);
             Assert.IsType<T>(sb);
             Assert.Equal(expected, sb);
         }
