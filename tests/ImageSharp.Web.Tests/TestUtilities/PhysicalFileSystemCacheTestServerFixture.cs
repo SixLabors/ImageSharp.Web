@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Web.DependencyInjection;
@@ -16,15 +17,17 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
         {
             services.AddImageSharp(options =>
             {
-                options.OnParseCommands = context =>
+                options.OnParseCommandsAsync = context =>
                 {
                     Assert.NotNull(context);
                     Assert.NotNull(context.Context);
                     Assert.NotNull(context.Commands);
                     Assert.NotNull(context.Parser);
+
+                    return Task.CompletedTask;
                 };
 
-                options.OnProcessed = context =>
+                options.OnProcessedAsync = context =>
                 {
                     Assert.NotNull(context);
                     Assert.NotNull(context.Commands);
@@ -32,19 +35,25 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                     Assert.NotNull(context.Context);
                     Assert.NotNull(context.Extension);
                     Assert.NotNull(context.Stream);
+
+                    return Task.CompletedTask;
                 };
 
-                options.OnBeforeSave = context =>
+                options.OnBeforeSaveAsync = context =>
                 {
                     Assert.NotNull(context);
                     Assert.NotNull(context.Format);
                     Assert.NotNull(context.Image);
+
+                    return Task.CompletedTask;
                 };
 
-                options.OnPrepareResponse = context =>
+                options.OnPrepareResponseAsync = context =>
                 {
                     Assert.NotNull(context);
                     Assert.NotNull(context.Response);
+
+                    return Task.CompletedTask;
                 };
             })
                 .ClearProviders()

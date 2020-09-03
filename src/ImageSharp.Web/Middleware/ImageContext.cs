@@ -111,13 +111,19 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// Gets the preconditioned state of the request.
         /// </summary>
         /// <returns>The <see cref="PreconditionState"/>.</returns>
-        public PreconditionState GetPreconditionState() => GetMaxPreconditionState(this.ifMatchState, this.ifNoneMatchState, this.ifModifiedSinceState, this.ifUnmodifiedSinceState);
+        public PreconditionState GetPreconditionState()
+            => GetMaxPreconditionState(
+                this.ifMatchState,
+                this.ifNoneMatchState,
+                this.ifModifiedSinceState,
+                this.ifUnmodifiedSinceState);
 
         /// <summary>
         /// Gets a value indicating whether this request is a head request.
         /// </summary>
         /// <returns>THe <see cref="bool"/>.</returns>
-        public bool IsHeadRequest() => string.Equals("HEAD", this.request.Method, StringComparison.OrdinalIgnoreCase);
+        public bool IsHeadRequest()
+            => string.Equals("HEAD", this.request.Method, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Set the response status headers.
@@ -126,12 +132,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="Task"/>.</returns>
         public Task SendStatusAsync(int statusCode, in ImageCacheMetadata metaData)
-        {
-            this.ApplyResponseHeaders(statusCode, metaData.ContentType, metaData.CacheControlMaxAge);
-
-            // this.logger.LogHandled(statusCode, SubPath);
-            return ResponseConstants.CompletedTask;
-        }
+            => this.ApplyResponseHeadersAsync(
+                statusCode,
+                metaData.ContentType,
+                metaData.CacheControlMaxAge);
 
         /// <summary>
         /// Set the response content.
@@ -141,7 +145,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <returns>The <see cref="Task"/>.</returns>
         public async Task SendAsync(Stream stream, ImageCacheMetadata metaData)
         {
-            this.ApplyResponseHeaders(ResponseConstants.Status200Ok, metaData.ContentType, metaData.CacheControlMaxAge);
+            await this.ApplyResponseHeadersAsync(
+                ResponseConstants.Status200Ok,
+                metaData.ContentType,
+                metaData.CacheControlMaxAge);
 
             if (stream.CanSeek)
             {
@@ -170,7 +177,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
             return max;
         }
 
-        private void ApplyResponseHeaders(int statusCode, string contentType, TimeSpan maxAge)
+        private async Task ApplyResponseHeadersAsync(
+            int statusCode,
+            string contentType,
+            TimeSpan maxAge)
         {
             this.response.StatusCode = statusCode;
             if (statusCode < 400)
@@ -193,7 +203,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     MustRevalidate = true
                 };
 
-                this.options.OnPrepareResponse?.Invoke(this.context);
+                await this.options.OnPrepareResponseAsync.Invoke(this.context);
             }
 
             if (statusCode == ResponseConstants.Status200Ok)
