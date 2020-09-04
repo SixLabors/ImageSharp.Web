@@ -8,15 +8,20 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
 {
     /// <summary>
     /// Defines a contract for converting the value of a string into a different data type.
-    /// Implementations of this interface should be stateless by design.
+    /// Implementations should be stateless by design and also implement <see cref="ICommandConverter{T}"/>.
     /// </summary>
     public interface ICommandConverter
     {
         /// <summary>
-        /// Gets the type of property this converter converts.
+        /// Gets the type this converter returns.
         /// </summary>
         Type Type { get; }
+    }
 
+    /// <inheritdoc/>
+    /// <typeparam name="T">The type this converter returns.</typeparam>
+    public interface ICommandConverter<T> : ICommandConverter
+    {
         /// <summary>
         /// Converts the given string to the type of this converter, using the specified culture information.
         /// </summary>
@@ -30,6 +35,6 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// <param name="value">The <see cref="string"/> to convert. </param>
         /// <param name="propertyType">The property type that the converter will convert to.</param>
         /// <exception cref="NotSupportedException">The conversion cannot be performed.</exception>
-        object ConvertFrom(CommandParser parser, CultureInfo culture, string value, Type propertyType);
+        T ConvertFrom(CommandParser parser, CultureInfo culture, string value, Type propertyType);
     }
 }

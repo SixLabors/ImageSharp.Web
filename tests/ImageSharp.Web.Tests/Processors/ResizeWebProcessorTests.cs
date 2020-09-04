@@ -15,8 +15,23 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
 {
     public class ResizeWebProcessorTests
     {
-        [Fact]
-        public void ResizeWebProcessor_UpdatesSize()
+        [Theory]
+        [InlineData(nameof(KnownResamplers.Bicubic))]
+        [InlineData(nameof(KnownResamplers.Box))]
+        [InlineData(nameof(KnownResamplers.CatmullRom))]
+        [InlineData(nameof(KnownResamplers.Hermite))]
+        [InlineData(nameof(KnownResamplers.Lanczos2))]
+        [InlineData(nameof(KnownResamplers.Lanczos3))]
+        [InlineData(nameof(KnownResamplers.Lanczos5))]
+        [InlineData(nameof(KnownResamplers.Lanczos8))]
+        [InlineData(nameof(KnownResamplers.MitchellNetravali))]
+        [InlineData(nameof(KnownResamplers.NearestNeighbor))]
+        [InlineData(nameof(KnownResamplers.Robidoux))]
+        [InlineData(nameof(KnownResamplers.RobidouxSharp))]
+        [InlineData(nameof(KnownResamplers.Spline))]
+        [InlineData(nameof(KnownResamplers.Triangle))]
+        [InlineData(nameof(KnownResamplers.Welch))]
+        public void ResizeWebProcessor_UpdatesSize(string resampler)
         {
             const int Width = 4;
             const int Height = 6;
@@ -35,10 +50,11 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
 
             var commands = new Dictionary<string, string>
             {
-                { ResizeWebProcessor.Sampler, nameof(KnownResamplers.Box) },
+                { ResizeWebProcessor.Sampler, resampler },
                 { ResizeWebProcessor.Width, Width.ToString() },
                 { ResizeWebProcessor.Height, Height.ToString() },
-                { ResizeWebProcessor.Xy, "0,0" }
+                { ResizeWebProcessor.Xy, "0,0" },
+                { ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch) }
             };
 
             using var image = new Image<Rgba32>(1, 1);

@@ -9,15 +9,15 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// <summary>
     /// The generic converter for integral types.
     /// </summary>
-    /// <typeparam name="T">The type of object to convert to.</typeparam>
-    internal sealed class IntegralNumberConverter<T> : ICommandConverter
+    /// <inheritdoc/>
+    internal sealed class IntegralNumberConverter<T> : ICommandConverter<T>
         where T : struct, IConvertible, IComparable<T>
     {
         /// <inheritdoc/>
         public Type Type => typeof(T);
 
         /// <inheritdoc/>
-        public object ConvertFrom(
+        public T ConvertFrom(
             CommandParser parser,
             CultureInfo culture,
             string value,
@@ -26,7 +26,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
             if (string.IsNullOrWhiteSpace(value)
                 || Array.IndexOf(TypeConstants.IntegralTypes, propertyType) < 0)
             {
-                return default(T);
+                return default;
             }
 
             // Round the value to the nearest decimal value

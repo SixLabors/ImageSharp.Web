@@ -168,10 +168,16 @@ namespace SixLabors.ImageSharp.Web.Processors
             {
                 switch (sampler.ToLowerInvariant())
                 {
-                    case "nearest": return KnownResamplers.NearestNeighbor;
+                    case "nearest":
+                    case "nearestneighbor":
+                        return KnownResamplers.NearestNeighbor;
                     case "box": return KnownResamplers.Box;
-                    case "mitchell": return KnownResamplers.MitchellNetravali;
-                    case "catmull": return KnownResamplers.CatmullRom;
+                    case "mitchell":
+                    case "mitchellnetravali":
+                        return KnownResamplers.MitchellNetravali;
+                    case "catmull":
+                    case "catmullrom":
+                        return KnownResamplers.CatmullRom;
                     case "lanczos2": return KnownResamplers.Lanczos2;
                     case "lanczos3": return KnownResamplers.Lanczos3;
                     case "lanczos5": return KnownResamplers.Lanczos5;

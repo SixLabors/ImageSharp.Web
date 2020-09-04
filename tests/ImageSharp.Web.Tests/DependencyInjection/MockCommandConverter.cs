@@ -8,7 +8,7 @@ using SixLabors.ImageSharp.Web.Commands.Converters;
 
 namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
 {
-    public class MockCommandConverter : ICommandConverter
+    public class MockCommandConverter : ICommandConverter<object>
     {
         public Type Type => typeof(MockCommandConverter);
 

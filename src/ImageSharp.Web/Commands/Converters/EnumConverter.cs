@@ -4,21 +4,24 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace SixLabors.ImageSharp.Web.Commands.Converters
 {
     /// <summary>
     /// The enum converter. Allows conversion to enumerations.
     /// </summary>
-    internal sealed class EnumConverter : ICommandConverter
+    internal sealed class EnumConverter : ICommandConverter<object>
     {
         public Type Type => typeof(Enum);
 
         /// <inheritdoc/>
         /// <remarks>
-        /// Unlike other converters the type here does not match the passed type.
+        /// Unlike other converters the <see cref="Type"/> property does not
+        /// match the <paramref name="propertyType"/> value.
         /// This allows us to reuse the same converter for infinite enum types.
         /// </remarks>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public object ConvertFrom(
             CommandParser parser,
             CultureInfo culture,
@@ -59,6 +62,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         /// <param name="input">The input string to split.</param>
         /// <param name="separator">The separator to split string by.</param>
         /// <returns>The <see cref="T:String[]"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static string[] GetStringArray(string input, char separator)
             => input.Split(separator).Select(s => s.Trim()).ToArray();
     }

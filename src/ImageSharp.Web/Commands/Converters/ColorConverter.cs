@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace SixLabors.ImageSharp.Web.Commands.Converters
@@ -12,7 +13,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// <summary>
     /// Allows the conversion of strings into rgba32 pixel colors.
     /// </summary>
-    internal class ColorConverter : ICommandConverter
+    internal class ColorConverter : ICommandConverter<Color>
     {
         /// <summary>
         /// The web color hexadecimal regex. Matches strings arranged
@@ -34,11 +35,12 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
         public Type Type => typeof(Color);
 
         /// <inheritdoc/>
-        public object ConvertFrom(CommandParser parser, CultureInfo culture, string value, Type propertyType)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Color ConvertFrom(CommandParser parser, CultureInfo culture, string value, Type propertyType)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                return default(Color);
+                return default;
             }
 
             // Numeric r,g,b - r,g,b,a
@@ -81,10 +83,6 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
             return table.ContainsKey(value) ? table[value] : default;
         }
 
-        /// <summary>
-        /// Initializes color table mapping color constants.
-        /// </summary>
-        /// <returns>The <see cref="IDictionary{String, Color}"/>.</returns>
         private static IDictionary<string, Color> InitializeColorConstantsTable()
         {
             IDictionary<string, Color> table = new Dictionary<string, Color>(StringComparer.OrdinalIgnoreCase);
