@@ -44,6 +44,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
             Assert.Equal(Width, image.Width);
             Assert.Equal(format, actual.Format);
 
+            response.Dispose();
+
             // Cached Response
             response = await this.HttpClient.GetAsync(url + Command);
 
@@ -57,6 +59,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
 
             Assert.Equal(Width, cached.Width);
             Assert.Equal(format, actual.Format);
+
+            response.Dispose();
 
             // 304 response
             var request = new HttpRequestMessage
@@ -73,6 +77,9 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
             Assert.Equal(0, response.Content.Headers.ContentLength);
             Assert.Equal(format.DefaultMimeType, response.Content.Headers.ContentType.MediaType);
 
+            request.Dispose();
+            response.Dispose();
+
             // 412 response
             request = new HttpRequestMessage
             {
@@ -86,6 +93,9 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
 
             Assert.Equal(HttpStatusCode.PreconditionFailed, response.StatusCode);
             Assert.Equal(0, response.Content.Headers.ContentLength);
+
+            request.Dispose();
+            response.Dispose();
         }
     }
 }
