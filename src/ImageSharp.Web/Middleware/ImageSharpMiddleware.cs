@@ -4,9 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -82,6 +84,16 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private readonly FormatUtilities formatUtilities;
 
         /// <summary>
+        /// Used to parse processing commands.
+        /// </summary>
+        private readonly CommandParser commandParser;
+
+        /// <summary>
+        /// The culture to use when parsing processing commands.
+        /// </summary>
+        private readonly CultureInfo parserCulture;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ImageSharpMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next middleware in the pipeline.</param>
@@ -92,6 +104,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images.</param>
         /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images.</param>
         /// <param name="cacheHash">An <see cref="ICacheHash"/>instance used for calculating cached file names.</param>
+        /// <param name="commandParser">The command parser</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public ImageSharpMiddleware(
             RequestDelegate next,
@@ -102,6 +115,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IEnumerable<IImageWebProcessor> processors,
             IImageCache cache,
             ICacheHash cacheHash,
+            CommandParser commandParser,
             FormatUtilities formatUtilities)
         {
             Guard.NotNull(next, nameof(next));
@@ -112,7 +126,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
             Guard.NotNull(processors, nameof(processors));
             Guard.NotNull(cache, nameof(cache));
             Guard.NotNull(cacheHash, nameof(cacheHash));
-            Guard.NotNull(AsyncLock, nameof(AsyncLock));
+            Guard.NotNull(commandParser, nameof(commandParser));
+            Guard.NotNull(formatUtilities, nameof(formatUtilities));
 
             this.next = next;
             this.options = options.Value;
@@ -121,6 +136,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.processors = processors as IImageWebProcessor[] ?? processors.ToArray();
             this.cache = cache;
             this.cacheHash = cacheHash;
+            this.commandParser = commandParser;
+            this.parserCulture = this.options.UseInvariantParsingCulture
+                ? CultureInfo.InvariantCulture
+                : CultureInfo.CurrentCulture;
 
             var commands = new HashSet<string>();
             foreach (IImageWebProcessor processor in this.processors)
@@ -160,7 +179,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
 
             await this.options.OnParseCommandsAsync.Invoke(
-                new ImageCommandContext(context, commands, CommandParser.Instance));
+                new ImageCommandContext(context, commands, this.commandParser, this.parserCulture));
 
             // Get the correct service for the request.
             IImageProvider provider = null;
@@ -222,11 +241,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             // Not cached? Let's get it from the image resolver.
             RecyclableMemoryStream outStream = null;
-            try
+
+            // Enter a write lock which locks writing and any reads for the same request.
+            // This reduces the overheads of unnecessary processing plus avoids file locks.
+            using (await AsyncLock.WriterLockAsync(key))
             {
-                // Enter a write lock which locks writing and any reads for the same request.
-                // This reduces the overheads of unnecessary processing plus avoids file locks.
-                using (await AsyncLock.WriterLockAsync(key))
+                try
                 {
                     ImageCacheMetadata cachedImageMetadata = default;
                     outStream = new RecyclableMemoryStream(this.options.MemoryStreamManager);
@@ -244,8 +264,16 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         else
                         {
                             using var image = FormattedImage.Load(this.options.Configuration, inStream);
-                            image.Process(this.logger, this.processors, commands);
+
+                            image.Process(
+                                this.logger,
+                                this.processors,
+                                commands,
+                                this.commandParser,
+                                this.parserCulture);
+
                             await this.options.OnBeforeSaveAsync.Invoke(image);
+
                             image.Save(outStream);
                             format = image.Format;
                         }
@@ -278,17 +306,17 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     await this.cache.SetAsync(key, outStream, cachedImageMetadata);
                     await this.SendResponseAsync(imageContext, key, cachedImageMetadata, outStream, null);
                 }
-            }
-            catch (Exception ex)
-            {
-                // Log the error internally then rethrow.
-                // We don't call next here, the pipeline will automatically handle it
-                this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
-                throw;
-            }
-            finally
-            {
-                await this.StreamDisposeAsync(outStream);
+                catch (Exception ex)
+                {
+                    // Log the error internally then rethrow.
+                    // We don't call next here, the pipeline will automatically handle it
+                    this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
+                    throw;
+                }
+                finally
+                {
+                    await this.StreamDisposeAsync(outStream);
+                }
             }
         }
 
@@ -362,23 +390,24 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     if (imageContext.IsHeadRequest())
                     {
                         await imageContext.SendStatusAsync(ResponseConstants.Status200Ok, metadata);
+                        return;
                     }
 
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
 
                     // When stream is null we're sending from the cache.
                     await imageContext.SendAsync(stream ?? await cacheResolver.OpenReadAsync(), metadata);
-
-                    break;
+                    return;
 
                 case ImageContext.PreconditionState.NotModified:
                     this.logger.LogImageNotModified(imageContext.GetDisplayUrl());
                     await imageContext.SendStatusAsync(ResponseConstants.Status304NotModified, metadata);
-                    break;
+                    return;
+
                 case ImageContext.PreconditionState.PreconditionFailed:
                     this.logger.LogImagePreconditionFailed(imageContext.GetDisplayUrl());
                     await imageContext.SendStatusAsync(ResponseConstants.Status412PreconditionFailed, metadata);
-                    break;
+                    return;
                 default:
                     var exception = new NotImplementedException(imageContext.GetPreconditionState().ToString());
                     Debug.Fail(exception.ToString());

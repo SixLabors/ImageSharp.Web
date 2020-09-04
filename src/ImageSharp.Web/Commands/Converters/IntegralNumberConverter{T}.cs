@@ -9,17 +9,24 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// <summary>
     /// The generic converter for integral types.
     /// </summary>
-    /// <typeparam name="T">The type of object to convert to.</typeparam>
-    internal sealed class IntegralNumberConverter<T> : CommandConverter
+    /// <inheritdoc/>
+    internal sealed class IntegralNumberConverter<T> : ICommandConverter<T>
         where T : struct, IConvertible, IComparable<T>
     {
         /// <inheritdoc/>
-        public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
+        public Type Type => typeof(T);
+
+        /// <inheritdoc/>
+        public T ConvertFrom(
+            CommandParser parser,
+            CultureInfo culture,
+            string value,
+            Type propertyType)
         {
             if (string.IsNullOrWhiteSpace(value)
                 || Array.IndexOf(TypeConstants.IntegralTypes, propertyType) < 0)
             {
-                return default(T);
+                return default;
             }
 
             // Round the value to the nearest decimal value
@@ -60,7 +67,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
             }
 
             // Now it's rounded an clamped we should be able to correctly parse the string.
-            return (T)Convert.ChangeType(rounded.ToString(CultureInfo.InvariantCulture), typeof(T), culture);
+            return (T)Convert.ChangeType(rounded.ToString(culture), typeof(T), culture);
         }
     }
 }

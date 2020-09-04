@@ -1,7 +1,8 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Formats;
@@ -44,7 +45,12 @@ namespace SixLabors.ImageSharp.Web.Processors
         public IEnumerable<string> Commands { get; } = FormatCommands;
 
         /// <inheritdoc/>
-        public FormattedImage Process(FormattedImage image, ILogger logger, IDictionary<string, string> commands)
+        public FormattedImage Process(
+            FormattedImage image,
+            ILogger logger,
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture)
         {
             string extension = commands.GetValueOrDefault(Format);
 

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
@@ -25,8 +26,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             // It's a good idea to have this to provide very basic security.
             // We can safely use the static resize processor properties.
-            uint width = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Width));
-            uint height = c.Parser.ParseValue<uint>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Height));
+            uint width = c.Parser.ParseValue<uint>(
+                c.Commands.GetValueOrDefault(ResizeWebProcessor.Width),
+                c.Culture);
+
+            uint height = c.Parser.ParseValue<uint>(
+                c.Commands.GetValueOrDefault(ResizeWebProcessor.Height),
+                c.Culture);
 
             if (width > 4000 && height > 4000)
             {
@@ -51,6 +57,14 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// buffers independently from image buffer pooling.
         /// </summary>
         public RecyclableMemoryStreamManager MemoryStreamManager { get; set; } = new RecyclableMemoryStreamManager();
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to use culture-independent (invariant)
+        /// conversion when converting commands.
+        /// If set to <see langword="false"/> the <see cref="CommandParser"/> will use
+        /// the <see cref="CultureInfo.CurrentCulture"/>.
+        /// </summary>
+        public bool UseInvariantParsingCulture { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the duration to store images in the browser cache.

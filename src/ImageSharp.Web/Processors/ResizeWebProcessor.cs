@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
@@ -65,9 +66,14 @@ namespace SixLabors.ImageSharp.Web.Processors
         public IEnumerable<string> Commands { get; } = ResizeCommands;
 
         /// <inheritdoc/>
-        public FormattedImage Process(FormattedImage image, ILogger logger, IDictionary<string, string> commands)
+        public FormattedImage Process(
+            FormattedImage image,
+            ILogger logger,
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture)
         {
-            ResizeOptions options = GetResizeOptions(commands);
+            ResizeOptions options = GetResizeOptions(commands, parser, culture);
 
             if (options != null)
             {
@@ -77,15 +83,17 @@ namespace SixLabors.ImageSharp.Web.Processors
             return image;
         }
 
-        private static ResizeOptions GetResizeOptions(IDictionary<string, string> commands)
+        private static ResizeOptions GetResizeOptions(
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture)
         {
             if (!commands.ContainsKey(Width) && !commands.ContainsKey(Height))
             {
                 return null;
             }
 
-            CommandParser parser = CommandParser.Instance;
-            Size size = ParseSize(commands, parser);
+            Size size = ParseSize(commands, parser, culture);
 
             if (size.Width <= 0 && size.Height <= 0)
             {
@@ -95,10 +103,10 @@ namespace SixLabors.ImageSharp.Web.Processors
             var options = new ResizeOptions
             {
                 Size = size,
-                CenterCoordinates = GetCenter(commands, parser),
-                Position = GetAnchor(commands, parser),
-                Mode = GetMode(commands, parser),
-                Compand = GetCompandMode(commands, parser),
+                CenterCoordinates = GetCenter(commands, parser, culture),
+                Position = GetAnchor(commands, parser, culture),
+                Mode = GetMode(commands, parser, culture),
+                Compand = GetCompandMode(commands, parser, culture),
             };
 
             // Defaults to Bicubic if not set.
@@ -107,18 +115,24 @@ namespace SixLabors.ImageSharp.Web.Processors
             return options;
         }
 
-        private static Size ParseSize(IDictionary<string, string> commands, CommandParser parser)
+        private static Size ParseSize(
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture)
         {
             // The command parser will reject negative numbers as it clamps values to ranges.
-            uint width = parser.ParseValue<uint>(commands.GetValueOrDefault(Width));
-            uint height = parser.ParseValue<uint>(commands.GetValueOrDefault(Height));
+            uint width = parser.ParseValue<uint>(commands.GetValueOrDefault(Width), culture);
+            uint height = parser.ParseValue<uint>(commands.GetValueOrDefault(Height), culture);
 
             return new Size((int)width, (int)height);
         }
 
-        private static PointF? GetCenter(IDictionary<string, string> commands, CommandParser parser)
+        private static PointF? GetCenter(
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture)
         {
-            float[] coordinates = parser.ParseValue<float[]>(commands.GetValueOrDefault(Xy));
+            float[] coordinates = parser.ParseValue<float[]>(commands.GetValueOrDefault(Xy), culture);
 
             if (coordinates.Length != 2)
             {
@@ -128,14 +142,23 @@ namespace SixLabors.ImageSharp.Web.Processors
             return new PointF(coordinates[0], coordinates[1]);
         }
 
-        private static ResizeMode GetMode(IDictionary<string, string> commands, CommandParser parser)
-            => parser.ParseValue<ResizeMode>(commands.GetValueOrDefault(Mode));
+        private static ResizeMode GetMode(
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture)
+            => parser.ParseValue<ResizeMode>(commands.GetValueOrDefault(Mode), culture);
 
-        private static AnchorPositionMode GetAnchor(IDictionary<string, string> commands, CommandParser parser)
-            => parser.ParseValue<AnchorPositionMode>(commands.GetValueOrDefault(Anchor));
+        private static AnchorPositionMode GetAnchor(
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture)
+            => parser.ParseValue<AnchorPositionMode>(commands.GetValueOrDefault(Anchor), culture);
 
-        private static bool GetCompandMode(IDictionary<string, string> commands, CommandParser parser)
-            => parser.ParseValue<bool>(commands.GetValueOrDefault(Compand));
+        private static bool GetCompandMode(
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture)
+            => parser.ParseValue<bool>(commands.GetValueOrDefault(Compand), culture);
 
         private static IResampler GetSampler(IDictionary<string, string> commands)
         {
@@ -145,10 +168,16 @@ namespace SixLabors.ImageSharp.Web.Processors
             {
                 switch (sampler.ToLowerInvariant())
                 {
-                    case "nearest": return KnownResamplers.NearestNeighbor;
+                    case "nearest":
+                    case "nearestneighbor":
+                        return KnownResamplers.NearestNeighbor;
                     case "box": return KnownResamplers.Box;
-                    case "mitchell": return KnownResamplers.MitchellNetravali;
-                    case "catmull": return KnownResamplers.CatmullRom;
+                    case "mitchell":
+                    case "mitchellnetravali":
+                        return KnownResamplers.MitchellNetravali;
+                    case "catmull":
+                    case "catmullrom":
+                        return KnownResamplers.CatmullRom;
                     case "lanczos2": return KnownResamplers.Lanczos2;
                     case "lanczos3": return KnownResamplers.Lanczos3;
                     case "lanczos5": return KnownResamplers.Lanczos5;

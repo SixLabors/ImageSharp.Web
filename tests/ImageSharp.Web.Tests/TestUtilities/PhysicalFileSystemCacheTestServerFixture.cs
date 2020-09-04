@@ -1,10 +1,13 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Web.DependencyInjection;
+using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.ImageSharp.Web.Providers.Azure;
 using Xunit;
@@ -17,6 +20,8 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
         {
             services.AddImageSharp(options =>
             {
+                Func<ImageCommandContext, Task> onParseCommandsAsync = options.OnParseCommandsAsync;
+
                 options.OnParseCommandsAsync = context =>
                 {
                     Assert.NotNull(context);
@@ -24,8 +29,10 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                     Assert.NotNull(context.Commands);
                     Assert.NotNull(context.Parser);
 
-                    return Task.CompletedTask;
+                    return onParseCommandsAsync.Invoke(context);
                 };
+
+                Func<ImageProcessingContext, Task> onProcessedAsync = options.OnProcessedAsync;
 
                 options.OnProcessedAsync = context =>
                 {
@@ -36,8 +43,10 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                     Assert.NotNull(context.Extension);
                     Assert.NotNull(context.Stream);
 
-                    return Task.CompletedTask;
+                    return onProcessedAsync.Invoke(context);
                 };
+
+                Func<FormattedImage, Task> onBeforeSaveAsync = options.OnBeforeSaveAsync;
 
                 options.OnBeforeSaveAsync = context =>
                 {
@@ -45,15 +54,17 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                     Assert.NotNull(context.Format);
                     Assert.NotNull(context.Image);
 
-                    return Task.CompletedTask;
+                    return onBeforeSaveAsync.Invoke(context);
                 };
+
+                Func<HttpContext, Task> onPrepareResponseAsync = options.OnPrepareResponseAsync;
 
                 options.OnPrepareResponseAsync = context =>
                 {
                     Assert.NotNull(context);
                     Assert.NotNull(context.Response);
 
-                    return Task.CompletedTask;
+                    return onPrepareResponseAsync.Invoke(context);
                 };
             })
                 .ClearProviders()

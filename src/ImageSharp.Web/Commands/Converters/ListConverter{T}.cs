@@ -5,17 +5,25 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace SixLabors.ImageSharp.Web.Commands.Converters
 {
     /// <summary>
-    /// Converts the value of an string to a generic list.
+    /// Converts the value of a string to a generic list.
     /// </summary>
-    /// <typeparam name="T">The type to convert from.</typeparam>
-    internal class ListConverter<T> : CommandConverter
+    /// <typeparam name="T">The type of result to return.</typeparam>
+    internal sealed class ListConverter<T> : ICommandConverter<List<T>>
     {
+        public Type Type => typeof(List<T>);
+
         /// <inheritdoc/>
-        public override object ConvertFrom(CultureInfo culture, string value, Type propertyType)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public List<T> ConvertFrom(
+            CommandParser parser,
+            CultureInfo culture,
+            string value,
+            Type propertyType)
         {
             var result = new List<T>();
             if (string.IsNullOrWhiteSpace(value))
@@ -23,33 +31,20 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
                 return result;
             }
 
-            Type type = typeof(T);
-            ICommandConverter paramConverter = CommandDescriptor.GetConverter(type);
-
-            if (paramConverter == null)
+            foreach (string pill in GetStringArray(value, culture))
             {
-                throw new InvalidOperationException("No type converter exists for type " + type.FullName);
-            }
-
-            foreach (string pill in this.GetStringArray(value, culture))
-            {
-                object item = paramConverter.ConvertFromInvariantString(pill, type);
+                T item = parser.ParseValue<T>(pill, culture);
                 if (item != null)
                 {
-                    result.Add((T)item);
+                    result.Add(item);
                 }
             }
 
             return result;
         }
 
-        /// <summary>
-        /// Splits a string by separator to return an array of string values.
-        /// </summary>
-        /// <param name="input">The input string to split.</param>
-        /// <param name="culture">A <see cref="CultureInfo"/>. The current culture to split string by.</param>
-        /// <returns>The <see cref="T:String[]"/>.</returns>
-        protected string[] GetStringArray(string input, CultureInfo culture)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static string[] GetStringArray(string input, CultureInfo culture)
         {
             char separator = culture.TextInfo.ListSeparator[0];
             return input.Split(separator).Select(s => s.Trim()).ToArray();
