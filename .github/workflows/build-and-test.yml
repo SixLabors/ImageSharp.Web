@@ -15,6 +15,10 @@ jobs:
         strategy:
             matrix:
                 options:
+                    - os: macos-latest
+                      framework: netcoreapp3.1
+                      runtime: -x64
+                      codecov: false
                     - os: ubuntu-latest
                       framework: netcoreapp3.1
                       runtime: -x64
@@ -45,22 +49,19 @@ jobs:
                   git fetch --prune --unshallow
                   git submodule -q update --init --recursive
 
-            - name: Install Azurite Linux
-              if: matrix.options.os == 'ubuntu-latest'
+            - name: Setup Azurite
+              if: matrix.options.os != 'windows-latest'
               shell: bash
-              run: sudo npm install -g azurite
-
-            - name: Use Azurite Linux
-              if: matrix.options.os == 'ubuntu-latest'
-              shell: bash
-              run: sudo azurite --loose &
-
-            - name: Use Azure Storage Emulator Windows
-              if: matrix.options.os == 'windows-latest'
-              shell: cmd
               run: |
-                  "%ProgramFiles(x86)%\Microsoft SDKs\Azure\Storage Emulator\AzureStorageEmulator.exe" init /server "(localdb)\MsSqlLocalDb"
-                  "%ProgramFiles(x86)%\Microsoft SDKs\Azure\Storage Emulator\AzureStorageEmulator.exe" start
+                  sudo npm install -g azurite
+                  sudo azurite --loose &
+
+            - name: Setup Azurite Windows
+              if: matrix.options.os == 'windows-latest'
+              shell: bash
+              run: |
+                  npm install -g azurite
+                  azurite --loose &
 
             - name: Build
               shell: pwsh

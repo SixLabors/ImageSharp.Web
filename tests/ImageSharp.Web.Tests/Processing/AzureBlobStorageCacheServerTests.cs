@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
     {
         private const int Width = 20;
         private static readonly string Command = "?width=" + Width + "&v=" + Guid.NewGuid().ToString();
+        private static readonly string Command2 = "?width=" + (Width + 1) + "&v=" + Guid.NewGuid().ToString();
 
         public AzureBlobStorageCacheServerTests(AzureBlobStorageCacheTestServerFixture fixture)
             : base(fixture)
@@ -25,7 +27,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
         [Theory]
         [InlineData(TestConstants.PhysicalTestImage)]
         [InlineData(TestConstants.AzureTestImage)]
-        public async Task CanProcessAndResolveImage(string url)
+        public async Task CanProcessAndResolveImageAsync(string url)
         {
             string ext = Path.GetExtension(url);
             IImageFormat format = Configuration.Default.ImageFormatsManager.FindFormatByFileExtension(ext);
@@ -96,6 +98,22 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
 
             request.Dispose();
             response.Dispose();
+        }
+
+        [Theory]
+        [InlineData(TestConstants.PhysicalTestImage)]
+        [InlineData(TestConstants.AzureTestImage)]
+        public async Task CanProcessMultipleIdenticalQueriesAsync(string url)
+        {
+            Task[] tasks = Enumerable.Range(0, 5).Select(_ => Task.Run(async () =>
+            {
+                using HttpResponseMessage response = await this.HttpClient.GetAsync(url + Command2);
+                Assert.NotNull(response);
+            })).ToArray();
+
+            var all = Task.WhenAll(tasks);
+            await all;
+            Assert.True(all.IsCompletedSuccessfully);
         }
     }
 }
