@@ -51,11 +51,11 @@ jobs:
 
             - name: Install Azurite
               shell: bash
-              run: npm install -g azurite
+              run: sudo npm install -g azurite
 
             - name: Use Azurite
               shell: bash
-              run: azurite --loose &
+              run: sudo azurite --loose &
 
             - name: Build
               shell: pwsh
