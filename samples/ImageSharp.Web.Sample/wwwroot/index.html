@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -168,6 +168,35 @@
                 </p>
                 <p>
                     <img src="imagesharp-logo.png?width=300&bgcolor=128,28,32,128" />
+                </p>
+            </div>
+        </section>
+        <hr />
+        <section>
+            <h2>Identical Queries</h2>
+            <p>Demonstrates that the middleware handles identical queries without file contention.</p>
+            <div>
+                <p>
+                    <code>imagesharp-logo.png?width=123</code>
+                </p>
+                <p>
+                    <img src="imagesharp-logo.png?width=123" />
+                </p>
+            </div>
+            <div>
+                <p>
+                    <code>imagesharp-logo.png?width=123</code>
+                </p>
+                <p>
+                    <img src="imagesharp-logo.png?width=123" />
+                </p>
+            </div>
+            <div>
+                <p>
+                    <code>imagesharp-logo.png?width=123</code>
+                </p>
+                <p>
+                    <img src="imagesharp-logo.png?width=123" />
                 </p>
             </div>
         </section>

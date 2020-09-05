@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
@@ -46,6 +47,7 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="uri">The full request uri.</param>
         /// <returns>The <see cref="string"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetExtensionFromUri(string uri)
         {
             // TODO: Investigate using span to reduce allocations here.
@@ -81,6 +83,7 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="contentType">The content type (mime-type).</param>
         /// <returns>The <see cref="string"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetExtensionFromContentType(string contentType) => this.fileExtension[contentType];
     }
 }
