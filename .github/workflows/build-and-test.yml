@@ -49,13 +49,19 @@ jobs:
                   git fetch --prune --unshallow
                   git submodule -q update --init --recursive
 
-            - name: Install Azurite
+            - name: Setup Azurite
+              if: matrix.options.os != 'windows-latest'
               shell: bash
-              run: sudo npm install -g azurite
+              run: |
+                  sudo npm install -g azurite
+                  sudo azurite --loose &
 
-            - name: Use Azurite
+            - name: Setup Azurite Windows
+              if: matrix.options.os == 'windows-latest'
               shell: bash
-              run: sudo azurite --loose &
+              run: |
+                  npm install -g azurite
+                  azurite --loose &
 
             - name: Build
               shell: pwsh
