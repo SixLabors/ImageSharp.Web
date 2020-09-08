@@ -85,31 +85,17 @@ namespace SixLabors.ImageSharp.Web.Caching
         }
 
         /// <inheritdoc/>
-        public async Task<IImageCacheResolver> GetAsync(string key)
+        public Task<IImageCacheResolver> GetAsync(string key)
         {
             string path = ToFilePath(key, this.cachedNameLength);
 
             IFileInfo metaFileInfo = this.fileProvider.GetFileInfo(this.ToMetaDataFilePath(path));
             if (!metaFileInfo.Exists)
             {
-                return null;
+                return Task.FromResult<IImageCacheResolver>(null);
             }
 
-            ImageCacheMetadata metadata = default;
-            using (Stream stream = metaFileInfo.CreateReadStream())
-            {
-                metadata = await ImageCacheMetadata.ReadAsync(stream);
-            }
-
-            IFileInfo fileInfo = this.fileProvider.GetFileInfo(this.ToImageFilePath(path, metadata));
-
-            // Check to see if the file exists.
-            if (!fileInfo.Exists)
-            {
-                return null;
-            }
-
-            return new PhysicalFileSystemCacheResolver(fileInfo, metadata);
+            return Task.FromResult<IImageCacheResolver>(new PhysicalFileSystemCacheResolver(metaFileInfo, this.formatUtilities));
         }
 
         /// <inheritdoc/>
@@ -142,6 +128,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="path">The root path.</param>
         /// <param name="metaData">The image metadata.</param>
         /// <returns>The <see cref="string"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private string ToImageFilePath(string path, in ImageCacheMetadata metaData)
             => $"{path}.{this.formatUtilities.GetExtensionFromContentType(metaData.ContentType)}";
 
@@ -150,6 +137,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </summary>
         /// <param name="path">The root path.</param>
         /// <returns>The <see cref="string"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private string ToMetaDataFilePath(string path) => $"{path}.meta";
 
         /// <summary>

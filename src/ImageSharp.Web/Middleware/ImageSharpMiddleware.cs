@@ -8,8 +8,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
+using BitFaster.Caching.Lru;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -32,6 +32,24 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// The key-lock used for limiting identical requests.
         /// </summary>
         private static readonly AsyncKeyLock AsyncLock = new AsyncKeyLock();
+
+        /// <summary>
+        /// Used to temporarily store source metadata reads to reduce the overhead of cache lookups.
+        /// </summary>
+        private static readonly ConcurrentTLru<string, ImageMetadata> SourceMetadataLru
+            = new ConcurrentTLru<string, ImageMetadata>(1024, TimeSpan.FromMinutes(5));
+
+        /// <summary>
+        /// Used to temporarily store cache resolver reads to reduce the overhead of cache lookups.
+        /// </summary>
+        private static readonly ConcurrentTLru<string, IImageCacheResolver> CacheResolverLru
+            = new ConcurrentTLru<string, IImageCacheResolver>(1024, TimeSpan.FromMinutes(5));
+
+        /// <summary>
+        /// Used to temporarily store cache metadata reads to reduce the overhead of cache lookups.
+        /// </summary>
+        private static readonly ConcurrentTLru<string, ImageCacheMetadata> CacheMetadataLru
+            = new ConcurrentTLru<string, ImageCacheMetadata>(1024, TimeSpan.FromMinutes(5));
 
         /// <summary>
         /// The function processing the Http request.
@@ -304,6 +322,14 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                     // Save the image to the cache and send the response to the caller.
                     await this.cache.SetAsync(key, outStream, cachedImageMetadata);
+
+                    // Remove the resolver from the cache so we always resolve next request.
+                    CacheResolverLru.TryRemove(key);
+
+                    // Replace cache metadata item value.
+                    CacheMetadataLru.TryRemove(key);
+                    CacheMetadataLru.GetOrAdd(key, _ => cachedImageMetadata);
+
                     await this.SendResponseAsync(imageContext, key, cachedImageMetadata, outStream, null);
                 }
                 catch (Exception ex)
@@ -351,14 +377,20 @@ namespace SixLabors.ImageSharp.Web.Middleware
             using (await AsyncLock.ReaderLockAsync(key))
             {
                 // Check to see if the cache contains this image.
-                sourceImageMetadata = await sourceImageResolver.GetMetaDataAsync();
-                IImageCacheResolver cachedImageResolver = await this.cache.GetAsync(key);
+                IImageCacheResolver cachedImageResolver
+                    = await CacheResolverLru.GetOrAddAsync(key, async k => await this.cache.GetAsync(k));
+
                 if (cachedImageResolver != null)
                 {
-                    ImageCacheMetadata cachedImageMetadata = await cachedImageResolver.GetMetaDataAsync();
+                    ImageCacheMetadata cachedImageMetadata =
+                        await CacheMetadataLru.GetOrAddAsync(key, async _ => await cachedImageResolver.GetMetaDataAsync());
+
                     if (cachedImageMetadata != default)
                     {
                         // Has the cached image expired or has the source image been updated?
+                        sourceImageMetadata =
+                            await SourceMetadataLru.GetOrAddAsync(key, async _ => await sourceImageResolver.GetMetaDataAsync());
+
                         if (cachedImageMetadata.SourceLastWriteTimeUtc == sourceImageMetadata.LastWriteTimeUtc
                             && cachedImageMetadata.ContentLength > 0 // Fix for old cache without length property
                             && cachedImageMetadata.CacheLastWriteTimeUtc > (DateTimeOffset.UtcNow - this.options.CacheMaxAge))

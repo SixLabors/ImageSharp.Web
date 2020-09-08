@@ -14,23 +14,38 @@ namespace SixLabors.ImageSharp.Web.Resolvers
     public class PhysicalFileSystemCacheResolver : IImageCacheResolver
     {
         private readonly IFileInfo fileInfo;
-        private readonly ImageCacheMetadata metadata;
+        private readonly FormatUtilities formatUtilities;
+        private ImageCacheMetadata metadata;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCacheResolver"/> class.
         /// </summary>
-        /// <param name="fileInfo">The input file info.</param>
-        /// <param name="metadata">The image metadata associated with this file.</param>
-        public PhysicalFileSystemCacheResolver(IFileInfo fileInfo, in ImageCacheMetadata metadata)
+        /// <param name="metaFileInfo">The cached metadata file info.</param>
+        /// <param name="formatUtilities">
+        /// Contains various format helper methods based on the current configuration.
+        /// </param>
+        public PhysicalFileSystemCacheResolver(IFileInfo metaFileInfo, FormatUtilities formatUtilities)
         {
-            this.fileInfo = fileInfo;
-            this.metadata = metadata;
+            this.fileInfo = metaFileInfo;
+            this.formatUtilities = formatUtilities;
         }
 
         /// <inheritdoc/>
-        public Task<ImageCacheMetadata> GetMetaDataAsync() => Task.FromResult(this.metadata);
+        public async Task<ImageCacheMetadata> GetMetaDataAsync()
+        {
+            using Stream stream = this.fileInfo.CreateReadStream();
+            this.metadata = await ImageCacheMetadata.ReadAsync(stream);
+            return this.metadata;
+        }
 
         /// <inheritdoc/>
-        public Task<Stream> OpenReadAsync() => Task.FromResult(this.fileInfo.CreateReadStream());
+        public Task<Stream> OpenReadAsync()
+        {
+            string path = Path.ChangeExtension(
+                this.fileInfo.PhysicalPath,
+                this.formatUtilities.GetExtensionFromContentType(this.metadata.ContentType));
+
+            return Task.FromResult<Stream>(File.OpenRead(path));
+        }
     }
 }
