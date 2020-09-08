@@ -348,29 +348,30 @@ namespace SixLabors.ImageSharp.Web.Middleware
             string key)
         {
             ImageMetadata sourceImageMetadata = default;
-            using (await AsyncLock.ReaderLockAsync(key))
+
+            // using (await AsyncLock.ReaderLockAsync(key))
+            // {
+            // Check to see if the cache contains this image.
+            sourceImageMetadata = await sourceImageResolver.GetMetaDataAsync();
+            IImageCacheResolver cachedImageResolver = await this.cache.GetAsync(key);
+            if (cachedImageResolver != null)
             {
-                // Check to see if the cache contains this image.
-                sourceImageMetadata = await sourceImageResolver.GetMetaDataAsync();
-                IImageCacheResolver cachedImageResolver = await this.cache.GetAsync(key);
-                if (cachedImageResolver != null)
+                ImageCacheMetadata cachedImageMetadata = await cachedImageResolver.GetMetaDataAsync();
+                if (cachedImageMetadata != default)
                 {
-                    ImageCacheMetadata cachedImageMetadata = await cachedImageResolver.GetMetaDataAsync();
-                    if (cachedImageMetadata != default)
+                    // Has the cached image expired or has the source image been updated?
+                    if (cachedImageMetadata.SourceLastWriteTimeUtc == sourceImageMetadata.LastWriteTimeUtc
+                        && cachedImageMetadata.ContentLength > 0 // Fix for old cache without length property
+                        && cachedImageMetadata.CacheLastWriteTimeUtc > (DateTimeOffset.UtcNow - this.options.CacheMaxAge))
                     {
-                        // Has the cached image expired or has the source image been updated?
-                        if (cachedImageMetadata.SourceLastWriteTimeUtc == sourceImageMetadata.LastWriteTimeUtc
-                            && cachedImageMetadata.ContentLength > 0 // Fix for old cache without length property
-                            && cachedImageMetadata.CacheLastWriteTimeUtc > (DateTimeOffset.UtcNow - this.options.CacheMaxAge))
-                        {
-                            // We're pulling the image from the cache.
-                            await this.SendResponseAsync(imageContext, key, cachedImageMetadata, null, cachedImageResolver);
-                            return (false, sourceImageMetadata);
-                        }
+                        // We're pulling the image from the cache.
+                        await this.SendResponseAsync(imageContext, key, cachedImageMetadata, null, cachedImageResolver);
+                        return (false, sourceImageMetadata);
                     }
                 }
             }
 
+            // }
             return (true, sourceImageMetadata);
         }
 
