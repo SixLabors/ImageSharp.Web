@@ -372,35 +372,46 @@ namespace SixLabors.ImageSharp.Web.Middleware
         {
             using (await AsyncLock.ReaderLockAsync(key))
             {
-                ImageMetadata sourceImageMetadata = default;
+                // Get the source metadata for processing, storing the result for future checks.
+                ImageMetadata sourceImageMetadata = await
+                    SourceMetadataLru.GetOrAddAsync(
+                        key,
+                        _ => sourceImageResolver.GetMetaDataAsync());
 
                 // Check to see if the cache contains this image.
-                IImageCacheResolver cachedImageResolver
-                    = await CacheResolverLru.GetOrAddAsync(key, async k => await this.cache.GetAsync(k));
+                // If not, we return early. No further checks necessary.
+                IImageCacheResolver cachedImageResolver = await
+                    CacheResolverLru.GetOrAddAsync(
+                        key,
+                        k => this.cache.GetAsync(k));
 
-                if (cachedImageResolver != null)
+                if (cachedImageResolver is null)
                 {
-                    ImageCacheMetadata cachedImageMetadata =
-                        await CacheMetadataLru.GetOrAddAsync(key, async _ => await cachedImageResolver.GetMetaDataAsync());
-
-                    if (cachedImageMetadata != default)
-                    {
-                        // Has the cached image expired or has the source image been updated?
-                        sourceImageMetadata =
-                            await SourceMetadataLru.GetOrAddAsync(key, async _ => await sourceImageResolver.GetMetaDataAsync());
-
-                        if (cachedImageMetadata.SourceLastWriteTimeUtc == sourceImageMetadata.LastWriteTimeUtc
-                            && cachedImageMetadata.ContentLength > 0 // Fix for old cache without length property
-                            && cachedImageMetadata.CacheLastWriteTimeUtc > (DateTimeOffset.UtcNow - this.options.CacheMaxAge))
-                        {
-                            // We're pulling the image from the cache.
-                            await this.SendResponseAsync(imageContext, key, cachedImageMetadata, null, cachedImageResolver);
-                            return (false, sourceImageMetadata);
-                        }
-                    }
+                    // Remove the null resolver from the store.
+                    CacheResolverLru.TryRemove(key);
+                    return (true, sourceImageMetadata);
                 }
 
-                return (true, sourceImageMetadata);
+                // Now resolve the cached image metadata storing the result.
+                ImageCacheMetadata cachedImageMetadata = await
+                    CacheMetadataLru.GetOrAddAsync(
+                        key,
+                        _ => cachedImageResolver.GetMetaDataAsync());
+
+                // Has the cached image expired?
+                // Or has the source image changed since the image was last cached?
+                if (cachedImageMetadata.ContentLength == 0 // Fix for old cache without length property
+                    || cachedImageMetadata.CacheLastWriteTimeUtc <= (DateTimeOffset.UtcNow - this.options.CacheMaxAge)
+                    || cachedImageMetadata.SourceLastWriteTimeUtc != sourceImageMetadata.LastWriteTimeUtc)
+                {
+                    // We want to remove the metadata from the store so that the next check gets the updated file.
+                    CacheMetadataLru.TryRemove(key);
+                    return (true, sourceImageMetadata);
+                }
+
+                // We're pulling the image from the cache.
+                await this.SendResponseAsync(imageContext, key, cachedImageMetadata, null, cachedImageResolver);
+                return (false, sourceImageMetadata);
             }
         }
 
