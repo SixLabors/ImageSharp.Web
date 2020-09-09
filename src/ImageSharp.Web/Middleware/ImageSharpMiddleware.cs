@@ -323,12 +323,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     // Save the image to the cache and send the response to the caller.
                     await this.cache.SetAsync(key, outStream, cachedImageMetadata);
 
-                    // Remove the resolver from the cache so we always resolve next request.
+                    // Remove the resolver from the cache so we always resolve next request
+                    // for the same key.
                     CacheResolverLru.TryRemove(key);
-
-                    // Replace cache metadata item value.
-                    CacheMetadataLru.TryRemove(key);
-                    CacheMetadataLru.GetOrAdd(key, _ => cachedImageMetadata);
 
                     await this.SendResponseAsync(imageContext, key, cachedImageMetadata, outStream, null);
                 }
@@ -373,9 +370,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
             ImageContext imageContext,
             string key)
         {
-            ImageMetadata sourceImageMetadata = default;
             using (await AsyncLock.ReaderLockAsync(key))
             {
+                ImageMetadata sourceImageMetadata = default;
+
                 // Check to see if the cache contains this image.
                 IImageCacheResolver cachedImageResolver
                     = await CacheResolverLru.GetOrAddAsync(key, async k => await this.cache.GetAsync(k));
@@ -401,9 +399,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         }
                     }
                 }
-            }
 
-            return (true, sourceImageMetadata);
+                return (true, sourceImageMetadata);
+            }
         }
 
         private async Task SendResponseAsync(
