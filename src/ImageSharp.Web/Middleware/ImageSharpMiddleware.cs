@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BitFaster.Caching.Lru;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -36,20 +35,20 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Used to temporarily store source metadata reads to reduce the overhead of cache lookups.
         /// </summary>
-        private static readonly ConcurrentTLru<string, ImageMetadata> SourceMetadataLru
-            = new ConcurrentTLru<string, ImageMetadata>(1024, TimeSpan.FromMinutes(5));
+        private static readonly ConcurrentTLruCache<string, ImageMetadata> SourceMetadataLru
+            = new ConcurrentTLruCache<string, ImageMetadata>(1024, TimeSpan.FromMinutes(5));
 
         /// <summary>
         /// Used to temporarily store cache resolver reads to reduce the overhead of cache lookups.
         /// </summary>
-        private static readonly ConcurrentTLru<string, IImageCacheResolver> CacheResolverLru
-            = new ConcurrentTLru<string, IImageCacheResolver>(1024, TimeSpan.FromMinutes(5));
+        private static readonly ConcurrentTLruCache<string, IImageCacheResolver> CacheResolverLru
+            = new ConcurrentTLruCache<string, IImageCacheResolver>(1024, TimeSpan.FromMinutes(5));
 
         /// <summary>
         /// Used to temporarily store cache metadata reads to reduce the overhead of cache lookups.
         /// </summary>
-        private static readonly ConcurrentTLru<string, ImageCacheMetadata> CacheMetadataLru
-            = new ConcurrentTLru<string, ImageCacheMetadata>(1024, TimeSpan.FromMinutes(5));
+        private static readonly ConcurrentTLruCache<string, ImageCacheMetadata> CacheMetadataLru
+            = new ConcurrentTLruCache<string, ImageCacheMetadata>(1024, TimeSpan.FromMinutes(5));
 
         /// <summary>
         /// The function processing the Http request.
@@ -268,10 +267,19 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 {
                     ImageCacheMetadata cachedImageMetadata = default;
                     outStream = new RecyclableMemoryStream(this.options.MemoryStreamManager);
+                    IImageFormat format;
+
+                    // 14.9.3 CacheControl Max-Age
+                    // Check to see if the source metadata has a CacheControl Max-Age value
+                    // and use it to override the default max age from our options.
+                    TimeSpan maxAge = this.options.BrowserMaxAge;
+                    if (!sourceImageMetadata.CacheControlMaxAge.Equals(TimeSpan.MinValue))
+                    {
+                        maxAge = sourceImageMetadata.CacheControlMaxAge;
+                    }
+
                     using (Stream inStream = await sourceImageResolver.OpenReadAsync())
                     {
-                        IImageFormat format;
-
                         // No commands? We simply copy the stream across.
                         if (commands.Count == 0)
                         {
@@ -295,30 +303,21 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             image.Save(outStream);
                             format = image.Format;
                         }
-
-                        // 14.9.3 CacheControl Max-Age
-                        // Check to see if the source metadata has a CacheControl Max-Age value
-                        // and use it to override the default max age from our options.
-                        TimeSpan maxAge = this.options.BrowserMaxAge;
-                        if (!sourceImageMetadata.CacheControlMaxAge.Equals(TimeSpan.MinValue))
-                        {
-                            maxAge = sourceImageMetadata.CacheControlMaxAge;
-                        }
-
-                        cachedImageMetadata = new ImageCacheMetadata(
-                            sourceImageMetadata.LastWriteTimeUtc,
-                            DateTime.UtcNow,
-                            format.DefaultMimeType,
-                            maxAge,
-                            outStream.Length);
                     }
 
                     // Allow for any further optimization of the image.
                     outStream.Position = 0;
-                    string contentType = cachedImageMetadata.ContentType;
+                    string contentType = format.DefaultMimeType;
                     string extension = this.formatUtilities.GetExtensionFromContentType(contentType);
                     await this.options.OnProcessedAsync.Invoke(new ImageProcessingContext(context, outStream, commands, contentType, extension));
                     outStream.Position = 0;
+
+                    cachedImageMetadata = new ImageCacheMetadata(
+                        sourceImageMetadata.LastWriteTimeUtc,
+                        DateTime.UtcNow,
+                        contentType,
+                        maxAge,
+                        outStream.Length);
 
                     // Save the image to the cache and send the response to the caller.
                     await this.cache.SetAsync(key, outStream, cachedImageMetadata);
