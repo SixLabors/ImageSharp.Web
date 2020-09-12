@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace SixLabors.ImageSharp.Web.Caching
@@ -88,6 +89,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ReaderRelease()
         {
             TaskCompletionSource<Releaser> toWake = null;
@@ -111,6 +113,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             toWake?.SetResult(new Releaser(this, true));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WriterRelease()
         {
             TaskCompletionSource<Releaser> toWake = null;
