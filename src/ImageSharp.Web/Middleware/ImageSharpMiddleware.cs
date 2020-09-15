@@ -2,12 +2,14 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -28,9 +30,16 @@ namespace SixLabors.ImageSharp.Web.Middleware
     public class ImageSharpMiddleware
     {
         /// <summary>
-        /// The key-lock used for limiting identical requests.
+        /// The write worker used for limiting identical requests.
         /// </summary>
-        private static readonly AsyncKeyLock AsyncLock = new AsyncKeyLock();
+        private static readonly ConcurrentDictionary<string, Lazy<Task>> WriteWorkers
+            = new ConcurrentDictionary<string, Lazy<Task>>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// The read worker used for limiting identical requests.
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, Lazy<Task<ValueTuple<bool, ImageMetadata>>>> ReadWorkers
+            = new ConcurrentDictionary<string, Lazy<Task<ValueTuple<bool, ImageMetadata>>>>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Used to temporarily store source metadata reads to reduce the overhead of cache lookups.
@@ -261,7 +270,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             // Enter a write lock which locks writing and any reads for the same request.
             // This reduces the overheads of unnecessary processing plus avoids file locks.
-            using (await AsyncLock.WriterLockAsync(key))
+            await WriteWorkers.GetOrAdd(
+                key,
+                x => new Lazy<Task>(
+                    async () =>
             {
                 try
                 {
@@ -339,7 +351,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 {
                     await this.StreamDisposeAsync(outStream);
                 }
-            }
+            }, LazyThreadSafetyMode.ExecutionAndPublication)).Value;
         }
 
         private ValueTask StreamDisposeAsync(Stream stream)
@@ -369,49 +381,69 @@ namespace SixLabors.ImageSharp.Web.Middleware
             ImageContext imageContext,
             string key)
         {
-            using (await AsyncLock.ReaderLockAsync(key))
+            if (WriteWorkers.TryGetValue(key, out var writeWork))
             {
-                // Get the source metadata for processing, storing the result for future checks.
-                ImageMetadata sourceImageMetadata = await
-                    SourceMetadataLru.GetOrAddAsync(
-                        key,
-                        _ => sourceImageResolver.GetMetaDataAsync());
-
-                // Check to see if the cache contains this image.
-                // If not, we return early. No further checks necessary.
-                IImageCacheResolver cachedImageResolver = await
-                    CacheResolverLru.GetOrAddAsync(
-                        key,
-                        k => this.cache.GetAsync(k));
-
-                if (cachedImageResolver is null)
-                {
-                    // Remove the null resolver from the store.
-                    CacheResolverLru.TryRemove(key);
-                    return (true, sourceImageMetadata);
-                }
-
-                // Now resolve the cached image metadata storing the result.
-                ImageCacheMetadata cachedImageMetadata = await
-                    CacheMetadataLru.GetOrAddAsync(
-                        key,
-                        _ => cachedImageResolver.GetMetaDataAsync());
-
-                // Has the cached image expired?
-                // Or has the source image changed since the image was last cached?
-                if (cachedImageMetadata.ContentLength == 0 // Fix for old cache without length property
-                    || cachedImageMetadata.CacheLastWriteTimeUtc <= (DateTimeOffset.UtcNow - this.options.CacheMaxAge)
-                    || cachedImageMetadata.SourceLastWriteTimeUtc != sourceImageMetadata.LastWriteTimeUtc)
-                {
-                    // We want to remove the metadata from the store so that the next check gets the updated file.
-                    CacheMetadataLru.TryRemove(key);
-                    return (true, sourceImageMetadata);
-                }
-
-                // We're pulling the image from the cache.
-                await this.SendResponseAsync(imageContext, key, cachedImageMetadata, null, cachedImageResolver);
-                return (false, sourceImageMetadata);
+                await writeWork.Value;
             }
+
+            if (ReadWorkers.TryGetValue(key, out var readWork))
+            {
+                return await readWork.Value;
+            }
+
+            return await ReadWorkers.GetOrAdd(
+                key,
+                x => new Lazy<Task<ValueTuple<bool, ImageMetadata>>>(
+                    async () =>
+            {
+                try
+                {
+                    // Get the source metadata for processing, storing the result for future checks.
+                    ImageMetadata sourceImageMetadata = await
+                        SourceMetadataLru.GetOrAddAsync(
+                            key,
+                            _ => sourceImageResolver.GetMetaDataAsync());
+
+                    // Check to see if the cache contains this image.
+                    // If not, we return early. No further checks necessary.
+                    IImageCacheResolver cachedImageResolver = await
+                        CacheResolverLru.GetOrAddAsync(
+                            key,
+                            k => this.cache.GetAsync(k));
+
+                    if (cachedImageResolver is null)
+                    {
+                        // Remove the null resolver from the store.
+                        CacheResolverLru.TryRemove(key);
+                        return (true, sourceImageMetadata);
+                    }
+
+                    // Now resolve the cached image metadata storing the result.
+                    ImageCacheMetadata cachedImageMetadata = await
+                        CacheMetadataLru.GetOrAddAsync(
+                            key,
+                            _ => cachedImageResolver.GetMetaDataAsync());
+
+                    // Has the cached image expired?
+                    // Or has the source image changed since the image was last cached?
+                    if (cachedImageMetadata.ContentLength == 0 // Fix for old cache without length property
+                        || cachedImageMetadata.CacheLastWriteTimeUtc <= (DateTimeOffset.UtcNow - this.options.CacheMaxAge)
+                        || cachedImageMetadata.SourceLastWriteTimeUtc != sourceImageMetadata.LastWriteTimeUtc)
+                    {
+                        // We want to remove the metadata from the store so that the next check gets the updated file.
+                        CacheMetadataLru.TryRemove(key);
+                        return (true, sourceImageMetadata);
+                    }
+
+                    // We're pulling the image from the cache.
+                    await this.SendResponseAsync(imageContext, key, cachedImageMetadata, null, cachedImageResolver);
+                    return (false, sourceImageMetadata);
+                }
+                finally
+                {
+                    ReadWorkers.TryRemove(key, out var _);
+                }
+            }, LazyThreadSafetyMode.ExecutionAndPublication)).Value;
         }
 
         private async Task SendResponseAsync(
