@@ -277,6 +277,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
             {
                 try
                 {
+                    // Prevent a second request from starting a read during write execution.
+                    if (ReadWorkers.TryGetValue(key, out var readWork))
+                    {
+                        await readWork.Value;
+                    }                  
+
                     ImageCacheMetadata cachedImageMetadata = default;
                     outStream = new RecyclableMemoryStream(this.options.MemoryStreamManager);
                     IImageFormat format;
@@ -350,6 +356,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 finally
                 {
                     await this.StreamDisposeAsync(outStream);
+                    WriteWorkers.TryRemove(key, out var _);
                 }
             }, LazyThreadSafetyMode.ExecutionAndPublication)).Value;
         }
