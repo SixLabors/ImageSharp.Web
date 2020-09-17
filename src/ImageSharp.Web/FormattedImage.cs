@@ -47,7 +47,7 @@ namespace SixLabors.ImageSharp.Web
             {
                 if (value is null)
                 {
-                    ThrowInvalid(nameof(value));
+                    ThrowNull(nameof(value));
                 }
 
                 this.format = value;
@@ -65,7 +65,7 @@ namespace SixLabors.ImageSharp.Web
             {
                 if (value is null)
                 {
-                    ThrowInvalid(nameof(value));
+                    ThrowNull(nameof(value));
                 }
 
                 // The given type should match the format encoder.
@@ -108,6 +108,9 @@ namespace SixLabors.ImageSharp.Web
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowInvalid(string name) => throw new ArgumentNullException(name);
+        private static void ThrowNull(string name) => throw new ArgumentNullException(name);
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowInvalid(string name) => throw new ArgumentException(name);
     }
 }
