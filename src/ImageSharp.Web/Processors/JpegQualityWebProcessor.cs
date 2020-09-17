@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Web.Commands;
 
@@ -38,9 +39,19 @@ namespace SixLabors.ImageSharp.Web.Processors
         {
             if (commands.ContainsKey(Quality) && image.Format is JpegFormat)
             {
+                var reference =
+                    (JpegEncoder)image.Image
+                    .GetConfiguration()
+                    .ImageFormatsManager
+                    .FindEncoder(image.Format);
+
                 // The encoder clamps any values so no validation is required.
                 int quality = parser.ParseValue<int>(commands.GetValueOrDefault(Quality), culture);
-                image.Encoder = new JpegEncoder() { Quality = quality };
+
+                if (quality != reference.Quality)
+                {
+                    image.Encoder = new JpegEncoder() { Quality = quality, Subsample = reference.Subsample };
+                }
             }
 
             return image;
