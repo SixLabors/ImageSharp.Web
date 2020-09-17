@@ -54,6 +54,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 {
                     Assert.NotNull(context);
                     Assert.NotNull(context.Format);
+                    Assert.NotNull(context.Encoder);
                     Assert.NotNull(context.Image);
 
                     return onBeforeSaveAsync.Invoke(context);
