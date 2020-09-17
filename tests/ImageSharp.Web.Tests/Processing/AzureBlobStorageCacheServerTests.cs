@@ -105,10 +105,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
         [InlineData(TestConstants.AzureTestImage)]
         public async Task CanProcessMultipleIdenticalQueriesAsync(string url)
         {
-            Task[] tasks = Enumerable.Range(0, 5).Select(_ => Task.Run(async () =>
+            Task[] tasks = Enumerable.Range(0, 100).Select(i => Task.Run(async () =>
             {
-                using HttpResponseMessage response = await this.HttpClient.GetAsync(url + Command2);
+                var command = i % 2 == 0 ? Command : Command2;
+                using HttpResponseMessage response = await this.HttpClient.GetAsync(url + command);
                 Assert.NotNull(response);
+                Assert.True(response.IsSuccessStatusCode);
             })).ToArray();
 
             var all = Task.WhenAll(tasks);
