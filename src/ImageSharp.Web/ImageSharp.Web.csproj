@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AssemblyTitle>SixLabors.ImageSharp.Web</AssemblyTitle>
@@ -16,18 +16,18 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions"  />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions"  />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities"  />
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions"  />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"  />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" />
     <PackageReference Include="MinVer" PrivateAssets="All" />
     <PackageReference Include="SixLabors.ImageSharp" />
   </ItemGroup>

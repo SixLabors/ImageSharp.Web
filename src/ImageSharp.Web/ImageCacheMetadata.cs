@@ -123,7 +123,7 @@ namespace SixLabors.ImageSharp.Web
             return new ImageCacheMetadata(
                 sourceLastWriteTimeUtc,
                 cacheLastWriteTimeUtc,
-                contentType ?? string.Empty,
+                contentType,
                 cacheControlMaxAge,
                 contentLength);
         }
@@ -160,7 +160,8 @@ namespace SixLabors.ImageSharp.Web
             return this.SourceLastWriteTimeUtc == other.SourceLastWriteTimeUtc
                    && this.CacheLastWriteTimeUtc == other.CacheLastWriteTimeUtc
                    && this.ContentType == other.ContentType
-                   && this.CacheControlMaxAge == other.CacheControlMaxAge;
+                   && this.CacheControlMaxAge == other.CacheControlMaxAge
+                   && this.ContentLength == other.ContentLength;
         }
 
         /// <inheritdoc/>
