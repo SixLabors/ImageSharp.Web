@@ -28,6 +28,7 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
             Assert.Contains(services, x => x.ServiceType == typeof(IImageWebProcessor) && x.ImplementationType == typeof(ResizeWebProcessor));
             Assert.Contains(services, x => x.ServiceType == typeof(IImageWebProcessor) && x.ImplementationType == typeof(FormatWebProcessor));
             Assert.Contains(services, x => x.ServiceType == typeof(IImageWebProcessor) && x.ImplementationType == typeof(BackgroundColorWebProcessor));
+            Assert.Contains(services, x => x.ServiceType == typeof(IImageWebProcessor) && x.ImplementationType == typeof(JpegQualityWebProcessor));
             Assert.Contains(services, x => x.ServiceType == typeof(CommandParser));
 
             Assert.Contains(services, x => x.ServiceType == typeof(ICommandConverter) && x.ImplementationType == typeof(IntegralNumberConverter<sbyte>));

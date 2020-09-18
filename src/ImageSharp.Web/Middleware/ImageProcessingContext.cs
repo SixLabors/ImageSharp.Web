@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="context">The current HTTP request context.</param>
         /// <param name="stream">The stream containing the processed image bytes.</param>
         /// <param name="commands">The parsed collection of processing commands.</param>
-        /// <param name="contentType">The content type for for the processed image..</param>
+        /// <param name="contentType">The content type for the processed image.</param>
         /// <param name="extension">The file extension for the processed image.</param>
         public ImageProcessingContext(
             HttpContext context,
