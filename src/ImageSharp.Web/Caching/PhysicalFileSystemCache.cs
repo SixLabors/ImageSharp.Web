@@ -72,7 +72,10 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             // Allow configuration of the cache without having to register everything.
             this.cacheOptions = cacheOptions != null ? cacheOptions.Value : new PhysicalFileSystemCacheOptions();
-            this.cacheRootPath = Path.Combine(environment.WebRootPath, this.cacheOptions.CacheFolder);
+            var cacheRoot = string.IsNullOrEmpty(this.cacheOptions.CacheRoot)
+                ? environment.WebRootPath
+                : this.cacheOptions.CacheRoot;
+            this.cacheRootPath = Path.Combine(cacheRoot, this.cacheOptions.CacheFolder);
             if (!Directory.Exists(this.cacheRootPath))
             {
                 Directory.CreateDirectory(this.cacheRootPath);

@@ -12,5 +12,10 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Gets or sets the cache folder name.
         /// </summary>
         public string CacheFolder { get; set; } = "is-cache";
+
+        /// <summary>
+        /// Gets or sets the cache root folder.
+        /// </summary>
+        public string CacheRoot { get; set; }
     }
 }
