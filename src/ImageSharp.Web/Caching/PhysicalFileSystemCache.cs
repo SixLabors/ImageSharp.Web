@@ -72,10 +72,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             // Allow configuration of the cache without having to register everything.
             this.cacheOptions = cacheOptions != null ? cacheOptions.Value : new PhysicalFileSystemCacheOptions();
-            var cacheRoot = string.IsNullOrEmpty(this.cacheOptions.CacheRoot)
-                ? environment.WebRootPath
-                : this.cacheOptions.CacheRoot;
-            this.cacheRootPath = Path.Combine(cacheRoot, this.cacheOptions.CacheFolder);
+            this.cacheRootPath = GetCacheRoot(this.cacheOptions, environment.WebRootPath);
             if (!Directory.Exists(this.cacheRootPath))
             {
                 Directory.CreateDirectory(this.cacheRootPath);
@@ -85,6 +82,20 @@ namespace SixLabors.ImageSharp.Web.Caching
             this.options = options.Value;
             this.cachedNameLength = (int)this.options.CachedNameLength;
             this.formatUtilities = formatUtilities;
+        }
+
+        /// <summary>
+        /// Determine the cache root path
+        /// </summary>
+        /// <param name="cacheOptions">the cache options.</param>
+        /// <param name="webRootPath">the webRootPath.</param>
+        /// <returns>root path.</returns>
+        internal static string GetCacheRoot(PhysicalFileSystemCacheOptions cacheOptions, string webRootPath)
+        {
+            var cacheRoot = string.IsNullOrEmpty(cacheOptions.CacheRoot)
+                ? webRootPath
+                : cacheOptions.CacheRoot;
+            return Path.Combine(cacheRoot, cacheOptions.CacheFolder);
         }
 
         /// <inheritdoc/>
