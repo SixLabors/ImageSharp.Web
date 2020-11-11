@@ -21,27 +21,29 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             Assert.Equal(expected, actual);
         }
 
-        [Fact]
-        public void CacheRootFromOptions()
+        [Theory]
+#if Linux
+        [InlineData("cacheFolder", "/Users/username", null, null, "/Users/username/cacheFolder")]
+        [InlineData("cacheFolder", null, "/Users/WebRoot", null, "/Users/WebRoot/cacheFolder")]
+        [InlineData("cacheFolder", "../Temp", null, "/Users/this/a/root", "/Users/this/a/Temp/cacheFolder")]
+#elif OSX
+        [InlineData("cacheFolder", "/Users/username", null, null, "/Users/username/cacheFolder")]
+        [InlineData("cacheFolder", null, "/Users/WebRoot", null, "/Users/WebRoot/cacheFolder")]
+        [InlineData("cacheFolder", "../Temp", null, "/Users/this/a/root", "/Users/this/a/Temp/cacheFolder")]
+#elif Windows
+        [InlineData("cacheFolder", "C:/Temp", null, null, "C:/Temp/cacheFolder")]
+        [InlineData("cacheFolder", null, "C:/WebRoot", null, "C:/WebRoot/cacheFolder")]
+        [InlineData("cacheFolder", "../Temp", null, "C:/this/a/root", "C:/this/a/Temp/cacheFolder")]
+#endif
+        public void CacheRootFromOptions(string cacheFolder, string cacheRoot, string webRootPath, string contentRootPath, string expected)
         {
             var cacheOptions = new PhysicalFileSystemCacheOptions();
-            cacheOptions.CacheFolder = "cacheFolder";
-            cacheOptions.CacheRoot = "C:\\Temp";
+            cacheOptions.CacheFolder = cacheFolder;
+            cacheOptions.CacheRoot = cacheRoot;
 
-            var cacheRoot = PhysicalFileSystemCache.GetCacheRoot(cacheOptions, null);
+            var cacheRootResult = PhysicalFileSystemCache.GetCacheRoot(cacheOptions, webRootPath, contentRootPath);
 
-            Assert.Equal(Path.Combine(cacheOptions.CacheRoot, cacheOptions.CacheFolder), cacheRoot);
-        }
-
-        [Fact]
-        public void CacheRootFromEnvironment()
-        {
-            var cacheOptions = new PhysicalFileSystemCacheOptions();
-            cacheOptions.CacheFolder = "cacheFolder";
-
-            var cacheRoot = PhysicalFileSystemCache.GetCacheRoot(cacheOptions, "C:\\WebRoot");
-
-            Assert.Equal(Path.Combine("C:\\WebRoot", cacheOptions.CacheFolder), cacheRoot);
+            Assert.Equal(expected, cacheRootResult);
         }
     }
 }
