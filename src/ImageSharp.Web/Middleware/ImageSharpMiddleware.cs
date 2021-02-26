@@ -50,8 +50,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Used to temporarily store cache resolver reads to reduce the overhead of cache lookups.
         /// </summary>
-        private static readonly ConcurrentTLruCache<string, (IImageCacheResolver, ImageCacheMetadata)> CacheResolverLru
-            = new ConcurrentTLruCache<string, (IImageCacheResolver, ImageCacheMetadata)>(1024, TimeSpan.FromMinutes(5));
+        private static readonly ConcurrentTLruCache<string, ValueTuple<IImageCacheResolver, ImageCacheMetadata>> CacheResolverLru
+            = new ConcurrentTLruCache<string, ValueTuple<IImageCacheResolver, ImageCacheMetadata>>(1024, TimeSpan.FromMinutes(5));
 
         /// <summary>
         /// The function processing the Http request.
@@ -407,7 +407,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                             // Check to see if the cache contains this image.
                             // If not, we return early. No further checks necessary.
-                            (IImageCacheResolver, ImageCacheMetadata) cachedImageResolver = await
+                            (IImageCacheResolver ImageCacheResolver, ImageCacheMetadata ImageCacheMetadata) cachedImage = await
                                 CacheResolverLru.GetOrAddAsync(
                                     key,
                                     async k =>
@@ -422,7 +422,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                         return (resolver, metadata);
                                     });
 
-                            if (cachedImageResolver.Item1 is null)
+                            if (cachedImage.ImageCacheResolver is null)
                             {
                                 // Remove the null resolver from the store.
                                 CacheResolverLru.TryRemove(key);
@@ -431,9 +431,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                             // Has the cached image expired?
                             // Or has the source image changed since the image was last cached?
-                            if (cachedImageResolver.Item2.ContentLength == 0 // Fix for old cache without length property
-                                || cachedImageResolver.Item2.CacheLastWriteTimeUtc <= (DateTimeOffset.UtcNow - this.options.CacheMaxAge)
-                                || cachedImageResolver.Item2.SourceLastWriteTimeUtc != sourceImageMetadata.LastWriteTimeUtc)
+                            if (cachedImage.ImageCacheMetadata.ContentLength == 0 // Fix for old cache without length property
+                                || cachedImage.ImageCacheMetadata.CacheLastWriteTimeUtc <= (DateTimeOffset.UtcNow - this.options.CacheMaxAge)
+                                || cachedImage.ImageCacheMetadata.SourceLastWriteTimeUtc != sourceImageMetadata.LastWriteTimeUtc)
                             {
                                 // We want to remove the resolver from the store so that the next check gets the updated file.
                                 CacheResolverLru.TryRemove(key);
@@ -441,7 +441,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             }
 
                             // We're pulling the image from the cache.
-                            await this.SendResponseAsync(imageContext, key, cachedImageResolver.Item2, null, cachedImageResolver.Item1);
+                            await this.SendResponseAsync(imageContext, key, cachedImage.ImageCacheMetadata, null, cachedImage.ImageCacheResolver);
                             return (false, sourceImageMetadata);
                         }
                         finally
