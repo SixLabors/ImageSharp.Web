@@ -5,74 +5,36 @@
     Directory.Build.targets is automatically picked up and imported by
     Microsoft.Common.targets. This file needs to exist, even if empty so that
     files in the parent directory tree, with the same name, are not imported
-    instead. The import fairly late and most other props/targets will have
+    instead. They import fairly late and most other props/targets will have
     been imported beforehand. We also don't need to add ourselves to
     MSBuildAllProjects, as that is done by the file that imports us.
   -->
 
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileDirectory)..\Directory.Build.targets</MSBuildAllProjects>
-  </PropertyGroup>
+  <!-- Import the shared src .targets file -->
+  <Import Project="$(MSBuildThisFileDirectory)..\shared-infrastructure\msbuild\targets\SixLabors.Src.targets" />
 
+  <!-- Import the solution .targets file. -->
   <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.targets" />
 
-  <PropertyGroup>
-    <GeneratedInternalsVisibleToFile Condition="'$(GeneratedInternalsVisibleToFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).InternalsVisibleTo$(DefaultLanguageSourceExtension)</GeneratedInternalsVisibleToFile>
-  </PropertyGroup>
-
-  <!-- Workaround for running Coverlet with Deterministic builds -->
-  <!-- https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/DeterministicBuild.md -->
-  <Target Name="CoverletGetPathMap"
-            DependsOnTargets="InitializeSourceRootMappedPaths"
-            Returns="@(_LocalTopLevelSourceRoot)"
-            Condition="'$(DeterministicSourcePaths)' == 'true'">
-    <ItemGroup>
-      <_LocalTopLevelSourceRoot Include="@(SourceRoot)" Condition="'%(SourceRoot.NestedRoot)' == ''"/>
-    </ItemGroup>
-  </Target>
-  
-  <ItemDefinitionGroup>
-    <InternalsVisibleTo>
-      <Visible>false</Visible>
-    </InternalsVisibleTo>
-  </ItemDefinitionGroup>
-
-  <Target Name="GenerateInternalsVisibleTo"
-          BeforeTargets="CoreCompile"
-          DependsOnTargets="PrepareForBuild;CoreGenerateInternalsVisibleTo"
-          Condition="'@(InternalsVisibleTo)' != ''" />
-
-  <Target Name="CoreGenerateInternalsVisibleTo"
-          Condition="'$(Language)' == 'VB' or '$(Language)' == 'C#'"
-          Inputs="$(MSBuildAllProjects)"
-          Outputs="$(GeneratedInternalsVisibleToFile)">
-    <CreateItem Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute" AdditionalMetadata="_Parameter1=%(InternalsVisibleTo.Identity)" Condition="'%(InternalsVisibleTo.Key)' == ''">
-      <Output TaskParameter="Include" ItemName="InternalsVisibleToAttribute" />
-    </CreateItem>
-    <CreateItem Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute" AdditionalMetadata="_Parameter1=%(InternalsVisibleTo.Identity), PublicKey=%(InternalsVisibleTo.Key)" Condition="'%(InternalsVisibleTo.Key)' != ''">
-      <Output TaskParameter="Include" ItemName="InternalsVisibleToAttribute" />
-    </CreateItem>
-
-    <WriteCodeFragment AssemblyAttributes="@(InternalsVisibleToAttribute)" Language="$(Language)" OutputFile="$(GeneratedInternalsVisibleToFile)">
-      <Output TaskParameter="OutputFile" ItemName="Compile" />
-      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
-    </WriteCodeFragment>
-  </Target>
-
-  <!-- Empty target so that `dotnet test` will work on the solution -->
-  <!-- https://github.com/Microsoft/vstest/issues/411 -->
-  <Target Name="VSTest" Condition="'$(IsTestProject)' == 'true'"/>
-
   <ItemGroup>
-    <!--Shared config files that have to exist at root level.-->
-    <ConfigFilesToCopy Include="..\..\shared-infrastructure\.editorconfig;..\..\shared-infrastructure\.gitattributes" />
+    <PackageReference Update="Azure.Storage.Blobs" Version="12.4.0" />
+    <PackageReference Update="Microsoft.IO.RecyclableMemoryStream" Version="1.3.5" />
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Update="MinVer" PrivateAssets="All" Version="2.3.0" />
+    <PackageReference Update="SixLabors.ImageSharp" Version="1.0.3" />
   </ItemGroup>
 
-  <!--Ensures our config files are up to date.-->
-  <Target Name="CopyFiles" BeforeTargets="Build">
-    <Copy SourceFiles="@(ConfigFilesToCopy)"
-          SkipUnchangedFiles = "true"
-          DestinationFolder="..\..\" />
-  </Target>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <FrameworkReference Update="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
+    <PackageReference Update="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.0.0" />
+    <PackageReference Update="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.0" />
+    <PackageReference Update="Microsoft.AspNetCore.Http.Extensions" Version="2.0.0" />
+    <PackageReference Update="Microsoft.AspNetCore.WebUtilities" Version="2.0.0" />
+    <PackageReference Update="Microsoft.Extensions.Caching.Abstractions" Version="2.0.0" />
+    <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
+    <PackageReference Update="Microsoft.Extensions.FileProviders.Physical" Version="2.0.0"/>
+  </ItemGroup>
 </Project>

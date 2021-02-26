@@ -22,24 +22,26 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         }
 
         [Theory]
-#if Linux
+#if OS_LINUX
         [InlineData("cacheFolder", "/Users/username", null, null, "/Users/username/cacheFolder")]
         [InlineData("cacheFolder", null, "/Users/WebRoot", null, "/Users/WebRoot/cacheFolder")]
         [InlineData("cacheFolder", "../Temp", null, "/Users/this/a/root", "/Users/this/a/Temp/cacheFolder")]
-#elif OSX
+#elif OS_OSX
         [InlineData("cacheFolder", "/Users/username", null, null, "/Users/username/cacheFolder")]
         [InlineData("cacheFolder", null, "/Users/WebRoot", null, "/Users/WebRoot/cacheFolder")]
         [InlineData("cacheFolder", "../Temp", null, "/Users/this/a/root", "/Users/this/a/Temp/cacheFolder")]
-#elif Windows
+#elif OS_WINDOWS
         [InlineData("cacheFolder", "C:/Temp", null, null, "C:/Temp\\cacheFolder")]
         [InlineData("cacheFolder", null, "C:/WebRoot", null, "C:/WebRoot\\cacheFolder")]
         [InlineData("cacheFolder", "../Temp", null, "C:/this/a/root", "C:\\this\\a\\Temp\\cacheFolder")]
 #endif
         public void CacheRootFromOptions(string cacheFolder, string cacheRoot, string webRootPath, string contentRootPath, string expected)
         {
-            var cacheOptions = new PhysicalFileSystemCacheOptions();
-            cacheOptions.CacheFolder = cacheFolder;
-            cacheOptions.CacheRoot = cacheRoot;
+            var cacheOptions = new PhysicalFileSystemCacheOptions
+            {
+                CacheFolder = cacheFolder,
+                CacheRoot = cacheRoot
+            };
 
             var cacheRootResult = PhysicalFileSystemCache.GetCacheRoot(cacheOptions, webRootPath, contentRootPath);
 

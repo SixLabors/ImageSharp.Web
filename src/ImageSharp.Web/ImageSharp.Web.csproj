@@ -27,8 +27,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" />
-    <PackageReference Include="MinVer" PrivateAssets="All" />
     <PackageReference Include="SixLabors.ImageSharp" />
   </ItemGroup>
 

@@ -5,36 +5,23 @@
     Directory.Build.targets is automatically picked up and imported by
     Microsoft.Common.targets. This file needs to exist, even if empty so that
     files in the parent directory tree, with the same name, are not imported
-    instead. The import fairly late and most other props/targets will have
+    instead. They import fairly late and most other props/targets will have
     been imported beforehand. We also don't need to add ourselves to
     MSBuildAllProjects, as that is done by the file that imports us.
   -->
 
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileDirectory)..\Directory.Build.targets</MSBuildAllProjects>
-  </PropertyGroup>
+  <!-- Import the shared tests .targets file -->
+  <Import Project="$(MSBuildThisFileDirectory)..\shared-infrastructure\msbuild\targets\SixLabors.Tests.targets" />
 
+  <!-- Import the solution .targets file. -->
   <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.targets" />
 
-  <!-- Tool versions for tool references across all projects -->
+  <!-- Test Dependencies -->
   <ItemGroup>
-    <!--dotnet tools does not have an x86 runner. You have to use separate SDKs-->
-    <!--https://github.com/actions/setup-dotnet/issues/72-->
-    <DotNetCliToolReference Update="dotnet-xunit" Version="2.3.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!--Test Dependencies-->
-    <PackageReference Update="BenchmarkDotNet" Version="0.12.0" />
-    <PackageReference Update="coverlet.collector" Version="1.3.0" PrivateAssets="All"/>
+    <PackageReference Update="Azure.Storage.Blobs" Version="12.4.0" />
+    <PackageReference Update="BenchmarkDotNet" Version="0.12.1" />
     <PackageReference Update="Microsoft.Azure.KeyVault.Core" Version="3.0.4" />
     <PackageReference Update="Microsoft.Azure.Storage.Blob" Version="11.1.2" />
-    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.5.0-preview-20200116-01" />
-
-    <!--Don't update these. We're getting AmbiguousMatchException on Linux-->
-    <!--See https://github.com/xunit/xunit/issues/1771-->
-    <PackageReference Update="xunit" Version="2.3.1" />
-    <PackageReference Update="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
