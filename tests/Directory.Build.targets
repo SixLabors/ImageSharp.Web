@@ -22,6 +22,14 @@
     <PackageReference Update="BenchmarkDotNet" Version="0.12.1" />
     <PackageReference Update="Microsoft.Azure.KeyVault.Core" Version="3.0.4" />
     <PackageReference Update="Microsoft.Azure.Storage.Blob" Version="11.1.2" />
+
+    <!--
+        Don't update these. We're getting AmbiguousMatchException for
+        CommandParser tests.
+    -->
+    <!--See https://github.com/xunit/xunit/issues/1771-->
+    <PackageReference Update="xunit" Version="2.3.1" />
+    <PackageReference Update="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
