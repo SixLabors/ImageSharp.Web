@@ -418,7 +418,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                         {
                                             metadata = await resolver.GetMetaDataAsync();
                                         }
-                                        
+
                                         return (resolver, metadata);
                                     });
 
