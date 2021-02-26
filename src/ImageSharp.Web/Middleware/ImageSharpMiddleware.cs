@@ -410,7 +410,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             (IImageCacheResolver, ImageCacheMetadata) cachedImageResolver = await
                                 CacheResolverLru.GetOrAddAsync(
                                     key,
-                                    async k => 
+                                    async k =>
                                     {
                                         var resolver = await this.cache.GetAsync(k);
                                         ImageCacheMetadata metadata = default;
@@ -418,6 +418,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                         {
                                             metadata = await resolver.GetMetaDataAsync();
                                         }
+                                        
                                         return (resolver, metadata);
                                     });
 
