@@ -50,14 +50,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Used to temporarily store cache resolver reads to reduce the overhead of cache lookups.
         /// </summary>
-        private static readonly ConcurrentTLruCache<string, IImageCacheResolver> CacheResolverLru
-            = new ConcurrentTLruCache<string, IImageCacheResolver>(1024, TimeSpan.FromMinutes(5));
-
-        /// <summary>
-        /// Used to temporarily store cache metadata reads to reduce the overhead of cache lookups.
-        /// </summary>
-        private static readonly ConcurrentTLruCache<string, ImageCacheMetadata> CacheMetadataLru
-            = new ConcurrentTLruCache<string, ImageCacheMetadata>(1024, TimeSpan.FromMinutes(5));
+        private static readonly ConcurrentTLruCache<string, (IImageCacheResolver, ImageCacheMetadata)> CacheResolverLru
+            = new ConcurrentTLruCache<string, (IImageCacheResolver, ImageCacheMetadata)>(1024, TimeSpan.FromMinutes(5));
 
         /// <summary>
         /// The function processing the Http request.
@@ -413,37 +407,40 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
                             // Check to see if the cache contains this image.
                             // If not, we return early. No further checks necessary.
-                            IImageCacheResolver cachedImageResolver = await
+                            (IImageCacheResolver, ImageCacheMetadata) cachedImageResolver = await
                                 CacheResolverLru.GetOrAddAsync(
                                     key,
-                                    k => this.cache.GetAsync(k));
+                                    async k => 
+                                    {
+                                        var resolver = await this.cache.GetAsync(k);
+                                        ImageCacheMetadata metadata = default;
+                                        if (resolver != null)
+                                        {
+                                            metadata = await resolver.GetMetaDataAsync();
+                                        }
+                                        return (resolver, metadata);
+                                    });
 
-                            if (cachedImageResolver is null)
+                            if (cachedImageResolver.Item1 is null)
                             {
                                 // Remove the null resolver from the store.
                                 CacheResolverLru.TryRemove(key);
                                 return (true, sourceImageMetadata);
                             }
 
-                            // Now resolve the cached image metadata storing the result.
-                            ImageCacheMetadata cachedImageMetadata = await
-                                CacheMetadataLru.GetOrAddAsync(
-                                    key,
-                                    _ => cachedImageResolver.GetMetaDataAsync());
-
                             // Has the cached image expired?
                             // Or has the source image changed since the image was last cached?
-                            if (cachedImageMetadata.ContentLength == 0 // Fix for old cache without length property
-                                || cachedImageMetadata.CacheLastWriteTimeUtc <= (DateTimeOffset.UtcNow - this.options.CacheMaxAge)
-                                || cachedImageMetadata.SourceLastWriteTimeUtc != sourceImageMetadata.LastWriteTimeUtc)
+                            if (cachedImageResolver.Item2.ContentLength == 0 // Fix for old cache without length property
+                                || cachedImageResolver.Item2.CacheLastWriteTimeUtc <= (DateTimeOffset.UtcNow - this.options.CacheMaxAge)
+                                || cachedImageResolver.Item2.SourceLastWriteTimeUtc != sourceImageMetadata.LastWriteTimeUtc)
                             {
-                                // We want to remove the metadata from the store so that the next check gets the updated file.
-                                CacheMetadataLru.TryRemove(key);
+                                // We want to remove the resolver from the store so that the next check gets the updated file.
+                                CacheResolverLru.TryRemove(key);
                                 return (true, sourceImageMetadata);
                             }
 
                             // We're pulling the image from the cache.
-                            await this.SendResponseAsync(imageContext, key, cachedImageMetadata, null, cachedImageResolver);
+                            await this.SendResponseAsync(imageContext, key, cachedImageResolver.Item2, null, cachedImageResolver.Item1);
                             return (false, sourceImageMetadata);
                         }
                         finally
