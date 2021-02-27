@@ -9,7 +9,7 @@ See https://t.co/0A4WzeGMZS
     <ItemGroup>
       <ProjectReference
         Remove="$(MSBuildThisFileDirectory)samples\ImageSharp.Web.Sample\ImageSharp.Web.Sample.csproj"
-        Condition="'$(GITHUB_ACTIONS)' == 'true'"/>
+        Condition="'$(CI)' == 'true'"/>
     </ItemGroup>
   </Target>
 </Project>

@@ -22,7 +22,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         private static readonly string PiStringDk = Pi.ToString(Dk);
         private static readonly double RoundedPi = Math.Round(Pi, MidpointRounding.AwayFromZero);
 
-        public static TheoryData<object, string, CultureInfo> IntegralValuesInv
+        public static TheoryData<object, string, CultureInfo> IntegralValuesInv { get; }
             = new TheoryData<object, string, CultureInfo>
         {
             { (sbyte)1, "1", Inv },
@@ -38,7 +38,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             { 1M, "1", Inv },
         };
 
-        public static TheoryData<object, string, CultureInfo> IntegralValuesDk
+        public static TheoryData<object, string, CultureInfo> IntegralValuesDk { get; }
             = new TheoryData<object, string, CultureInfo>
         {
                     { (sbyte)1, "1", Dk },
@@ -54,7 +54,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
                     { 1M, "1", Dk },
         };
 
-        public static TheoryData<object, string, CultureInfo> RealValuesInv
+        public static TheoryData<object, string, CultureInfo> RealValuesInv { get; }
             = new TheoryData<object, string, CultureInfo>
         {
             { (sbyte)RoundedPi, PiStringInv, Inv },
@@ -70,7 +70,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             { (decimal)Pi, PiStringInv, Inv },
         };
 
-        public static TheoryData<object, string, CultureInfo> RealValuesDanish
+        public static TheoryData<object, string, CultureInfo> RealValuesDanish { get; }
             = new TheoryData<object, string, CultureInfo>
         {
             { (sbyte)RoundedPi, PiStringDk, Dk },
@@ -86,44 +86,44 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             { (decimal)Pi, PiStringDk, Dk },
         };
 
-        public static TheoryData<ResizeMode, string, CultureInfo> EnumValues
+        public static TheoryData<ResizeMode, string, CultureInfo> EnumValues { get; }
             = new TheoryData<ResizeMode, string, CultureInfo>
         {
             { ResizeMode.Max, "max", Inv },
             { ResizeMode.Crop, "this is not, an enum value", Inv }, // Unknown returns default
         };
 
-        public static TheoryData<int[], string, CultureInfo> IntegralArrays
+        public static TheoryData<int[], string, CultureInfo> IntegralArrays { get; }
             = new TheoryData<int[], string, CultureInfo>
         {
             { new[] { 1, 2, 3, 4 }, ToNumericList(Inv, 1, 2, 3, 4), Inv },
         };
 
-        public static TheoryData<float[], string, CultureInfo> RealArraysInv
+        public static TheoryData<float[], string, CultureInfo> RealArraysInv { get; }
             = new TheoryData<float[], string, CultureInfo>
         {
             { new[] { 1.667F, 2.667F, 3.667F, 4.667F }, ToNumericList(Inv, 1.667F, 2.667F, 3.667F, 4.667F), Inv },
         };
 
-        public static TheoryData<float[], string, CultureInfo> RealArraysDk
+        public static TheoryData<float[], string, CultureInfo> RealArraysDk { get; }
             = new TheoryData<float[], string, CultureInfo>
         {
             { new[] { 1.667F, 2.667F, 3.667F, 4.667F }, ToNumericList(Dk, 1.667F, 2.667F, 3.667F, 4.667F), Dk },
         };
 
-        public static TheoryData<object, string, CultureInfo> IntegralLists
+        public static TheoryData<object, string, CultureInfo> IntegralLists { get; }
             = new TheoryData<object, string, CultureInfo>
         {
             { new List<int> { 1, 2, 3, 4 }, ToNumericList(Inv, 1, 2, 3, 4), Inv },
         };
 
-        public static TheoryData<List<float>, string, CultureInfo> RealLists
+        public static TheoryData<List<float>, string, CultureInfo> RealLists { get; }
             = new TheoryData<List<float>, string, CultureInfo>
         {
             { new List<float> { 1.667F, 2.667F, 3.667F, 4.667F }, "1.667,2.667,3.667,4.667", Inv },
         };
 
-        public static TheoryData<Color, string, CultureInfo> ColorValuesInv
+        public static TheoryData<Color, string, CultureInfo> ColorValuesInv { get; }
             = new TheoryData<Color, string, CultureInfo>
         {
             { default, string.Empty, Inv },
@@ -135,7 +135,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             { Color.YellowGreen, "9ACD32FF", Inv },
         };
 
-        public static TheoryData<Color, string, CultureInfo> ColorValuesDk
+        public static TheoryData<Color, string, CultureInfo> ColorValuesDk { get; }
             = new TheoryData<Color, string, CultureInfo>
         {
             { default, string.Empty, Dk },

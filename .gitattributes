@@ -4,7 +4,6 @@
 #   normalize to Unix-style line endings
 ###############################################################################
 *           text        eol=lf
-
 ###############################################################################
 # Set explicit file behavior to:
 #   treat as text and
@@ -54,7 +53,6 @@
 *.txt               text        eol=lf
 *.vb                text        eol=lf
 *.yml               text        eol=lf
-
 ###############################################################################
 # Set explicit file behavior to:
 #   treat as text
@@ -62,7 +60,6 @@
 #   diff as csharp
 ###############################################################################
 *.cs                text        eol=lf          diff=csharp
-
 ###############################################################################
 # Set explicit file behavior to:
 #   treat as text
@@ -74,7 +71,6 @@
 *.fsproj            text        eol=lf          merge=union
 *.ncrunchproject    text        eol=lf          merge=union
 *.vbproj            text        eol=lf          merge=union
-
 ###############################################################################
 # Set explicit file behavior to:
 #   treat as text
@@ -82,37 +78,29 @@
 #   use a union merge when resoling conflicts
 ###############################################################################
 *.sln               text        eol=crlf        merge=union
-
 ###############################################################################
 # Set explicit file behavior to:
 #   treat as binary
 ###############################################################################
 *.basis             binary
-*.bmp               binary
-*.dds               binary
 *.dll               binary
 *.eot               binary
 *.exe               binary
-*.gif               binary
-*.jpg               binary
 *.ktx               binary
 *.otf               binary
 *.pbm               binary
 *.pdf               binary
-*.png               binary
 *.ppt               binary
 *.pptx              binary
 *.pvr               binary
 *.snk               binary
-*.tga               binary
 *.ttc               binary
 *.ttf               binary
-*.webp              binary
+*.wbmp              binary
 *.woff              binary
 *.woff2             binary
 *.xls               binary
 *.xlsx              binary
-
 ###############################################################################
 # Set explicit file behavior to:
 #   diff as plain text
@@ -124,3 +112,16 @@
 *.pptx              diff=astextplain
 *.rtf               diff=astextplain
 *.svg               diff=astextplain
+###############################################################################
+# Handle image files by git lfs
+###############################################################################
+*.jpg               filter=lfs diff=lfs merge=lfs -text
+*.jpeg              filter=lfs diff=lfs merge=lfs -text
+*.bmp               filter=lfs diff=lfs merge=lfs -text
+*.gif               filter=lfs diff=lfs merge=lfs -text
+*.png               filter=lfs diff=lfs merge=lfs -text
+*.tif               filter=lfs diff=lfs merge=lfs -text
+*.tiff              filter=lfs diff=lfs merge=lfs -text
+*.tga               filter=lfs diff=lfs merge=lfs -text
+*.webp              filter=lfs diff=lfs merge=lfs -text
+*.dds               filter=lfs diff=lfs merge=lfs -text

@@ -5,42 +5,12 @@
     Directory.Build.targets is automatically picked up and imported by
     Microsoft.Common.targets. This file needs to exist, even if empty so that
     files in the parent directory tree, with the same name, are not imported
-    instead. The import fairly late and most other props/targets will have been
+    instead. They import fairly late and most other props/targets will have been
     imported beforehand. We also don't need to add ourselves to
     MSBuildAllProjects, as that is done by the file that imports us.
   -->
 
-  <!-- Settings that append the existing setting value -->
-  <PropertyGroup>
-    <DefineConstants>$(DefineConstants);$(OS)</DefineConstants>
-  </PropertyGroup>
+  <!-- Import the shared global .props file -->
+  <Import Project="$(MSBuildThisFileDirectory)shared-infrastructure\msbuild\targets\SixLabors.Global.targets"/>
 
-  <!-- Package versions for package references across all projects -->
-  <ItemGroup>
-    <!--Global Dependencies-->
-    <PackageReference Update="Microsoft.Net.Compilers.Toolset" Version="3.3.1" />
-    <PackageReference Update="StyleCop.Analyzers" PrivateAssets="All" Version="1.1.118" />
-
-    <!--Src Dependencies-->
-    <PackageReference Update="Azure.Storage.Blobs" Version="12.4.0" />
-    <PackageReference Update="Microsoft.IO.RecyclableMemoryStream" Version="1.3.5" />
-    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
-    <PackageReference Update="MinVer" PrivateAssets="All" Version="2.3.0" />
-    <PackageReference Update="SixLabors.ImageSharp" Version="1.0.2" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <FrameworkReference Update="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <PackageReference Update="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.0.0" />
-    <PackageReference Update="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.0" />
-    <PackageReference Update="Microsoft.AspNetCore.Http.Extensions" Version="2.0.0" />
-    <PackageReference Update="Microsoft.AspNetCore.WebUtilities" Version="2.0.0" />
-    <PackageReference Update="Microsoft.Extensions.Caching.Abstractions" Version="2.0.0" />
-    <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
-    <PackageReference Update="Microsoft.Extensions.FileProviders.Physical" Version="2.0.0"/>
-  </ItemGroup>
-  
 </Project>

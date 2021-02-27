@@ -8,9 +8,6 @@ namespace SixLabors.ImageSharp.Web.Benchmarks
 {
     public class MemoryConfig : ManualConfig
     {
-        public MemoryConfig()
-        {
-            this.Add(MemoryDiagnoser.Default);
-        }
+        public MemoryConfig() => this.AddDiagnoser(MemoryDiagnoser.Default);
     }
 }
