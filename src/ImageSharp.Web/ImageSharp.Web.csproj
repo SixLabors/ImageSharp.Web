@@ -4,12 +4,22 @@
     <AssemblyTitle>SixLabors.ImageSharp.Web</AssemblyTitle>
     <AssemblyName>SixLabors.ImageSharp.Web</AssemblyName>
     <RootNamespace>SixLabors.ImageSharp.Web</RootNamespace>
-    <Description>ImageSharp Middleware for serving images via a url based API.</Description>
     <PackageId>SixLabors.ImageSharp.Web</PackageId>
+    <PackageIcon>sixlabors.imagesharp.web.128.png</PackageIcon>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/SixLabors/ImageSharp.Web/</RepositoryUrl>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <PackageTags>Image Middleware Resize Crop Gif Jpg Jpeg Bitmap Png Core Cache ASP</PackageTags>
+    <Description>ImageSharp Middleware for serving images via a url based API.</Description>
+  </PropertyGroup>
 
+  <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\shared-infrastructure\branding\icons\imagesharp.web\sixlabors.imagesharp.web.128.png" Pack="true" PackagePath="" />
+  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
