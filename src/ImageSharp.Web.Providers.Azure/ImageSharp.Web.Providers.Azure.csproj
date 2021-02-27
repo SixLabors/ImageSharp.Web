@@ -3,15 +3,24 @@
   <PropertyGroup>
     <AssemblyName>SixLabors.ImageSharp.Web.Providers.Azure</AssemblyName>
     <AssemblyTitle>SixLabors.ImageSharp.Web.Providers.Azure</AssemblyTitle>
-    <Description>A provider for resolving images via Azure Blob Storage.</Description>
-    <PackageId>SixLabors.ImageSharp.Web.Providers.Azure</PackageId>
-    <PackageTags>Image Middleware Resize Crop Gif Jpg Jpeg Bitmap Png Azure</PackageTags>
     <RootNamespace>SixLabors.ImageSharp.Web</RootNamespace>
+    <PackageId>SixLabors.ImageSharp.Web.Providers.Azure</PackageId>
+    <PackageIcon>sixlabors.imagesharp.web.128.png</PackageIcon>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/SixLabors/ImageSharp.Web/</RepositoryUrl>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+    <PackageTags>Image Middleware Resize Crop Gif Jpg Jpeg Bitmap Png Azure</PackageTags>
+    <Description>A provider for resolving and caching images via Azure Blob Storage.</Description>
+</PropertyGroup>
 
+  <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
 
-
+  <ItemGroup>
+    <None Include="..\..\shared-infrastructure\branding\icons\imagesharp.web\sixlabors.imagesharp.web.128.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" />
   </ItemGroup>
