@@ -246,7 +246,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IDictionary<string, string> commands)
         {
             // Create a cache key based on all the components of the requested url
-            string uri = GetUri(context, commands);
+            string uri = GetUri(context, commands, this.options.IgnoreHost);
             string key = this.cacheHash.Create(uri, this.options.CachedNameLength);
 
             // Check the cache, if present, not out of date and not requiring and update
@@ -492,9 +492,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
         }
 
-        private static string GetUri(HttpContext context, IDictionary<string, string> commands)
+        private static string GetUri(HttpContext context, IDictionary<string, string> commands, bool ignoreHost)
         {
-            var sb = new StringBuilder(context.Request.Host.ToString());
+            var sb = new StringBuilder(ignoreHost ? null : context.Request.Host.ToString());
 
             string pathBase = context.Request.PathBase.ToString();
             if (!string.IsNullOrWhiteSpace(pathBase))

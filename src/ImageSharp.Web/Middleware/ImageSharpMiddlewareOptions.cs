@@ -91,6 +91,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public uint CachedNameLength { get; set; } = 12;
 
         /// <summary>
+        /// Gets or sets a value indicating whether to use the host portion of the request URI when generating the key used for the image cache.
+        /// </summary>
+        public bool IgnoreHost { get; set; }
+
+        /// <summary>
         /// Gets or sets the additional command parsing method that can be used to used to augment commands.
         /// This is called once the commands have been gathered and before an <see cref="IImageProvider"/> has been assigned.
         /// </summary>
