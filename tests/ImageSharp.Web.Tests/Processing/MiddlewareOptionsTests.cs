@@ -56,6 +56,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
 
         //private readonly bool ignoreHost;
 
+        // I get the feeling that this is a naming violation...
+        // I had tried to make this an instance property, but for some reason it wasn't working - it was always false...
         public static bool ____RULE_VIOLATION____IgnoreHost____RULE_VIOLATION____;
 
         private ImageCacheMock imageCache = new ImageCacheMock();
