@@ -151,6 +151,11 @@ namespace SixLabors.ImageSharp.Web.Sample
                 app.UseDeveloperExceptionPage();
             }
 
+            app.Use(async (context, next) =>
+            {
+                context.Request.Host = new Microsoft.AspNetCore.Http.HostString("jjjjjj.org");
+                await next();
+            });
             app.UseDefaultFiles();
             app.UseImageSharp();
             app.UseStaticFiles();

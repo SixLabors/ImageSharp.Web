@@ -20,56 +20,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
     {
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddImageSharp(options =>
-            {
-                Func<ImageCommandContext, Task> onParseCommandsAsync = options.OnParseCommandsAsync;
-
-                options.OnParseCommandsAsync = context =>
-                {
-                    Assert.NotNull(context);
-                    Assert.NotNull(context.Context);
-                    Assert.NotNull(context.Commands);
-                    Assert.NotNull(context.Parser);
-
-                    return onParseCommandsAsync.Invoke(context);
-                };
-
-                Func<ImageProcessingContext, Task> onProcessedAsync = options.OnProcessedAsync;
-
-                options.OnProcessedAsync = context =>
-                {
-                    Assert.NotNull(context);
-                    Assert.NotNull(context.Commands);
-                    Assert.NotNull(context.ContentType);
-                    Assert.NotNull(context.Context);
-                    Assert.NotNull(context.Extension);
-                    Assert.NotNull(context.Stream);
-
-                    return onProcessedAsync.Invoke(context);
-                };
-
-                Func<FormattedImage, Task> onBeforeSaveAsync = options.OnBeforeSaveAsync;
-
-                options.OnBeforeSaveAsync = context =>
-                {
-                    Assert.NotNull(context);
-                    Assert.NotNull(context.Format);
-                    Assert.NotNull(context.Encoder);
-                    Assert.NotNull(context.Image);
-
-                    return onBeforeSaveAsync.Invoke(context);
-                };
-
-                Func<HttpContext, Task> onPrepareResponseAsync = options.OnPrepareResponseAsync;
-
-                options.OnPrepareResponseAsync = context =>
-                {
-                    Assert.NotNull(context);
-                    Assert.NotNull(context.Response);
-
-                    return onPrepareResponseAsync.Invoke(context);
-                };
-            })
+            AddDefaultImageSharp(services)
                 .ClearProviders()
                 .Configure<AzureBlobStorageImageProviderOptions>(options =>
                 {
