@@ -65,7 +65,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         [Obsolete("Use ImageSharp.Configuration.MemoryAllocator. This will be removed in a future version.")]
-        public static IImageSharpBuilder SetMemoryAllocator<TMemoryAllocator>(this IImageSharpBuilder builder) 
+        public static IImageSharpBuilder SetMemoryAllocator<TMemoryAllocator>(this IImageSharpBuilder builder)
             where TMemoryAllocator : MemoryAllocator
             => builder;
 
