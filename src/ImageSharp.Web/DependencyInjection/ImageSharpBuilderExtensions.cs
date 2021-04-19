@@ -54,7 +54,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <param name="builder">The core builder.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="MemoryAllocator"/>.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        [Obsolete("Use ImageSharp.Configuration.MemoryAllocator. This will be removed in a future version.")]
+        [Obsolete("Use ImageSharp.Configuration.MemoryAllocator. This will be removed in a future version.", true)]
         public static IImageSharpBuilder SetMemoryAllocator(this IImageSharpBuilder builder, Func<IServiceProvider, MemoryAllocator> implementationFactory)
             => builder;
 
@@ -64,7 +64,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <typeparam name="TMemoryAllocator">The type of class implementing <see cref="MemoryAllocator"/>to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        [Obsolete("Use ImageSharp.Configuration.MemoryAllocator. This will be removed in a future version.")]
+        [Obsolete("Use ImageSharp.Configuration.MemoryAllocator. This will be removed in a future version.", true)]
         public static IImageSharpBuilder SetMemoryAllocator<TMemoryAllocator>(this IImageSharpBuilder builder)
             where TMemoryAllocator : MemoryAllocator
             => builder;
