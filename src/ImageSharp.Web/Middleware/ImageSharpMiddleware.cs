@@ -24,25 +24,6 @@ using SixLabors.ImageSharp.Web.Resolvers;
 
 namespace SixLabors.ImageSharp.Web.Middleware
 {
-    public struct ImageResponse
-    {
-        internal ImageContext Context { get; set; }
-        public ImageCacheMetadata Metadata { get; set; }
-        public Stream Stream { get; set; }
-
-    }
-
-    public struct CacheImageResponse
-    {
-        public bool NewOrUppdated { get; set; }
-        public ImageMetadata Metadata { get; set; }
-        public ImageCacheMetadata CacheMetadata { get; set; }
-
-        public IImageCacheResolver Resolver { get; set; }
-
-    }
-
-
     /// <summary>
     /// Middleware for handling the processing of images via image requests.
     /// </summary>
@@ -51,14 +32,14 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// The write worker used for limiting identical requests.
         /// </summary>
-        private static readonly ConcurrentDictionary<string, Lazy<Task<ImageResponse>>> WriteWorkers
-            = new ConcurrentDictionary<string, Lazy<Task<ImageResponse>>>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, Task<ImageWorkerResult>> WriteWorkers
+            = new ConcurrentDictionary<string, Task<ImageWorkerResult>>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// The read worker used for limiting identical requests.
         /// </summary>
-        private static readonly ConcurrentDictionary<string, Lazy<Task<CacheImageResponse>>> ReadWorkers
-            = new ConcurrentDictionary<string, Lazy<Task<CacheImageResponse>>>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, Task<ImageWorkerResult>> ReadWorkers
+            = new ConcurrentDictionary<string, Task<ImageWorkerResult>>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Used to temporarily store source metadata reads to reduce the overhead of cache lookups.
@@ -270,33 +251,40 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             // Check the cache, if present, not out of date and not requiring and update
             // we'll simply serve the file from there.
-            var cacheImageResponse =
-                await this.IsNewOrUpdatedAsync(sourceImageResolver, imageContext, key);
-
-            if (!cacheImageResponse.NewOrUppdated)
+            ImageWorkerResult readResult = default;
+            try
             {
-                await this.SendResponseAsync(imageContext, key, cacheImageResponse.CacheMetadata, null, cacheImageResponse.Resolver);
+                readResult = await this.IsNewOrUpdatedAsync(sourceImageResolver, imageContext, key);
+            }
+            finally
+            {
+                ReadWorkers.TryRemove(key, out Task<ImageWorkerResult> _);
+            }
+
+            if (!readResult.IsNewOrUpdated)
+            {
+                await this.SendResponseAsync(imageContext, key, readResult.CacheImageMetadata, readResult.Resolver);
                 return;
             }
 
-            var sourceImageMetadata = cacheImageResponse.Metadata;
-
             // Not cached, or is updated? Let's get it from the image resolver.
-            RecyclableMemoryStream outStream = null;
+            var sourceImageMetadata = readResult.SourceImageMetadata;
 
-            // Enter a write lock which locks writing and any reads for the same request.
-            // This reduces the overheads of unnecessary processing plus avoids file locks.
-            var writeResult = await WriteWorkers.GetOrAdd(
-                key,
-                _ => new Lazy<Task<ImageResponse>>(
-                    async () =>
+            // Enter an asynchronous write worker which prevents multiple writes and delays any reads for the same request.
+            // This reduces the overheads of unnecessary processing.
+            try
+            {
+                ImageWorkerResult writeResult = await WriteWorkers.GetOrAddAsync(
+                    key,
+                    async (key) =>
                     {
+                        RecyclableMemoryStream outStream = null;
                         try
                         {
                             // Prevent a second request from starting a read during write execution.
-                            if (ReadWorkers.TryGetValue(key, out Lazy<Task<CacheImageResponse>> readWork))
+                            if (ReadWorkers.TryGetValue(key, out Task<ImageWorkerResult> readWork))
                             {
-                                await readWork.Value;
+                                await readWork;
                             }
 
                             ImageCacheMetadata cachedImageMetadata = default;
@@ -356,31 +344,27 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             // Save the image to the cache and send the response to the caller.
                             await this.cache.SetAsync(key, outStream, cachedImageMetadata);
 
-                            // Remove the resolver from the cache so we always resolve next request
+                            // Remove any resolver from the cache so we always resolve next request
                             // for the same key.
                             CacheResolverLru.TryRemove(key);
 
-                            // This worker queue should be all about writing.
-                            // Not sending. sending would only happen once
-                            // when it is part of this queue.
+                            // Place the resolver in the lru cache.
+                            (IImageCacheResolver ImageCacheResolver, ImageCacheMetadata ImageCacheMetadata) cachedImage = await
+                                CacheResolverLru.GetOrAddAsync(
+                                    key,
+                                    async k =>
+                                    {
+                                        IImageCacheResolver resolver = await this.cache.GetAsync(k);
+                                        ImageCacheMetadata metadata = default;
+                                        if (resolver != null)
+                                        {
+                                            metadata = await resolver.GetMetaDataAsync();
+                                        }
 
-                            var taskCompletionSource = new TaskCompletionSource<ImageResponse>();
+                                        return (resolver, metadata);
+                                    });
 
-
-                            // Return the response to the pipeline so it can return the response to multiple callers.
-                            var result = new ImageResponse
-                            {
-                                Context = imageContext,
-                                Metadata = cachedImageMetadata,
-                                Stream = outStream
-                            };
-
-                            return result;
-                            
-                            // taskCompletionSource.SetResult(result);
-
-                            // return taskCompletionSource.Task;
-
+                            return new ImageWorkerResult(cachedImage.ImageCacheMetadata, cachedImage.ImageCacheResolver);
                         }
                         catch (Exception ex)
                         {
@@ -391,13 +375,18 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         }
                         finally
                         {
-                            // await this.StreamDisposeAsync(outStream);
-                            WriteWorkers.TryRemove(key, out Lazy<Task<ImageResponse>> _);
+                            await this.StreamDisposeAsync(outStream);
                         }
-                    }, LazyThreadSafetyMode.ExecutionAndPublication)).Value;
+                    });
 
-
-            await this.SendResponseAsync(imageContext, key, writeResult.Metadata, writeResult.Stream, null);                    
+                await this.SendResponseAsync(imageContext, key, writeResult.CacheImageMetadata, writeResult.Resolver);
+            }
+            finally
+            {
+                // As soon as we have sent a response from a writer the result is available from a reader so we remove this task.
+                // Any existing awaiters will continue to await.
+                WriteWorkers.TryRemove(key, out Task<ImageWorkerResult> _);
+            }
         }
 
         private ValueTask StreamDisposeAsync(Stream stream)
@@ -422,95 +411,77 @@ namespace SixLabors.ImageSharp.Web.Middleware
 #endif
         }
 
-        private async Task<CacheImageResponse> IsNewOrUpdatedAsync(
+        private async Task<ImageWorkerResult> IsNewOrUpdatedAsync(
             IImageResolver sourceImageResolver,
             ImageContext imageContext,
             string key)
         {
-            if (WriteWorkers.TryGetValue(key, out Lazy<Task<ImageResponse>> writeWork))
+            // Pause until the write has been completed.
+            if (WriteWorkers.TryGetValue(key, out Task<ImageWorkerResult> writeWorkResult))
             {
-                await writeWork.Value;
+                await writeWorkResult;
             }
 
-            if (ReadWorkers.TryGetValue(key, out Lazy<Task<CacheImageResponse>> readWork))
+            if (ReadWorkers.TryGetValue(key, out Task<ImageWorkerResult> readWorkResult))
             {
-                return await readWork.Value;
+                return await readWorkResult;
             }
 
             return await ReadWorkers.GetOrAdd(
                 key,
-                _ => new Lazy<Task<CacheImageResponse>>(
-                    async () =>
+                async (key) =>
                     {
-                        try
-                        {
-                            // Get the source metadata for processing, storing the result for future checks.
-                            ImageMetadata sourceImageMetadata = await
-                                SourceMetadataLru.GetOrAddAsync(
-                                    key,
-                                    _ => sourceImageResolver.GetMetaDataAsync());
+                        // Get the source metadata for processing, storing the result for future checks.
+                        ImageMetadata sourceImageMetadata = await
+                            SourceMetadataLru.GetOrAddAsync(
+                                key,
+                                _ => sourceImageResolver.GetMetaDataAsync());
 
-                            // Check to see if the cache contains this image.
-                            // If not, we return early. No further checks necessary.
-                            (IImageCacheResolver ImageCacheResolver, ImageCacheMetadata ImageCacheMetadata) cachedImage = await
-                                CacheResolverLru.GetOrAddAsync(
-                                    key,
-                                    async k =>
+                        // Check to see if the cache contains this image.
+                        // If not, we return early. No further checks necessary.
+                        (IImageCacheResolver ImageCacheResolver, ImageCacheMetadata ImageCacheMetadata) cachedImage = await
+                            CacheResolverLru.GetOrAddAsync(
+                                key,
+                                async k =>
+                                {
+                                    IImageCacheResolver resolver = await this.cache.GetAsync(k);
+                                    ImageCacheMetadata metadata = default;
+                                    if (resolver != null)
                                     {
-                                        IImageCacheResolver resolver = await this.cache.GetAsync(k);
-                                        ImageCacheMetadata metadata = default;
-                                        if (resolver != null)
-                                        {
-                                            metadata = await resolver.GetMetaDataAsync();
-                                        }
+                                        metadata = await resolver.GetMetaDataAsync();
+                                    }
 
-                                        return (resolver, metadata);
-                                    });
+                                    return (resolver, metadata);
+                                });
 
-                            if (cachedImage.ImageCacheResolver is null)
-                            {
-                                // Remove the null resolver from the store.
-                                CacheResolverLru.TryRemove(key);
-
-                                return new CacheImageResponse { NewOrUppdated = true, Metadata = sourceImageMetadata};
-                            }
-
-                            // Has the cached image expired?
-                            // Or has the source image changed since the image was last cached?
-                            if (cachedImage.ImageCacheMetadata.ContentLength == 0 // Fix for old cache without length property
-                                || cachedImage.ImageCacheMetadata.CacheLastWriteTimeUtc <= (DateTimeOffset.UtcNow - this.options.CacheMaxAge)
-                                || cachedImage.ImageCacheMetadata.SourceLastWriteTimeUtc != sourceImageMetadata.LastWriteTimeUtc)
-                            {
-                                // We want to remove the resolver from the store so that the next check gets the updated file.
-                                CacheResolverLru.TryRemove(key);
-                                return new CacheImageResponse { NewOrUppdated = true, Metadata = sourceImageMetadata};
-                            }
-
-                            // Likewise this queue should be about getting the image metadata
-                            // not 
-
-                            // We're pulling the image from the cache.
-                            // await this.SendResponseAsync(imageContext, key, cachedImage.ImageCacheMetadata, null, cachedImage.ImageCacheResolver);
-
-                            // The image is cached. Return the cached image so multiple callers can write a response.
-                            return new CacheImageResponse { 
-                                NewOrUppdated = false, 
-                                Metadata = sourceImageMetadata, 
-                                CacheMetadata = cachedImage.ImageCacheMetadata, 
-                                Resolver = cachedImage.ImageCacheResolver};
-                        }
-                        finally
+                        if (cachedImage.ImageCacheResolver is null)
                         {
-                            ReadWorkers.TryRemove(key, out Lazy<Task<CacheImageResponse>> _);
+                            // Remove the null resolver from the store.
+                            CacheResolverLru.TryRemove(key);
+
+                            return new ImageWorkerResult(sourceImageMetadata);
                         }
-                    }, LazyThreadSafetyMode.ExecutionAndPublication)).Value;
+
+                        // Has the cached image expired?
+                        // Or has the source image changed since the image was last cached?
+                        if (cachedImage.ImageCacheMetadata.ContentLength == 0 // Fix for old cache without length property
+                            || cachedImage.ImageCacheMetadata.CacheLastWriteTimeUtc <= (DateTimeOffset.UtcNow - this.options.CacheMaxAge)
+                            || cachedImage.ImageCacheMetadata.SourceLastWriteTimeUtc != sourceImageMetadata.LastWriteTimeUtc)
+                        {
+                            // We want to remove the resolver from the store so that the next check gets the updated file.
+                            CacheResolverLru.TryRemove(key);
+                            return new ImageWorkerResult(sourceImageMetadata);
+                        }
+
+                        // The image is cached. Return the cached image so multiple callers can write a response.
+                        return new ImageWorkerResult(sourceImageMetadata, cachedImage.ImageCacheMetadata, cachedImage.ImageCacheResolver);
+                    });
         }
 
         private async Task SendResponseAsync(
             ImageContext imageContext,
             string key,
             ImageCacheMetadata metadata,
-            Stream stream,
             IImageCacheResolver cacheResolver)
         {
             imageContext.ComprehendRequestHeaders(metadata.CacheLastWriteTimeUtc, metadata.ContentLength);
@@ -528,7 +499,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
 
                     // When stream is null we're sending from the cache.
-                    await imageContext.SendAsync(stream ?? await cacheResolver.OpenReadAsync(), metadata);
+                    await imageContext.SendAsync(await cacheResolver.OpenReadAsync(), metadata);
                     return;
 
                 case ImageContext.PreconditionState.NotModified:
