@@ -54,12 +54,9 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <param name="builder">The core builder.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="MemoryAllocator"/>.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        [Obsolete("Use ImageSharp.Configuration.MemoryAllocator. This will be removed in a future version.", true)]
         public static IImageSharpBuilder SetMemoryAllocator(this IImageSharpBuilder builder, Func<IServiceProvider, MemoryAllocator> implementationFactory)
-        {
-            var descriptor = new ServiceDescriptor(typeof(MemoryAllocator), implementationFactory, ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
-            return builder;
-        }
+            => builder;
 
         /// <summary>
         /// Sets the given <see cref="MemoryAllocator"/> adding it to the service collection.
@@ -67,13 +64,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <typeparam name="TMemoryAllocator">The type of class implementing <see cref="MemoryAllocator"/>to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        [Obsolete("Use ImageSharp.Configuration.MemoryAllocator. This will be removed in a future version.", true)]
         public static IImageSharpBuilder SetMemoryAllocator<TMemoryAllocator>(this IImageSharpBuilder builder)
             where TMemoryAllocator : MemoryAllocator
-        {
-            var descriptor = new ServiceDescriptor(typeof(MemoryAllocator), typeof(TMemoryAllocator), ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
-            return builder;
-        }
+            => builder;
 
         /// <summary>
         /// Sets the given <see cref="IImageCache"/> adding it to the service collection.
