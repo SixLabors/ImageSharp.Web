@@ -499,7 +499,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
 
                     // When stream is null we're sending from the cache.
-                    await imageContext.SendAsync(await cacheResolver.OpenReadAsync(), metadata);
+                    using (var stream = await cacheResolver.OpenReadAsync())
+                    {
+                        await imageContext.SendAsync(stream, metadata);
+                    }
                     return;
 
                 case ImageContext.PreconditionState.NotModified:
