@@ -503,6 +503,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     {
                         await imageContext.SendAsync(stream, metadata);
                     }
+
                     return;
 
                 case ImageContext.PreconditionState.NotModified:
