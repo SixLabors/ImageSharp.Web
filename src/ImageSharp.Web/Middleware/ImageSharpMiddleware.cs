@@ -419,15 +419,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
             // Pause until the write has been completed.
             if (WriteWorkers.TryGetValue(key, out Task<ImageWorkerResult> writeWorkResult))
             {
-                await writeWorkResult;
+                return await writeWorkResult;
             }
 
-            if (ReadWorkers.TryGetValue(key, out Task<ImageWorkerResult> readWorkResult))
-            {
-                return await readWorkResult;
-            }
-
-            return await ReadWorkers.GetOrAdd(
+            return await ReadWorkers.GetOrAddAsync(
                 key,
                 async (key) =>
                     {
