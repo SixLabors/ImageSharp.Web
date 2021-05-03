@@ -111,6 +111,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
                 using HttpResponseMessage response = await this.HttpClient.GetAsync(url + command);
                 Assert.NotNull(response);
                 Assert.True(response.IsSuccessStatusCode);
+                Assert.True(response.Content.Headers.ContentLength > 0);
             })).ToArray();
 
             var all = Task.WhenAll(tasks);
