@@ -8,7 +8,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
     /// <summary>
     /// Provides an asynchronous worker result.
     /// </summary>
-    internal struct ImageWorkerResult
+    internal readonly struct ImageWorkerResult
     {
         public ImageWorkerResult(ImageMetadata sourceImageMetadata)
         {
