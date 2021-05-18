@@ -20,7 +20,8 @@ namespace SixLabors.ImageSharp.Web.Commands
     {
         private readonly IDictionary<string, IDictionary<string, string>> presets;
 
-        public PresetRequestParser(IOptions<PresetRequestParserOptions> options) => this.presets = ParsePresets(options.Value.Presets);
+        public PresetRequestParser(IOptions<PresetRequestParserOptions> options) =>
+            this.presets = ParsePresets(options.Value.Presets);
 
         public IDictionary<string, string> ParseRequestCommands(HttpContext context)
         {
@@ -28,9 +29,11 @@ namespace SixLabors.ImageSharp.Web.Commands
             return this.presets.GetValueOrDefault(requestedPreset) ?? new Dictionary<string, string>();
         }
 
-        private static IDictionary<string, IDictionary<string, string>> ParsePresets(IDictionary<string, string> unparsedPresets) =>
+        private static IDictionary<string, IDictionary<string, string>> ParsePresets(
+            IDictionary<string, string> unparsedPresets) =>
             unparsedPresets
-                .Select(keyValue => new KeyValuePair<string, IDictionary<string, string>>(keyValue.Key, ParsePreset(keyValue.Value)))
+                .Select(keyValue =>
+                    new KeyValuePair<string, IDictionary<string, string>>(keyValue.Key, ParsePreset(keyValue.Value)))
                 .ToDictionary(keyValue => keyValue.Key, keyValue => keyValue.Value);
 
         private static IDictionary<string, string> ParsePreset(string unparsedPresetValue)
@@ -41,6 +44,7 @@ namespace SixLabors.ImageSharp.Web.Commands
             {
                 transformed[keyValue.Key] = keyValue.Value.ToString();
             }
+
             return transformed;
         }
     }
