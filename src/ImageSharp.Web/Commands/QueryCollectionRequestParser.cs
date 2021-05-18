@@ -23,7 +23,7 @@ namespace SixLabors.ImageSharp.Web.Commands
             }
 
             Dictionary<string, StringValues> parsed = QueryHelpers.ParseQuery(context.Request.QueryString.ToUriComponent());
-            var transformed = new Dictionary<string, string>(parsed.Count);
+            var transformed = new Dictionary<string, string>(parsed.Count, StringComparer.OrdinalIgnoreCase);
             foreach (KeyValuePair<string, StringValues> pair in parsed)
             {
                 transformed[pair.Key] = pair.Value.ToString();
