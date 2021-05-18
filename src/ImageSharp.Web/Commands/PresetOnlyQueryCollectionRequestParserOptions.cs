@@ -6,9 +6,9 @@ using System.Collections.Generic;
 namespace SixLabors.ImageSharp.Web.Commands
 {
     /// <summary>
-    /// Configuration options for the <see cref="PresetRequestParser"/>.
+    /// Configuration options for the <see cref="PresetOnlyQueryCollectionRequestParser"/>.
     /// </summary>
-    public class PresetRequestParserOptions
+    public class PresetOnlyQueryCollectionRequestParserOptions
     {
         /// <summary>
         /// Gets or sets the presets, which is a Dictionary of preset names to command query strings.

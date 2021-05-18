@@ -10,10 +10,10 @@ using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.Commands
 {
-    public class PresetRequestParserTests
+    public class PresetOnlyQueryCollectionRequestParserTests
     {
         [Fact]
-        public void PresetRequestParserExtractsCommands()
+        public void PresetOnlyQueryCollectionRequestParserExtractsCommands()
         {
             IDictionary<string, string> expected = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -22,7 +22,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             };
 
             HttpContext context = CreateHttpContext("?preset=Preset1");
-            IDictionary<string, string> actual = new PresetRequestParser(Options.Create(new PresetRequestParserOptions
+            IDictionary<string, string> actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
             {
                 Presets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
@@ -34,12 +34,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         }
 
         [Fact]
-        public void PresetRequestParserCommandsWithoutPresetParam()
+        public void PresetOnlyQueryCollectionRequestParserCommandsWithoutPresetParam()
         {
             IDictionary<string, string> expected = new Dictionary<string, string>();
 
             HttpContext context = CreateHttpContext("?test=test");
-            IDictionary<string, string> actual = new PresetRequestParser(Options.Create(new PresetRequestParserOptions
+            IDictionary<string, string> actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
             {
                 Presets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
@@ -51,12 +51,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         }
 
         [Fact]
-        public void PresetRequestParserCommandsWithoutMatchingPreset()
+        public void PresetOnlyQueryCollectionRequestParserCommandsWithoutMatchingPreset()
         {
             IDictionary<string, string> expected = new Dictionary<string, string>();
 
             HttpContext context = CreateHttpContext("?preset=Preset2");
-            IDictionary<string, string> actual = new PresetRequestParser(Options.Create(new PresetRequestParserOptions
+            IDictionary<string, string> actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
             {
                 Presets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
