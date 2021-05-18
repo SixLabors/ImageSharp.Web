@@ -17,6 +17,10 @@ namespace SixLabors.ImageSharp.Web.Commands
     public class PresetOnlyQueryCollectionRequestParser : IRequestParser
     {
         private readonly IDictionary<string, IDictionary<string, string>> presets;
+
+        /// <summary>
+        /// The key of the preset query param.
+        /// </summary>
         public const string QueryKey = "preset";
 
         /// <summary>
