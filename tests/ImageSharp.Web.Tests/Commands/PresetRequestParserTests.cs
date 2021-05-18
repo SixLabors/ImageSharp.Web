@@ -17,8 +17,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         {
             IDictionary<string, string> expected = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                { "width", "400" },
-                { "height", "200" }
+                {"width", "400"}, {"height", "200"}
             };
 
             HttpContext context = CreateHttpContext("?preset=Preset1");
@@ -26,7 +25,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             {
                 Presets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "Preset1", "width=400&height=200" }
+                    {"Preset1", "width=400&height=200"}
                 }
             })).ParseRequestCommands(context);
 
@@ -43,7 +42,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             {
                 Presets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "Preset1", "width=400&height=200" }
+                    {"Preset1", "width=400&height=200"}
                 }
             })).ParseRequestCommands(context);
 
@@ -60,7 +59,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             {
                 Presets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "Preset1", "width=400&height=200" }
+                    {"Preset1", "width=400&height=200"}
                 }
             })).ParseRequestCommands(context);
 
