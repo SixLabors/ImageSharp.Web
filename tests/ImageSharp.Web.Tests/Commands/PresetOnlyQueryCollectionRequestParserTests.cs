@@ -34,6 +34,28 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         }
 
         [Fact]
+        public void PresetOnlyQueryCollectionRequestParserExtractsCommandsWithOtherCasing()
+        {
+            IDictionary<string, string> expected = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "width", "400" },
+                { "height", "200" }
+            };
+
+            HttpContext context = CreateHttpContext("?PRESET=PRESET1");
+            IDictionary<string, string> actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
+            {
+                Presets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Preset1", "width=400&height=200" }
+                }
+            })).ParseRequestCommands(context);
+
+            Assert.Equal(expected, actual);
+        }
+
+
+        [Fact]
         public void PresetOnlyQueryCollectionRequestParserCommandsWithoutPresetParam()
         {
             IDictionary<string, string> expected = new Dictionary<string, string>();
