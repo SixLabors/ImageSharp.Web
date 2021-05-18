@@ -11,18 +11,20 @@ using Microsoft.Extensions.Primitives;
 namespace SixLabors.ImageSharp.Web.Commands
 {
     /// <summary>
-    /// Parses ImageSharp.Web image processing requests to ImageSharp.Web commands based on statically defined presets.
-    /// The advantages of this are:
-    /// 1. Image processing for certain scenarios can be adjusted in a single place, by adjusting the preset definition.
-    /// 2. Security. Only known presets are applied. Limits DOS opportunities.
+    /// Parses preset name from the request querystring and returns the commands configured for that preset.
     /// </summary>
     public class PresetRequestParser : IRequestParser
     {
         private readonly IDictionary<string, IDictionary<string, string>> presets;
 
-        public PresetRequestParser(IOptions<PresetRequestParserOptions> options) =>
-            this.presets = ParsePresets(options.Value.Presets);
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PresetRequestParser"/> class.
+        /// </summary>
+        /// <param name="presetOptions">The preset options.</param>
+        public PresetRequestParser(IOptions<PresetRequestParserOptions> presetOptions) =>
+            this.presets = ParsePresets(presetOptions.Value.Presets);
 
+        /// <inheritdoc/>
         public IDictionary<string, string> ParseRequestCommands(HttpContext context)
         {
             var requestedPreset = context.Request.Query["preset"].ToString();
