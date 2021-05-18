@@ -17,6 +17,7 @@ namespace SixLabors.ImageSharp.Web.Commands
     public class PresetOnlyQueryCollectionRequestParser : IRequestParser
     {
         private readonly IDictionary<string, IDictionary<string, string>> presets;
+        public const string QueryKey = "preset";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PresetOnlyQueryCollectionRequestParser"/> class.
@@ -28,7 +29,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// <inheritdoc/>
         public IDictionary<string, string> ParseRequestCommands(HttpContext context)
         {
-            if (context.Request.Query.Count == 0)
+            if (context.Request.Query.Count == 0 || !context.Request.Query.ContainsKey(QueryKey))
             {
                 return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
