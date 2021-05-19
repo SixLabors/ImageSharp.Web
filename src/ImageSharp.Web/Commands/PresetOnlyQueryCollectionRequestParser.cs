@@ -19,7 +19,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         private readonly IDictionary<string, IDictionary<string, string>> presets;
 
         /// <summary>
-        /// The key of the preset query param.
+        /// The command constant for the preset query parameter.
         /// </summary>
         public const string QueryKey = "preset";
 
