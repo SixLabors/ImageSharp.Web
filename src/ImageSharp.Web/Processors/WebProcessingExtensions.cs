@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace SixLabors.ImageSharp.Web.Processors
             CommandParser commandParser,
             CultureInfo culture)
         {
-            foreach (IImageWebProcessor processor in processors.GetBySupportedCommands(commands.Keys.ToList()))
+            foreach (IImageWebProcessor processor in processors.GetBySupportedCommands(commands))
             {
                 source = processor.Process(source, logger, commands, commandParser, culture);
             }
@@ -46,15 +47,20 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// Sorts the processors according to the first supported command and removes processors without supported commands.
         /// </summary>
         /// <param name="processors">The collection of available processors.</param>
-        /// <param name="commands">The list of parsed commands.</param>
+        /// <param name="commands">The parsed collection of processing commands.</param>
         /// <returns>
         /// The sorted proccessors.
         /// </returns>
-        public static IEnumerable<IImageWebProcessor> GetBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, IList<string> commands)
-            => processors
-                .GroupBy(p => commands.Intersect(p.Commands).Min(c => (int?)commands.IndexOf(c)) ?? -1) // Get index of first supported command
-                .Where(g => g.Key != -1) // Remove processors without supported commands
-                .OrderBy(g => g.Key)
+        public static IEnumerable<IImageWebProcessor> GetBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, IDictionary<string, string> commands)
+        {
+            List<string> commandKeys = new List<string>(commands.Keys);
+            IEqualityComparer<string> comparer = (commands as Dictionary<string, string>)?.Comparer ?? StringComparer.OrdinalIgnoreCase;
+
+            return processors
+                .GroupBy(p => commandKeys.Intersect(p.Commands, comparer).Min(c => (int?)commandKeys.FindIndex(k => comparer.Equals(c, k))) ?? -1) // Get index of first supported command
+                .Where(g => g.Key != -1) // Filter processors without supported commands
+                .OrderBy(g => g.Key) // Order processors by first supported command
                 .SelectMany(g => g);
+        }
     }
 }
