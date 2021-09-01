@@ -55,7 +55,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// </returns>
         public static IEnumerable<IImageWebProcessor> GetBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, List<string> commands)
             => processors
-                .GroupBy(p => commands.Intersect(p.Commands, StringComparer.OrdinalIgnoreCase).Min(c => (int?)commands.FindIndex(k => k.Equals(c, StringComparison.OrdinalIgnoreCase))) ?? -1) // Get index of first supported command
+                .GroupBy(p => commands.FindIndex(c => p.Commands.Contains(c, StringComparer.OrdinalIgnoreCase))) // Get index of first supported command
                 .Where(g => g.Key != -1) // Filter processors without supported commands
                 .OrderBy(g => g.Key) // Order processors by first supported command
                 .SelectMany(g => g);
