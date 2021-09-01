@@ -189,11 +189,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
             if (commands.Count > 0)
             {
                 // Strip out any unknown commands
-                IEqualityComparer<string> comparer = (commands as Dictionary<string, string>)?.Comparer ?? StringComparer.OrdinalIgnoreCase;
-
                 foreach (string command in new List<string>(commands.Keys))
                 {
-                    if (!this.knownCommands.Contains(command, comparer))
+                    if (!this.knownCommands.Contains(command, StringComparer.OrdinalIgnoreCase))
                     {
                         commands.Remove(command);
                     }

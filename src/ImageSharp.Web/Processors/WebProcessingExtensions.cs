@@ -35,7 +35,9 @@ namespace SixLabors.ImageSharp.Web.Processors
             CommandParser commandParser,
             CultureInfo culture)
         {
-            foreach (IImageWebProcessor processor in processors.GetBySupportedCommands(commands))
+            var commandKeys = new List<string>(commands.Keys);
+
+            foreach (IImageWebProcessor processor in processors.GetBySupportedCommands(commandKeys))
             {
                 source = processor.Process(source, logger, commands, commandParser, culture);
             }
@@ -49,18 +51,13 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <param name="processors">The collection of available processors.</param>
         /// <param name="commands">The parsed collection of processing commands.</param>
         /// <returns>
-        /// The sorted proccessors.
+        /// The sorted proccessors that supports any of the specified commands.
         /// </returns>
-        public static IEnumerable<IImageWebProcessor> GetBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, IDictionary<string, string> commands)
-        {
-            List<string> commandKeys = new List<string>(commands.Keys);
-            IEqualityComparer<string> comparer = (commands as Dictionary<string, string>)?.Comparer ?? StringComparer.OrdinalIgnoreCase;
-
-            return processors
-                .GroupBy(p => commandKeys.Intersect(p.Commands, comparer).Min(c => (int?)commandKeys.FindIndex(k => comparer.Equals(c, k))) ?? -1) // Get index of first supported command
+        public static IEnumerable<IImageWebProcessor> GetBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, List<string> commands)
+            => processors
+                .GroupBy(p => commands.Intersect(p.Commands, StringComparer.OrdinalIgnoreCase).Min(c => (int?)commands.FindIndex(k => k.Equals(c, StringComparison.OrdinalIgnoreCase))) ?? -1) // Get index of first supported command
                 .Where(g => g.Key != -1) // Filter processors without supported commands
                 .OrderBy(g => g.Key) // Order processors by first supported command
                 .SelectMany(g => g);
-        }
     }
 }
