@@ -9,7 +9,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -201,42 +200,51 @@ namespace SixLabors.ImageSharp.Web.Middleware
             await this.options.OnParseCommandsAsync.Invoke(
                 new ImageCommandContext(context, commands, this.commandParser, this.parserCulture));
 
-            // Get the correct service for the request.
-            IImageProvider provider = null;
-            foreach (IImageProvider resolver in this.providers)
+            // Get the correct service for the request
+            (bool isValidRequest, IImageResolver imageResolver) = await this.GetImageResolverAsync(context, commands.Count > 0);
+            if (imageResolver is null)
             {
-                if (resolver.Match(context))
+                if (isValidRequest)
                 {
-                    provider = resolver;
-                    break;
+                    // Log the error but let the pipeline handle the 404
+                    var imageContext = new ImageContext(context, this.options);
+                    this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
                 }
-            }
 
-            if ((commands.Count == 0 && provider?.ProcessingBehavior != ProcessingBehavior.All)
-                || provider?.IsValidRequest(context) != true)
-            {
                 // Nothing to do. call the next delegate/middleware in the pipeline
-                await this.next(context);
-                return;
-            }
-
-            IImageResolver sourceImageResolver = await provider.GetAsync(context);
-
-            if (sourceImageResolver is null)
-            {
-                // Log the error but let the pipeline handle the 404
-                // by calling the next delegate/middleware in the pipeline.
-                var imageContext = new ImageContext(context, this.options);
-                this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
                 await this.next(context);
                 return;
             }
 
             await this.ProcessRequestAsync(
                 context,
-                sourceImageResolver,
+                imageResolver,
                 new ImageContext(context, this.options),
                 commands);
+        }
+
+        private async Task<(bool, IImageResolver)> GetImageResolverAsync(HttpContext context, bool hasCommands)
+        {
+            bool isValidRequest = false;
+            IImageResolver imageResolver = null;
+
+            foreach (IImageProvider imageProvider in this.providers)
+            {
+                if (imageProvider.Match(context) &&
+                    (hasCommands || imageProvider.ProcessingBehavior == ProcessingBehavior.All) &&
+                    imageProvider.IsValidRequest(context))
+                {
+                    // We have a valid request, now try to get the image resolver
+                    isValidRequest = true;
+                    imageResolver = await imageProvider.GetAsync(context);
+                    if (!(imageResolver is null))
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return (isValidRequest, imageResolver);
         }
 
         private async Task ProcessRequestAsync(
