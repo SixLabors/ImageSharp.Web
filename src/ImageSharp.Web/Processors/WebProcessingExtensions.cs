@@ -54,10 +54,33 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// The sorted proccessors that supports any of the specified commands.
         /// </returns>
         public static IEnumerable<IImageWebProcessor> GetBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, List<string> commands)
-            => processors
-                .GroupBy(p => commands.FindIndex(c => p.Commands.Contains(c, StringComparer.OrdinalIgnoreCase))) // Get index of first supported command
-                .Where(g => g.Key != -1) // Filter processors without supported commands
-                .OrderBy(g => g.Key) // Order processors by first supported command
-                .SelectMany(g => g);
+        {
+            var sortedProcessors = new SortedDictionary<int, IList<IImageWebProcessor>>();
+
+            foreach (IImageWebProcessor processor in processors)
+            {
+                // Get index of first supported command
+                int index = commands.FindIndex(c => processor.Commands.Contains(c, StringComparer.OrdinalIgnoreCase));
+                if (index != -1)
+                {
+                    if (!sortedProcessors.TryGetValue(index, out IList<IImageWebProcessor> indexProcessors))
+                    {
+                        indexProcessors = new List<IImageWebProcessor>();
+                        sortedProcessors.Add(index, indexProcessors);
+                    }
+
+                    indexProcessors.Add(processor);
+                }
+            }
+
+            // Return sorted processors
+            foreach (IEnumerable<IImageWebProcessor> values in sortedProcessors.Values)
+            {
+                foreach (IImageWebProcessor value in values)
+                {
+                    yield return value;
+                }
+            }
+        }
     }
 }
