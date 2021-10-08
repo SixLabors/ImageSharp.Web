@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.Web.Commands;
 
@@ -55,31 +54,25 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// </returns>
         public static IEnumerable<IImageWebProcessor> GetBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, List<string> commands)
         {
-            var sortedProcessors = new SortedDictionary<int, IList<IImageWebProcessor>>();
+            var indexedProcessors = new List<(int Index, IImageWebProcessor Processor)>();
 
             foreach (IImageWebProcessor processor in processors)
             {
                 // Get index of first supported command
-                int index = commands.FindIndex(c => processor.Commands.Contains(c, StringComparer.OrdinalIgnoreCase));
+                var processorCommands = new List<string>(processor.Commands);
+                int index = commands.FindIndex(c => processorCommands.FindIndex(pc => pc.Equals(c, StringComparison.OrdinalIgnoreCase)) != -1);
                 if (index != -1)
                 {
-                    if (!sortedProcessors.TryGetValue(index, out IList<IImageWebProcessor> indexProcessors))
-                    {
-                        indexProcessors = new List<IImageWebProcessor>();
-                        sortedProcessors.Add(index, indexProcessors);
-                    }
-
-                    indexProcessors.Add(processor);
+                    indexedProcessors.Add((index, processor));
                 }
             }
 
+            indexedProcessors.Sort((x, y) => x.Index.CompareTo(y.Index));
+
             // Return sorted processors
-            foreach (IEnumerable<IImageWebProcessor> values in sortedProcessors.Values)
+            foreach ((int _, IImageWebProcessor processor) in indexedProcessors)
             {
-                foreach (IImageWebProcessor value in values)
-                {
-                    yield return value;
-                }
+                yield return processor;
             }
         }
     }
