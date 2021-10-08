@@ -59,8 +59,7 @@ namespace SixLabors.ImageSharp.Web.Processors
             foreach (IImageWebProcessor processor in processors)
             {
                 // Get index of first supported command
-                var processorCommands = new List<string>(processor.Commands);
-                int index = commands.FindIndex(c => processorCommands.FindIndex(pc => pc.Equals(c, StringComparison.OrdinalIgnoreCase)) != -1);
+                int index = commands.FindIndex(c => processor.IsSupportedCommand(c));
                 if (index != -1)
                 {
                     indexedProcessors.Add((index, processor));
@@ -74,6 +73,27 @@ namespace SixLabors.ImageSharp.Web.Processors
             {
                 yield return processor;
             }
+        }
+
+        /// <summary>
+        /// Determines whether the specified command is supported by the processor
+        /// </summary>
+        /// <param name="processor">The processor.</param>
+        /// <param name="command">The command.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified command is supported by the processor; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsSupportedCommand(this IImageWebProcessor processor, string command)
+        {
+            foreach (string processorCommand in processor.Commands)
+            {
+                if (processorCommand.Equals(command, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
