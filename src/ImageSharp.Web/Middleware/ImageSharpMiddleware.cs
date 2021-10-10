@@ -201,7 +201,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         break;
                     }
 
-                    ++index;
+                    index++;
                 }
             }
 
@@ -249,7 +249,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private void StripUnknownCommands(Dictionary<string, string> commands, int startAtIndex)
         {
             var keys = new List<string>(commands.Keys);
-            for (var index = startAtIndex; index < keys.Count; index++)
+            for (int index = startAtIndex; index < keys.Count; index++)
             {
                 string command = keys[index];
                 if (!this.knownCommands.Contains(command))
