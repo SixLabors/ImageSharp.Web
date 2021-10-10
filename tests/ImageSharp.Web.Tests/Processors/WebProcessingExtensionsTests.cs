@@ -29,7 +29,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 ResizeWebProcessor.Height
             };
 
-            var supportedProcessors = WebProcessingExtensions.GetBySupportedCommands(processors, commands).ToArray();
+            IImageWebProcessor[] supportedProcessors = WebProcessingExtensions.GetBySupportedCommands(processors, commands).ToArray();
 
             Assert.Equal(2, supportedProcessors.Length);
             Assert.IsType<ResizeWebProcessor>(supportedProcessors[0]);
@@ -46,7 +46,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
 
             var commands = new List<string>();
 
-            var supportedProcessors = WebProcessingExtensions.GetBySupportedCommands(processors, commands).ToArray();
+            IImageWebProcessor[] supportedProcessors = WebProcessingExtensions.GetBySupportedCommands(processors, commands).ToArray();
 
             Assert.Empty(supportedProcessors);
         }

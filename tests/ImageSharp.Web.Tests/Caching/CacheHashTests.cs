@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Middleware;
 using Xunit;
-
 using MSOptions = Microsoft.Extensions.Options.Options;
 
 namespace SixLabors.ImageSharp.Web.Tests.Caching
@@ -17,7 +16,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         private static readonly ICacheHash CacheHash = new CacheHash(Options);
 
         [Fact]
-        public void CachHashProducesIdenticalResults()
+        public void CacheHashProducesIdenticalResults()
         {
             const string Input = "http://testwebsite.com/image-12345.jpeg?width=400";
             string expected = CacheHash.Create(Input, 8);
@@ -27,7 +26,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         }
 
         [Fact]
-        public void CachHashProducesDifferentResults()
+        public void CacheHashProducesDifferentResults()
         {
             const string Input = "http://testwebsite.com/image-12345.jpeg?width=400";
             const string Input2 = "http://testwebsite.com/image-23456.jpeg?width=400";
@@ -38,7 +37,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         }
 
         [Fact]
-        public void CachHashLengthIsIdentical()
+        public void CacheHashLengthIsIdentical()
         {
             const int Length = 12;
             const string Input = "http://testwebsite.com/image-12345.jpeg?width=400";

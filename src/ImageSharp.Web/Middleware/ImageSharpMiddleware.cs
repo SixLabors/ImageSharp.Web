@@ -32,25 +32,25 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// The write worker used for limiting identical requests.
         /// </summary>
         private static readonly ConcurrentDictionary<string, Task<ImageWorkerResult>> WriteWorkers
-            = new ConcurrentDictionary<string, Task<ImageWorkerResult>>(StringComparer.OrdinalIgnoreCase);
+            = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// The read worker used for limiting identical requests.
         /// </summary>
         private static readonly ConcurrentDictionary<string, Task<ImageWorkerResult>> ReadWorkers
-            = new ConcurrentDictionary<string, Task<ImageWorkerResult>>(StringComparer.OrdinalIgnoreCase);
+            = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Used to temporarily store source metadata reads to reduce the overhead of cache lookups.
         /// </summary>
         private static readonly ConcurrentTLruCache<string, ImageMetadata> SourceMetadataLru
-            = new ConcurrentTLruCache<string, ImageMetadata>(1024, TimeSpan.FromMinutes(5));
+            = new(1024, TimeSpan.FromMinutes(5));
 
         /// <summary>
         /// Used to temporarily store cache resolver reads to reduce the overhead of cache lookups.
         /// </summary>
-        private static readonly ConcurrentTLruCache<string, ValueTuple<IImageCacheResolver, ImageCacheMetadata>> CacheResolverLru
-            = new ConcurrentTLruCache<string, ValueTuple<IImageCacheResolver, ImageCacheMetadata>>(1024, TimeSpan.FromMinutes(5));
+        private static readonly ConcurrentTLruCache<string, (IImageCacheResolver, ImageCacheMetadata)> CacheResolverLru
+            = new(1024, TimeSpan.FromMinutes(5));
 
         /// <summary>
         /// The function processing the Http request.
@@ -274,7 +274,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             ImageWorkerResult readResult = default;
             try
             {
-                readResult = await this.IsNewOrUpdatedAsync(sourceImageResolver, imageContext, key);
+                readResult = await this.IsNewOrUpdatedAsync(sourceImageResolver, key);
             }
             finally
             {
@@ -288,7 +288,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
 
             // Not cached, or is updated? Let's get it from the image resolver.
-            var sourceImageMetadata = readResult.SourceImageMetadata;
+            ImageMetadata sourceImageMetadata = readResult.SourceImageMetadata;
 
             // Enter an asynchronous write worker which prevents multiple writes and delays any reads for the same request.
             // This reduces the overheads of unnecessary processing.
@@ -433,7 +433,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
         private async Task<ImageWorkerResult> IsNewOrUpdatedAsync(
             IImageResolver sourceImageResolver,
-            ImageContext imageContext,
             string key)
         {
             // Pause until the write has been completed.
@@ -514,7 +513,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     this.logger.LogImageServed(imageContext.GetDisplayUrl(), key);
 
                     // When stream is null we're sending from the cache.
-                    using (var stream = await cacheResolver.OpenReadAsync())
+                    using (Stream stream = await cacheResolver.OpenReadAsync())
                     {
                         await imageContext.SendAsync(stream, metadata);
                     }
