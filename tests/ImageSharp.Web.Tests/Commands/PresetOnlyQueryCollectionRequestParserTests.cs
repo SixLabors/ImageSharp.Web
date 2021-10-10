@@ -54,7 +54,6 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             Assert.Equal(expected, actual);
         }
 
-
         [Fact]
         public void PresetOnlyQueryCollectionRequestParserCommandsWithoutPresetParam()
         {
