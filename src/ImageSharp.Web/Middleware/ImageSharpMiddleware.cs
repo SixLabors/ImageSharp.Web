@@ -160,7 +160,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 ? CultureInfo.InvariantCulture
                 : CultureInfo.CurrentCulture;
 
-            var commands = new HashSet<string>();
+            var commands = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (IImageWebProcessor processor in this.processors)
             {
                 foreach (string command in processor.Commands)
@@ -184,23 +184,31 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public async Task Invoke(HttpContext context)
 #pragma warning restore IDE1006 // Naming Styles
         {
-            IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context);
+            // We expect to get concrete collection type which removes virtual dispatch concerns and enumerator allocations
+            IDictionary<string, string> parsedCommands = this.requestParser.ParseRequestCommands(context);
+            Dictionary<string, string> commands = parsedCommands as Dictionary<string, string> ?? new Dictionary<string, string>(parsedCommands, StringComparer.OrdinalIgnoreCase);
+
             if (commands.Count > 0)
             {
-                // Strip out any unknown commands.
-                foreach (string command in new List<string>(commands.Keys))
+                // Strip out any unknown commands, if needed.
+                int index = 0;
+                foreach (string command in commands.Keys)
                 {
                     if (!this.knownCommands.Contains(command))
                     {
-                        commands.Remove(command);
+                        // Need to actually remove, allocates new list to allow modifications
+                        this.StripUnknownCommands(commands, startAtIndex: index);
+                        break;
                     }
+
+                    index++;
                 }
             }
 
             await this.options.OnParseCommandsAsync.Invoke(
                 new ImageCommandContext(context, commands, this.commandParser, this.parserCulture));
 
-            // Get the correct service for the request.
+            // Get the correct service for the request
             IImageProvider provider = null;
             foreach (IImageProvider resolver in this.providers)
             {
@@ -236,6 +244,19 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 sourceImageResolver,
                 new ImageContext(context, this.options),
                 commands);
+        }
+
+        private void StripUnknownCommands(Dictionary<string, string> commands, int startAtIndex)
+        {
+            var keys = new List<string>(commands.Keys);
+            for (int index = startAtIndex; index < keys.Count; index++)
+            {
+                string command = keys[index];
+                if (!this.knownCommands.Contains(command))
+                {
+                    commands.Remove(command);
+                }
+            }
         }
 
         private async Task ProcessRequestAsync(

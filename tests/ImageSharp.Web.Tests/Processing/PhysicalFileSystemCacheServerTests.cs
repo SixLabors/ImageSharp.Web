@@ -16,8 +16,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
     public class PhysicalFileSystemCacheServerTests : ServerTestBase<PhysicalFileSystemCacheTestServerFixture>
     {
         private const int Width = 20;
-        private static readonly string Command = "?width=" + Width + "&v=" + Guid.NewGuid().ToString();
-        private static readonly string Command2 = "?width=" + (Width + 1) + "&v=" + Guid.NewGuid().ToString();
+        private static readonly string Command = "?invalidcommand=qwerty&width=" + Width + "&v=" + Guid.NewGuid().ToString();
+        private static readonly string Command2 = "?invalidcommand=qwerty&width=" + (Width + 1) + "&v=" + Guid.NewGuid().ToString();
 
         public PhysicalFileSystemCacheServerTests(PhysicalFileSystemCacheTestServerFixture fixture)
             : base(fixture)
