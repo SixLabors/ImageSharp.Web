@@ -274,7 +274,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             ImageWorkerResult readResult = default;
             try
             {
-                readResult = await this.IsNewOrUpdatedAsync(sourceImageResolver, imageContext, key);
+                readResult = await this.IsNewOrUpdatedAsync(sourceImageResolver, key);
             }
             finally
             {
@@ -433,7 +433,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
         private async Task<ImageWorkerResult> IsNewOrUpdatedAsync(
             IImageResolver sourceImageResolver,
-            ImageContext imageContext,
             string key)
         {
             // Pause until the write has been completed.
