@@ -160,7 +160,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 ? CultureInfo.InvariantCulture
                 : CultureInfo.CurrentCulture;
 
-            var commands = new HashSet<string>();
+            var commands = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (IImageWebProcessor processor in this.processors)
             {
                 foreach (string command in processor.Commands)
@@ -208,7 +208,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             await this.options.OnParseCommandsAsync.Invoke(
                 new ImageCommandContext(context, commands, this.commandParser, this.parserCulture));
 
-            // Get the correct service for the request.
+            // Get the correct service for the request
             IImageProvider provider = null;
             foreach (IImageProvider resolver in this.providers)
             {
