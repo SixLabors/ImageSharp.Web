@@ -65,19 +65,11 @@ namespace SixLabors.ImageSharp.Web
                     return ext;
                 }
 
-#if !NETCOREAPP3_1_OR_GREATER
-                path = uri.ToLowerInvariant().AsSpan(0, query);
-#else
                 path = uri.AsSpan(0, query);
-#endif
             }
             else
             {
-#if !NETCOREAPP3_1_OR_GREATER
-                path = uri.ToLowerInvariant();
-#else
                 path = uri;
-#endif
             }
 
             int extensionIndex;
