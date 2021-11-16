@@ -19,8 +19,7 @@ namespace SixLabors.ImageSharp.Web
     /// </summary>
     public sealed class FormatUtilities
     {
-        private readonly IImageFormat[] imageFormats;
-        private readonly Dictionary<IImageFormat, string[]> fileExtensions = new Dictionary<IImageFormat, string[]>();
+        private readonly List<string> fileExtensions = new List<string>();
         private readonly Dictionary<string, string> fileExtension = new Dictionary<string, string>();
 
         /// <summary>
@@ -33,12 +32,18 @@ namespace SixLabors.ImageSharp.Web
 
             // The formats contained in the configuration are used a lot in hash generation
             // so we need them to be enumerated to remove allocations and allow indexing.
-            this.imageFormats = options.Value.Configuration.ImageFormats.ToArray();
-            for (int i = 0; i < this.imageFormats.Length; i++)
+            IImageFormat[] imageFormats = options.Value.Configuration.ImageFormats.ToArray();
+
+            for (int i = 0; i < imageFormats.Length; i++)
             {
-                string[] extensions = this.imageFormats[i].FileExtensions.ToArray();
-                this.fileExtensions[this.imageFormats[i]] = extensions;
-                this.fileExtension[this.imageFormats[i].DefaultMimeType] = extensions[0];
+                string[] extensions = imageFormats[i].FileExtensions.ToArray();
+
+                foreach (string extension in extensions)
+                {
+                    this.fileExtensions.Add(extension);
+                }
+
+                this.fileExtension[imageFormats[i].DefaultMimeType] = extensions[0];
             }
         }
 
@@ -50,32 +55,46 @@ namespace SixLabors.ImageSharp.Web
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetExtensionFromUri(string uri)
         {
-            // TODO: Investigate using span to reduce allocations here.
-            string[] parts = uri.Split('?');
-            if (parts.Length > 1 && QueryHelpers.ParseQuery(parts[1]).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
+            int query = uri.IndexOf('?');
+            ReadOnlySpan<char> path;
+
+            if (query > -1)
             {
-                return ext;
+                if (uri.Contains(FormatWebProcessor.Format, StringComparison.OrdinalIgnoreCase) && QueryHelpers.ParseQuery(uri.Substring(query)).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
+                {
+                    return ext;
+                }
+
+#if !NETCOREAPP3_1_OR_GREATER
+                path = uri.ToLowerInvariant().AsSpan(0, query);
+#else
+                path = uri.AsSpan(0, query);
+#endif
+            }
+            else
+            {
+#if !NETCOREAPP3_1_OR_GREATER
+                path = uri.ToLowerInvariant();
+#else
+                path = uri;
+#endif
             }
 
-            string path = parts[0];
-            string extension = null;
-            int index = 0;
-            for (int i = 0; i < this.imageFormats.Length; i++)
+            int extensionIndex;
+            if ((extensionIndex = path.LastIndexOf('.')) != -1)
             {
-                for (int j = 0; j < this.fileExtensions[this.imageFormats[i]].Length; j++)
-                {
-                    int li = path.LastIndexOf($".{this.fileExtensions[this.imageFormats[i]][j]}", StringComparison.OrdinalIgnoreCase);
-                    if (li < index)
-                    {
-                        continue;
-                    }
+                ReadOnlySpan<char> extension = path.Slice(extensionIndex + 1);
 
-                    index = li;
-                    extension = this.fileExtensions[this.imageFormats[i]][j];
+                foreach (string ext in this.fileExtensions)
+                {
+                    if (extension.Equals(ext, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return ext;
+                    }
                 }
             }
 
-            return extension;
+            return null;
         }
 
         /// <summary>
