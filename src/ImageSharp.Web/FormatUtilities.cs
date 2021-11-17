@@ -19,31 +19,27 @@ namespace SixLabors.ImageSharp.Web
     /// </summary>
     public sealed class FormatUtilities
     {
-        private readonly List<string> fileExtensions = new List<string>();
-        private readonly Dictionary<string, string> fileExtension = new Dictionary<string, string>();
+        private readonly List<string> extensions = new();
+        private readonly Dictionary<string, string> extensionsByMimeType = new();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FormatUtilities"/> class.
+        /// Initializes a new instance of the <see cref="FormatUtilities" /> class.
         /// </summary>
         /// <param name="options">The middleware options.</param>
         public FormatUtilities(IOptions<ImageSharpMiddlewareOptions> options)
         {
             Guard.NotNull(options, nameof(options));
 
-            // The formats contained in the configuration are used a lot in hash generation
-            // so we need them to be enumerated to remove allocations and allow indexing.
-            IImageFormat[] imageFormats = options.Value.Configuration.ImageFormats.ToArray();
-
-            for (int i = 0; i < imageFormats.Length; i++)
+            foreach (IImageFormat imageFormat in options.Value.Configuration.ImageFormats)
             {
-                string[] extensions = imageFormats[i].FileExtensions.ToArray();
+                string[] extensions = imageFormat.FileExtensions.ToArray();
 
                 foreach (string extension in extensions)
                 {
-                    this.fileExtensions.Add(extension);
+                    this.extensions.Add(extension);
                 }
 
-                this.fileExtension[imageFormats[i].DefaultMimeType] = extensions[0];
+                this.extensionsByMimeType[imageFormat.DefaultMimeType] = extensions[0];
             }
         }
 
@@ -51,7 +47,7 @@ namespace SixLabors.ImageSharp.Web
         /// Gets the file extension for the given image uri.
         /// </summary>
         /// <param name="uri">The full request uri.</param>
-        /// <returns>The <see cref="string"/>.</returns>
+        /// <returns>The <see cref="string" />.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetExtensionFromUri(string uri)
         {
@@ -75,13 +71,13 @@ namespace SixLabors.ImageSharp.Web
             int extensionIndex;
             if ((extensionIndex = path.LastIndexOf('.')) != -1)
             {
-                ReadOnlySpan<char> extension = path.Slice(extensionIndex + 1);
+                ReadOnlySpan<char> pathExtension = path.Slice(extensionIndex + 1);
 
-                foreach (string ext in this.fileExtensions)
+                foreach (string extension in this.extensions)
                 {
-                    if (extension.Equals(ext, StringComparison.OrdinalIgnoreCase))
+                    if (pathExtension.Equals(extension, StringComparison.OrdinalIgnoreCase))
                     {
-                        return ext;
+                        return extension;
                     }
                 }
             }
@@ -93,8 +89,8 @@ namespace SixLabors.ImageSharp.Web
         /// Gets the correct extension for the given content type (mime-type).
         /// </summary>
         /// <param name="contentType">The content type (mime-type).</param>
-        /// <returns>The <see cref="string"/>.</returns>
+        /// <returns>The <see cref="string" />.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string GetExtensionFromContentType(string contentType) => this.fileExtension[contentType];
+        public string GetExtensionFromContentType(string contentType) => this.extensionsByMimeType[contentType];
     }
 }
