@@ -33,17 +33,17 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 formatString: "The image '{Uri}' could not be resolved");
 
             LogServedAction = LoggerMessage.Define<string, string>(
-                logLevel: LogLevel.Information,
+                logLevel: LogLevel.Debug,
                 eventId: 3,
                 formatString: "Sending image. Request uri: '{Uri}'. Cached Key: '{Key}'");
 
             LogPathNotModifiedAction = LoggerMessage.Define<string>(
-                logLevel: LogLevel.Information,
+                logLevel: LogLevel.Debug,
                 eventId: 4,
                 formatString: "The image '{Uri}' was not modified");
 
             LogPreconditionFailedAction = LoggerMessage.Define<string>(
-                logLevel: LogLevel.Information,
+                logLevel: LogLevel.Debug,
                 eventId: 5,
                 formatString: "Precondition for image '{Uri}' failed");
         }
