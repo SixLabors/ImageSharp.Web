@@ -43,7 +43,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 formatString: "The image '{Uri}' was not modified");
 
             LogPreconditionFailedAction = LoggerMessage.Define<string>(
-                logLevel: LogLevel.Debug,
+                logLevel: LogLevel.Warning,
                 eventId: 5,
                 formatString: "Precondition for image '{Uri}' failed");
         }
