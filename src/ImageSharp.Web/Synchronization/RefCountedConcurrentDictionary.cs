@@ -96,7 +96,7 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         {
             while (true)
             {
-                if (this.dictionary.TryGetValue(key, out RefCountedConcurrentDictionary<TKey, TValue>.RefCountedValue? refCountedValue))
+                if (this.dictionary.TryGetValue(key, out RefCountedValue? refCountedValue))
                 {
                     // Increment ref count
                     if (this.dictionary.TryUpdate(key, new RefCountedValue(refCountedValue.Value, refCountedValue.RefCount + 1), refCountedValue))
@@ -131,7 +131,7 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         {
             while (true)
             {
-                if (!this.dictionary.TryGetValue(key, out RefCountedConcurrentDictionary<TKey, TValue>.RefCountedValue? refCountedValue))
+                if (!this.dictionary.TryGetValue(key, out RefCountedValue? refCountedValue))
                 {
                     // This is BAD. It indicates a ref counting problem where someone is either double-releasing,
                     // or they're releasing a key that they never obtained in the first place!!
@@ -196,7 +196,7 @@ namespace SixLabors.ImageSharp.Web.Synchronization
             {
                 get
                 {
-                    KeyValuePair<TKey, RefCountedConcurrentDictionary<TKey, TValue>.RefCountedValue> keyValuePair = this.enumerator.Current;
+                    KeyValuePair<TKey, RefCountedValue> keyValuePair = this.enumerator.Current;
                     return (keyValuePair.Key, keyValuePair.Value.Value, keyValuePair.Value.RefCount);
                 }
             }
