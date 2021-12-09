@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -158,6 +159,55 @@ namespace SixLabors.ImageSharp.Web.Synchronization
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Get an enumeration over the contents of the dictionary for testing/debugging purposes
+        /// </summary>
+        internal IEnumerable<(TKey Key, TValue Value, int RefCount)> DebugGetContents() => new RefCountedDictionaryEnumerable(this);
+
+        /// <summary>
+        /// Internal class used for testing/debugging purposes
+        /// </summary>
+        private class RefCountedDictionaryEnumerable : IEnumerable<(TKey Key, TValue Value, int RefCount)>
+        {
+            private readonly RefCountedConcurrentDictionary<TKey, TValue> dictionary;
+
+            internal RefCountedDictionaryEnumerable(RefCountedConcurrentDictionary<TKey, TValue> dictionary)
+                => this.dictionary = dictionary;
+
+            public IEnumerator<(TKey Key, TValue Value, int RefCount)> GetEnumerator()
+                => new RefCountedDictionaryEnumerator(this.dictionary);
+
+            IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Internal class used for testing/debugging purposes
+        /// </summary>
+        private class RefCountedDictionaryEnumerator : IEnumerator<(TKey Key, TValue Value, int RefCount)>
+        {
+            private readonly IEnumerator<KeyValuePair<TKey, RefCountedValue>> enumerator;
+
+            public RefCountedDictionaryEnumerator(RefCountedConcurrentDictionary<TKey, TValue> dictionary)
+                => this.enumerator = dictionary.dictionary.GetEnumerator();
+
+            public (TKey Key, TValue Value, int RefCount) Current
+            {
+                get
+                {
+                    KeyValuePair<TKey, RefCountedConcurrentDictionary<TKey, TValue>.RefCountedValue> keyValuePair = this.enumerator.Current;
+                    return (keyValuePair.Key, keyValuePair.Value.Value, keyValuePair.Value.RefCount);
+                }
+            }
+
+            object IEnumerator.Current => this.Current;
+
+            public void Dispose() => this.enumerator.Dispose();
+
+            public bool MoveNext() => this.enumerator.MoveNext();
+
+            public void Reset() => this.enumerator.Reset();
         }
 
         /// <summary>
