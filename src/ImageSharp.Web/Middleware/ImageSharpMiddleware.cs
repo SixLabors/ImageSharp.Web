@@ -291,8 +291,23 @@ namespace SixLabors.ImageSharp.Web.Middleware
             RecyclableMemoryStream outStream = null;
             try
             {
-                using (await this.asyncKeyLock.WriterLockAsync(key))
+                Task<AsyncReaderWriterLock.Releaser> takeLockTask = this.asyncKeyLock.WriterLockAsync(key);
+                bool lockWasAlreadyHeld = takeLockTask.Status != TaskStatus.RanToCompletion;
+                using (await takeLockTask)
                 {
+                    // If the lock was already held, then that means there's a chance another worker has already
+                    // processed this same request and the value may now be available in the cache, so check
+                    // the cache one more time
+                    if (lockWasAlreadyHeld)
+                    {
+                        readResult = await this.IsNewOrUpdatedAsync(sourceImageResolver, key);
+                        if (!readResult.IsNewOrUpdated)
+                        {
+                            await this.SendResponseAsync(imageContext, key, readResult.CacheImageMetadata, readResult.Resolver, null);
+                            return;
+                        }
+                    }
+
                     try
                     {
                         ImageCacheMetadata cachedImageMetadata = default;
