@@ -410,8 +410,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
         }
 
         private async Task<ImageWorkerResult> IsNewOrUpdatedAsync(
-                    IImageResolver sourceImageResolver,
-                    string key)
+            IImageResolver sourceImageResolver,
+            string key)
         {
             // Get the source metadata for processing, storing the result for future checks.
             ImageMetadata sourceImageMetadata = await
