@@ -39,9 +39,9 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         /// </summary>
         /// <param name="key">The key identifying the specific object to lock against.</param>
         /// <returns>
-        /// The <see cref="AsyncLock.Releaser"/> that will release the lock.
+        /// The <see cref="IDisposable"/> that will release the lock.
         /// </returns>
-        public Task<AsyncLock.Releaser> LockAsync(TKey key)
+        public Task<IDisposable> LockAsync(TKey key)
             => this.activeLocks.Get(key).LockAsync();
 
         /// <summary>

@@ -19,12 +19,12 @@ namespace SixLabors.ImageSharp.Web.Synchronization
     public class AsyncReaderWriterLock
     {
         private readonly object stateLock;
-        private readonly Releaser writerReleaser;
-        private readonly Releaser readerReleaser;
-        private readonly Task<Releaser> writerReleaserTask;
-        private readonly Task<Releaser> readerReleaserTask;
-        private readonly Queue<TaskCompletionSource<Releaser>> waitingWriters;
-        private TaskCompletionSource<Releaser>? waitingReaders;
+        private readonly IDisposable writerReleaser;
+        private readonly IDisposable readerReleaser;
+        private readonly Task<IDisposable> writerReleaserTask;
+        private readonly Task<IDisposable> readerReleaserTask;
+        private readonly Queue<TaskCompletionSource<IDisposable>> waitingWriters;
+        private TaskCompletionSource<IDisposable>? waitingReaders;
         private int readersWaiting;
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace SixLabors.ImageSharp.Web.Synchronization
             this.readerReleaser = new Releaser(this, false);
             this.writerReleaserTask = Task.FromResult(this.writerReleaser);
             this.readerReleaserTask = Task.FromResult(this.readerReleaser);
-            this.waitingWriters = new Queue<TaskCompletionSource<Releaser>>();
+            this.waitingWriters = new Queue<TaskCompletionSource<IDisposable>>();
             this.waitingReaders = null;
             this.readersWaiting = 0;
             this.status = 0;
@@ -57,13 +57,13 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         public Action? OnRelease { get; set; }
 
         /// <summary>
-        /// Asynchronously obtains the lock in shared reader mode. Dispose the returned <see cref="Releaser"/>
+        /// Asynchronously obtains the lock in shared reader mode. Dispose the returned <see cref="IDisposable"/>
         /// to release the lock.
         /// </summary>
         /// <returns>
-        /// The <see cref="Releaser"/> that will release the lock.
+        /// The <see cref="IDisposable"/> that will release the lock.
         /// </returns>
-        public Task<Releaser> ReaderLockAsync()
+        public Task<IDisposable> ReaderLockAsync()
         {
             lock (this.stateLock)
             {
@@ -82,7 +82,7 @@ namespace SixLabors.ImageSharp.Web.Synchronization
 
                     if (this.waitingReaders == null)
                     {
-                        this.waitingReaders = new TaskCompletionSource<Releaser>(TaskCreationOptions.RunContinuationsAsynchronously);
+                        this.waitingReaders = new TaskCompletionSource<IDisposable>(TaskCreationOptions.RunContinuationsAsynchronously);
                     }
 
                     return this.waitingReaders.Task;
@@ -91,13 +91,13 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         }
 
         /// <summary>
-        /// Asynchronously obtains the lock in exclusive writer mode. Dispose the returned <see cref="Releaser"/>
+        /// Asynchronously obtains the lock in exclusive writer mode. Dispose the returned <see cref="IDisposable"/>
         /// to release the lock.
         /// </summary>
         /// <returns>
-        /// The <see cref="Releaser"/> that will release the lock.
+        /// The <see cref="IDisposable"/> that will release the lock.
         /// </returns>
-        public Task<Releaser> WriterLockAsync()
+        public Task<IDisposable> WriterLockAsync()
         {
             lock (this.stateLock)
             {
@@ -112,7 +112,7 @@ namespace SixLabors.ImageSharp.Web.Synchronization
                 {
                     // This writer has to wait to obtain the lock. Create a new tcs for this writer, add it to the
                     // queue of waiting writers, and return the task.
-                    var waiter = new TaskCompletionSource<Releaser>(TaskCreationOptions.RunContinuationsAsynchronously);
+                    var waiter = new TaskCompletionSource<IDisposable>(TaskCreationOptions.RunContinuationsAsynchronously);
                     this.waitingWriters.Enqueue(waiter);
                     return waiter.Task;
                 }
@@ -123,7 +123,7 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         {
             try
             {
-                TaskCompletionSource<Releaser>? nextLockHolder = null;
+                TaskCompletionSource<IDisposable>? nextLockHolder = null;
 
                 lock (this.stateLock)
                 {
@@ -148,8 +148,8 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         {
             try
             {
-                TaskCompletionSource<Releaser>? nextLockHolder;
-                Releaser releaser;
+                TaskCompletionSource<IDisposable>? nextLockHolder;
+                IDisposable releaser;
 
                 lock (this.stateLock)
                 {
@@ -188,7 +188,7 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         /// <summary>
         /// Utility class that releases an <see cref="AsyncReaderWriterLock"/> on disposal.
         /// </summary>
-        public sealed class Releaser : IDisposable
+        private sealed class Releaser : IDisposable
         {
             private readonly AsyncReaderWriterLock toRelease;
             private readonly bool writer;

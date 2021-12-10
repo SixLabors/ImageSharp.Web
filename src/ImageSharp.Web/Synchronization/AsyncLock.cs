@@ -16,9 +16,9 @@ namespace SixLabors.ImageSharp.Web.Synchronization
     {
         private readonly SemaphoreSlim semaphore;
 #pragma warning disable IDE0069 // Disposable fields should be disposed
-        private readonly Releaser releaser;
+        private readonly IDisposable releaser;
 #pragma warning restore IDE0069 // Disposable fields should be disposed
-        private readonly Task<Releaser> releaserTask;
+        private readonly Task<IDisposable> releaserTask;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncLock"/> class.
@@ -36,12 +36,12 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         public Action? OnRelease { get; set; }
 
         /// <summary>
-        /// Asynchronously obtains the lock. Dispose the returned <see cref="Releaser"/> to release the lock.
+        /// Asynchronously obtains the lock. Dispose the returned <see cref="IDisposable"/> to release the lock.
         /// </summary>
         /// <returns>
-        /// The <see cref="Releaser"/> that will release the lock.
+        /// The <see cref="IDisposable"/> that will release the lock.
         /// </returns>
-        public Task<Releaser> LockAsync()
+        public Task<IDisposable> LockAsync()
         {
             Task wait = this.semaphore.WaitAsync();
 
@@ -50,7 +50,7 @@ namespace SixLabors.ImageSharp.Web.Synchronization
                 ? this.releaserTask
                 : AwaitThenReturn(wait, this.releaser);
 
-            static async Task<Releaser> AwaitThenReturn(Task t, Releaser r)
+            static async Task<IDisposable> AwaitThenReturn(Task t, IDisposable r)
             {
                 await t;
                 return r;
@@ -77,7 +77,7 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         /// <summary>
         /// Utility class that releases an <see cref="AsyncLock"/> on disposal.
         /// </summary>
-        public sealed class Releaser : IDisposable
+        private sealed class Releaser : IDisposable
         {
             private readonly AsyncLock toRelease;
 

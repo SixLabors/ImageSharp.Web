@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
@@ -38,9 +39,9 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         /// </summary>
         /// <param name="key">The key identifying the specific object to lock against.</param>
         /// <returns>
-        /// The <see cref="AsyncReaderWriterLock.Releaser"/> that will release the lock.
+        /// The <see cref="IDisposable"/> that will release the lock.
         /// </returns>
-        public Task<AsyncReaderWriterLock.Releaser> ReaderLockAsync(TKey key)
+        public Task<IDisposable> ReaderLockAsync(TKey key)
             => this.activeLocks.Get(key).ReaderLockAsync();
 
         /// <summary>
@@ -48,9 +49,9 @@ namespace SixLabors.ImageSharp.Web.Synchronization
         /// </summary>
         /// <param name="key">The key identifying the specific object to lock against.</param>
         /// <returns>
-        /// The <see cref="AsyncReaderWriterLock.Releaser"/> that will release the lock.
+        /// The <see cref="IDisposable"/> that will release the lock.
         /// </returns>
-        public Task<AsyncReaderWriterLock.Releaser> WriterLockAsync(TKey key)
+        public Task<IDisposable> WriterLockAsync(TKey key)
             => this.activeLocks.Get(key).WriterLockAsync();
 
         private AsyncReaderWriterLock CreateLeasedLock(TKey key)

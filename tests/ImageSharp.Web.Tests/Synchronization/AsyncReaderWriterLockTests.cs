@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp.Web.Synchronization;
 using Xunit;
@@ -14,10 +15,10 @@ namespace SixLabors.ImageSharp.Web.Tests.Synchronization
         [Fact]
         public void OneWriterAtATime()
         {
-            Task<AsyncReaderWriterLock.Releaser> first = this.l.WriterLockAsync();
+            Task<IDisposable> first = this.l.WriterLockAsync();
             Assert.True(first.IsCompletedSuccessfully);
 
-            Task<AsyncReaderWriterLock.Releaser> second = this.l.WriterLockAsync();
+            Task<IDisposable> second = this.l.WriterLockAsync();
             Assert.False(second.IsCompleted);
 
             first.Result.Dispose();
@@ -27,10 +28,10 @@ namespace SixLabors.ImageSharp.Web.Tests.Synchronization
         [Fact]
         public void WriterBlocksReaders()
         {
-            Task<AsyncReaderWriterLock.Releaser> first = this.l.WriterLockAsync();
+            Task<IDisposable> first = this.l.WriterLockAsync();
             Assert.True(first.IsCompletedSuccessfully);
 
-            Task<AsyncReaderWriterLock.Releaser> second = this.l.ReaderLockAsync();
+            Task<IDisposable> second = this.l.ReaderLockAsync();
             Assert.False(second.IsCompleted);
 
             first.Result.Dispose();
@@ -40,13 +41,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Synchronization
         [Fact]
         public void WaitingWriterBlocksReaders()
         {
-            Task<AsyncReaderWriterLock.Releaser> first = this.l.ReaderLockAsync();
+            Task<IDisposable> first = this.l.ReaderLockAsync();
             Assert.True(first.IsCompletedSuccessfully);
 
-            Task<AsyncReaderWriterLock.Releaser> second = this.l.WriterLockAsync();
+            Task<IDisposable> second = this.l.WriterLockAsync();
             Assert.False(second.IsCompleted);
 
-            Task<AsyncReaderWriterLock.Releaser> third = this.l.ReaderLockAsync();
+            Task<IDisposable> third = this.l.ReaderLockAsync();
             Assert.False(third.IsCompleted);
 
             first.Result.Dispose();
@@ -60,29 +61,29 @@ namespace SixLabors.ImageSharp.Web.Tests.Synchronization
         [Fact]
         public void MultipleReadersAtOnce()
         {
-            Task<AsyncReaderWriterLock.Releaser> first = this.l.ReaderLockAsync();
+            Task<IDisposable> first = this.l.ReaderLockAsync();
             Assert.True(first.IsCompletedSuccessfully);
 
-            Task<AsyncReaderWriterLock.Releaser> second = this.l.ReaderLockAsync();
+            Task<IDisposable> second = this.l.ReaderLockAsync();
             Assert.True(second.IsCompletedSuccessfully);
 
-            Task<AsyncReaderWriterLock.Releaser> third = this.l.ReaderLockAsync();
+            Task<IDisposable> third = this.l.ReaderLockAsync();
             Assert.True(third.IsCompletedSuccessfully);
         }
 
         [Fact]
         public void AllWaitingReadersReleasedConcurrently()
         {
-            Task<AsyncReaderWriterLock.Releaser> writer = this.l.WriterLockAsync();
+            Task<IDisposable> writer = this.l.WriterLockAsync();
             Assert.True(writer.IsCompletedSuccessfully);
 
-            Task<AsyncReaderWriterLock.Releaser> reader1 = this.l.ReaderLockAsync();
+            Task<IDisposable> reader1 = this.l.ReaderLockAsync();
             Assert.False(reader1.IsCompleted);
 
-            Task<AsyncReaderWriterLock.Releaser> reader2 = this.l.ReaderLockAsync();
+            Task<IDisposable> reader2 = this.l.ReaderLockAsync();
             Assert.False(reader2.IsCompleted);
 
-            Task<AsyncReaderWriterLock.Releaser> reader3 = this.l.ReaderLockAsync();
+            Task<IDisposable> reader3 = this.l.ReaderLockAsync();
             Assert.False(reader3.IsCompleted);
 
             writer.Result.Dispose();

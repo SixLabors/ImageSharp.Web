@@ -289,7 +289,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             RecyclableMemoryStream outStream = null;
             try
             {
-                Task<AsyncReaderWriterLock.Releaser> takeLockTask = this.asyncKeyLock.WriterLockAsync(key);
+                Task<IDisposable> takeLockTask = this.asyncKeyLock.WriterLockAsync(key);
                 bool lockWasAlreadyHeld = takeLockTask.Status != TaskStatus.RanToCompletion;
                 using (await takeLockTask)
                 {
