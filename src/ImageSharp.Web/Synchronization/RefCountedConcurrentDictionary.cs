@@ -227,10 +227,13 @@ namespace SixLabors.ImageSharp.Web.Synchronization
             }
 
             public bool Equals(
-#if NETCOREAPP3_1_OR_GREATER
-                [System.Diagnostics.CodeAnalysis.AllowNull]
-#endif
+#if NET5_0_OR_GREATER
+                RefCountedValue? other)
+#elif NETCOREAPP3_1_OR_GREATER
+                [System.Diagnostics.CodeAnalysis.AllowNull] RefCountedValue other)
+#else
                 RefCountedValue other)
+#endif
                 => (other != null) && (this.RefCount == other.RefCount) && EqualityComparer<TValue>.Default.Equals(this.Value, other.Value);
 
             public override bool Equals(object? obj)
