@@ -11,6 +11,7 @@ using SixLabors.ImageSharp.Web.Commands.Converters;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
+using SixLabors.ImageSharp.Web.Synchronization;
 
 namespace SixLabors.ImageSharp.Web.DependencyInjection
 {
@@ -56,6 +57,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             builder.Services.Configure(setupAction);
 
             builder.Services.AddSingleton<FormatUtilities>();
+
+            builder.Services.AddSingleton<AsyncKeyReaderWriterLock<string>>();
 
             builder.SetRequestParser<QueryCollectionRequestParser>();
 
