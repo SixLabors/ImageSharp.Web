@@ -14,7 +14,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Helpers
         public static IEnumerable<object[]> DefaultExtensions =
             Configuration.Default.ImageFormats.SelectMany(f => f.FileExtensions.Select(e => new object[] { e, e }));
 
-        private static readonly FormatUtilities FormatUtilities = new FormatUtilities(Options.Create(new ImageSharpMiddlewareOptions()));
+        private static readonly FormatUtilities FormatUtilities = new(Options.Create(new ImageSharpMiddlewareOptions()));
 
         [Theory]
         [MemberData(nameof(DefaultExtensions))]
@@ -27,22 +27,29 @@ namespace SixLabors.ImageSharp.Web.Tests.Helpers
         [Fact]
         public void GetExtensionShouldNotMatchExtensionWithoutDotPrefix()
         {
-            const string Uri = "http://www.example.org/some/path/to/bmpimage";
-            Assert.Null(FormatUtilities.GetExtensionFromUri(Uri));
+            const string uri = "http://www.example.org/some/path/to/bmpimage";
+            Assert.Null(FormatUtilities.GetExtensionFromUri(uri));
         }
 
         [Fact]
         public void GetExtensionShouldIgnoreQueryStringWithoutFormatParamter()
         {
-            const string Uri = "http://www.example.org/some/path/to/image.bmp?width=300&foo=.png";
-            Assert.Equal("bmp", FormatUtilities.GetExtensionFromUri(Uri));
+            const string uri = "http://www.example.org/some/path/to/image.bmp?width=300&foo=.png";
+            Assert.Equal("bmp", FormatUtilities.GetExtensionFromUri(uri));
         }
 
         [Fact]
         public void GetExtensionShouldAcknowledgeQueryStringFormatParameter()
         {
-            const string Uri = "http://www.example.org/some/path/to/image.bmp?width=300&format=png";
-            Assert.Equal("png", FormatUtilities.GetExtensionFromUri(Uri));
+            const string uri = "http://www.example.org/some/path/to/image.bmp?width=300&format=png";
+            Assert.Equal("png", FormatUtilities.GetExtensionFromUri(uri));
+        }
+
+        [Fact]
+        public void GetExtensionShouldRejectInvalidQueryStringFormatParameter()
+        {
+            const string uri = "http://www.example.org/some/path/to/image.bmp?width=300&format=invalid";
+            Assert.Null(FormatUtilities.GetExtensionFromUri(uri));
         }
     }
 }

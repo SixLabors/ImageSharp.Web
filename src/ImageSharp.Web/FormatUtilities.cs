@@ -51,14 +51,26 @@ namespace SixLabors.ImageSharp.Web
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetExtensionFromUri(string uri)
         {
+            // TODO: This method should follow TryGet pattern. Fix for V2.
             int query = uri.IndexOf('?');
             ReadOnlySpan<char> path;
 
             if (query > -1)
             {
-                if (uri.Contains(FormatWebProcessor.Format, StringComparison.OrdinalIgnoreCase) && QueryHelpers.ParseQuery(uri.Substring(query)).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
+                if (uri.Contains(FormatWebProcessor.Format, StringComparison.OrdinalIgnoreCase)
+                    && QueryHelpers.ParseQuery(uri.Substring(query)).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
                 {
-                    return ext;
+                    // We have a query but is it a valid one?
+                    ReadOnlySpan<char> extSpan = ext[0].AsSpan();
+                    foreach (string extension in this.extensions)
+                    {
+                        if (extSpan.Equals(extension, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return extension;
+                        }
+                    }
+
+                    return null;
                 }
 
                 path = uri.AsSpan(0, query);
