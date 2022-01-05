@@ -37,9 +37,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// </summary>
         /// <param name="options">The middleware configuration options.</param>
         public FormatWebProcessor(IOptions<ImageSharpMiddlewareOptions> options)
-        {
-            this.options = options.Value;
-        }
+            => this.options = options.Value;
 
         /// <inheritdoc/>
         public IEnumerable<string> Commands { get; } = FormatCommands;
