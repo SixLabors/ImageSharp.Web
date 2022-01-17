@@ -59,7 +59,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
                 .AddProcessor<BackgroundColorWebProcessor>()
-                .AddProcessor<JpegQualityWebProcessor>();
+                .AddProcessor<QualityWebProcessor>();
 
             // Add the default service and options.
             //
@@ -136,7 +136,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
                 .AddProcessor<BackgroundColorWebProcessor>()
-                .AddProcessor<JpegQualityWebProcessor>();
+                .AddProcessor<QualityWebProcessor>();
         }
 
         /// <summary>
