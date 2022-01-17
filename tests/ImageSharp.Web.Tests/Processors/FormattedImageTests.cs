@@ -58,15 +58,15 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             formatted.Format = JpegFormat.Instance;
             Assert.Equal(typeof(JpegEncoder), formatted.Encoder.GetType());
 
-            JpegSubsample current = ((JpegEncoder)formatted.Encoder).Subsample.GetValueOrDefault();
+            JpegColorType current = ((JpegEncoder)formatted.Encoder).ColorType.GetValueOrDefault();
 
-            Assert.Equal(JpegSubsample.Ratio444, current);
-            formatted.Encoder = new JpegEncoder { Subsample = JpegSubsample.Ratio420 };
+            Assert.Equal(JpegColorType.YCbCrRatio420, current);
+            formatted.Encoder = new JpegEncoder { ColorType = JpegColorType.YCbCrRatio444 };
 
-            JpegSubsample replacement = ((JpegEncoder)formatted.Encoder).Subsample.GetValueOrDefault();
+            JpegColorType replacement = ((JpegEncoder)formatted.Encoder).ColorType.GetValueOrDefault();
 
             Assert.NotEqual(current, replacement);
-            Assert.Equal(JpegSubsample.Ratio420, replacement);
+            Assert.Equal(JpegColorType.YCbCrRatio444, replacement);
         }
     }
 }

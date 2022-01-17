@@ -16,7 +16,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
         {
             var processors = new IImageWebProcessor[]
             {
-                new JpegQualityWebProcessor(),
+                new QualityWebProcessor(),
                 new ResizeWebProcessor(),
                 new BackgroundColorWebProcessor(),
                 new MockWebProcessor()
@@ -25,7 +25,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             var commands = new List<string>
             {
                 ResizeWebProcessor.Width,
-                JpegQualityWebProcessor.Quality,
+                QualityWebProcessor.Quality,
                 ResizeWebProcessor.Height
             };
 
@@ -33,7 +33,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
 
             Assert.Equal(2, supportedProcessors.Length);
             Assert.IsType<ResizeWebProcessor>(supportedProcessors[0]);
-            Assert.IsType<JpegQualityWebProcessor>(supportedProcessors[1]);
+            Assert.IsType<QualityWebProcessor>(supportedProcessors[1]);
         }
 
         [Fact]
