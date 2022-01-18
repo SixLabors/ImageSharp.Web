@@ -47,11 +47,18 @@ namespace SixLabors.ImageSharp.Web
         /// Gets the file extension for the given image uri.
         /// </summary>
         /// <param name="uri">The full request uri.</param>
-        /// <returns>The <see cref="string" />.</returns>
+        /// <param name="extension">
+        /// When this method returns, contains the file extension for the image source,
+        /// if the path exists; otherwise, the default value for the type of the path parameter.
+        /// This parameter is passed uninitialized.
+        /// </param>
+        /// <returns>
+        /// <see langword="true" /> if the uri contains an extension; otherwise, <see langword="false" />.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string GetExtensionFromUri(string uri)
+        public bool TryGetExtensionFromUri(string uri, out string extension)
         {
-            // TODO: This method should follow TryGet pattern. Fix for V2.
+            extension = null;
             int query = uri.IndexOf('?');
             ReadOnlySpan<char> path;
 
@@ -62,15 +69,16 @@ namespace SixLabors.ImageSharp.Web
                 {
                     // We have a query but is it a valid one?
                     ReadOnlySpan<char> extSpan = ext[0].AsSpan();
-                    foreach (string extension in this.extensions)
+                    foreach (string e in this.extensions)
                     {
-                        if (extSpan.Equals(extension, StringComparison.OrdinalIgnoreCase))
+                        if (extSpan.Equals(e, StringComparison.OrdinalIgnoreCase))
                         {
-                            return extension;
+                            extension = e;
+                            return true;
                         }
                     }
 
-                    return null;
+                    return false;
                 }
 
                 path = uri.AsSpan(0, query);
@@ -85,16 +93,17 @@ namespace SixLabors.ImageSharp.Web
             {
                 ReadOnlySpan<char> pathExtension = path.Slice(extensionIndex + 1);
 
-                foreach (string extension in this.extensions)
+                foreach (string e in this.extensions)
                 {
-                    if (pathExtension.Equals(extension, StringComparison.OrdinalIgnoreCase))
+                    if (pathExtension.Equals(e, StringComparison.OrdinalIgnoreCase))
                     {
-                        return extension;
+                        extension = e;
+                        return true;
                     }
                 }
             }
 
-            return null;
+            return false;
         }
 
         /// <summary>
