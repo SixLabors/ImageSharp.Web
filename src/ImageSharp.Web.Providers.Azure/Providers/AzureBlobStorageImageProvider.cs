@@ -127,7 +127,7 @@ namespace SixLabors.ImageSharp.Web.Providers.Azure
 
         /// <inheritdoc/>
         public bool IsValidRequest(HttpContext context)
-            => this.formatUtilities.GetExtensionFromUri(context.Request.GetDisplayUrl()) != null;
+            => this.formatUtilities.TryGetExtensionFromUri(context.Request.GetDisplayUrl(), out _);
 
         private bool IsMatch(HttpContext context)
         {

@@ -53,7 +53,8 @@ namespace SixLabors.ImageSharp.Web.Providers
         public Func<HttpContext, bool> Match { get; set; } = _ => true;
 
         /// <inheritdoc/>
-        public bool IsValidRequest(HttpContext context) => this.formatUtilities.GetExtensionFromUri(context.Request.GetDisplayUrl()) != null;
+        public bool IsValidRequest(HttpContext context)
+            => this.formatUtilities.TryGetExtensionFromUri(context.Request.GetDisplayUrl(), out _);
 
         /// <inheritdoc/>
         public Task<IImageResolver> GetAsync(HttpContext context)
