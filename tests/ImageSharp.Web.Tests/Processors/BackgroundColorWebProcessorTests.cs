@@ -1,7 +1,6 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System.Collections.Generic;
 using System.Globalization;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
@@ -17,12 +16,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
         [Fact]
         public void BackgroundColorWebProcessor_UpdatesColor()
         {
-            var parser = new CommandParser(new[] { new ColorConverter() });
+            CommandParser parser = new(new[] { new ColorConverter() });
             CultureInfo culture = CultureInfo.InvariantCulture;
 
-            var commands = new Dictionary<string, string>
+            CommandCollection commands = new()
             {
-                { BackgroundColorWebProcessor.Color, nameof(Color.Orange) }
+                { new(BackgroundColorWebProcessor.Color, nameof(Color.Orange)) }
             };
 
             using var image = new Image<Rgba32>(1, 1);

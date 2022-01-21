@@ -33,8 +33,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
         [InlineData(nameof(KnownResamplers.Welch))]
         public void ResizeWebProcessor_UpdatesSize(string resampler)
         {
-            const int Width = 4;
-            const int Height = 6;
+            const int width = 4;
+            const int height = 6;
 
             var converters = new List<ICommandConverter>
             {
@@ -48,21 +48,21 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             var parser = new CommandParser(converters);
             CultureInfo culture = CultureInfo.InvariantCulture;
 
-            var commands = new Dictionary<string, string>
+            CommandCollection commands = new()
             {
-                { ResizeWebProcessor.Sampler, resampler },
-                { ResizeWebProcessor.Width, Width.ToString() },
-                { ResizeWebProcessor.Height, Height.ToString() },
-                { ResizeWebProcessor.Xy, "0,0" },
-                { ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch) }
+                { new(ResizeWebProcessor.Sampler, resampler) },
+                { new(ResizeWebProcessor.Width, width.ToString()) },
+                { new(ResizeWebProcessor.Height, height.ToString()) },
+                { new(ResizeWebProcessor.Xy, "0,0") },
+                { new(ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch)) }
             };
 
             using var image = new Image<Rgba32>(1, 1);
             using var formatted = new FormattedImage(image, PngFormat.Instance);
             new ResizeWebProcessor().Process(formatted, null, commands, parser, culture);
 
-            Assert.Equal(Width, image.Width);
-            Assert.Equal(Height, image.Height);
+            Assert.Equal(width, image.Width);
+            Assert.Equal(height, image.Height);
         }
     }
 }

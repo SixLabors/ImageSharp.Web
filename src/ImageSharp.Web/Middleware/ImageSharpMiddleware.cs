@@ -172,18 +172,15 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.asyncKeyLock = asyncKeyLock;
         }
 
-#pragma warning disable IDE1006 // Naming Styles
         /// <summary>
         /// Performs operations upon the current request.
         /// </summary>
         /// <param name="context">The current HTTP request context.</param>
         /// <returns>The <see cref="Task"/>.</returns>
         public async Task Invoke(HttpContext context)
-#pragma warning restore IDE1006 // Naming Styles
         {
             // We expect to get concrete collection type which removes virtual dispatch concerns and enumerator allocations
-            IDictionary<string, string> parsedCommands = this.requestParser.ParseRequestCommands(context);
-            Dictionary<string, string> commands = parsedCommands as Dictionary<string, string> ?? new Dictionary<string, string>(parsedCommands, StringComparer.OrdinalIgnoreCase);
+            CommandCollection commands = this.requestParser.ParseRequestCommands(context);
 
             if (commands.Count > 0)
             {
@@ -243,7 +240,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 commands);
         }
 
-        private void StripUnknownCommands(Dictionary<string, string> commands, int startAtIndex)
+        private void StripUnknownCommands(CommandCollection commands, int startAtIndex)
         {
             var keys = new List<string>(commands.Keys);
             for (int index = startAtIndex; index < keys.Count; index++)
@@ -260,7 +257,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             HttpContext context,
             IImageResolver sourceImageResolver,
             ImageContext imageContext,
-            IDictionary<string, string> commands)
+            CommandCollection commands)
         {
             // Create a cache key based on all the components of the requested url
             string uri = GetUri(context, commands);
@@ -511,7 +508,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
         }
 
-        private static string GetUri(HttpContext context, IDictionary<string, string> commands)
+        private static string GetUri(HttpContext context, CommandCollection commands)
         {
             var sb = new StringBuilder(context.Request.Host.ToString());
 

@@ -22,7 +22,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             };
 
             HttpContext context = CreateHttpContext("?preset=Preset1");
-            IDictionary<string, string> actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
+            CommandCollection actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
             {
                 Presets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
@@ -43,7 +43,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             };
 
             HttpContext context = CreateHttpContext("?PRESET=PRESET1");
-            IDictionary<string, string> actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
+            CommandCollection actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
             {
                 Presets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
@@ -60,7 +60,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             IDictionary<string, string> expected = new Dictionary<string, string>();
 
             HttpContext context = CreateHttpContext("?test=test");
-            IDictionary<string, string> actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
+            CommandCollection actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
             {
                 Presets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
@@ -77,7 +77,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             IDictionary<string, string> expected = new Dictionary<string, string>();
 
             HttpContext context = CreateHttpContext("?preset=Preset2");
-            IDictionary<string, string> actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
+            CommandCollection actual = new PresetOnlyQueryCollectionRequestParser(Options.Create(new PresetOnlyQueryCollectionRequestParserOptions
             {
                 Presets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {

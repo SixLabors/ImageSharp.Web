@@ -34,11 +34,11 @@ namespace SixLabors.ImageSharp.Web.Processors
         public FormattedImage Process(
             FormattedImage image,
             ILogger logger,
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
         {
-            if (commands.ContainsKey(Quality))
+            if (commands.Contains(Quality))
             {
                 // The encoders clamp any values so no validation is required.
                 int quality = parser.ParseValue<int>(commands.GetValueOrDefault(Quality), culture);

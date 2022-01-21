@@ -1,8 +1,6 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Commands;
 using Xunit;
@@ -14,14 +12,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         [Fact]
         public void QueryCollectionParserExtractsCommands()
         {
-            IDictionary<string, string> expected = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            CommandCollection expected = new()
             {
-                { "width", "400" },
-                { "height", "200" }
+                { new("width", "400") },
+                { new("height", "200") }
             };
 
             HttpContext context = CreateHttpContext();
-            IDictionary<string, string> actual = new QueryCollectionRequestParser().ParseRequestCommands(context);
+            CommandCollection actual = new QueryCollectionRequestParser().ParseRequestCommands(context);
 
             Assert.Equal(expected, actual);
         }

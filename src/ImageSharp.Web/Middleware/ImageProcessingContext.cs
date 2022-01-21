@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using SixLabors.ImageSharp.Web.Commands;
 
 namespace SixLabors.ImageSharp.Web.Middleware
 {
@@ -23,7 +24,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public ImageProcessingContext(
             HttpContext context,
             Stream stream,
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             string contentType,
             string extension)
         {
@@ -47,10 +48,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Gets the parsed collection of processing commands.
         /// </summary>
-        public IDictionary<string, string> Commands { get; }
+        public CommandCollection Commands { get; }
 
         /// <summary>
-        /// Gets the content type for for the processed image.
+        /// Gets the content type for the processed image.
         /// </summary>
         public string ContentType { get; }
 

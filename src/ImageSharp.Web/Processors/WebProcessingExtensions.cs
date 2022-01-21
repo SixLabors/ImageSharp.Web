@@ -30,7 +30,7 @@ namespace SixLabors.ImageSharp.Web.Processors
             this FormattedImage source,
             ILogger logger,
             IEnumerable<IImageWebProcessor> processors,
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser commandParser,
             CultureInfo culture)
         {

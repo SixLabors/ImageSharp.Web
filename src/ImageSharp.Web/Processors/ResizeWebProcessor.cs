@@ -69,7 +69,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         public FormattedImage Process(
             FormattedImage image,
             ILogger logger,
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
         {
@@ -84,11 +84,11 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         private static ResizeOptions GetResizeOptions(
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
         {
-            if (!commands.ContainsKey(Width) && !commands.ContainsKey(Height))
+            if (!commands.Contains(Width) && !commands.Contains(Height))
             {
                 return null;
             }
@@ -116,7 +116,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         private static Size ParseSize(
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
         {
@@ -128,7 +128,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         private static PointF? GetCenter(
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
         {
@@ -143,24 +143,24 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         private static ResizeMode GetMode(
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
             => parser.ParseValue<ResizeMode>(commands.GetValueOrDefault(Mode), culture);
 
         private static AnchorPositionMode GetAnchor(
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
             => parser.ParseValue<AnchorPositionMode>(commands.GetValueOrDefault(Anchor), culture);
 
         private static bool GetCompandMode(
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
             => parser.ParseValue<bool>(commands.GetValueOrDefault(Compand), culture);
 
-        private static IResampler GetSampler(IDictionary<string, string> commands)
+        private static IResampler GetSampler(CommandCollection commands)
         {
             string sampler = commands.GetValueOrDefault(Sampler);
 
@@ -171,23 +171,34 @@ namespace SixLabors.ImageSharp.Web.Processors
                     case "nearest":
                     case "nearestneighbor":
                         return KnownResamplers.NearestNeighbor;
-                    case "box": return KnownResamplers.Box;
+                    case "box":
+                        return KnownResamplers.Box;
                     case "mitchell":
                     case "mitchellnetravali":
                         return KnownResamplers.MitchellNetravali;
                     case "catmull":
                     case "catmullrom":
                         return KnownResamplers.CatmullRom;
-                    case "lanczos2": return KnownResamplers.Lanczos2;
-                    case "lanczos3": return KnownResamplers.Lanczos3;
-                    case "lanczos5": return KnownResamplers.Lanczos5;
-                    case "lanczos8": return KnownResamplers.Lanczos8;
-                    case "welch": return KnownResamplers.Welch;
-                    case "robidoux": return KnownResamplers.Robidoux;
-                    case "robidouxsharp": return KnownResamplers.RobidouxSharp;
-                    case "spline": return KnownResamplers.Spline;
-                    case "triangle": return KnownResamplers.Triangle;
-                    case "hermite": return KnownResamplers.Hermite;
+                    case "lanczos2":
+                        return KnownResamplers.Lanczos2;
+                    case "lanczos3":
+                        return KnownResamplers.Lanczos3;
+                    case "lanczos5":
+                        return KnownResamplers.Lanczos5;
+                    case "lanczos8":
+                        return KnownResamplers.Lanczos8;
+                    case "welch":
+                        return KnownResamplers.Welch;
+                    case "robidoux":
+                        return KnownResamplers.Robidoux;
+                    case "robidouxsharp":
+                        return KnownResamplers.RobidouxSharp;
+                    case "spline":
+                        return KnownResamplers.Spline;
+                    case "triangle":
+                        return KnownResamplers.Triangle;
+                    case "hermite":
+                        return KnownResamplers.Hermite;
                 }
             }
 

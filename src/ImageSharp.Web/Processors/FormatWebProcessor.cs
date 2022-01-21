@@ -46,7 +46,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         public FormattedImage Process(
             FormattedImage image,
             ILogger logger,
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
         {
@@ -54,8 +54,7 @@ namespace SixLabors.ImageSharp.Web.Processors
 
             if (!string.IsNullOrWhiteSpace(extension))
             {
-                IImageFormat format = this.options.Configuration
-                    .ImageFormatsManager.FindFormatByFileExtension(extension);
+                IImageFormat format = this.options.Configuration.ImageFormatsManager.FindFormatByFileExtension(extension);
 
                 if (format != null)
                 {
