@@ -49,6 +49,42 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         }
 
         [Fact]
+        public void CanSetCommandsViaIndex()
+        {
+            KeyValuePair<string, string> kv1 = new("a", "b");
+            KeyValuePair<string, string> kv2 = new("c", "d");
+            CommandCollection collection = new();
+
+            collection.Add(kv1);
+            Assert.Single(collection);
+            Assert.Equal(0, collection.IndexOf(kv1));
+            Assert.Equal(kv1.Value, collection[kv1.Key]);
+
+            collection[0] = kv2;
+            Assert.Single(collection);
+            Assert.Equal(0, collection.IndexOf(kv2));
+            Assert.Equal(kv2.Value, collection[kv2.Key]);
+        }
+
+        [Fact]
+        public void CanSetCommandsViaKey()
+        {
+            KeyValuePair<string, string> kv1 = new("a", "b");
+            KeyValuePair<string, string> kv2 = new("a", "d");
+            CommandCollection collection = new();
+
+            collection.Add(kv1);
+            Assert.Single(collection);
+            Assert.Equal(0, collection.IndexOf(kv1));
+            Assert.Equal(kv1.Value, collection[kv1.Key]);
+
+            collection[kv1.Key] = kv2.Value;
+            Assert.Single(collection);
+            Assert.Equal(0, collection.IndexOf(kv2));
+            Assert.Equal(kv2.Value, collection[kv2.Key]);
+        }
+
+        [Fact]
         public void CanRemoveCommands()
         {
             KeyValuePair<string, string> kv1 = new("a", "b");

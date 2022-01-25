@@ -33,12 +33,13 @@ namespace SixLabors.ImageSharp.Web.Commands
         public ICollection<string> Keys => this.keys;
 
         /// <summary>
-        /// Gets the command value with the specified key.
+        /// Gets or sets the value associated with the specified key.
         /// </summary>
-        /// <param name="key">The key of the element to get.</param>
+        /// <param name="key">The key of the value to get or set.</param>
         /// <returns>
-        /// The command value with the specified key. If a value with the specified key is not
-        /// found, an exception is thrown.
+        /// The value associated with the specified key. If the specified key is not found,
+        /// a get operation throws a <see cref="KeyNotFoundException"/>, and
+        /// a set operation creates a new element with the specified key.
         /// </returns>
         /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
         /// <exception cref="KeyNotFoundException">An element with the specified key does not exist in the collection.</exception>
@@ -49,6 +50,17 @@ namespace SixLabors.ImageSharp.Web.Commands
                 if (this.TryGetValue(key, out KeyValuePair<string, string> item))
                 {
                     return item.Value;
+                }
+
+                throw new KeyNotFoundException();
+            }
+
+            set
+            {
+                if (this.TryGetValue(key, out KeyValuePair<string, string> item))
+                {
+                    this.SetItem(this.IndexOf(item), new(key, value));
+                    return;
                 }
 
                 throw new KeyNotFoundException();
