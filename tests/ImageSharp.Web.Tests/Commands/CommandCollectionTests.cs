@@ -103,6 +103,24 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         }
 
         [Fact]
+        public void CanRemoveCommandsViaKey()
+        {
+            KeyValuePair<string, string> kv1 = new("a", "b");
+            KeyValuePair<string, string> kv2 = new("c", "d");
+            CommandCollection collection = new();
+
+            collection.Add(kv1);
+            collection.Add(kv2);
+
+            Assert.Equal(2, collection.Count);
+
+            collection.Remove(kv1.Key);
+
+            Assert.Single(collection);
+            Assert.Equal(kv2.Value, collection[kv2.Key]);
+        }
+
+        [Fact]
         public void CanClearCommands()
         {
             KeyValuePair<string, string> kv1 = new("a", "b");
