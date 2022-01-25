@@ -12,8 +12,6 @@ namespace SixLabors.ImageSharp.Web.Commands
     /// </summary>
     public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<string, string>>
     {
-        private readonly List<string> keys = new();
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandCollection"/> class.
         /// </summary>
@@ -28,9 +26,18 @@ namespace SixLabors.ImageSharp.Web.Commands
         }
 
         /// <summary>
-        /// Gets an <see cref="ICollection{T}"/> representing the keys of the collection.
+        /// Gets an <see cref="IEnumerable{String}"/> representing the keys of the collection.
         /// </summary>
-        public ICollection<string> Keys => this.keys;
+        public IEnumerable<string> Keys
+        {
+            get
+            {
+                foreach (KeyValuePair<string, string> item in this)
+                {
+                    yield return this.GetKeyForItem(item);
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the value associated with the specified key.
@@ -60,39 +67,12 @@ namespace SixLabors.ImageSharp.Web.Commands
                 if (this.TryGetValue(key, out KeyValuePair<string, string> item))
                 {
                     this.SetItem(this.IndexOf(item), new(key, value));
-                    return;
                 }
-
-                throw new KeyNotFoundException();
+                else
+                {
+                    this.Add(new(key, value));
+                }
             }
-        }
-
-        /// <inheritdoc/>
-        protected override void InsertItem(int index, KeyValuePair<string, string> item)
-        {
-            base.InsertItem(index, item);
-            this.keys.Insert(index, item.Key);
-        }
-
-        /// <inheritdoc/>
-        protected override void RemoveItem(int index)
-        {
-            base.RemoveItem(index);
-            this.keys.RemoveAt(index);
-        }
-
-        /// <inheritdoc/>
-        protected override void SetItem(int index, KeyValuePair<string, string> item)
-        {
-            base.SetItem(index, item);
-            this.keys[index] = item.Key;
-        }
-
-        /// <inheritdoc/>
-        protected override void ClearItems()
-        {
-            base.ClearItems();
-            this.keys.Clear();
         }
 
         /// <inheritdoc/>

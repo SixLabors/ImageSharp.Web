@@ -136,5 +136,31 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
 
             Assert.Empty(collection);
         }
+
+        [Fact]
+        public void KeysAreOrdered()
+        {
+            string[] keys = new[] { "a", "b", "c", "d" };
+
+            CommandCollection collection = new();
+            foreach (string key in keys)
+            {
+                collection.Insert(0, new(key, null));
+            }
+
+            int counter = keys.Length - 1;
+            foreach (string key in collection.Keys)
+            {
+                Assert.Equal(keys[counter--], key);
+            }
+        }
+
+        [Fact]
+        public void GetByInvalidKeyThrowsCorrectly()
+            => Assert.Throws<KeyNotFoundException>(() =>
+            {
+                CommandCollection collection = new();
+                return collection["a"];
+            });
     }
 }
