@@ -1,8 +1,10 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
+using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -11,20 +13,23 @@ namespace SixLabors.ImageSharp.Web
     /// <summary>
     /// A class encapsulating an image with a particular file encoding.
     /// </summary>
-    /// <seealso cref="System.IDisposable" />
-    public class FormattedImage : IDisposable
+    /// <seealso cref="IDisposable"/>
+    public sealed class FormattedImage : IDisposable
     {
+        private readonly ImageFormatManager imageFormatsManager;
         private IImageFormat format;
+        private IImageEncoder encoder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FormattedImage"/> class.
         /// </summary>
         /// <param name="image">The image.</param>
         /// <param name="format">The format.</param>
-        protected FormattedImage(Image<Rgba32> image, IImageFormat format)
+        internal FormattedImage(Image<Rgba32> image, IImageFormat format)
         {
-            this.format = format;
             this.Image = image;
+            this.imageFormatsManager = image.GetConfiguration().ImageFormatsManager;
+            this.Format = format;
         }
 
         /// <summary>
@@ -38,7 +43,40 @@ namespace SixLabors.ImageSharp.Web
         public IImageFormat Format
         {
             get => this.format;
-            set => this.format = value ?? throw new ArgumentNullException(nameof(value));
+            set
+            {
+                if (value is null)
+                {
+                    ThrowNull(nameof(value));
+                }
+
+                this.format = value;
+                this.encoder = this.imageFormatsManager.FindEncoder(value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the encoder.
+        /// </summary>
+        public IImageEncoder Encoder
+        {
+            get => this.encoder;
+            set
+            {
+                if (value is null)
+                {
+                    ThrowNull(nameof(value));
+                }
+
+                // The given type should match the format encoder.
+                IImageEncoder reference = this.imageFormatsManager.FindEncoder(this.Format);
+                if (reference.GetType() != value.GetType())
+                {
+                    ThrowInvalid(nameof(value));
+                }
+
+                this.encoder = value;
+            }
         }
 
         /// <summary>
@@ -46,7 +84,7 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <param name="source">The source.</param>
-        /// <returns>A formatted image.</returns>
+        /// <returns>The <see cref="FormattedImage"/>.</returns>
         public static FormattedImage Load(Configuration configuration, Stream source)
         {
             var image = ImageSharp.Image.Load<Rgba32>(configuration, source, out IImageFormat format);
@@ -54,18 +92,25 @@ namespace SixLabors.ImageSharp.Web
         }
 
         /// <summary>
-        /// Saves the specified destination.
+        /// Saves image to the specified destination stream.
         /// </summary>
-        /// <param name="destination">The destination.</param>
-        public void Save(Stream destination) => this.Image.Save(destination, this.format);
+        /// <param name="destination">The destination stream.</param>
+        public void Save(Stream destination) => this.Image.Save(destination, this.encoder);
 
         /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting
+        /// unmanaged resources.
         /// </summary>
         public void Dispose()
         {
             this.Image?.Dispose();
             this.Image = null;
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowNull(string name) => throw new ArgumentNullException(name);
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowInvalid(string name) => throw new ArgumentException(name);
     }
 }

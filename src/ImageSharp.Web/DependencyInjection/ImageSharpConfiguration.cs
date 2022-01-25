@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using Microsoft.Extensions.Options;
@@ -14,10 +14,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <inheritdoc/>
         public void Configure(ImageSharpMiddlewareOptions options)
         {
-            options.Configuration = Configuration.Default;
-            options.MaxCacheDays = 365;
-            options.MaxBrowserCacheDays = 7;
-            options.CachedNameLength = 12;
         }
     }
 }

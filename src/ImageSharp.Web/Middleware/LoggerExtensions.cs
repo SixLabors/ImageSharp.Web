@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+﻿// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -23,12 +23,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
         static LoggerExtensions()
         {
             LogProcessingErrorAction = LoggerMessage.Define<string>(
-                logLevel: LogLevel.Error,
+                logLevel: LogLevel.Debug,
                 eventId: 1,
                 formatString: "The image '{Uri}' could not be processed");
 
             LogResolveFailedAction = LoggerMessage.Define<string>(
-                logLevel: LogLevel.Error,
+                logLevel: LogLevel.Debug,
                 eventId: 2,
                 formatString: "The image '{Uri}' could not be resolved");
 

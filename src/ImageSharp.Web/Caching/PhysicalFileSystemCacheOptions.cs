@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 namespace SixLabors.ImageSharp.Web.Caching
@@ -12,5 +12,19 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Gets or sets the cache folder name.
         /// </summary>
         public string CacheFolder { get; set; } = "is-cache";
+
+        /// <summary>
+        /// Gets or sets the optional cache root folder.
+        /// <para>
+        /// This value can be <see langword="null"/>, a fully qualified absolute path,
+        /// or a path relative to the directory that contains the application
+        /// content files.
+        /// </para>
+        /// <para>
+        /// If not set, this will default to the directory that contains the web-servable
+        /// application content files; commonly 'wwwroot'.
+        /// </para>
+        /// </summary>
+        public string CacheRoot { get; set; }
     }
 }

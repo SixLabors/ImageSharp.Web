@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -8,32 +8,33 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
 {
     /// <summary>
     /// Defines a contract for converting the value of a string into a different data type.
-    /// Implementations of this interface should be stateless by design.
+    /// Implementations should be stateless by design and also implement <see cref="ICommandConverter{T}"/>.
     /// </summary>
     public interface ICommandConverter
+    {
+        /// <summary>
+        /// Gets the type this converter returns.
+        /// </summary>
+        Type Type { get; }
+    }
+
+    /// <inheritdoc/>
+    /// <typeparam name="T">The type this converter returns.</typeparam>
+    public interface ICommandConverter<T> : ICommandConverter
     {
         /// <summary>
         /// Converts the given string to the type of this converter, using the specified culture information.
         /// </summary>
         /// <returns>
-        /// An <see cref="string"/> that represents the converted value.
+        /// A <see cref="string"/> that represents the converted value.
         /// </returns>
+        /// <param name="parser">The command parser use for parting commands.</param>
         /// <param name="culture">
-        /// The <see cref="CultureInfo"/> to use as the current culture.
+        /// The <see cref="CultureInfo"/> to use as the current parsing culture.
         /// </param>
         /// <param name="value">The <see cref="string"/> to convert. </param>
         /// <param name="propertyType">The property type that the converter will convert to.</param>
         /// <exception cref="NotSupportedException">The conversion cannot be performed.</exception>
-        object ConvertFrom(CultureInfo culture, string value, Type propertyType);
-
-        /// <summary>
-        /// Converts the given string to the converter's native type using the invariant culture.
-        /// </summary>
-        /// <param name="text">The value to convert from.</param>
-        /// <param name="propertyType">The property type that the converter will convert to.</param>
-        /// <returns>
-        /// An <see cref="object"/> that represents the converted value.
-        /// </returns>
-        object ConvertFromInvariantString(string text, Type propertyType);
+        T ConvertFrom(CommandParser parser, CultureInfo culture, string value, Type propertyType);
     }
 }

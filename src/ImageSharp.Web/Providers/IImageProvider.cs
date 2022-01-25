@@ -1,8 +1,7 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Resolvers;
@@ -14,6 +13,11 @@ namespace SixLabors.ImageSharp.Web.Providers
     /// </summary>
     public interface IImageProvider
     {
+        /// <summary>
+        /// Gets the processing behavior.
+        /// </summary>
+        ProcessingBehavior ProcessingBehavior { get; }
+
         /// <summary>
         /// Gets or sets the method used by the resolver to identify itself as the correct resolver to use.
         /// </summary>

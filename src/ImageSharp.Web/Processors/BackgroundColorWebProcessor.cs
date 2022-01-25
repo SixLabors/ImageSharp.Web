@@ -1,9 +1,9 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Web.Commands;
 
@@ -29,9 +29,14 @@ namespace SixLabors.ImageSharp.Web.Processors
         public IEnumerable<string> Commands { get; } = ColorCommands;
 
         /// <inheritdoc/>
-        public FormattedImage Process(FormattedImage image, ILogger logger, IDictionary<string, string> commands)
+        public FormattedImage Process(
+            FormattedImage image,
+            ILogger logger,
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture)
         {
-            Rgba32 background = CommandParser.Instance.ParseValue<Rgba32>(commands.GetValueOrDefault(Color));
+            Color background = parser.ParseValue<Color>(commands.GetValueOrDefault(Color), culture);
 
             if (background != default)
             {

@@ -1,8 +1,10 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp.Web.Commands;
 
 namespace SixLabors.ImageSharp.Web.Processors
 {
@@ -22,7 +24,16 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <param name="image">The image to process.</param>
         /// <param name="logger">The type used for performing logging.</param>
         /// <param name="commands">The querystring collection containing the processing commands.</param>
-        /// <returns>The <see cref="Image{Rgba32}"/>.</returns>
-        FormattedImage Process(FormattedImage image, ILogger logger, IDictionary<string, string> commands);
+        /// <param name="parser">The command parser use for parting commands.</param>
+        /// <param name="culture">
+        /// The <see cref="CultureInfo"/> to use as the current parsing culture.
+        /// </param>
+        /// <returns>The <see cref="FormattedImage"/>.</returns>
+        FormattedImage Process(
+            FormattedImage image,
+            ILogger logger,
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture);
     }
 }

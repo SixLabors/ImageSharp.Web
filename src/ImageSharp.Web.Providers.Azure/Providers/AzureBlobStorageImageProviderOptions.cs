@@ -1,9 +1,9 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using Microsoft.Azure.Storage.Blob;
+using System.Collections.Generic;
 
-namespace SixLabors.ImageSharp.Web.Providers
+namespace SixLabors.ImageSharp.Web.Providers.Azure
 {
     /// <summary>
     /// Configuration options for the <see cref="AzureBlobStorageImageProvider"/> provider.
@@ -11,20 +11,27 @@ namespace SixLabors.ImageSharp.Web.Providers
     public class AzureBlobStorageImageProviderOptions
     {
         /// <summary>
-        /// Gets or sets the connection string.
+        /// Gets or sets the collection of blob container client options.
+        /// </summary>
+        public ICollection<AzureBlobContainerClientOptions> BlobContainers { get; set; } = new HashSet<AzureBlobContainerClientOptions>();
+    }
+
+    /// <summary>
+    /// Represents a single Azure Blob Storage connection and container.
+    /// </summary>
+    public class AzureBlobContainerClientOptions
+    {
+        /// <summary>
+        /// Gets or sets the Azure Blob Storage connection string.
+        /// <see href="https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string."/>
         /// </summary>
         public string ConnectionString { get; set; }
 
         /// <summary>
-        /// Gets or sets the container name.
+        /// Gets or sets the Azure Blob Storage container name.
         /// Must conform to Azure Blob Storage containiner naming guidlines.
         /// <see href="https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names"/>
         /// </summary>
         public string ContainerName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the value indicating the level of public access that is allowed on the container.
-        /// </summary>
-        public BlobContainerPublicAccessType AccessType { get; set; } = BlobContainerPublicAccessType.Blob;
     }
 }

@@ -12,7 +12,7 @@
 
 * Ensure the PR description clearly describes the problem and solution. Include the relevant issue number if applicable.
 
-* Before submitting, please ensure that your code matches the existing coding patterns and practise as demonstrated in the repository. These follow strict Stylecop rules :cop:.
+* Before submitting, please ensure that your code matches the existing coding patterns and practice as demonstrated in the repository. These follow strict Stylecop rules :cop:.
 
 #### **Do you intend to add a new feature or change an existing one?**
 
@@ -23,6 +23,10 @@
 #### **Do you have questions about consuming the library or the source code?**
 
 * Ask any question about how to use ImageSharp in the [ImageSharp Gitter Chat Room](https://gitter.im/ImageSharp/General).
+
+#### Code of Conduct
+This project has adopted the code of conduct defined by the [Contributor Covenant](https://contributor-covenant.org/) to clarify expected behavior in our community.
+For more information, see the [.NET Foundation Code of Conduct](https://dotnetfoundation.org/code-of-conduct).
 
 And please remember. ImageSharp.Web is the work of a very, very, small number of developers who struggle balancing time to contribute to the project with family time and work commitments. We encourage you to pitch in and help make our vision of simple accessible imageprocessing available to all. Open Source can only exist with your help.
 

@@ -1,8 +1,7 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace SixLabors.ImageSharp.Web.Commands
 {
@@ -65,10 +64,5 @@ namespace SixLabors.ImageSharp.Web.Commands
             Long,
             ULong
         };
-
-        /// <summary>
-        /// The <see cref="PixelFormats.Rgba32"/> type.
-        /// </summary>
-        public static readonly Type Rgba32 = typeof(Rgba32);
     }
 }

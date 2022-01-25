@@ -1,8 +1,13 @@
-﻿using Microsoft.AspNetCore.Builder;
+// Copyright (c) Six Labors.
+// Licensed under the Apache License, Version 2.0.
+
+using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
@@ -10,21 +15,32 @@ using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
-using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Web.Sample
 {
+    /// <summary>
+    /// Contains application configuration allowing the addition of services to the container.
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// </summary>
+        /// <param name="configuration">The configuration properties.</param>
         public Startup(IConfiguration configuration) => this.AppConfiguration = configuration;
 
+        /// <summary>
+        /// Gets the configuration properties.
+        /// </summary>
         public IConfiguration AppConfiguration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services">The collection of service desscriptors.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddImageSharpCore()
+            services.AddImageSharp()
                 .SetRequestParser<QueryCollectionRequestParser>()
                 .Configure<PhysicalFileSystemCacheOptions>(options =>
                 {
@@ -34,7 +50,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                 {
                     return new PhysicalFileSystemCache(
                                 provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
-                                provider.GetRequiredService<IHostingEnvironment>(),
+                                provider.GetRequiredService<IWebHostEnvironment>(),
                                 provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
                                 provider.GetRequiredService<FormatUtilities>());
                 })
@@ -42,7 +58,8 @@ namespace SixLabors.ImageSharp.Web.Sample
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
-                .AddProcessor<BackgroundColorWebProcessor>();
+                .AddProcessor<BackgroundColorWebProcessor>()
+                .AddProcessor<QualityWebProcessor>();
 
             // Add the default service and options.
             //
@@ -68,13 +85,13 @@ namespace SixLabors.ImageSharp.Web.Sample
                 options =>
                     {
                         options.Configuration = Configuration.Default;
-                        options.MaxBrowserCacheDays = 7;
-                        options.MaxCacheDays = 365;
+                        options.BrowserMaxAge = TimeSpan.FromDays(7);
+                        options.CacheMaxAge = TimeSpan.FromDays(365);
                         options.CachedNameLength = 8;
-                        options.OnParseCommands = _ => { };
-                        options.OnBeforeSave = _ => { };
-                        options.OnProcessed = _ => { };
-                        options.OnPrepareResponse = _ => { };
+                        options.OnParseCommandsAsync = _ => Task.CompletedTask;
+                        options.OnBeforeSaveAsync = _ => Task.CompletedTask;
+                        options.OnProcessedAsync = _ => Task.CompletedTask;
+                        options.OnPrepareResponseAsync = _ => Task.CompletedTask;
                     });
         }
 
@@ -87,20 +104,19 @@ namespace SixLabors.ImageSharp.Web.Sample
 
         private void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
         {
-            services.AddImageSharpCore(
+            services.AddImageSharp(
                 options =>
                     {
                         options.Configuration = Configuration.Default;
-                        options.MaxBrowserCacheDays = 7;
-                        options.MaxCacheDays = 365;
+                        options.BrowserMaxAge = TimeSpan.FromDays(7);
+                        options.CacheMaxAge = TimeSpan.FromDays(365);
                         options.CachedNameLength = 8;
-                        options.OnParseCommands = _ => { };
-                        options.OnBeforeSave = _ => { };
-                        options.OnProcessed = _ => { };
-                        options.OnPrepareResponse = _ => { };
+                        options.OnParseCommandsAsync = _ => Task.CompletedTask;
+                        options.OnBeforeSaveAsync = _ => Task.CompletedTask;
+                        options.OnProcessedAsync = _ => Task.CompletedTask;
+                        options.OnPrepareResponseAsync = _ => Task.CompletedTask;
                     })
                 .SetRequestParser<QueryCollectionRequestParser>()
-                .SetMemoryAllocator(provider => ArrayPoolMemoryAllocator.CreateWithMinimalPooling())
                 .Configure<PhysicalFileSystemCacheOptions>(options =>
                 {
                     options.CacheFolder = "different-cache";
@@ -109,19 +125,26 @@ namespace SixLabors.ImageSharp.Web.Sample
                 {
                     return new PhysicalFileSystemCache(
                         provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
-                        provider.GetRequiredService<IHostingEnvironment>(),
+                        provider.GetRequiredService<IWebHostEnvironment>(),
                         provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
                         provider.GetRequiredService<FormatUtilities>());
                 })
                 .SetCacheHash<CacheHash>()
+                .ClearProviders()
                 .AddProvider<PhysicalFileSystemProvider>()
+                .ClearProcessors()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
-                .AddProcessor<BackgroundColorWebProcessor>();
+                .AddProcessor<BackgroundColorWebProcessor>()
+                .AddProcessor<QualityWebProcessor>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app">The application builder.</param>
+        /// <param name="env">The hosting environment the application is running in.</param>
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {

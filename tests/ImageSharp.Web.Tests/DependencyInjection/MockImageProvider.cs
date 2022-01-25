@@ -1,4 +1,4 @@
-// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -11,6 +11,8 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
 {
     public class MockImageProvider : IImageProvider
     {
+        public ProcessingBehavior ProcessingBehavior { get; set; } = ProcessingBehavior.All;
+
         public Func<HttpContext, bool> Match { get; set; } = _ => true;
 
         public Task<IImageResolver> GetAsync(HttpContext context) => Task.FromResult<IImageResolver>(null);

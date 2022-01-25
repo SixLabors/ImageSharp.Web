@@ -1,7 +1,8 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Formats;
@@ -36,21 +37,25 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// </summary>
         /// <param name="options">The middleware configuration options.</param>
         public FormatWebProcessor(IOptions<ImageSharpMiddlewareOptions> options)
-        {
-            this.options = options.Value;
-        }
+            => this.options = options.Value;
 
         /// <inheritdoc/>
         public IEnumerable<string> Commands { get; } = FormatCommands;
 
         /// <inheritdoc/>
-        public FormattedImage Process(FormattedImage image, ILogger logger, IDictionary<string, string> commands)
+        public FormattedImage Process(
+            FormattedImage image,
+            ILogger logger,
+            IDictionary<string, string> commands,
+            CommandParser parser,
+            CultureInfo culture)
         {
             string extension = commands.GetValueOrDefault(Format);
 
             if (!string.IsNullOrWhiteSpace(extension))
             {
-                IImageFormat format = this.options.Configuration.ImageFormatsManager.FindFormatByFileExtension(extension);
+                IImageFormat format = this.options.Configuration
+                    .ImageFormatsManager.FindFormatByFileExtension(extension);
 
                 if (format != null)
                 {

@@ -1,12 +1,15 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 
 namespace SixLabors.ImageSharp.Web
@@ -16,24 +19,27 @@ namespace SixLabors.ImageSharp.Web
     /// </summary>
     public sealed class FormatUtilities
     {
-        private readonly IImageFormat[] imageFormats;
-        private readonly Dictionary<IImageFormat, string[]> fileExtensions = new Dictionary<IImageFormat, string[]>();
-        private readonly Dictionary<string, string> fileExtension = new Dictionary<string, string>();
+        private readonly List<string> extensions = new();
+        private readonly Dictionary<string, string> extensionsByMimeType = new();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FormatUtilities"/> class.
+        /// Initializes a new instance of the <see cref="FormatUtilities" /> class.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        public FormatUtilities(Configuration configuration)
+        /// <param name="options">The middleware options.</param>
+        public FormatUtilities(IOptions<ImageSharpMiddlewareOptions> options)
         {
-            // The formats contained in the configuration are used a lot in hash generation
-            // so we need them to be enumerated to remove allocations and allow indexing.
-            this.imageFormats = configuration.ImageFormats.ToArray();
-            for (int i = 0; i < this.imageFormats.Length; i++)
+            Guard.NotNull(options, nameof(options));
+
+            foreach (IImageFormat imageFormat in options.Value.Configuration.ImageFormats)
             {
-                string[] extensions = this.imageFormats[i].FileExtensions.ToArray();
-                this.fileExtensions[this.imageFormats[i]] = extensions;
-                this.fileExtension[this.imageFormats[i].DefaultMimeType] = extensions[0];
+                string[] extensions = imageFormat.FileExtensions.ToArray();
+
+                foreach (string extension in extensions)
+                {
+                    this.extensions.Add(extension);
+                }
+
+                this.extensionsByMimeType[imageFormat.DefaultMimeType] = extensions[0];
             }
         }
 
@@ -41,42 +47,71 @@ namespace SixLabors.ImageSharp.Web
         /// Gets the file extension for the given image uri.
         /// </summary>
         /// <param name="uri">The full request uri.</param>
-        /// <returns>The <see cref="string"/>.</returns>
-        public string GetExtensionFromUri(string uri)
+        /// <param name="extension">
+        /// When this method returns, contains the file extension for the image source,
+        /// if the path exists; otherwise, the default value for the type of the path parameter.
+        /// This parameter is passed uninitialized.
+        /// </param>
+        /// <returns>
+        /// <see langword="true" /> if the uri contains an extension; otherwise, <see langword="false" />.
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryGetExtensionFromUri(string uri, out string extension)
         {
-            // TODO: Investigate using span to reduce allocations here.
-            string[] parts = uri.Split('?');
-            if (parts.Length > 1 && QueryHelpers.ParseQuery(parts[1]).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
-            {
-                return ext;
-            }
+            extension = null;
+            int query = uri.IndexOf('?');
+            ReadOnlySpan<char> path;
 
-            string path = parts[0];
-            string extension = null;
-            int index = 0;
-            for (int i = 0; i < this.imageFormats.Length; i++)
+            if (query > -1)
             {
-                for (int j = 0; j < this.fileExtensions[this.imageFormats[i]].Length; j++)
+                if (uri.Contains(FormatWebProcessor.Format, StringComparison.OrdinalIgnoreCase)
+                    && QueryHelpers.ParseQuery(uri.Substring(query)).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
                 {
-                    int li = path.LastIndexOf($".{this.fileExtensions[this.imageFormats[i]][j]}", StringComparison.OrdinalIgnoreCase);
-                    if (li < index)
+                    // We have a query but is it a valid one?
+                    ReadOnlySpan<char> extSpan = ext[0].AsSpan();
+                    foreach (string e in this.extensions)
                     {
-                        continue;
+                        if (extSpan.Equals(e, StringComparison.OrdinalIgnoreCase))
+                        {
+                            extension = e;
+                            return true;
+                        }
                     }
 
-                    index = li;
-                    extension = this.fileExtensions[this.imageFormats[i]][j];
+                    return false;
+                }
+
+                path = uri.AsSpan(0, query);
+            }
+            else
+            {
+                path = uri;
+            }
+
+            int extensionIndex;
+            if ((extensionIndex = path.LastIndexOf('.')) != -1)
+            {
+                ReadOnlySpan<char> pathExtension = path.Slice(extensionIndex + 1);
+
+                foreach (string e in this.extensions)
+                {
+                    if (pathExtension.Equals(e, StringComparison.OrdinalIgnoreCase))
+                    {
+                        extension = e;
+                        return true;
+                    }
                 }
             }
 
-            return extension;
+            return false;
         }
 
         /// <summary>
         /// Gets the correct extension for the given content type (mime-type).
         /// </summary>
         /// <param name="contentType">The content type (mime-type).</param>
-        /// <returns>The <see cref="string"/>.</returns>
-        public string GetExtensionFromContentType(string contentType) => this.fileExtension[contentType];
+        /// <returns>The <see cref="string" />.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string GetExtensionFromContentType(string contentType) => this.extensionsByMimeType[contentType];
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -20,10 +20,18 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
                 { "height", "200" }
             };
 
-            HttpContext context = TestHelpers.CreateHttpContext();
+            HttpContext context = CreateHttpContext();
             IDictionary<string, string> actual = new QueryCollectionRequestParser().ParseRequestCommands(context);
 
             Assert.Equal(expected, actual);
+        }
+
+        private static HttpContext CreateHttpContext()
+        {
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Path = "/testwebsite.com/image-12345.jpeg";
+            httpContext.Request.QueryString = new QueryString("?width=400&height=200");
+            return httpContext;
         }
     }
 }

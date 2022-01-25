@@ -1,18 +1,17 @@
-// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Net;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Azure.Storage;
-using Microsoft.Azure.Storage.Blob;
-using Microsoft.Azure.Storage.Shared.Protocol;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.ImageSharp.Web.Resolvers.Azure;
 
-namespace SixLabors.ImageSharp.Web.Providers
+namespace SixLabors.ImageSharp.Web.Providers.Azure
 {
     /// <summary>
     /// Returns images stored in Azure Blob Storage.
@@ -25,14 +24,10 @@ namespace SixLabors.ImageSharp.Web.Providers
         private static readonly char[] SlashChars = { '\\', '/' };
 
         /// <summary>
-        /// The cloud storage account.
+        /// The containers for the blob services.
         /// </summary>
-        private readonly CloudStorageAccount storageAccount;
-
-        /// <summary>
-        /// The container in the blob service.
-        /// </summary>
-        private readonly CloudBlobContainer container;
+        private readonly Dictionary<string, BlobContainerClient> containers
+            = new Dictionary<string, BlobContainerClient>();
 
         /// <summary>
         /// The blob storage options.
@@ -62,27 +57,17 @@ namespace SixLabors.ImageSharp.Web.Providers
 
             this.storageOptions = storageOptions.Value;
             this.formatUtilities = formatUtilities;
-            this.storageAccount = CloudStorageAccount.Parse(this.storageOptions.ConnectionString);
 
-            try
+            foreach (AzureBlobContainerClientOptions container in this.storageOptions.BlobContainers)
             {
-                // It's ok to create a single reusable client since we are not altering it.
-                CloudBlobClient client = this.storageAccount.CreateCloudBlobClient();
-                this.container = client.GetContainerReference(this.storageOptions.ContainerName);
-
-                if (!this.container.Exists())
-                {
-                    this.container.Create();
-                    this.container.SetPermissions(new BlobContainerPermissions { PublicAccess = this.storageOptions.AccessType });
-                }
-            }
-            catch (StorageException storageException) when (storageException.RequestInformation.HttpStatusCode == (int)HttpStatusCode.Conflict
-                || storageException.RequestInformation.ExtendedErrorInformation.ErrorCode == StorageErrorCodeStrings.ContainerAlreadyExists)
-            {
-                // https://github.com/Azure/azure-sdk-for-net/issues/109
-                // We do not fire exception if container exists - there is no need in such actions
+                this.containers.Add(
+                    container.ContainerName,
+                    new BlobContainerClient(container.ConnectionString, container.ContainerName));
             }
         }
+
+        /// <inheritdoc/>
+        public ProcessingBehavior ProcessingBehavior { get; } = ProcessingBehavior.All;
 
         /// <inheritdoc/>
         public Func<HttpContext, bool> Match
@@ -97,17 +82,42 @@ namespace SixLabors.ImageSharp.Web.Providers
             // Strip the leading slash and container name from the HTTP request path and treat
             // the remaining path string as the blob name.
             // Path has already been correctly parsed before here.
-            string blobName = context.Request.Path.Value.TrimStart(SlashChars)
-                                     .Substring(this.storageOptions.ContainerName.Length)
-                                     .TrimStart(SlashChars);
+            string containerName = string.Empty;
+            BlobContainerClient container = null;
+
+            // We want an exact match here to ensure that container names starting with
+            // the same prefix are not mixed up.
+            string path = context.Request.Path.Value.TrimStart(SlashChars);
+            int index = path.IndexOfAny(SlashChars);
+            string nameToMatch = index != -1 ? path.Substring(0, index) : path;
+
+            foreach (string key in this.containers.Keys)
+            {
+                if (nameToMatch.Equals(key, StringComparison.OrdinalIgnoreCase))
+                {
+                    containerName = key;
+                    container = this.containers[key];
+                    break;
+                }
+            }
+
+            // Something has gone horribly wrong for this to happen but check anyway.
+            if (container is null)
+            {
+                return null;
+            }
+
+            // Blob name should be the remaining path string.
+            string blobName = path.Substring(containerName.Length).TrimStart(SlashChars);
 
             if (string.IsNullOrWhiteSpace(blobName))
             {
                 return null;
             }
 
-            CloudBlockBlob blob = this.container.GetBlockBlobReference(blobName);
-            if (!await blob.ExistsAsync().ConfigureAwait(false))
+            BlobClient blob = container.GetBlobClient(blobName);
+
+            if (!await blob.ExistsAsync())
             {
                 return null;
             }
@@ -117,12 +127,22 @@ namespace SixLabors.ImageSharp.Web.Providers
 
         /// <inheritdoc/>
         public bool IsValidRequest(HttpContext context)
-            => this.formatUtilities.GetExtensionFromUri(context.Request.GetDisplayUrl()) != null;
+            => this.formatUtilities.TryGetExtensionFromUri(context.Request.GetDisplayUrl(), out _);
 
         private bool IsMatch(HttpContext context)
         {
+            // Only match loosly here for performance.
+            // Path matching conflicts should be dealt with by configuration.
             string path = context.Request.Path.Value.TrimStart(SlashChars);
-            return path.StartsWith(this.storageOptions.ContainerName, StringComparison.OrdinalIgnoreCase);
+            foreach (string container in this.containers.Keys)
+            {
+                if (path.StartsWith(container, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
