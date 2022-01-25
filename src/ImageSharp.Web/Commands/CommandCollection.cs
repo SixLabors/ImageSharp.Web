@@ -48,7 +48,7 @@ namespace SixLabors.ImageSharp.Web.Commands
             {
                 if (this.TryGetValue(key, out KeyValuePair<string, string> item))
                 {
-                    return item.Key;
+                    return item.Value;
                 }
 
                 throw new KeyNotFoundException();
