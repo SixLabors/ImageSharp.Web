@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 
 namespace SixLabors.ImageSharp.Web.Commands
 {
@@ -59,7 +60,8 @@ namespace SixLabors.ImageSharp.Web.Commands
                     return item.Value;
                 }
 
-                throw new KeyNotFoundException();
+                ThrowKeyNotFound();
+                return default;
             }
 
             set
@@ -75,7 +77,43 @@ namespace SixLabors.ImageSharp.Web.Commands
             }
         }
 
+        /// <summary>
+        /// Searches for an element that matches the conditions defined by the specified
+        /// predicate, and returns the zero-based index of the first occurrence within the
+        /// entire <see cref="CommandCollection"/>.
+        /// </summary>
+        /// <param name="match">
+        /// The <see cref="Predicate{T}"/> delegate that defines the conditions of the element to
+        /// search for.
+        /// </param>
+        /// <returns>
+        /// The zero-based index of the first occurrence of an element that matches the conditions
+        /// defined by match, if found; otherwise, -1.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="match"/> is null.</exception>
+        public int FindIndex(Predicate<string> match)
+        {
+            Guard.NotNull(match, nameof(match));
+
+            int index = 0;
+            foreach (KeyValuePair<string, string> item in this)
+            {
+                if (match(item.Key))
+                {
+                    return index;
+                }
+
+                index++;
+            }
+
+            return -1;
+        }
+
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override string GetKeyForItem(KeyValuePair<string, string> item) => item.Key;
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowKeyNotFound() => throw new KeyNotFoundException();
     }
 }

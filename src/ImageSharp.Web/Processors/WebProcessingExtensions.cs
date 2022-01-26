@@ -34,9 +34,7 @@ namespace SixLabors.ImageSharp.Web.Processors
             CommandParser commandParser,
             CultureInfo culture)
         {
-            var commandKeys = new List<string>(commands.Keys);
-
-            foreach (IImageWebProcessor processor in processors.GetBySupportedCommands(commandKeys))
+            foreach (IImageWebProcessor processor in processors.GetBySupportedCommands(commands))
             {
                 source = processor.Process(source, logger, commands, commandParser, culture);
             }
@@ -52,7 +50,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <returns>
         /// The sorted proccessors that supports any of the specified commands.
         /// </returns>
-        public static IEnumerable<IImageWebProcessor> GetBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, List<string> commands)
+        public static IEnumerable<IImageWebProcessor> GetBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, CommandCollection commands)
         {
             var indexedProcessors = new List<(int Index, IImageWebProcessor Processor)>();
 
