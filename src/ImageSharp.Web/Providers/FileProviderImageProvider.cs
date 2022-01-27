@@ -26,16 +26,28 @@ namespace SixLabors.ImageSharp.Web.Providers
         private readonly FormatUtilities formatUtilities;
 
         /// <summary>
+        /// The path prefix that needs to match the request and is removed before getting the file info.
+        /// </summary>
+        private readonly PathString pathPrefix;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="FileProviderImageProvider"/> class.
         /// </summary>
         /// <param name="fileProvider">The file provider.</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
-        public FileProviderImageProvider(IFileProvider fileProvider, FormatUtilities formatUtilities)
+        /// <param name="pathPrefix">The path prefix that needs to match the request and is removed before getting the file info.</param>
+        public FileProviderImageProvider(IFileProvider fileProvider, FormatUtilities formatUtilities, PathString pathPrefix = default)
         {
             Guard.NotNull(fileProvider, nameof(fileProvider));
 
             this.fileProvider = fileProvider;
             this.formatUtilities = formatUtilities;
+            this.pathPrefix = pathPrefix;
+
+            if (pathPrefix.HasValue)
+            {
+                this.Match = c => c.Request.Path.StartsWithSegments(pathPrefix);
+            }
         }
 
         /// <inheritdoc/>
@@ -51,8 +63,12 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <inheritdoc/>
         public virtual Task<IImageResolver> GetAsync(HttpContext context)
         {
-            // Path has already been correctly parsed before here
-            IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
+            if (!context.Request.Path.StartsWithSegments(this.pathPrefix, out PathString subpath))
+            {
+                return Task.FromResult<IImageResolver>(null);
+            }
+
+            IFileInfo fileInfo = this.fileProvider.GetFileInfo(subpath);
 
             // Check to see if the file exists
             if (!fileInfo.Exists)
