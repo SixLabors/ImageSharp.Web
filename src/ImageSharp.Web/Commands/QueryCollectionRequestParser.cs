@@ -18,6 +18,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         {
             if (context.Request.Query.Count == 0)
             {
+                // We return new to ensure the collection is still mutable via events.
                 return new();
             }
 
