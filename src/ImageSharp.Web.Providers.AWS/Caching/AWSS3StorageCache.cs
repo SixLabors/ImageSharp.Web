@@ -1,33 +1,28 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3.Util;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Resolvers;
 using SixLabors.ImageSharp.Web.Resolvers.AWS;
 
 namespace SixLabors.ImageSharp.Web.Caching.AWS
 {
-
     /// <summary>
-    /// Implements an Azure Blob Storage based cache.
+    /// Implements an AWS S3 Storage based cache.
     /// </summary>
     public class AWSS3StorageCache : IImageCache
     {
         private readonly IAmazonS3 amazonS3Client;
-        private readonly String bucket;
+        private readonly string bucket;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AzureBlobStorageCache"/> class.
+        /// Initializes a new instance of the <see cref="AWSS3StorageCache"/> class.
         /// </summary>
         /// <param name="cacheOptions">The cache options.</param>
         public AWSS3StorageCache(IOptions<AWSS3StorageCacheOptions> cacheOptions)
@@ -44,31 +39,31 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
                 this.amazonS3Client = new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
             }
             else if (!string.IsNullOrEmpty(options.AccessKey) &&
-                     !string.IsNullOrEmpty(options.AccessSecret)&&
+                     !string.IsNullOrEmpty(options.AccessSecret) &&
                      !string.IsNullOrEmpty(options.Region))
             {
                 var region = RegionEndpoint.GetBySystemName(options.Region);
-                amazonS3Client = new AmazonS3Client(options.AccessKey, options.AccessSecret, region);
+                this.amazonS3Client = new AmazonS3Client(options.AccessKey, options.AccessSecret, region);
             }
             else
             {
                 var region = RegionEndpoint.GetBySystemName(options.Region);
-                amazonS3Client = new AmazonS3Client(region);
+                this.amazonS3Client = new AmazonS3Client(region);
             }
         }
 
         /// <inheritdoc/>
         public async Task<IImageCacheResolver> GetAsync(string key)
         {
-            GetObjectMetadataRequest request = new GetObjectMetadataRequest() {BucketName = this.bucket, Key = key};
+            var request = new GetObjectMetadataRequest() { BucketName = this.bucket, Key = key };
 
             try
             {
                 await this.amazonS3Client.GetObjectMetadataAsync(request);
 
-                return new AWSS3FileSystemCacheResolver(this.amazonS3Client, this.bucket, key);
+                return new AWSS3StorageCacheResolver(this.amazonS3Client, this.bucket, key);
             }
-            catch (AmazonS3Exception exception)
+            catch
             {
                 return null;
             }
@@ -88,7 +83,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
 
             var dt = metadata.ToDictionary();
 
-            foreach (var d in dt)
+            foreach (KeyValuePair<string, string> d in dt)
             {
                 request.Metadata.Add(d.Key, d.Value);
             }
@@ -101,33 +96,28 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
         /// with the same name does not already exist.
         /// </summary>
         /// <param name="options">The Azure Blob Storage cache options.</param>
-        /// <param name="accessType">
-        /// Optionally specifies whether data in the container may be accessed publicly and
-        /// the level of access. <see cref="PublicAccessType.BlobContainer"/>
-        /// specifies full public read access for container and blob data. Clients can enumerate
-        /// blobs within the container via anonymous request, but cannot enumerate containers
-        /// within the storage account. <see cref="Blob"/>
-        /// specifies public read access for blobs. Blob data within this container can be
-        /// read via anonymous request, but container data is not available. Clients cannot
-        /// enumerate blobs within the container via anonymous request. <see cref="PublicAccessType.None"/>
-        /// specifies that the container data is private to the account owner.
+        /// <param name="acl">
+        /// Specifies whether data in the bucket may be accessed publicly and the level of access.
+        /// <see cref="S3CannedACL.PublicRead"/> specifies full public read access for bucket
+        /// and object data. <see cref="S3CannedACL.Private"/> specifies that the container
+        /// data is private to the account owner.
         /// </param>
         /// <returns>
-        /// If the container does not already exist, a <see cref="Response{T}"/> describing the newly
+        /// If the container does not already exist, a <see cref="PutBucketResponse"/> describing the newly
         /// created container. If the container already exists, <see langword="null"/>.
         /// </returns>
         public static PutBucketResponse CreateIfNotExists(
             AWSS3StorageCacheOptions options,
             S3CannedACL acl)
         {
-            AmazonS3Client amazonS3Client = null;
+            AmazonS3Client amazonS3Client;
             bool foundBucket = false;
 
             if (!string.IsNullOrEmpty(options.Endpoint) &&
                 options.AccessKey != null &&
                 options.AccessSecret != null)
             {
-                var config = new AmazonS3Config {ServiceURL = options.Endpoint, ForcePathStyle = true};
+                var config = new AmazonS3Config { ServiceURL = options.Endpoint, ForcePathStyle = true };
                 amazonS3Client = new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
             }
             else if (!string.IsNullOrEmpty(options.AccessKey) &&
@@ -137,12 +127,12 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
             }
             else
             {
-                amazonS3Client = new AmazonS3Client(Amazon.RegionEndpoint.GetBySystemName(options.Region));
+                amazonS3Client = new AmazonS3Client(RegionEndpoint.GetBySystemName(options.Region));
             }
 
-            var listBucketsResponse = amazonS3Client.ListBucketsAsync().GetAwaiter().GetResult();
+            ListBucketsResponse listBucketsResponse = amazonS3Client.ListBucketsAsync().GetAwaiter().GetResult();
 
-            foreach (var b in listBucketsResponse.Buckets)
+            foreach (S3Bucket b in listBucketsResponse.Buckets)
             {
                 if (b.BucketName == options.BucketName)
                 {
@@ -157,7 +147,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
                 {
                     BucketName = options.BucketName,
                     BucketRegion = options.Region,
-                    CannedACL = S3CannedACL.PublicRead
+                    CannedACL = acl
                 };
 
                 PutBucketResponse putBucketResponse =

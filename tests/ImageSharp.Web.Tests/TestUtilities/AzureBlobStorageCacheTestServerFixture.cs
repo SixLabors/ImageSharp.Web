@@ -13,83 +13,77 @@ using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.ImageSharp.Web.Providers.Azure;
 using Xunit;
+using ApplicationBuilderExtensions = SixLabors.ImageSharp.Web.DependencyInjection.ApplicationBuilderExtensions;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 {
     public class AzureBlobStorageCacheTestServerFixture : TestServerFixture
     {
-        protected override void ConfigureServices(IServiceCollection services)
-        {
+        protected override void ConfigureServices(IServiceCollection services) =>
             services.AddImageSharp(options =>
-            {
-                Func<ImageCommandContext, Task> onParseCommandsAsync = options.OnParseCommandsAsync;
-
-                options.OnParseCommandsAsync = context =>
                 {
-                    Assert.NotNull(context);
-                    Assert.NotNull(context.Context);
-                    Assert.NotNull(context.Commands);
-                    Assert.NotNull(context.Parser);
+                    Func<ImageCommandContext, Task> onParseCommandsAsync = options.OnParseCommandsAsync;
 
-                    return onParseCommandsAsync.Invoke(context);
-                };
+                    options.OnParseCommandsAsync = context =>
+                    {
+                        Assert.NotNull(context);
+                        Assert.NotNull(context.Context);
+                        Assert.NotNull(context.Commands);
+                        Assert.NotNull(context.Parser);
 
-                Func<ImageProcessingContext, Task> onProcessedAsync = options.OnProcessedAsync;
+                        return onParseCommandsAsync.Invoke(context);
+                    };
 
-                options.OnProcessedAsync = context =>
-                {
-                    Assert.NotNull(context);
-                    Assert.NotNull(context.Commands);
-                    Assert.NotNull(context.ContentType);
-                    Assert.NotNull(context.Context);
-                    Assert.NotNull(context.Extension);
-                    Assert.NotNull(context.Stream);
+                    Func<ImageProcessingContext, Task> onProcessedAsync = options.OnProcessedAsync;
 
-                    return onProcessedAsync.Invoke(context);
-                };
+                    options.OnProcessedAsync = context =>
+                    {
+                        Assert.NotNull(context);
+                        Assert.NotNull(context.Commands);
+                        Assert.NotNull(context.ContentType);
+                        Assert.NotNull(context.Context);
+                        Assert.NotNull(context.Extension);
+                        Assert.NotNull(context.Stream);
 
-                Func<FormattedImage, Task> onBeforeSaveAsync = options.OnBeforeSaveAsync;
+                        return onProcessedAsync.Invoke(context);
+                    };
 
-                options.OnBeforeSaveAsync = context =>
-                {
-                    Assert.NotNull(context);
-                    Assert.NotNull(context.Format);
-                    Assert.NotNull(context.Encoder);
-                    Assert.NotNull(context.Image);
+                    Func<FormattedImage, Task> onBeforeSaveAsync = options.OnBeforeSaveAsync;
 
-                    return onBeforeSaveAsync.Invoke(context);
-                };
+                    options.OnBeforeSaveAsync = context =>
+                    {
+                        Assert.NotNull(context);
+                        Assert.NotNull(context.Format);
+                        Assert.NotNull(context.Encoder);
+                        Assert.NotNull(context.Image);
 
-                Func<HttpContext, Task> onPrepareResponseAsync = options.OnPrepareResponseAsync;
+                        return onBeforeSaveAsync.Invoke(context);
+                    };
 
-                options.OnPrepareResponseAsync = context =>
-                {
-                    Assert.NotNull(context);
-                    Assert.NotNull(context.Response);
+                    Func<HttpContext, Task> onPrepareResponseAsync = options.OnPrepareResponseAsync;
 
-                    return onPrepareResponseAsync.Invoke(context);
-                };
-            })
+                    options.OnPrepareResponseAsync = context =>
+                    {
+                        Assert.NotNull(context);
+                        Assert.NotNull(context.Response);
+
+                        return onPrepareResponseAsync.Invoke(context);
+                    };
+                })
                 .ClearProviders()
-                .Configure<AzureBlobStorageImageProviderOptions>(options =>
+                .Configure<AzureBlobStorageImageProviderOptions>(options => options.BlobContainers.Add(new AzureBlobContainerClientOptions
                 {
-                    options.BlobContainers.Add(new AzureBlobContainerClientOptions
-                    {
-                        ConnectionString = TestConstants.AzureConnectionString,
-                        ContainerName = TestConstants.AzureContainerName
-                    });
-                })
-                .Configure<AWSS3StorageImageProviderOptions>(options =>
+                    ConnectionString = TestConstants.AzureConnectionString,
+                    ContainerName = TestConstants.AzureContainerName
+                }))
+                .Configure<AWSS3StorageImageProviderOptions>(options => options.S3Buckets.Add(new AWSS3BucketClientOptions
                 {
-                    options.S3Buckets.Add(new AWSS3BucketClientOptions
-                    {
-                        Endpoint = TestConstants.AWSEndpoint,
-                        BucketName = TestConstants.AWSBucketName,
-                        AccessKey = TestConstants.AWSAccessKey,
-                        AccessSecret = TestConstants.AWSAccessSecret,
-                        Region = TestConstants.AWSRegion
-                    });
-                })
+                    Endpoint = TestConstants.AWSEndpoint,
+                    BucketName = TestConstants.AWSBucketName,
+                    AccessKey = TestConstants.AWSAccessKey,
+                    AccessSecret = TestConstants.AWSAccessSecret,
+                    Region = TestConstants.AWSRegion
+                }))
                 .AddProvider(AzureBlobStorageImageProviderFactory.Create)
                 .AddProvider(AWSS3StorageImageProviderFactory.Create)
                 .AddProvider<PhysicalFileSystemProvider>()
@@ -102,11 +96,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                     AzureBlobStorageCache.CreateIfNotExists(options, PublicAccessType.None);
                 })
                 .SetCache<AzureBlobStorageCache>();
-        }
 
-        protected override void Configure(IApplicationBuilder app)
-        {
-            app.UseImageSharp();
-        }
+        protected override void Configure(IApplicationBuilder app) => ApplicationBuilderExtensions.UseImageSharp(app);
     }
 }

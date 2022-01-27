@@ -1,4 +1,4 @@
-// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -13,19 +13,19 @@ namespace SixLabors.ImageSharp.Web.Resolvers
     /// <summary>
     /// Provides means to manage image buffers within the AWS S3 file system.
     /// </summary>
-    public class AWSS3FileSystemImageResolver : IImageResolver
+    public class AWSS3StorageImageResolver : IImageResolver
     {
         private readonly IAmazonS3 amazonS3;
         private readonly string bucketName;
         private readonly string imagePath;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AWSS3FileSystemImageResolver"/> class.
+        /// Initializes a new instance of the <see cref="AWSS3StorageImageResolver"/> class.
         /// </summary>
         /// <param name="amazonS3">Amazon S3 Client</param>
         /// <param name="bucketName">Bucket Name for where the files are</param>
         /// <param name="imagePath">S3 Key</param>
-        public AWSS3FileSystemImageResolver(IAmazonS3 amazonS3, string bucketName, string imagePath)
+        public AWSS3StorageImageResolver(IAmazonS3 amazonS3, string bucketName, string imagePath)
         {
             this.amazonS3 = amazonS3;
             this.bucketName = bucketName;

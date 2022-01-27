@@ -8,10 +8,6 @@ using System.Net.Http.Headers;
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3.Util;
-using Amazon.Util;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -48,7 +44,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                     ServiceURL = bucketOptions.Endpoint,
                     ForcePathStyle = true
                 };
-                amazonS3Client = new AmazonS3Client("", "", config);
+                amazonS3Client = new AmazonS3Client(string.Empty, string.Empty, config);
             }
             else if (!string.IsNullOrEmpty(bucketOptions.AccessKey) &&
                      !string.IsNullOrEmpty(bucketOptions.AccessSecret) &&
@@ -63,9 +59,9 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 amazonS3Client = new AmazonS3Client(region);
             }
 
-            var listBucketsResponse = amazonS3Client.ListBucketsAsync().GetAwaiter().GetResult();
+            ListBucketsResponse listBucketsResponse = amazonS3Client.ListBucketsAsync().GetAwaiter().GetResult();
 
-            foreach (var b in listBucketsResponse.Buckets)
+            foreach (S3Bucket b in listBucketsResponse.Buckets)
             {
                 if (b.BucketName == bucketOptions.BucketName)
                 {
@@ -92,7 +88,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             IWebHostEnvironment environment = services.GetRequiredService<IWebHostEnvironment>();
 #endif
 
-            GetObjectRequest request = new GetObjectRequest()
+            var request = new GetObjectRequest()
             {
                 BucketName = bucketOptions.BucketName,
                 Key = TestConstants.ImagePath

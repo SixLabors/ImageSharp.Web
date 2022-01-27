@@ -1,4 +1,4 @@
-// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using SixLabors.ImageSharp.Web.Providers.AWS;
 namespace SixLabors.ImageSharp.Web.Providers
 {
     /// <summary>
-    /// Configuration options for the <see cref="AzureBlobStorageImageProvider"/> provider.
+    /// Configuration options for the <see cref="AWSS3StorageImageProviderOptions"/> provider.
     /// </summary>
     public class AWSS3StorageImageProviderOptions
     {
@@ -16,7 +16,6 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// </summary>
         public ICollection<AWSS3BucketClientOptions> S3Buckets { get; set; } = new HashSet<AWSS3BucketClientOptions>();
     }
-
 
     /// <summary>
     /// Configuration options for the <see cref="AWSS3StorageImageProvider"/> provider.
@@ -32,7 +31,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// Gets or sets the AWS bucket name.
         /// </summary>
         public string BucketName { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the AWS key - optional.
         /// </summary>

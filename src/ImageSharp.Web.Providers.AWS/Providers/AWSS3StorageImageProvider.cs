@@ -1,4 +1,4 @@
-// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -41,8 +41,8 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
         /// <summary>
         /// Initializes a new instance of the <see cref="AWSS3StorageImageProvider"/> class.
         /// </summary>
-        /// <param name="amazonS3Client">Amazon S3 client</param>
         /// <param name="storageOptions">The S3 storage options</param>
+        /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public AWSS3StorageImageProvider(IOptions<AWSS3StorageImageProviderOptions> storageOptions, FormatUtilities formatUtilities)
         {
             Guard.NotNull(storageOptions, nameof(storageOptions));
@@ -51,7 +51,7 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
 
             this.formatUtilities = formatUtilities;
 
-            foreach (var bucket in this.storageOptions.S3Buckets)
+            foreach (AWSS3BucketClientOptions bucket in this.storageOptions.S3Buckets)
             {
                 AmazonS3Client s3Client = null;
 
@@ -83,6 +83,7 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
             }
         }
 
+        /// <inheritdoc/>
         public ProcessingBehavior ProcessingBehavior { get; } = ProcessingBehavior.All;
 
         /// <inheritdoc />
@@ -137,7 +138,7 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
 
             bool imageExists = await this.KeyExists(s3Client, bucketName, key);
 
-            return !imageExists ? null : new AWSS3FileSystemImageResolver(s3Client, bucketName, key);
+            return !imageExists ? null : new AWSS3StorageImageResolver(s3Client, bucketName, key);
         }
 
         private bool IsMatch(HttpContext context)

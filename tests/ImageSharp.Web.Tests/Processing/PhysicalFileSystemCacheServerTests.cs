@@ -109,7 +109,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
         {
             Task[] tasks = Enumerable.Range(0, 100).Select(i => Task.Run(async () =>
               {
-                  var command = i % 2 == 0 ? Command : Command2;
+                  string command = i % 2 == 0 ? Command : Command2;
                   using HttpResponseMessage response = await this.HttpClient.GetAsync(url + command);
                   Assert.NotNull(response);
                   Assert.True(response.IsSuccessStatusCode);
