@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -27,11 +26,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// The depth of the nested cache folders structure to store the images.
         /// </summary>
         private readonly int cacheFolderDepth;
-
-        /// <summary>
-        /// The file provider abstraction.
-        /// </summary>
-        private readonly IFileProvider fileProvider;
 
         /// <summary>
         /// Contains various format helper methods based on the current configuration.
@@ -54,7 +48,6 @@ namespace SixLabors.ImageSharp.Web.Caching
             FormatUtilities formatUtilities)
         {
             Guard.NotNull(environment, nameof(environment));
-            Guard.NotNull(options, nameof(options));
             Guard.NotNullOrWhiteSpace(environment.WebRootPath, nameof(environment.WebRootPath));
 
             // Allow configuration of the cache without having to register everything
@@ -62,10 +55,6 @@ namespace SixLabors.ImageSharp.Web.Caching
             this.cacheRootPath = GetCacheRoot(cacheOptions, environment.WebRootPath, environment.ContentRootPath);
             this.cacheFolderDepth = (int)cacheOptions.CacheFolderDepth;
 
-            // Ensure cache directory is created before initializing the file provider
-            Directory.CreateDirectory(this.cacheRootPath);
-
-            this.fileProvider = new PhysicalFileProvider(this.cacheRootPath);
             this.formatUtilities = formatUtilities;
         }
 
@@ -92,7 +81,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         {
             string path = ToFilePath(key, this.cacheFolderDepth);
 
-            IFileInfo metaFileInfo = this.fileProvider.GetFileInfo(this.ToMetaDataFilePath(path));
+            var metaFileInfo = new FileInfo(this.ToMetaDataFilePath(path));
             if (!metaFileInfo.Exists)
             {
                 return Task.FromResult<IImageCacheResolver>(null);

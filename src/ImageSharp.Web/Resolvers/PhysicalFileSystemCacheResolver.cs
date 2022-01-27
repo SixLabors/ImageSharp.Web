@@ -3,7 +3,6 @@
 
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.FileProviders;
 using SixLabors.ImageSharp.Web.Caching;
 
 namespace SixLabors.ImageSharp.Web.Resolvers
@@ -13,7 +12,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
     /// </summary>
     public class PhysicalFileSystemCacheResolver : IImageCacheResolver
     {
-        private readonly IFileInfo metaFileInfo;
+        private readonly FileInfo metaFileInfo;
         private readonly FormatUtilities formatUtilities;
         private ImageCacheMetadata metadata;
 
@@ -24,7 +23,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// <param name="formatUtilities">
         /// Contains various format helper methods based on the current configuration.
         /// </param>
-        public PhysicalFileSystemCacheResolver(IFileInfo metaFileInfo, FormatUtilities formatUtilities)
+        public PhysicalFileSystemCacheResolver(FileInfo metaFileInfo, FormatUtilities formatUtilities)
         {
             this.metaFileInfo = metaFileInfo;
             this.formatUtilities = formatUtilities;
@@ -33,7 +32,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// <inheritdoc/>
         public async Task<ImageCacheMetadata> GetMetaDataAsync()
         {
-            using Stream stream = this.metaFileInfo.CreateReadStream();
+            using Stream stream = this.metaFileInfo.OpenRead();
             this.metadata = await ImageCacheMetadata.ReadAsync(stream);
             return this.metadata;
         }
@@ -42,7 +41,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         public Task<Stream> OpenReadAsync()
         {
             string path = Path.ChangeExtension(
-                this.metaFileInfo.PhysicalPath,
+                this.metaFileInfo.FullName,
                 this.formatUtilities.GetExtensionFromContentType(this.metadata.ContentType));
 
             return Task.FromResult<Stream>(File.OpenRead(path));
