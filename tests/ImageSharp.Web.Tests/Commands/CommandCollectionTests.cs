@@ -49,6 +49,26 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         }
 
         [Fact]
+        public void CanInsertCommandsViaKey()
+        {
+            KeyValuePair<string, string> kv1 = new("a", "b");
+            KeyValuePair<string, string> kv2 = new("c", "d");
+
+            CommandCollection collection = new();
+            collection.Add(kv1);
+            Assert.Single(collection);
+
+            collection.Insert(0, kv2.Key, kv2.Value);
+            Assert.Equal(2, collection.Count);
+
+            Assert.Equal(kv1.Value, collection[kv1.Key]);
+            Assert.Equal(kv2.Value, collection[kv2.Key]);
+
+            Assert.Equal(1, collection.IndexOf(kv1));
+            Assert.Equal(0, collection.IndexOf(kv2));
+        }
+
+        [Fact]
         public void CanSetCommandsViaIndex()
         {
             KeyValuePair<string, string> kv1 = new("a", "b");
@@ -148,10 +168,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
                 collection.Insert(0, new(key, null));
             }
 
-            int counter = keys.Length - 1;
+            int index = 0;
+            int offset = keys.Length - 1;
             foreach (string key in collection.Keys)
             {
-                Assert.Equal(keys[counter--], key);
+                Assert.Equal(index++, collection.IndexOf(key));
+                Assert.Equal(keys[offset--], key);
             }
         }
 

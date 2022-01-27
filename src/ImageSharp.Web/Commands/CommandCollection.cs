@@ -55,13 +55,12 @@ namespace SixLabors.ImageSharp.Web.Commands
         {
             get
             {
-                if (this.TryGetValue(key, out KeyValuePair<string, string> item))
+                if (!this.TryGetValue(key, out string value))
                 {
-                    return item.Value;
+                    ThrowKeyNotFound();
                 }
 
-                ThrowKeyNotFound();
-                return default;
+                return value;
             }
 
             set
@@ -72,9 +71,53 @@ namespace SixLabors.ImageSharp.Web.Commands
                 }
                 else
                 {
-                    this.Add(new(key, value));
+                    this.Add(key, value);
                 }
             }
+        }
+
+        /// <summary>
+        /// Adds an element with the provided key and value to the <see cref="CommandCollection"/>.
+        /// </summary>
+        /// <param name="key">The <see cref="string"/> to use as the key of the element to add.</param>
+        /// <param name="value">The <see cref="string"/> to use as the value of the element to add.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
+        public void Add(string key, string value) => this.Add(new(key, value));
+
+        /// <summary>
+        /// Inserts an element into the <see cref="CommandCollection"/> at the
+        /// specified index.
+        /// </summary>
+        /// <param name="index">The zero-based index at which item should be inserted.</param>
+        /// <param name="key">The <see cref="string"/> to use as the key of the element to insert.</param>
+        /// <param name="value">The <see cref="string"/> to use as the value of the element to insert.</param>
+        /// <exception cref="ArgumentOutOfRangeException">index is less than zero. -or- index is greater than <see cref="P:CommandCollection.Count"/>.</exception>
+        public void Insert(int index, string key, string value) => this.Insert(index, new(key, value));
+
+        /// <summary>
+        /// Gets the value associated with the specified key.
+        /// </summary>
+        /// <param name="key">The key whose value to get.</param>
+        /// <param name="value">
+        /// When this method returns, the value associated with the specified key, if the
+        /// key is found; otherwise, the default value for the type of the value parameter.
+        /// This parameter is passed uninitialized.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the object that implements <see cref="CommandCollection"/> contains
+        /// an element with the specified key; otherwise, <see langword="false"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
+        public bool TryGetValue(string key, out string value)
+        {
+            if (this.TryGetValue(key, out KeyValuePair<string, string> keyValue))
+            {
+                value = keyValue.Value;
+                return true;
+            }
+
+            value = default;
+            return false;
         }
 
         /// <summary>
@@ -104,6 +147,25 @@ namespace SixLabors.ImageSharp.Web.Commands
                 }
 
                 index++;
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Searches for the specified key and returns the zero-based index of the first
+        /// occurrence within the entire <see cref="CommandCollection"/>.
+        /// </summary>
+        /// <param name="key">The key to locate in the <see cref="CommandCollection"/>.</param>
+        /// <returns>
+        /// The zero-based index of the first occurrence of key within the entire <see cref="CommandCollection"/>,
+        /// if found; otherwise, -1.
+        /// </returns>
+        public int IndexOf(string key)
+        {
+            if (this.TryGetValue(key, out KeyValuePair<string, string> item))
+            {
+                return this.IndexOf(item);
             }
 
             return -1;
