@@ -55,7 +55,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                                 provider.GetRequiredService<FormatUtilities>());
                 })
                 .SetCacheHash<CacheHash>()
-                .AddProvider<PhysicalFileSystemProvider>()
+                .AddProvider<WebRootImageProvider>()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
                 .AddProcessor<BackgroundColorWebProcessor>()
@@ -131,7 +131,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                 })
                 .SetCacheHash<CacheHash>()
                 .ClearProviders()
-                .AddProvider<PhysicalFileSystemProvider>()
+                .AddProvider<WebRootImageProvider>()
                 .ClearProcessors()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()

@@ -78,7 +78,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                     });
                 })
                 .AddProvider(AzureBlobStorageImageProviderFactory.Create)
-                .AddProvider<PhysicalFileSystemProvider>()
+                .AddProvider<WebRootImageProvider>()
                 .AddProcessor<CacheBusterWebProcessor>();
         }
 

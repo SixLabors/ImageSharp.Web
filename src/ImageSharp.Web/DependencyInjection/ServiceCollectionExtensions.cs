@@ -66,7 +66,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
 
             builder.SetCacheHash<CacheHash>();
 
-            builder.AddProvider<PhysicalFileSystemProvider>();
+            builder.AddProvider<WebRootImageProvider>();
 
             builder.AddProcessor<ResizeWebProcessor>()
                    .AddProcessor<FormatWebProcessor>()

@@ -12,9 +12,9 @@ using SixLabors.ImageSharp.Web.Resolvers;
 namespace SixLabors.ImageSharp.Web.Providers
 {
     /// <summary>
-    /// Returns images stored in the local physical file system.
+    /// Returns images from the web root file provider.
     /// </summary>
-    public class PhysicalFileSystemProvider : IImageProvider
+    public class WebRootImageProvider : IImageProvider
     {
         /// <summary>
         /// The file provider abstraction.
@@ -27,11 +27,11 @@ namespace SixLabors.ImageSharp.Web.Providers
         private readonly FormatUtilities formatUtilities;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PhysicalFileSystemProvider"/> class.
+        /// Initializes a new instance of the <see cref="WebRootImageProvider"/> class.
         /// </summary>
         /// <param name="environment">The environment used by this middleware.</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
-        public PhysicalFileSystemProvider(
+        public WebRootImageProvider(
 #if NETCOREAPP2_1
             IHostingEnvironment environment,
 #else
@@ -59,17 +59,18 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <inheritdoc/>
         public Task<IImageResolver> GetAsync(HttpContext context)
         {
-            // Path has already been correctly parsed before here.
+            // Path has already been correctly parsed before here
             IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
 
-            // Check to see if the file exists.
+            // Check to see if the file exists
             if (!fileInfo.Exists)
             {
                 return Task.FromResult<IImageResolver>(null);
             }
 
             var metadata = new ImageMetadata(fileInfo.LastModified.UtcDateTime, fileInfo.Length);
-            return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
+
+            return Task.FromResult<IImageResolver>(new FileInfoImageResolver(fileInfo, metadata));
         }
     }
 }
