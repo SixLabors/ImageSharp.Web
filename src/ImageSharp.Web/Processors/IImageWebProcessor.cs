@@ -14,16 +14,16 @@ namespace SixLabors.ImageSharp.Web.Processors
     public interface IImageWebProcessor
     {
         /// <summary>
-        /// Gets the collection of recognized querystring commands.
+        /// Gets the collection of recognized command keys.
         /// </summary>
         IEnumerable<string> Commands { get; }
 
         /// <summary>
-        /// Processes the image based on the querystring commands.
+        /// Processes the image based on the given commands.
         /// </summary>
         /// <param name="image">The image to process.</param>
         /// <param name="logger">The type used for performing logging.</param>
-        /// <param name="commands">The querystring collection containing the processing commands.</param>
+        /// <param name="commands">The ordered collection containing the processing commands.</param>
         /// <param name="parser">The command parser use for parting commands.</param>
         /// <param name="culture">
         /// The <see cref="CultureInfo"/> to use as the current parsing culture.
@@ -32,7 +32,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         FormattedImage Process(
             FormattedImage image,
             ILogger logger,
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture);
     }

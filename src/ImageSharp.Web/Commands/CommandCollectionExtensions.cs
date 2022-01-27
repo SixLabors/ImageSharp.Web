@@ -6,22 +6,20 @@ using System.Collections.Generic;
 namespace SixLabors.ImageSharp.Web.Commands
 {
     /// <summary>
-    /// Extension methods for <see cref="IDictionary{TKey, TValue}"/>.
+    /// Extension methods for <see cref="CommandCollectionExtensions"/>.
     /// </summary>
-    public static class DictionaryExtensions
+    public static class CommandCollectionExtensions
     {
         /// <summary>
         /// Gets the value associated with the specified key or the default value.
         /// </summary>
-        /// <param name="dictionary">The dictionary instance.</param>
+        /// <param name="collection">The collection instance.</param>
         /// <param name="key">The key of the value to get.</param>
-        /// <typeparam name="TValue">The value type.</typeparam>
-        /// <typeparam name="TKey">The key type.</typeparam>
         /// <returns>The value associated with the specified key or the default value.</returns>
-        public static TValue GetValueOrDefault<TValue, TKey>(this IDictionary<TKey, TValue> dictionary, TKey key)
+        public static string GetValueOrDefault(this CommandCollection collection, string key)
         {
-            dictionary.TryGetValue(key, out TValue result);
-            return result;
+            collection.TryGetValue(key, out KeyValuePair<string, string> result);
+            return result.Value;
         }
     }
 }

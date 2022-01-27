@@ -33,7 +33,6 @@ namespace SixLabors.ImageSharp.Web.Resolvers.Azure
         }
 
         /// <inheritdoc/>
-        public async Task<Stream> OpenReadAsync()
-            => (await this.blob.DownloadAsync()).Value.Content;
+        public Task<Stream> OpenReadAsync() => this.blob.OpenReadAsync();
     }
 }
