@@ -13,7 +13,7 @@ namespace SixLabors.ImageSharp.Web.Caching
     public class CacheKey : ICacheKey
     {
         /// <inheritdoc/>
-        public string Create(HttpContext context, CommandCollection commands)
+        public string Create(HttpContext context, CommandCollection commands, bool caseSensitive)
         {
             var sb = new StringBuilder(context.Request.Host.ToString());
 
@@ -31,7 +31,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             sb.Append(QueryString.Create(commands));
 
-            return sb.ToString().ToLowerInvariant();
+            return caseSensitive ? sb.ToString() : sb.ToString().ToLowerInvariant();
         }
     }
 }

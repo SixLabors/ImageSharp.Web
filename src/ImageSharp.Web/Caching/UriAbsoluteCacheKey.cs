@@ -13,17 +13,11 @@ namespace SixLabors.ImageSharp.Web.Caching
     public class UriAbsoluteCacheKey : ICacheKey
     {
         /// <inheritdoc/>
-        public virtual string Create(HttpContext context, CommandCollection commands)
-            => UriHelper.BuildAbsolute(context.Request.Scheme, context.Request.Host, context.Request.PathBase, context.Request.Path, QueryString.Create(commands));
-    }
+        public string Create(HttpContext context, CommandCollection commands, bool caseSensitive)
+        {
+            string cacheKey = UriHelper.BuildAbsolute(context.Request.Scheme, context.Request.Host, context.Request.PathBase, context.Request.Path, QueryString.Create(commands));
 
-    /// <summary>
-    /// Creates a cache key based on the lowercased request scheme, host, path and commands.
-    /// </summary>
-    public class UriAbsoluteLowercaseCacheKey : UriAbsoluteCacheKey
-    {
-        /// <inheritdoc/>
-        public override string Create(HttpContext context, CommandCollection commands)
-            => base.Create(context, commands).ToLowerInvariant();
+            return caseSensitive ? cacheKey : cacheKey.ToLowerInvariant();
+        }
     }
 }

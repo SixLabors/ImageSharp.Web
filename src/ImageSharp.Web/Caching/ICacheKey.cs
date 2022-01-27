@@ -16,9 +16,10 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </summary>
         /// <param name="context">The HTTP context.</param>
         /// <param name="commands">The commands.</param>
+        /// <param name="caseSensitive">If set to <c>true</c> the cache key should be generated in a case sensitive manner.</param>
         /// <returns>
         /// The cache key.
         /// </returns>
-        string Create(HttpContext context, CommandCollection commands);
+        string Create(HttpContext context, CommandCollection commands, bool caseSensitive);
     }
 }
