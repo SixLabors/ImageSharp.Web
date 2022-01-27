@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Resolvers;
@@ -30,19 +29,9 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly int cachedNameLength;
 
         /// <summary>
-        /// The file provider abstraction.
-        /// </summary>
-        private readonly IFileProvider fileProvider;
-
-        /// <summary>
         /// The cache configuration options.
         /// </summary>
         private readonly PhysicalFileSystemCacheOptions cacheOptions;
-
-        /// <summary>
-        /// The middleware configuration options.
-        /// </summary>
-        private readonly ImageSharpMiddlewareOptions options;
 
         /// <summary>
         /// Contains various format helper methods based on the current configuration.
@@ -73,14 +62,8 @@ namespace SixLabors.ImageSharp.Web.Caching
             // Allow configuration of the cache without having to register everything.
             this.cacheOptions = cacheOptions != null ? cacheOptions.Value : new PhysicalFileSystemCacheOptions();
             this.cacheRootPath = GetCacheRoot(this.cacheOptions, environment.WebRootPath, environment.ContentRootPath);
-            if (!Directory.Exists(this.cacheRootPath))
-            {
-                Directory.CreateDirectory(this.cacheRootPath);
-            }
 
-            this.fileProvider = new PhysicalFileProvider(this.cacheRootPath);
-            this.options = options.Value;
-            this.cachedNameLength = (int)this.options.CachedNameLength;
+            this.cachedNameLength = (int)options.Value.CachedNameLength;
             this.formatUtilities = formatUtilities;
         }
 
@@ -93,7 +76,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <returns>root path.</returns>
         internal static string GetCacheRoot(PhysicalFileSystemCacheOptions cacheOptions, string webRootPath, string contentRootPath)
         {
-            var cacheRoot = string.IsNullOrEmpty(cacheOptions.CacheRoot)
+            string cacheRoot = string.IsNullOrEmpty(cacheOptions.CacheRoot)
                 ? webRootPath
                 : cacheOptions.CacheRoot;
 
@@ -107,7 +90,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         {
             string path = ToFilePath(key, this.cachedNameLength);
 
-            IFileInfo metaFileInfo = this.fileProvider.GetFileInfo(this.ToMetaDataFilePath(path));
+            var metaFileInfo = new FileInfo(this.ToMetaDataFilePath(path));
             if (!metaFileInfo.Exists)
             {
                 return Task.FromResult<IImageCacheResolver>(null);
@@ -124,10 +107,8 @@ namespace SixLabors.ImageSharp.Web.Caching
             string metaPath = this.ToMetaDataFilePath(path);
             string directory = Path.GetDirectoryName(path);
 
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
+            // Safe to always create
+            Directory.CreateDirectory(directory);
 
             using (FileStream fileStream = File.Create(imagePath))
             {
