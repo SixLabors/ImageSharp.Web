@@ -38,8 +38,13 @@ namespace SixLabors.ImageSharp.Web.Commands
                 return new();
             }
 
-            string requestedPreset = context.Request.Query["preset"][0];
-            return this.presets.GetValueOrDefault(requestedPreset) ?? new();
+            string requestedPreset = context.Request.Query[QueryKey][0];
+            if (this.presets.TryGetValue(requestedPreset, out CommandCollection collection))
+            {
+                return collection;
+            }
+
+            return new();
         }
 
         private static IDictionary<string, CommandCollection> ParsePresets(
