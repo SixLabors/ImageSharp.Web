@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Formats.Gif;
@@ -21,12 +20,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
         [Fact]
         public void FormatWebProcessor_UpdatesFormat()
         {
-            var parser = new CommandParser(Array.Empty<ICommandConverter>());
+            CommandParser parser = new(Array.Empty<ICommandConverter>());
             CultureInfo culture = CultureInfo.InvariantCulture;
 
-            var commands = new Dictionary<string, string>
+            CommandCollection commands = new()
             {
-                { FormatWebProcessor.Format, GifFormat.Instance.Name },
+                { new(FormatWebProcessor.Format, GifFormat.Instance.Name) },
             };
 
             using var image = new Image<Rgba32>(1, 1);

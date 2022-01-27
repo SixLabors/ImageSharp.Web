@@ -17,7 +17,7 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
         public FormattedImage Process(
             FormattedImage image,
             ILogger logger,
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
             => image;

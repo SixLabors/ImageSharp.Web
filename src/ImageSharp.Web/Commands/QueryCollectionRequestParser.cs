@@ -1,7 +1,6 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
@@ -15,18 +14,21 @@ namespace SixLabors.ImageSharp.Web.Commands
     public sealed class QueryCollectionRequestParser : IRequestParser
     {
         /// <inheritdoc/>
-        public IDictionary<string, string> ParseRequestCommands(HttpContext context)
+        public CommandCollection ParseRequestCommands(HttpContext context)
         {
             if (context.Request.Query.Count == 0)
             {
-                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                // We return new to ensure the collection is still mutable via events.
+                return new();
             }
 
+            // TODO: Investigate skipping the double allocation here.
+            // In .NET 6 we can directly use the QueryStringEnumerable type and enumerate stright to our command collection
             Dictionary<string, StringValues> parsed = QueryHelpers.ParseQuery(context.Request.QueryString.ToUriComponent());
-            var transformed = new Dictionary<string, string>(parsed.Count, StringComparer.OrdinalIgnoreCase);
+            CommandCollection transformed = new();
             foreach (KeyValuePair<string, StringValues> pair in parsed)
             {
-                transformed[pair.Key] = pair.Value.ToString();
+                transformed.Add(new(pair.Key, pair.Value.ToString()));
             }
 
             return transformed;

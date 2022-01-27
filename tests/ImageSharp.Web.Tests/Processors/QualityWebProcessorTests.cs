@@ -18,12 +18,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
         [Fact]
         public void QualityWebProcessor_UpdatesJpegQuality()
         {
-            var parser = new CommandParser(new[] { new IntegralNumberConverter<int>() });
+            CommandParser parser = new(new[] { new IntegralNumberConverter<int>() });
             CultureInfo culture = CultureInfo.InvariantCulture;
 
-            var commands = new Dictionary<string, string>
+            CommandCollection commands = new()
             {
-                { QualityWebProcessor.Quality, "42" },
+                { new(QualityWebProcessor.Quality, "42") },
             };
 
             using var image = new Image<Rgba32>(1, 1);
@@ -41,12 +41,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
         [Fact]
         public void QualityWebProcessor_UpdatesWebpQuality()
         {
-            var parser = new CommandParser(new[] { new IntegralNumberConverter<int>() });
+            CommandParser parser = new(new[] { new IntegralNumberConverter<int>() });
             CultureInfo culture = CultureInfo.InvariantCulture;
 
-            var commands = new Dictionary<string, string>
+            CommandCollection commands = new()
             {
-                { QualityWebProcessor.Quality, "42" },
+                {
+                    new(QualityWebProcessor.Quality, "42")
+                },
             };
 
             using var image = new Image<Rgba32>(1, 1);

@@ -1,8 +1,8 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System.Collections.Generic;
 using System.Linq;
+using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Tests.DependencyInjection;
 using Xunit;
@@ -22,14 +22,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 new MockWebProcessor()
             };
 
-            var commands = new List<string>
+            CommandCollection commands = new()
             {
-                ResizeWebProcessor.Width,
-                QualityWebProcessor.Quality,
-                ResizeWebProcessor.Height
+                new(ResizeWebProcessor.Width, null),
+                new(QualityWebProcessor.Quality, null),
+                new(ResizeWebProcessor.Height, null)
             };
 
-            IImageWebProcessor[] supportedProcessors = WebProcessingExtensions.GetBySupportedCommands(processors, commands).ToArray();
+            IImageWebProcessor[] supportedProcessors = processors.GetBySupportedCommands(commands).ToArray();
 
             Assert.Equal(2, supportedProcessors.Length);
             Assert.IsType<ResizeWebProcessor>(supportedProcessors[0]);
@@ -44,9 +44,9 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 new MockWebProcessor()
             };
 
-            var commands = new List<string>();
+            CommandCollection commands = new();
 
-            IImageWebProcessor[] supportedProcessors = WebProcessingExtensions.GetBySupportedCommands(processors, commands).ToArray();
+            IImageWebProcessor[] supportedProcessors = processors.GetBySupportedCommands(commands).ToArray();
 
             Assert.Empty(supportedProcessors);
         }

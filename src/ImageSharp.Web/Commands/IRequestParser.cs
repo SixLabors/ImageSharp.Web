@@ -16,6 +16,6 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// </summary>
         /// <param name="context">Encapsulates all HTTP-specific information about an individual HTTP request.</param>
         /// <returns>The <see cref="IDictionary{TKey,TValue}"/>.</returns>
-        IDictionary<string, string> ParseRequestCommands(HttpContext context);
+        CommandCollection ParseRequestCommands(HttpContext context);
     }
 }

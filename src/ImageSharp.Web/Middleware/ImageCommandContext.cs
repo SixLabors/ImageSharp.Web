@@ -1,7 +1,6 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Commands;
@@ -22,7 +21,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="culture">The culture used to parse commands.</param>
         public ImageCommandContext(
             HttpContext context,
-            IDictionary<string, string> commands,
+            CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
         {
@@ -38,9 +37,9 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public HttpContext Context { get; }
 
         /// <summary>
-        /// Gets the dictionary containing the collection of URI derived processing commands.
+        /// Gets the collection of URI derived processing commands.
         /// </summary>
-        public IDictionary<string, string> Commands { get; }
+        public CommandCollection Commands { get; }
 
         /// <summary>
         /// Gets the command parser for parsing URI derived processing commands.
