@@ -40,7 +40,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Web.Benchmarks",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Web.Providers.Azure", "src\ImageSharp.Web.Providers.Azure\ImageSharp.Web.Providers.Azure.csproj", "{E2A545EC-B909-4EAD-B95F-397F68588BE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageSharp.Web.Providers.AWS", "src\ImageSharp.Web.Providers.AWS\ImageSharp.Web.Providers.AWS.csproj", "{E631D300-ACD5-40EA-A6BB-08E22092EC76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Web.Providers.AWS", "src\ImageSharp.Web.Providers.AWS\ImageSharp.Web.Providers.AWS.csproj", "{E631D300-ACD5-40EA-A6BB-08E22092EC76}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{B8152C86-B657-4967-B297-42F89A10D23A}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedInfrastructure", "shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.shproj", "{68A8CC40-6AED-4E96-B524-31B1158FDEEA}"
@@ -70,6 +71,7 @@ Global
 		shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems*{2f1b36e2-5d92-4442-b816-d2a978246435}*SharedItemsImports = 5
 		shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems*{68a8cc40-6aed-4e96-b524-31b1158fdeea}*SharedItemsImports = 13
 		shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems*{e2a545ec-b909-4ead-b95f-397f68588be3}*SharedItemsImports = 5
+		shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems*{e631d300-acd5-40ea-a6bb-08e22092ec76}*SharedItemsImports = 5
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

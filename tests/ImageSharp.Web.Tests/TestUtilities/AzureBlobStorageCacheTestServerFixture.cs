@@ -79,7 +79,19 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                         ContainerName = TestConstants.AzureContainerName
                     });
                 })
+                .Configure<AWSS3StorageImageProviderOptions>(options =>
+                {
+                    options.S3Buckets.Add(new AWSS3BucketClientOptions
+                    {
+                        Endpoint = TestConstants.AWSEndpoint,
+                        BucketName = TestConstants.AWSBucketName,
+                        AccessKey = TestConstants.AWSAccessKey,
+                        AccessSecret = TestConstants.AWSAccessSecret,
+                        Region = TestConstants.AWSRegion
+                    });
+                })
                 .AddProvider(AzureBlobStorageImageProviderFactory.Create)
+                .AddProvider(AWSS3StorageImageProviderFactory.Create)
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<CacheBusterWebProcessor>()
                 .Configure<AzureBlobStorageCacheOptions>(options =>

@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +12,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Resolvers;
 
-namespace SixLabors.ImageSharp.Web.Providers
+namespace SixLabors.ImageSharp.Web.Providers.AWS
 {
     /// <summary>
     /// Returns images stored in AWS S3.
@@ -22,7 +24,12 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// </summary>
         private static readonly char[] SlashChars = { '\\', '/' };
 
-        private readonly IAmazonS3 amazonS3Client;
+        /// <summary>
+        /// The containers for the blob services.
+        /// </summary>
+        private readonly Dictionary<string, IAmazonS3> buckets
+            = new Dictionary<string, IAmazonS3>();
+
         private readonly AWSS3StorageImageProviderOptions storageOptions;
         private Func<HttpContext, bool> match;
 
@@ -36,14 +43,47 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// </summary>
         /// <param name="amazonS3Client">Amazon S3 client</param>
         /// <param name="storageOptions">The S3 storage options</param>
-        public AWSS3StorageImageProvider(IAmazonS3 amazonS3Client, IOptions<AWSS3StorageImageProviderOptions> storageOptions, FormatUtilities formatUtilities)
+        public AWSS3StorageImageProvider(IOptions<AWSS3StorageImageProviderOptions> storageOptions, FormatUtilities formatUtilities)
         {
             Guard.NotNull(storageOptions, nameof(storageOptions));
 
-            this.amazonS3Client = amazonS3Client;
-            this.formatUtilities = formatUtilities;
             this.storageOptions = storageOptions.Value;
+
+            this.formatUtilities = formatUtilities;
+
+            foreach (var bucket in this.storageOptions.S3Buckets)
+            {
+                AmazonS3Client s3Client = null;
+
+                if (!string.IsNullOrEmpty(bucket.Endpoint) &&
+                    bucket.AccessKey != null &&
+                    bucket.AccessSecret != null)
+                {
+                    var config = new AmazonS3Config
+                    {
+                        ServiceURL = bucket.Endpoint,
+                        ForcePathStyle = true
+                    };
+                    s3Client = new AmazonS3Client(bucket.AccessKey, bucket.AccessSecret, config);
+                }
+                else if (!string.IsNullOrEmpty(bucket.AccessKey) &&
+                         !string.IsNullOrEmpty(bucket.AccessSecret) &&
+                         !string.IsNullOrEmpty(bucket.Region))
+                {
+                    var region = RegionEndpoint.GetBySystemName(bucket.Region);
+                    s3Client = new AmazonS3Client(bucket.AccessKey, bucket.AccessSecret, region);
+                }
+                else
+                {
+                    var region = RegionEndpoint.GetBySystemName(bucket.Region);
+                    s3Client = new AmazonS3Client(region);
+                }
+
+                this.buckets.Add(bucket.BucketName, s3Client);
+            }
         }
+
+        public ProcessingBehavior ProcessingBehavior { get; } = ProcessingBehavior.All;
 
         /// <inheritdoc />
         public Func<HttpContext, bool> Match
@@ -54,31 +94,71 @@ namespace SixLabors.ImageSharp.Web.Providers
 
         /// <inheritdoc />
         public bool IsValidRequest(HttpContext context)
-            => this.formatUtilities.GetExtensionFromUri(context.Request.GetDisplayUrl()) != null;
+            => this.formatUtilities.TryGetExtensionFromUri(context.Request.GetDisplayUrl(), out _);
 
         /// <inheritdoc />
         public async Task<IImageResolver> GetAsync(HttpContext context)
         {
             // Strip the leading slash and bucket name from the HTTP request path and treat
-            // the remaining path string as the file key.
+            // the remaining path string as the key.
             // Path has already been correctly parsed before here.
-            string key = context.Request.Path.Value.TrimStart(SlashChars)
-                            .Substring(this.storageOptions.BucketName.Length)
-                            .TrimStart(SlashChars);
+            string bucketName = string.Empty;
+            IAmazonS3 s3Client = null;
 
-            bool imageExists = await this.KeyExists(this.storageOptions.BucketName, key);
+            // We want an exact match here to ensure that bucket names starting with
+            // the same prefix are not mixed up.
+            string path = context.Request.Path.Value.TrimStart(SlashChars);
+            int index = path.IndexOfAny(SlashChars);
+            string nameToMatch = index != -1 ? path.Substring(0, index) : path;
 
-            return !imageExists ? null : new AWSS3FileSystemResolver(this.amazonS3Client, this.storageOptions.BucketName, key);
+            foreach (string k in this.buckets.Keys)
+            {
+                if (nameToMatch.Equals(k, StringComparison.OrdinalIgnoreCase))
+                {
+                    bucketName = k;
+                    s3Client = this.buckets[k];
+                    break;
+                }
+            }
+
+            // Something has gone horribly wrong for this to happen but check anyway.
+            if (s3Client is null)
+            {
+                return null;
+            }
+
+            // Key should be the remaining path string.
+            string key = path.Substring(bucketName.Length).TrimStart(SlashChars);
+
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return null;
+            }
+
+            bool imageExists = await this.KeyExists(s3Client, bucketName, key);
+
+            return !imageExists ? null : new AWSS3FileSystemImageResolver(s3Client, bucketName, key);
         }
 
         private bool IsMatch(HttpContext context)
         {
+            // Only match loosly here for performance.
+            // Path matching conflicts should be dealt with by configuration.
             string path = context.Request.Path.Value.TrimStart(SlashChars);
-            return path.StartsWith(this.storageOptions.BucketName, StringComparison.OrdinalIgnoreCase);
+
+            foreach (string bucket in this.buckets.Keys)
+            {
+                if (path.StartsWith(bucket, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // ref https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/S3/Custom/_bcl/IO/S3FileInfo.cs#L118
-        private async Task<bool> KeyExists(string bucketName, string key)
+        private async Task<bool> KeyExists(IAmazonS3 s3Client, string bucketName, string key)
         {
             try
             {
@@ -89,7 +169,7 @@ namespace SixLabors.ImageSharp.Web.Providers
                 };
 
                 // If the object doesn't exist then a "NotFound" will be thrown
-                await this.amazonS3Client.GetObjectMetadataAsync(request).ConfigureAwait(false);
+                await s3Client.GetObjectMetadataAsync(request).ConfigureAwait(false);
                 return true;
             }
             catch (AmazonS3Exception e)
