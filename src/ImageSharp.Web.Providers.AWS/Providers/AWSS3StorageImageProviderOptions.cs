@@ -2,9 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
-using SixLabors.ImageSharp.Web.Providers.AWS;
 
-namespace SixLabors.ImageSharp.Web.Providers
+namespace SixLabors.ImageSharp.Web.Providers.AWS
 {
     /// <summary>
     /// Configuration options for the <see cref="AWSS3StorageImageProviderOptions"/> provider.

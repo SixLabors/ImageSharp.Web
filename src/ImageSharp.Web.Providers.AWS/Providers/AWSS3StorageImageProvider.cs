@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Resolvers;
+using SixLabors.ImageSharp.Web.Resolvers.AWS;
 
 namespace SixLabors.ImageSharp.Web.Providers.AWS
 {

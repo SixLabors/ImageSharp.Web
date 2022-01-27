@@ -1,7 +1,6 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -41,7 +40,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers.AWS
             ICollection<string> keys = metadataResponse.Metadata.Keys;
             foreach (string key in keys)
             {
-                var k = key.Substring(11).ToUpper();
+                string k = key.Substring(11).ToUpper();
                 dict.Add(k, metadataResponse.Metadata[key]);
             }
 
