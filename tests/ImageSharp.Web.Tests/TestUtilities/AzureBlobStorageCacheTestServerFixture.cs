@@ -11,9 +11,9 @@ using SixLabors.ImageSharp.Web.Caching.Azure;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Providers;
+using SixLabors.ImageSharp.Web.Providers.AWS;
 using SixLabors.ImageSharp.Web.Providers.Azure;
 using Xunit;
-using ApplicationBuilderExtensions = SixLabors.ImageSharp.Web.DependencyInjection.ApplicationBuilderExtensions;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 {
@@ -97,6 +97,6 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 })
                 .SetCache<AzureBlobStorageCache>();
 
-        protected override void Configure(IApplicationBuilder app) => ApplicationBuilderExtensions.UseImageSharp(app);
+        protected override void Configure(IApplicationBuilder app) => app.UseImageSharp();
     }
 }
