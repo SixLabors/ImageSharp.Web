@@ -88,7 +88,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 .AddProvider(AWSS3StorageImageProviderFactory.Create)
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<CacheBusterWebProcessor>()
-                .Configure<AWSS3StorageCacheOptions>(options =>
+                .Configure<AWSS3BucketClientOptions>(options =>
                 {
                     options.Endpoint = TestConstants.AWSEndpoint;
                     options.BucketName = TestConstants.AWSCacheBucketName;

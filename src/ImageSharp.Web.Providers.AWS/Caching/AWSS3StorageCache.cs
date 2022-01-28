@@ -11,6 +11,8 @@ using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Web.Factories;
+using SixLabors.ImageSharp.Web.Providers.AWS;
 using SixLabors.ImageSharp.Web.Resolvers;
 using SixLabors.ImageSharp.Web.Resolvers.AWS;
 
@@ -26,6 +28,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
             TaskCreationOptions.None,
             TaskContinuationOptions.None,
             TaskScheduler.Default);
+        private static readonly AWSS3Factory AWSS3Factory = new ();
 
         private readonly IAmazonS3 amazonS3Client;
         private readonly string bucket;
@@ -34,12 +37,12 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
         /// Initializes a new instance of the <see cref="AWSS3StorageCache"/> class.
         /// </summary>
         /// <param name="cacheOptions">The cache options.</param>
-        public AWSS3StorageCache(IOptions<AWSS3StorageCacheOptions> cacheOptions)
+        public AWSS3StorageCache(IOptions<AWSS3BucketClientOptions> cacheOptions)
         {
             Guard.NotNull(cacheOptions, nameof(cacheOptions));
-            AWSS3StorageCacheOptions options = cacheOptions.Value;
+            AWSS3BucketClientOptions options = cacheOptions.Value;
             this.bucket = options.BucketName;
-            this.amazonS3Client = CreateClient(options);
+            this.amazonS3Client = AWSS3Factory.CreateClient(options);
         }
 
         /// <inheritdoc/>
@@ -95,10 +98,10 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
         /// created bucket. If the container already exists, <see langword="null"/>.
         /// </returns>
         public static PutBucketResponse CreateIfNotExists(
-            AWSS3StorageCacheOptions options,
+            AWSS3BucketClientOptions options,
             S3CannedACL acl)
         {
-            AmazonS3Client client = CreateClient(options);
+            AmazonS3Client client = AWSS3Factory.CreateClient(options);
 
             bool foundBucket = false;
             ListBucketsResponse listBucketsResponse = RunSync(() => client.ListBucketsAsync());
@@ -124,33 +127,6 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
             }
 
             return null;
-        }
-
-        private static AmazonS3Client CreateClient(AWSS3StorageCacheOptions options)
-        {
-            if (!string.IsNullOrWhiteSpace(options.Endpoint))
-            {
-                // AccessKey can be empty.
-                // AccessSecret can be empty.
-                AmazonS3Config config = new() { ServiceURL = options.Endpoint, ForcePathStyle = true };
-                return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
-            }
-            else if (!string.IsNullOrWhiteSpace(options.AccessKey))
-            {
-                // AccessSecret can be empty.
-                Guard.NotNullOrWhiteSpace(options.Region, nameof(options.Region));
-                var region = RegionEndpoint.GetBySystemName(options.Region);
-                return new AmazonS3Client(options.AccessKey, options.AccessSecret, region);
-            }
-            else if (!string.IsNullOrWhiteSpace(options.Region))
-            {
-                var region = RegionEndpoint.GetBySystemName(options.Region);
-                return new AmazonS3Client(region);
-            }
-            else
-            {
-                throw new ArgumentException("Invalid configuration.", nameof(options));
-            }
         }
 
         /// <summary>

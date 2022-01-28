@@ -10,6 +10,7 @@ using Amazon.S3.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Web.Factories;
 using SixLabors.ImageSharp.Web.Resolvers;
 using SixLabors.ImageSharp.Web.Resolvers.AWS;
 
@@ -20,6 +21,8 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
     /// </summary>
     public class AWSS3StorageImageProvider : IImageProvider
     {
+        private static readonly AWSS3Factory AWSS3Factory = new();
+
         /// <summary>
         /// Character array to remove from paths.
         /// </summary>
@@ -54,33 +57,7 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
 
             foreach (AWSS3BucketClientOptions bucket in this.storageOptions.S3Buckets)
             {
-                AmazonS3Client s3Client;
-                if (!string.IsNullOrEmpty(bucket.Endpoint) &&
-                    bucket.AccessKey != null &&
-                    bucket.AccessSecret != null)
-                {
-                    var config = new AmazonS3Config
-                    {
-                        ServiceURL = bucket.Endpoint,
-                        ForcePathStyle = true
-                    };
-
-                    s3Client = new AmazonS3Client(bucket.AccessKey, bucket.AccessSecret, config);
-                }
-                else if (!string.IsNullOrEmpty(bucket.AccessKey) &&
-                         !string.IsNullOrEmpty(bucket.AccessSecret) &&
-                         !string.IsNullOrEmpty(bucket.Region))
-                {
-                    var region = RegionEndpoint.GetBySystemName(bucket.Region);
-                    s3Client = new AmazonS3Client(bucket.AccessKey, bucket.AccessSecret, region);
-                }
-                else
-                {
-                    var region = RegionEndpoint.GetBySystemName(bucket.Region);
-                    s3Client = new AmazonS3Client(region);
-                }
-
-                this.buckets.Add(bucket.BucketName, s3Client);
+                this.buckets.Add(bucket.BucketName, AWSS3Factory.CreateClient(bucket));
             }
         }
 
