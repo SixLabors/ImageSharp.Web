@@ -13,11 +13,7 @@ namespace SixLabors.ImageSharp.Web.Caching
     public class UriRelativeCacheKey : ICacheKey
     {
         /// <inheritdoc/>
-        public string Create(HttpContext context, CommandCollection commands, bool caseSensitive)
-        {
-            string cacheKey = UriHelper.BuildRelative(context.Request.PathBase, context.Request.Path, QueryString.Create(commands));
-
-            return caseSensitive ? cacheKey : cacheKey.ToLowerInvariant();
-        }
+        public string Create(HttpContext context, CommandCollection commands)
+            => UriHelper.BuildRelative(context.Request.PathBase, context.Request.Path, QueryString.Create(commands)).ToLowerInvariant();
     }
 }

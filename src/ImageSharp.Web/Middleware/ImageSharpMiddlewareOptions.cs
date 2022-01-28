@@ -85,11 +85,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public TimeSpan CacheMaxAge { get; set; } = TimeSpan.FromDays(365);
 
         /// <summary>
-        /// Gets or sets a value indicating whether the cache key should be case sensitive.
-        /// </summary>
-        public bool CacheKeyCaseSensitive { get; set; } = false;
-
-        /// <summary>
         /// Gets or sets the length of the filename to use (minus the extension) when storing
         /// images in the image cache. Defaults to 12 characters.
         /// </summary>

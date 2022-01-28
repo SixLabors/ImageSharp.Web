@@ -269,7 +269,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             CommandCollection commands)
         {
             // Create a cache key and hash
-            string cacheKey = this.cacheKey.Create(context, commands, this.options.CacheKeyCaseSensitive);
+            string cacheKey = this.cacheKey.Create(context, commands);
             string cacheHash = this.cacheHash.Create(cacheKey, this.options.CachedNameLength);
 
             // Check the cache, if present, not out of date and not requiring an update
