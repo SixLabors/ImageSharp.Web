@@ -268,21 +268,22 @@ namespace SixLabors.ImageSharp.Web.Middleware
             ImageContext imageContext,
             CommandCollection commands)
         {
-            // Create a cache key and hash
-            string cacheKey = this.cacheKey.Create(context, commands);
-            string cacheHash = this.cacheHash.Create(cacheKey, this.options.CachedNameLength);
+            // Create a hashed cache key
+            string key = this.cacheHash.Create(
+                this.cacheKey.Create(context, commands),
+                this.options.CachedNameLength);
 
             // Check the cache, if present, not out of date and not requiring an update
             // we'll simply serve the file from there.
             ImageWorkerResult readResult = default;
-            using (await this.asyncKeyLock.ReaderLockAsync(cacheHash))
+            using (await this.asyncKeyLock.ReaderLockAsync(key))
             {
-                readResult = await this.IsNewOrUpdatedAsync(sourceImageResolver, cacheHash);
+                readResult = await this.IsNewOrUpdatedAsync(sourceImageResolver, key);
             }
 
             if (!readResult.IsNewOrUpdated)
             {
-                await this.SendResponseAsync(imageContext, cacheHash, readResult.CacheImageMetadata, readResult.Resolver, null);
+                await this.SendResponseAsync(imageContext, key, readResult.CacheImageMetadata, readResult.Resolver, null);
                 return;
             }
 
@@ -294,7 +295,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             RecyclableMemoryStream outStream = null;
             try
             {
-                Task<IDisposable> takeLockTask = this.asyncKeyLock.WriterLockAsync(cacheHash);
+                Task<IDisposable> takeLockTask = this.asyncKeyLock.WriterLockAsync(key);
                 bool lockWasAlreadyHeld = takeLockTask.Status != TaskStatus.RanToCompletion;
                 using (await takeLockTask)
                 {
@@ -303,7 +304,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     // the cache one more time
                     if (lockWasAlreadyHeld)
                     {
-                        readResult = await this.IsNewOrUpdatedAsync(sourceImageResolver, cacheHash);
+                        readResult = await this.IsNewOrUpdatedAsync(sourceImageResolver, key);
                     }
 
                     if (readResult.IsNewOrUpdated)
@@ -365,12 +366,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 outStream.Length);
 
                             // Save the image to the cache and send the response to the caller.
-                            await this.cache.SetAsync(cacheHash, outStream, cachedImageMetadata);
+                            await this.cache.SetAsync(key, outStream, cachedImageMetadata);
                             outStream.Position = 0;
 
                             // Remove any resolver from the cache so we always resolve next request
                             // for the same key.
-                            CacheResolverLru.TryRemove(cacheHash);
+                            CacheResolverLru.TryRemove(key);
 
                             readResult = new ImageWorkerResult(cachedImageMetadata, null);
                         }
@@ -384,7 +385,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     }
                 }
 
-                await this.SendResponseAsync(imageContext, cacheHash, readResult.CacheImageMetadata, readResult.Resolver, outStream);
+                await this.SendResponseAsync(imageContext, key, readResult.CacheImageMetadata, readResult.Resolver, outStream);
             }
             finally
             {
