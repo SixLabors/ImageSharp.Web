@@ -20,10 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ImageSharp.Web.Providers.AWS\ImageSharp.Web.Providers.AWS.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="SubFolder\imagesharp-logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

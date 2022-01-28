@@ -10,7 +10,7 @@
     <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/SixLabors/ImageSharp.Web/</RepositoryUrl>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <PackageTags>Image Middleware Resize Crop Gif Jpg Jpeg Bitmap Png AWS</PackageTags>
-    <Description>A provider for resolving and caching images via AWS Blob Storage.</Description>
+    <Description>A provider for resolving and caching images via AWS S3 Storage.</Description>
   </PropertyGroup>
 
   <PropertyGroup>
