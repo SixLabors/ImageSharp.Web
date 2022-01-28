@@ -22,9 +22,9 @@ namespace SixLabors.ImageSharp.Web.Resolvers.AWS
         /// <summary>
         /// Initializes a new instance of the <see cref="AWSS3StorageImageResolver"/> class.
         /// </summary>
-        /// <param name="amazonS3">Amazon S3 Client</param>
-        /// <param name="bucketName">Bucket Name for where the files are</param>
-        /// <param name="imagePath">S3 Key</param>
+        /// <param name="amazonS3">The Amazon S3 Client</param>
+        /// <param name="bucketName">The bucket name.</param>
+        /// <param name="imagePath">The image path.</param>
         public AWSS3StorageImageResolver(IAmazonS3 amazonS3, string bucketName, string imagePath)
         {
             this.amazonS3 = amazonS3;
@@ -53,10 +53,6 @@ namespace SixLabors.ImageSharp.Web.Resolvers.AWS
         }
 
         /// <inheritdoc />
-        public async Task<Stream> OpenReadAsync()
-        {
-            GetObjectResponse s3Object = await this.amazonS3.GetObjectAsync(this.bucketName, this.imagePath);
-            return s3Object.ResponseStream;
-        }
+        public Task<Stream> OpenReadAsync() => this.amazonS3.GetObjectStreamAsync(this.bucketName, this.imagePath, null);
     }
 }

@@ -1,8 +1,11 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon;
 using Amazon.S3;
@@ -18,6 +21,12 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
     /// </summary>
     public class AWSS3StorageCache : IImageCache
     {
+        private static readonly TaskFactory TaskFactory = new
+            (CancellationToken.None,
+            TaskCreationOptions.None,
+            TaskContinuationOptions.None,
+            TaskScheduler.Default);
+
         private readonly IAmazonS3 amazonS3Client;
         private readonly string bucket;
 
@@ -30,38 +39,18 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
             Guard.NotNull(cacheOptions, nameof(cacheOptions));
             AWSS3StorageCacheOptions options = cacheOptions.Value;
             this.bucket = options.BucketName;
-
-            if (!string.IsNullOrEmpty(options.Endpoint) &&
-                options.AccessKey != null &&
-                options.AccessSecret != null)
-            {
-                var config = new AmazonS3Config { ServiceURL = options.Endpoint, ForcePathStyle = true };
-                this.amazonS3Client = new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
-            }
-            else if (!string.IsNullOrEmpty(options.AccessKey) &&
-                     !string.IsNullOrEmpty(options.AccessSecret) &&
-                     !string.IsNullOrEmpty(options.Region))
-            {
-                var region = RegionEndpoint.GetBySystemName(options.Region);
-                this.amazonS3Client = new AmazonS3Client(options.AccessKey, options.AccessSecret, region);
-            }
-            else
-            {
-                var region = RegionEndpoint.GetBySystemName(options.Region);
-                this.amazonS3Client = new AmazonS3Client(region);
-            }
+            this.amazonS3Client = CreateClient(options);
         }
 
         /// <inheritdoc/>
         public async Task<IImageCacheResolver> GetAsync(string key)
         {
-            var request = new GetObjectMetadataRequest() { BucketName = this.bucket, Key = key };
-
+            GetObjectMetadataRequest request = new() { BucketName = this.bucket, Key = key };
             try
             {
-                await this.amazonS3Client.GetObjectMetadataAsync(request);
-
-                return new AWSS3StorageCacheResolver(this.amazonS3Client, this.bucket, key);
+                // HEAD request throws a 404 if not found.
+                MetadataCollection metadata = (await this.amazonS3Client.GetObjectMetadataAsync(request)).Metadata;
+                return new AWSS3StorageCacheResolver(this.amazonS3Client, this.bucket, key, metadata);
             }
             catch
             {
@@ -82,7 +71,6 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
             };
 
             var dt = metadata.ToDictionary();
-
             foreach (KeyValuePair<string, string> d in dt)
             {
                 request.Metadata.Add(d.Key, d.Value);
@@ -92,46 +80,28 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
         }
 
         /// <summary>
-        /// Creates a new container under the specified account if a container
+        /// Creates a new bucket under the specified account if a bucket
         /// with the same name does not already exist.
         /// </summary>
-        /// <param name="options">The Azure Blob Storage cache options.</param>
+        /// <param name="options">The AWS S3 Storage cache options.</param>
         /// <param name="acl">
         /// Specifies whether data in the bucket may be accessed publicly and the level of access.
         /// <see cref="S3CannedACL.PublicRead"/> specifies full public read access for bucket
-        /// and object data. <see cref="S3CannedACL.Private"/> specifies that the container
+        /// and object data. <see cref="S3CannedACL.Private"/> specifies that the bucket
         /// data is private to the account owner.
         /// </param>
         /// <returns>
-        /// If the container does not already exist, a <see cref="PutBucketResponse"/> describing the newly
-        /// created container. If the container already exists, <see langword="null"/>.
+        /// If the bucket does not already exist, a <see cref="PutBucketResponse"/> describing the newly
+        /// created bucket. If the container already exists, <see langword="null"/>.
         /// </returns>
         public static PutBucketResponse CreateIfNotExists(
             AWSS3StorageCacheOptions options,
             S3CannedACL acl)
         {
-            AmazonS3Client amazonS3Client;
+            AmazonS3Client client = CreateClient(options);
+
             bool foundBucket = false;
-
-            if (!string.IsNullOrEmpty(options.Endpoint) &&
-                options.AccessKey != null &&
-                options.AccessSecret != null)
-            {
-                var config = new AmazonS3Config { ServiceURL = options.Endpoint, ForcePathStyle = true };
-                amazonS3Client = new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
-            }
-            else if (!string.IsNullOrEmpty(options.AccessKey) &&
-                     !string.IsNullOrEmpty(options.AccessSecret))
-            {
-                amazonS3Client = new AmazonS3Client(options.AccessKey, options.AccessSecret);
-            }
-            else
-            {
-                amazonS3Client = new AmazonS3Client(RegionEndpoint.GetBySystemName(options.Region));
-            }
-
-            ListBucketsResponse listBucketsResponse = amazonS3Client.ListBucketsAsync().GetAwaiter().GetResult();
-
+            ListBucketsResponse listBucketsResponse = RunSync(() => client.ListBucketsAsync());
             foreach (S3Bucket b in listBucketsResponse.Buckets)
             {
                 if (b.BucketName == options.BucketName)
@@ -150,13 +120,57 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
                     CannedACL = acl
                 };
 
-                PutBucketResponse putBucketResponse =
-                    amazonS3Client.PutBucketAsync(putBucketRequest).GetAwaiter().GetResult();
-
-                return putBucketResponse;
+                return RunSync(() => client.PutBucketAsync(putBucketRequest));
             }
 
             return null;
+        }
+
+        private static AmazonS3Client CreateClient(AWSS3StorageCacheOptions options)
+        {
+            if (!string.IsNullOrWhiteSpace(options.Endpoint))
+            {
+                // AccessKey can be empty.
+                // AccessSecret can be empty.
+                AmazonS3Config config = new() { ServiceURL = options.Endpoint, ForcePathStyle = true };
+                return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
+            }
+            else if (!string.IsNullOrWhiteSpace(options.AccessKey))
+            {
+                // AccessSecret can be empty.
+                Guard.NotNullOrWhiteSpace(options.Region, nameof(options.Region));
+                var region = RegionEndpoint.GetBySystemName(options.Region);
+                return new AmazonS3Client(options.AccessKey, options.AccessSecret, region);
+            }
+            else if (!string.IsNullOrWhiteSpace(options.Region))
+            {
+                var region = RegionEndpoint.GetBySystemName(options.Region);
+                return new AmazonS3Client(region);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid configuration.", nameof(options));
+            }
+        }
+
+        /// <summary>
+        /// Executes an async <see cref="Task{TResult}"/> method which has
+        /// a <paramref name="task"/> return type synchronously.
+        /// <see href="https://github.com/aspnet/AspNetIdentity/blob/b7826741279450c58b230ece98bd04b4815beabf/src/Microsoft.AspNet.Identity.Core/AsyncHelper.cs"/>
+        /// </summary>
+        /// <typeparam name="TResult">The type of result to return.</typeparam>
+        /// <param name="task">The task to excecute.</param>
+        /// <returns>The <typeparamref name="TResult"/>.</returns>
+        private static TResult RunSync<TResult>(Func<Task<TResult>> task)
+        {
+            CultureInfo cultureUi = CultureInfo.CurrentUICulture;
+            CultureInfo culture = CultureInfo.CurrentCulture;
+            return TaskFactory.StartNew(() =>
+            {
+                Thread.CurrentThread.CurrentCulture = culture;
+                Thread.CurrentThread.CurrentUICulture = cultureUi;
+                return task();
+            }).Unwrap().GetAwaiter().GetResult();
         }
     }
 }

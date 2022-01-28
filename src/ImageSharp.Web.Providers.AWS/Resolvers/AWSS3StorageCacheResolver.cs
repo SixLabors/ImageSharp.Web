@@ -17,41 +17,37 @@ namespace SixLabors.ImageSharp.Web.Resolvers.AWS
         private readonly IAmazonS3 amazonS3;
         private readonly string bucketName;
         private readonly string imagePath;
+        private readonly MetadataCollection metadata;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AWSS3StorageCacheResolver"/> class.
         /// </summary>
-        /// <param name="amazonS3">Amazon S3 Client</param>
-        /// <param name="bucketName">Bucket Name for where the files are</param>
-        /// <param name="imagePath">S3 Key</param>
-        public AWSS3StorageCacheResolver(IAmazonS3 amazonS3, string bucketName, string imagePath)
+        /// <param name="amazonS3">The Amazon S3 Client</param>
+        /// <param name="bucketName">The bucket name.</param>
+        /// <param name="imagePath">The image path.</param>
+        /// <param name="metadata">The metadata collection.</param>
+        public AWSS3StorageCacheResolver(IAmazonS3 amazonS3, string bucketName, string imagePath, MetadataCollection metadata)
         {
             this.amazonS3 = amazonS3;
             this.bucketName = bucketName;
             this.imagePath = imagePath;
+            this.metadata = metadata;
         }
 
         /// <inheritdoc/>
-        public async Task<ImageCacheMetadata> GetMetaDataAsync()
+        public Task<ImageCacheMetadata> GetMetaDataAsync()
         {
-            GetObjectMetadataResponse metadataResponse = await this.amazonS3.GetObjectMetadataAsync(this.bucketName, this.imagePath);
-            var dict = new Dictionary<string, string>();
-
-            ICollection<string> keys = metadataResponse.Metadata.Keys;
-            foreach (string key in keys)
+            Dictionary<string, string> dict = new();
+            foreach (string key in this.metadata.Keys)
             {
-                string k = key.Substring(11).ToUpper();
-                dict.Add(k, metadataResponse.Metadata[key]);
+                // Trim automatically added x-amz-meta-
+                dict.Add(key.Substring(11).ToUpperInvariant(), this.metadata[key]);
             }
 
-            return ImageCacheMetadata.FromDictionary(dict);
+            return Task.FromResult(ImageCacheMetadata.FromDictionary(dict));
         }
 
         /// <inheritdoc/>
-        public async Task<Stream> OpenReadAsync()
-        {
-            GetObjectResponse s3Object = await this.amazonS3.GetObjectAsync(this.bucketName, this.imagePath);
-            return s3Object.ResponseStream;
-        }
+        public Task<Stream> OpenReadAsync() => this.amazonS3.GetObjectStreamAsync(this.bucketName, this.imagePath, null);
     }
 }

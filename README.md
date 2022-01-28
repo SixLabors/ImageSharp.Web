@@ -86,7 +86,7 @@ git submodule update --init --recursive
 
 #### Running the Tests
 
-The unit tests require [Azurite Azure Storage Emulator](https://github.com/Azure/Azurite) and  [s3rver](https://github.com/jamhall/s3rver) in order to run.
+The unit tests require [Azurite Azure Storage Emulator](https://github.com/Azure/Azurite) and [s3rver](https://github.com/jamhall/s3rver) in order to run.
 
 On Windows to install and run the server as a background process run the following command
 

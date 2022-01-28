@@ -28,8 +28,8 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
         /// <summary>
         /// The containers for the blob services.
         /// </summary>
-        private readonly Dictionary<string, IAmazonS3> buckets
-            = new Dictionary<string, IAmazonS3>();
+        private readonly Dictionary<string, AmazonS3Client> buckets
+            = new();
 
         private readonly AWSS3StorageImageProviderOptions storageOptions;
         private Func<HttpContext, bool> match;
@@ -54,8 +54,7 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
 
             foreach (AWSS3BucketClientOptions bucket in this.storageOptions.S3Buckets)
             {
-                AmazonS3Client s3Client = null;
-
+                AmazonS3Client s3Client;
                 if (!string.IsNullOrEmpty(bucket.Endpoint) &&
                     bucket.AccessKey != null &&
                     bucket.AccessSecret != null)
@@ -65,6 +64,7 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
                         ServiceURL = bucket.Endpoint,
                         ForcePathStyle = true
                     };
+
                     s3Client = new AmazonS3Client(bucket.AccessKey, bucket.AccessSecret, config);
                 }
                 else if (!string.IsNullOrEmpty(bucket.AccessKey) &&
@@ -137,9 +137,12 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
                 return null;
             }
 
-            bool imageExists = await this.KeyExists(s3Client, bucketName, key);
+            if (!await this.KeyExists(s3Client, bucketName, key))
+            {
+                return null;
+            }
 
-            return !imageExists ? null : new AWSS3StorageImageResolver(s3Client, bucketName, key);
+            return new AWSS3StorageImageResolver(s3Client, bucketName, key);
         }
 
         private bool IsMatch(HttpContext context)
@@ -147,7 +150,6 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
             // Only match loosly here for performance.
             // Path matching conflicts should be dealt with by configuration.
             string path = context.Request.Path.Value.TrimStart(SlashChars);
-
             foreach (string bucket in this.buckets.Keys)
             {
                 if (path.StartsWith(bucket, StringComparison.OrdinalIgnoreCase))
@@ -171,7 +173,7 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
                 };
 
                 // If the object doesn't exist then a "NotFound" will be thrown
-                await s3Client.GetObjectMetadataAsync(request).ConfigureAwait(false);
+                await s3Client.GetObjectMetadataAsync(request);
                 return true;
             }
             catch (AmazonS3Exception e)
