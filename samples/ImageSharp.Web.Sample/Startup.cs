@@ -88,7 +88,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                         options.Configuration = Configuration.Default;
                         options.BrowserMaxAge = TimeSpan.FromDays(7);
                         options.CacheMaxAge = TimeSpan.FromDays(365);
-                        options.CachedNameLength = 8;
+                        options.CacheHashLength = 8;
                         options.OnParseCommandsAsync = _ => Task.CompletedTask;
                         options.OnBeforeSaveAsync = _ => Task.CompletedTask;
                         options.OnProcessedAsync = _ => Task.CompletedTask;
@@ -111,7 +111,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                         options.Configuration = Configuration.Default;
                         options.BrowserMaxAge = TimeSpan.FromDays(7);
                         options.CacheMaxAge = TimeSpan.FromDays(365);
-                        options.CachedNameLength = 8;
+                        options.CacheHashLength = 8;
                         options.OnParseCommandsAsync = _ => Task.CompletedTask;
                         options.OnBeforeSaveAsync = _ => Task.CompletedTask;
                         options.OnProcessedAsync = _ => Task.CompletedTask;
