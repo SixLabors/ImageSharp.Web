@@ -80,7 +80,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             this.fileProvider = new PhysicalFileProvider(this.cacheRootPath);
             this.options = options.Value;
-            this.cachedNameLength = (int)this.options.CachedNameLength;
+            this.cachedNameLength = (int)this.options.CacheHashLength;
             this.formatUtilities = formatUtilities;
         }
 

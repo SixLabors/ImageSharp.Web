@@ -261,7 +261,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         {
             // Create a cache key based on all the components of the requested url
             string uri = GetUri(context, commands);
-            string key = this.cacheHash.Create(uri, this.options.CachedNameLength);
+            string key = this.cacheHash.Create(uri, this.options.CacheHashLength);
 
             // Check the cache, if present, not out of date and not requiring an update
             // we'll simply serve the file from there.

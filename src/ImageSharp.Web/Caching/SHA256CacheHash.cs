@@ -25,7 +25,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         public SHA256CacheHash(IOptions<ImageSharpMiddlewareOptions> options)
         {
             Guard.NotNull(options, nameof(options));
-            Guard.MustBeBetweenOrEqualTo<uint>(options.Value.CachedNameLength, 2, 64, nameof(options.Value.CachedNameLength));
+            Guard.MustBeBetweenOrEqualTo<uint>(options.Value.CacheHashLength, 2, 64, nameof(options.Value.CacheHashLength));
         }
 
         /// <inheritdoc/>

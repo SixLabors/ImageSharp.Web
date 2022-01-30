@@ -88,7 +88,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// Gets or sets the length of the filename to use (minus the extension) when storing
         /// images in the image cache. Defaults to 12 characters.
         /// </summary>
-        public uint CachedNameLength { get; set; } = 12;
+        public uint CacheHashLength { get; set; } = 12;
 
         /// <summary>
         /// Gets or sets the additional command parsing method that can be used to used to augment commands.
