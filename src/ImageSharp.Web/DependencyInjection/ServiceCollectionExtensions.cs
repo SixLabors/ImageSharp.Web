@@ -66,7 +66,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
 
             builder.SetCacheKey<UriRelativeLowerInvariantCacheKey>();
 
-            builder.SetCacheHash<CacheHash>();
+            builder.SetCacheHash<SHA256CacheHash>();
 
             builder.AddProvider<PhysicalFileSystemProvider>();
 

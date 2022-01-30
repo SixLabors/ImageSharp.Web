@@ -55,7 +55,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                                 provider.GetRequiredService<FormatUtilities>());
                 })
                 .SetCacheKey<UriRelativeLowerInvariantCacheKey>()
-                .SetCacheHash<CacheHash>()
+                .SetCacheHash<SHA256CacheHash>()
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
@@ -131,7 +131,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                         provider.GetRequiredService<FormatUtilities>());
                 })
                 .SetCacheKey<UriRelativeLowerInvariantCacheKey>()
-                .SetCacheHash<CacheHash>()
+                .SetCacheHash<SHA256CacheHash>()
                 .ClearProviders()
                 .AddProvider<PhysicalFileSystemProvider>()
                 .ClearProcessors()
