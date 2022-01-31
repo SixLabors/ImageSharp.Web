@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Resolvers;
 
 namespace SixLabors.ImageSharp.Web.Caching
@@ -25,24 +24,14 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly string cacheRootPath;
 
         /// <summary>
-        /// The length of the filename to use (minus the extension) when storing images in the image cache.
+        /// The depth of the nested cache folders structure to store the images.
         /// </summary>
-        private readonly int cachedNameLength;
+        private readonly int cacheFolderDepth;
 
         /// <summary>
         /// The file provider abstraction.
         /// </summary>
         private readonly IFileProvider fileProvider;
-
-        /// <summary>
-        /// The cache configuration options.
-        /// </summary>
-        private readonly PhysicalFileSystemCacheOptions cacheOptions;
-
-        /// <summary>
-        /// The middleware configuration options.
-        /// </summary>
-        private readonly ImageSharpMiddlewareOptions options;
 
         /// <summary>
         /// Contains various format helper methods based on the current configuration.
@@ -52,18 +41,16 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
-        /// <param name="cacheOptions">The cache configuration options.</param>
+        /// <param name="options">The cache configuration options.</param>
         /// <param name="environment">The hosting environment the application is running in.</param>
-        /// <param name="options">The middleware configuration options.</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public PhysicalFileSystemCache(
-            IOptions<PhysicalFileSystemCacheOptions> cacheOptions,
+            IOptions<PhysicalFileSystemCacheOptions> options,
 #if NETCOREAPP2_1
             IHostingEnvironment environment,
 #else
             IWebHostEnvironment environment,
 #endif
-            IOptions<ImageSharpMiddlewareOptions> options,
             FormatUtilities formatUtilities)
         {
             Guard.NotNull(environment, nameof(environment));
@@ -71,16 +58,14 @@ namespace SixLabors.ImageSharp.Web.Caching
             Guard.NotNullOrWhiteSpace(environment.WebRootPath, nameof(environment.WebRootPath));
 
             // Allow configuration of the cache without having to register everything.
-            this.cacheOptions = cacheOptions != null ? cacheOptions.Value : new PhysicalFileSystemCacheOptions();
-            this.cacheRootPath = GetCacheRoot(this.cacheOptions, environment.WebRootPath, environment.ContentRootPath);
-            if (!Directory.Exists(this.cacheRootPath))
-            {
-                Directory.CreateDirectory(this.cacheRootPath);
-            }
+            PhysicalFileSystemCacheOptions cacheOptions = options != null ? options.Value : new PhysicalFileSystemCacheOptions();
+            this.cacheRootPath = GetCacheRoot(cacheOptions, environment.WebRootPath, environment.ContentRootPath);
+            this.cacheFolderDepth = (int)cacheOptions.CacheFolderDepth;
+
+            // Ensure cache directory is created before initializing the file provider
+            Directory.CreateDirectory(this.cacheRootPath);
 
             this.fileProvider = new PhysicalFileProvider(this.cacheRootPath);
-            this.options = options.Value;
-            this.cachedNameLength = (int)this.options.CacheHashLength;
             this.formatUtilities = formatUtilities;
         }
 
@@ -93,7 +78,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <returns>root path.</returns>
         internal static string GetCacheRoot(PhysicalFileSystemCacheOptions cacheOptions, string webRootPath, string contentRootPath)
         {
-            var cacheRoot = string.IsNullOrEmpty(cacheOptions.CacheRoot)
+            string cacheRoot = string.IsNullOrEmpty(cacheOptions.CacheRoot)
                 ? webRootPath
                 : cacheOptions.CacheRoot;
 
@@ -105,7 +90,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <inheritdoc/>
         public Task<IImageCacheResolver> GetAsync(string key)
         {
-            string path = ToFilePath(key, this.cachedNameLength);
+            string path = ToFilePath(key, this.cacheFolderDepth);
 
             IFileInfo metaFileInfo = this.fileProvider.GetFileInfo(this.ToMetaDataFilePath(path));
             if (!metaFileInfo.Exists)
@@ -119,15 +104,13 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <inheritdoc/>
         public async Task SetAsync(string key, Stream stream, ImageCacheMetadata metadata)
         {
-            string path = Path.Combine(this.cacheRootPath, ToFilePath(key, this.cachedNameLength));
+            string path = Path.Combine(this.cacheRootPath, ToFilePath(key, this.cacheFolderDepth));
             string imagePath = this.ToImageFilePath(path, metadata);
             string metaPath = this.ToMetaDataFilePath(path);
             string directory = Path.GetDirectoryName(path);
 
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
+            // Ensure cache directory is created before creating files
+            Directory.CreateDirectory(directory);
 
             using (FileStream fileStream = File.Create(imagePath))
             {
@@ -162,13 +145,18 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Converts the key into a nested file path.
         /// </summary>
         /// <param name="key">The cache key.</param>
-        /// <param name="cachedNameLength">The length of the cached file name minus the extension.</param>
+        /// <param name="cacheFolderDepth">The depth of the nested cache folders structure to store the images.</param>
         /// <returns>The <see cref="string"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe string ToFilePath(string key, int cachedNameLength)
+        internal static unsafe string ToFilePath(string key, int cacheFolderDepth)
         {
+            if (cacheFolderDepth > key.Length)
+            {
+                cacheFolderDepth = key.Length;
+            }
+
             // Each key substring char + separator + key
-            int length = (cachedNameLength * 2) + key.Length;
+            int length = (cacheFolderDepth * 2) + key.Length;
             fixed (char* keyPtr = key)
             {
                 return string.Create(length, (Ptr: (IntPtr)keyPtr, key.Length), (chars, args) =>
@@ -179,7 +167,7 @@ namespace SixLabors.ImageSharp.Web.Caching
                     ref char charRef = ref MemoryMarshal.GetReference(chars);
 
                     int index = 0;
-                    for (int i = 0; i < cachedNameLength; i++)
+                    for (int i = 0; i < cacheFolderDepth; i++)
                     {
                         Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref keyRef, i);
                         Unsafe.Add(ref charRef, index++) = separator;

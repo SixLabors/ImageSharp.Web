@@ -14,6 +14,11 @@ namespace SixLabors.ImageSharp.Web.Caching
         public string CacheFolder { get; set; } = "is-cache";
 
         /// <summary>
+        /// Gets or sets the depth of the nested cache folders structure to store the images.
+        /// </summary>
+        public uint CacheFolderDepth { get; set; } = 12;
+
+        /// <summary>
         /// Gets or sets the optional cache root folder.
         /// <para>
         /// This value can be <see langword="null"/>, a fully qualified absolute path,
