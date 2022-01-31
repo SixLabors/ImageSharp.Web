@@ -59,15 +59,14 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 }
                 catch (AmazonS3Exception e)
                 {
-                    // CI tests are run in parallel and can sometime return a
+                    // CI tests are run in parallel and can sometimes return a
                     // false negative for the existance of a bucket.
-                    if (string.Equals(e.ErrorCode, "BucketExists"))
+                    if (string.Equals(e.ErrorCode, "BucketAlreadyExists"))
                     {
                         return;
                     }
 
-                    // Temp to capture error code
-                    throw new Exception(e.ErrorCode);
+                    throw;
                 }
             }
 
