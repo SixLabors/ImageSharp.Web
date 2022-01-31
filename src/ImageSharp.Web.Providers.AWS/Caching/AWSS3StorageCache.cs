@@ -1,11 +1,8 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Amazon.S3;
 using Amazon.S3.Model;
@@ -21,12 +18,6 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
     /// </summary>
     public class AWSS3StorageCache : IImageCache
     {
-        private static readonly TaskFactory TaskFactory = new
-            (CancellationToken.None,
-            TaskCreationOptions.None,
-            TaskContinuationOptions.None,
-            TaskScheduler.Default);
-
         private readonly IAmazonS3 amazonS3Client;
         private readonly string bucket;
 
@@ -70,8 +61,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
                 AutoCloseStream = false
             };
 
-            var dt = metadata.ToDictionary();
-            foreach (KeyValuePair<string, string> d in dt)
+            foreach (KeyValuePair<string, string> d in metadata.ToDictionary())
             {
                 request.Metadata.Add(d.Key, d.Value);
             }
@@ -97,11 +87,16 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
         public static PutBucketResponse CreateIfNotExists(
             AWSS3BucketClientOptions options,
             S3CannedACL acl)
+            => AsyncHelper.RunSync(() => CreateIfNotExistsAsync(options, acl));
+
+        private static async Task<PutBucketResponse> CreateIfNotExistsAsync(
+            AWSS3BucketClientOptions options,
+            S3CannedACL acl)
         {
             AmazonS3Client client = AmazonS3ClientFactory.CreateClient(options);
 
             bool foundBucket = false;
-            ListBucketsResponse listBucketsResponse = RunSync(() => client.ListBucketsAsync());
+            ListBucketsResponse listBucketsResponse = await client.ListBucketsAsync();
             foreach (S3Bucket b in listBucketsResponse.Buckets)
             {
                 if (b.BucketName == options.BucketName)
@@ -120,30 +115,10 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
                     CannedACL = acl
                 };
 
-                return RunSync(() => client.PutBucketAsync(putBucketRequest));
+                return await client.PutBucketAsync(putBucketRequest);
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Executes an async <see cref="Task{TResult}"/> method which has
-        /// a <paramref name="task"/> return type synchronously.
-        /// <see href="https://github.com/aspnet/AspNetIdentity/blob/b7826741279450c58b230ece98bd04b4815beabf/src/Microsoft.AspNet.Identity.Core/AsyncHelper.cs"/>
-        /// </summary>
-        /// <typeparam name="TResult">The type of result to return.</typeparam>
-        /// <param name="task">The task to excecute.</param>
-        /// <returns>The <typeparamref name="TResult"/>.</returns>
-        private static TResult RunSync<TResult>(Func<Task<TResult>> task)
-        {
-            CultureInfo cultureUi = CultureInfo.CurrentUICulture;
-            CultureInfo culture = CultureInfo.CurrentCulture;
-            return TaskFactory.StartNew(() =>
-            {
-                Thread.CurrentThread.CurrentCulture = culture;
-                Thread.CurrentThread.CurrentUICulture = cultureUi;
-                return task();
-            }).Unwrap().GetAwaiter().GetResult();
         }
     }
 }

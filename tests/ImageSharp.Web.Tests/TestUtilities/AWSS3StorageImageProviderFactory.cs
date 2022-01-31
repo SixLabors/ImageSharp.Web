@@ -5,14 +5,13 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
-using Amazon;
+using System.Threading.Tasks;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.ImageSharp.Web.Providers.AWS;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
@@ -23,44 +22,19 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
         {
             IOptions<AWSS3StorageImageProviderOptions> options = services.GetRequiredService<IOptions<AWSS3StorageImageProviderOptions>>();
             FormatUtilities utilities = services.GetRequiredService<FormatUtilities>();
-            InitializeAWSStorage(services, options.Value);
+            AsyncHelper.RunSync(() => InitializeAWSStorageAsync(services, options.Value));
 
             return new AWSS3StorageImageProvider(options, utilities);
         }
 
-        private static void InitializeAWSStorage(IServiceProvider services, AWSS3StorageImageProviderOptions options)
+        private static async Task InitializeAWSStorageAsync(IServiceProvider services, AWSS3StorageImageProviderOptions options)
         {
             // Upload an image to the AWS Test Storage;
             AWSS3BucketClientOptions bucketOptions = options.S3Buckets.First();
-            AmazonS3Client amazonS3Client = null;
+            AmazonS3Client amazonS3Client = AmazonS3ClientFactory.CreateClient(bucketOptions);
+            ListBucketsResponse listBucketsResponse = await amazonS3Client.ListBucketsAsync();
+
             bool foundBucket = false;
-
-            if (!string.IsNullOrEmpty(bucketOptions.Endpoint) &&
-                bucketOptions.AccessKey != null &&
-                bucketOptions.AccessSecret != null)
-            {
-                var config = new AmazonS3Config
-                {
-                    ServiceURL = bucketOptions.Endpoint,
-                    ForcePathStyle = true
-                };
-                amazonS3Client = new AmazonS3Client(string.Empty, string.Empty, config);
-            }
-            else if (!string.IsNullOrEmpty(bucketOptions.AccessKey) &&
-                     !string.IsNullOrEmpty(bucketOptions.AccessSecret) &&
-                     !string.IsNullOrEmpty(bucketOptions.Region))
-            {
-                var region = RegionEndpoint.GetBySystemName(bucketOptions.Region);
-                amazonS3Client = new AmazonS3Client(bucketOptions.AccessKey, bucketOptions.AccessSecret, region);
-            }
-            else
-            {
-                var region = RegionEndpoint.GetBySystemName(bucketOptions.Region);
-                amazonS3Client = new AmazonS3Client(region);
-            }
-
-            ListBucketsResponse listBucketsResponse = amazonS3Client.ListBucketsAsync().GetAwaiter().GetResult();
-
             foreach (S3Bucket b in listBucketsResponse.Buckets)
             {
                 if (b.BucketName == bucketOptions.BucketName)
@@ -79,7 +53,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                     CannedACL = S3CannedACL.PublicRead
                 };
 
-                amazonS3Client.PutBucketAsync(putBucketRequest).GetAwaiter().GetResult();
+                await amazonS3Client.PutBucketAsync(putBucketRequest);
             }
 
 #if NETCOREAPP2_1
@@ -88,22 +62,22 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             IWebHostEnvironment environment = services.GetRequiredService<IWebHostEnvironment>();
 #endif
 
-            var request = new GetObjectRequest()
-            {
-                BucketName = bucketOptions.BucketName,
-                Key = TestConstants.ImagePath
-            };
-
             try
             {
-                amazonS3Client.GetObjectAsync(request).GetAwaiter().GetResult();
+                GetObjectRequest request = new()
+                {
+                    BucketName = bucketOptions.BucketName,
+                    Key = TestConstants.ImagePath
+                };
+
+                await amazonS3Client.GetObjectAsync(request);
             }
             catch
             {
                 IFileInfo file = environment.WebRootFileProvider.GetFileInfo(TestConstants.ImagePath);
                 using Stream stream = file.CreateReadStream();
 
-                // Set the max-age property so we get coverage for testing is in our Azure provider.
+                // Set the max-age property so we get coverage for testing is in our AWS provider.
                 var cacheControl = new CacheControlHeaderValue
                 {
                     Public = true,
@@ -123,7 +97,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                     InputStream = stream
                 };
 
-                amazonS3Client.PutObjectAsync(putRequest).GetAwaiter().GetResult();
+                await amazonS3Client.PutObjectAsync(putRequest);
             }
         }
     }
