@@ -46,14 +46,29 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 
             if (!foundBucket)
             {
-                var putBucketRequest = new PutBucketRequest
+                try
                 {
-                    BucketName = bucketOptions.BucketName,
-                    BucketRegion = bucketOptions.Region,
-                    CannedACL = S3CannedACL.PublicRead
-                };
+                    var putBucketRequest = new PutBucketRequest
+                    {
+                        BucketName = bucketOptions.BucketName,
+                        BucketRegion = bucketOptions.Region,
+                        CannedACL = S3CannedACL.PublicRead
+                    };
 
-                await amazonS3Client.PutBucketAsync(putBucketRequest);
+                    await amazonS3Client.PutBucketAsync(putBucketRequest);
+                }
+                catch (AmazonS3Exception e)
+                {
+                    // CI tests are run in parallel and can sometime return a
+                    // false negative for the existance of a bucket.
+                    if (string.Equals(e.ErrorCode, "BucketExists"))
+                    {
+                        return;
+                    }
+
+                    // Temp to capture error code
+                    throw new Exception(e.ErrorCode);
+                }
             }
 
 #if NETCOREAPP2_1
