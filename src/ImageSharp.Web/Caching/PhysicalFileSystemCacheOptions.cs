@@ -4,7 +4,7 @@
 namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
-    /// Configuration options for the <see cref="PhysicalFileSystemCache"/>.
+    /// Configuration options for the <see cref="PhysicalFileSystemCache" />.
     /// </summary>
     public class PhysicalFileSystemCacheOptions
     {
@@ -12,6 +12,11 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// Gets or sets the cache folder name.
         /// </summary>
         public string CacheFolder { get; set; } = "is-cache";
+
+        /// <summary>
+        /// Gets or sets the depth of the nested cache folders structure to store the images.
+        /// </summary>
+        public uint CacheFolderDepth { get; set; } = 8;
 
         /// <summary>
         /// Gets or sets the optional cache root folder.

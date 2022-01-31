@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Resolvers;
 
 namespace SixLabors.ImageSharp.Web.Caching
@@ -35,16 +34,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly IFileProvider fileProvider;
 
         /// <summary>
-        /// The cache configuration options.
-        /// </summary>
-        private readonly PhysicalFileSystemCacheOptions cacheOptions;
-
-        /// <summary>
-        /// The middleware configuration options.
-        /// </summary>
-        private readonly ImageSharpMiddlewareOptions options;
-
-        /// <summary>
         /// Contains various format helper methods based on the current configuration.
         /// </summary>
         private readonly FormatUtilities formatUtilities;
@@ -52,18 +41,16 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCache"/> class.
         /// </summary>
-        /// <param name="cacheOptions">The cache configuration options.</param>
+        /// <param name="options">The cache configuration options.</param>
         /// <param name="environment">The hosting environment the application is running in.</param>
-        /// <param name="options">The middleware configuration options.</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public PhysicalFileSystemCache(
-            IOptions<PhysicalFileSystemCacheOptions> cacheOptions,
+            IOptions<PhysicalFileSystemCacheOptions> options,
 #if NETCOREAPP2_1
             IHostingEnvironment environment,
 #else
             IWebHostEnvironment environment,
 #endif
-            IOptions<ImageSharpMiddlewareOptions> options,
             FormatUtilities formatUtilities)
         {
             Guard.NotNull(environment, nameof(environment));
@@ -71,16 +58,14 @@ namespace SixLabors.ImageSharp.Web.Caching
             Guard.NotNullOrWhiteSpace(environment.WebRootPath, nameof(environment.WebRootPath));
 
             // Allow configuration of the cache without having to register everything.
-            this.cacheOptions = cacheOptions != null ? cacheOptions.Value : new PhysicalFileSystemCacheOptions();
-            this.cacheRootPath = GetCacheRoot(this.cacheOptions, environment.WebRootPath, environment.ContentRootPath);
-            if (!Directory.Exists(this.cacheRootPath))
-            {
-                Directory.CreateDirectory(this.cacheRootPath);
-            }
+            PhysicalFileSystemCacheOptions cacheOptions = options != null ? options.Value : new PhysicalFileSystemCacheOptions();
+            this.cacheRootPath = GetCacheRoot(cacheOptions, environment.WebRootPath, environment.ContentRootPath);
+            this.cacheFolderDepth = (int)cacheOptions.CacheFolderDepth;
+
+            // Ensure cache directory is created before initializing the file provider
+            Directory.CreateDirectory(this.cacheRootPath);
 
             this.fileProvider = new PhysicalFileProvider(this.cacheRootPath);
-            this.options = options.Value;
-            this.cacheFolderDepth = (int)this.options.CacheHashLength;
             this.formatUtilities = formatUtilities;
         }
 
@@ -124,10 +109,8 @@ namespace SixLabors.ImageSharp.Web.Caching
             string metaPath = this.ToMetaDataFilePath(path);
             string directory = Path.GetDirectoryName(path);
 
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
+            // Ensure cache directory is created before creating files
+            Directory.CreateDirectory(directory);
 
             using (FileStream fileStream = File.Create(imagePath))
             {
@@ -167,6 +150,11 @@ namespace SixLabors.ImageSharp.Web.Caching
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe string ToFilePath(string key, int cacheFolderDepth)
         {
+            if (cacheFolderDepth > key.Length)
+            {
+                cacheFolderDepth = key.Length;
+            }
+
             // Each key substring char + separator + key
             int length = (cacheFolderDepth * 2) + key.Length;
             fixed (char* keyPtr = key)
