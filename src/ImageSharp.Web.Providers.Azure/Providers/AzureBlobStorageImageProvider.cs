@@ -27,7 +27,7 @@ namespace SixLabors.ImageSharp.Web.Providers.Azure
         /// The containers for the blob services.
         /// </summary>
         private readonly Dictionary<string, BlobContainerClient> containers
-            = new Dictionary<string, BlobContainerClient>();
+            = new();
 
         /// <summary>
         /// The blob storage options.
