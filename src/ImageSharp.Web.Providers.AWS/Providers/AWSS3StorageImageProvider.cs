@@ -4,13 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Factories;
 using SixLabors.ImageSharp.Web.Resolvers;
 using SixLabors.ImageSharp.Web.Resolvers.AWS;
 
@@ -21,8 +19,6 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
     /// </summary>
     public class AWSS3StorageImageProvider : IImageProvider
     {
-        private static readonly AWSS3Factory AWSS3Factory = new();
-
         /// <summary>
         /// Character array to remove from paths.
         /// </summary>
@@ -57,7 +53,7 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
 
             foreach (AWSS3BucketClientOptions bucket in this.storageOptions.S3Buckets)
             {
-                this.buckets.Add(bucket.BucketName, AWSS3Factory.CreateClient(bucket));
+                this.buckets.Add(bucket.BucketName, AmazonS3ClientFactory.CreateClient(bucket));
             }
         }
 

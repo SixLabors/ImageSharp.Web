@@ -7,11 +7,9 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Factories;
 using SixLabors.ImageSharp.Web.Providers.AWS;
 using SixLabors.ImageSharp.Web.Resolvers;
 using SixLabors.ImageSharp.Web.Resolvers.AWS;
@@ -28,7 +26,6 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
             TaskCreationOptions.None,
             TaskContinuationOptions.None,
             TaskScheduler.Default);
-        private static readonly AWSS3Factory AWSS3Factory = new ();
 
         private readonly IAmazonS3 amazonS3Client;
         private readonly string bucket;
@@ -42,7 +39,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
             Guard.NotNull(cacheOptions, nameof(cacheOptions));
             AWSS3BucketClientOptions options = cacheOptions.Value;
             this.bucket = options.BucketName;
-            this.amazonS3Client = AWSS3Factory.CreateClient(options);
+            this.amazonS3Client = AmazonS3ClientFactory.CreateClient(options);
         }
 
         /// <inheritdoc/>
@@ -101,7 +98,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
             AWSS3BucketClientOptions options,
             S3CannedACL acl)
         {
-            AmazonS3Client client = AWSS3Factory.CreateClient(options);
+            AmazonS3Client client = AmazonS3ClientFactory.CreateClient(options);
 
             bool foundBucket = false;
             ListBucketsResponse listBucketsResponse = RunSync(() => client.ListBucketsAsync());
