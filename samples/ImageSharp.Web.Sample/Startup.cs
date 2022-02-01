@@ -51,7 +51,6 @@ namespace SixLabors.ImageSharp.Web.Sample
                     return new PhysicalFileSystemCache(
                                 provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
                                 provider.GetRequiredService<IWebHostEnvironment>(),
-                                provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
                                 provider.GetRequiredService<FormatUtilities>());
                 })
                 .SetCacheHash<SHA256CacheHash>()
@@ -126,7 +125,6 @@ namespace SixLabors.ImageSharp.Web.Sample
                     return new PhysicalFileSystemCache(
                         provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
                         provider.GetRequiredService<IWebHostEnvironment>(),
-                        provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
                         provider.GetRequiredService<FormatUtilities>());
                 })
                 .SetCacheHash<SHA256CacheHash>()

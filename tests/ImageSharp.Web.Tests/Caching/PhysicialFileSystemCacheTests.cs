@@ -8,14 +8,20 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
 {
     public class PhysicialFileSystemCacheTests
     {
-        [Fact]
-        public void FilePathMatchesReference()
+        [Theory]
+        [InlineData("abcdefghijkl", 0, false, "abcdefghijkl")]
+        [InlineData("abcdefghijkl", 0, true, "abcdefghijkl")]
+        [InlineData("abcdefghijkl", 4, false, "a/b/c/d/efghijkl")]
+        [InlineData("abcdefghijkl", 4, true, "a/b/c/d/abcdefghijkl")]
+        [InlineData("abcdefghijkl", 8, false, "a/b/c/d/e/f/g/h/ijkl")]
+        [InlineData("abcdefghijkl", 8, true, "a/b/c/d/e/f/g/h/abcdefghijkl")]
+        [InlineData("abcdefghijkl", 12, false, "a/b/c/d/e/f/g/h/i/j/k/l")]
+        [InlineData("abcdefghijkl", 12, true, "a/b/c/d/e/f/g/h/i/j/k/l/abcdefghijkl")]
+        [InlineData("abcdefghijkl", 16, false, "a/b/c/d/e/f/g/h/i/j/k/l")]
+        [InlineData("abcdefghijkl", 16, true, "a/b/c/d/e/f/g/h/i/j/k/l/abcdefghijkl")]
+        public void FilePathMatchesReference(string key, int cacheFolderDepth, bool legacyName, string expected)
         {
-            const string Key = "abcdefghijkl";
-            const int CachedNameLength = 12;
-
-            string expected = $"{string.Join("/", Key.Substring(0, CachedNameLength).ToCharArray())}/{Key}";
-            string actual = PhysicalFileSystemCache.ToFilePath(Key, CachedNameLength);
+            string actual = PhysicalFileSystemCache.ToFilePath(key, cacheFolderDepth, legacyName);
 
             Assert.Equal(expected, actual);
         }

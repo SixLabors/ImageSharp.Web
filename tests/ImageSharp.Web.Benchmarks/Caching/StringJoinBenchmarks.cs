@@ -12,11 +12,11 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
     public class StringJoinBenchmarks
     {
         private const string Key = "abcdefghijkl";
-        private const int CachedNameLength = 12;
+        private const int CacheFolderDepth = 12;
 
         [Benchmark(Baseline = true, Description = "String.Join")]
         public string JoinUsingString()
-            => $"{string.Join("/", Key.Substring(0, CachedNameLength).ToCharArray())}/{Key}";
+            => $"{string.Join("/", Key.Substring(0, CacheFolderDepth).ToCharArray())}/{Key}";
 
         [Benchmark(Description = "StringBuilder.Append")]
         public string JoinUsingStringBuilder()
@@ -25,8 +25,8 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
             const char separator = '/';
 
             // Each key substring char + separator + key
-            var sb = new StringBuilder((CachedNameLength * 2) + Key.Length);
-            ReadOnlySpan<char> paths = keySpan.Slice(0, CachedNameLength);
+            var sb = new StringBuilder((CacheFolderDepth * 2) + Key.Length);
+            ReadOnlySpan<char> paths = keySpan.Slice(0, CacheFolderDepth);
             for (int i = 0; i < paths.Length; i++)
             {
                 sb.Append(paths[i]);
@@ -39,7 +39,7 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
 
         [Benchmark(Description = "String.Create")]
         public string JoinUsingStringCreate()
-            => PhysicalFileSystemCache.ToFilePath(Key, CachedNameLength);
+            => PhysicalFileSystemCache.ToFilePath(Key, CacheFolderDepth, true);
 
         /*
         BenchmarkDotNet=v0.12.0, OS=Windows 10.0.18363

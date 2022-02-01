@@ -29,6 +29,11 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly int cacheFolderDepth;
 
         /// <summary>
+        /// If set to <c>true</c> uses the legacy/full length file name.
+        /// </summary>
+        private readonly bool useLegacyName;
+
+        /// <summary>
         /// The file provider abstraction.
         /// </summary>
         private readonly IFileProvider fileProvider;
@@ -57,10 +62,11 @@ namespace SixLabors.ImageSharp.Web.Caching
             Guard.NotNull(options, nameof(options));
             Guard.NotNullOrWhiteSpace(environment.WebRootPath, nameof(environment.WebRootPath));
 
-            // Allow configuration of the cache without having to register everything.
+            // Allow configuration of the cache without having to register everything
             PhysicalFileSystemCacheOptions cacheOptions = options != null ? options.Value : new PhysicalFileSystemCacheOptions();
             this.cacheRootPath = GetCacheRoot(cacheOptions, environment.WebRootPath, environment.ContentRootPath);
             this.cacheFolderDepth = (int)cacheOptions.CacheFolderDepth;
+            this.useLegacyName = cacheOptions.UseLegacyName;
 
             // Ensure cache directory is created before initializing the file provider
             Directory.CreateDirectory(this.cacheRootPath);
@@ -90,7 +96,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <inheritdoc/>
         public Task<IImageCacheResolver> GetAsync(string key)
         {
-            string path = ToFilePath(key, this.cacheFolderDepth);
+            string path = ToFilePath(key, this.cacheFolderDepth, this.useLegacyName);
 
             IFileInfo metaFileInfo = this.fileProvider.GetFileInfo(this.ToMetaDataFilePath(path));
             if (!metaFileInfo.Exists)
@@ -104,7 +110,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <inheritdoc/>
         public async Task SetAsync(string key, Stream stream, ImageCacheMetadata metadata)
         {
-            string path = Path.Combine(this.cacheRootPath, ToFilePath(key, this.cacheFolderDepth));
+            string path = Path.Combine(this.cacheRootPath, ToFilePath(key, this.cacheFolderDepth, this.useLegacyName));
             string imagePath = this.ToImageFilePath(path, metadata);
             string metaPath = this.ToMetaDataFilePath(path);
             string directory = Path.GetDirectoryName(path);
@@ -146,17 +152,38 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <param name="cacheFolderDepth">The depth of the nested cache folders structure to store the images.</param>
-        /// <returns>The <see cref="string"/>.</returns>
+        /// <param name="legacyName">If set to <c>true</c> uses the legacy/full length file name.</param>
+        /// <returns>
+        /// The <see cref="string" />.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe string ToFilePath(string key, int cacheFolderDepth)
+        internal static unsafe string ToFilePath(string key, int cacheFolderDepth, bool legacyName)
         {
-            if (cacheFolderDepth > key.Length)
+            int length;
+            int nameStartIndex;
+            if (legacyName)
             {
-                cacheFolderDepth = key.Length;
+                // Depth cannot exceed key length
+                if (cacheFolderDepth > key.Length)
+                {
+                    cacheFolderDepth = key.Length;
+                }
+
+                length = (cacheFolderDepth * 2) + key.Length;
+                nameStartIndex = 0;
+            }
+            else
+            {
+                // Ensure we keep at least 1 character for the file name
+                if (cacheFolderDepth >= key.Length)
+                {
+                    cacheFolderDepth = key.Length - 1;
+                }
+
+                length = cacheFolderDepth + key.Length;
+                nameStartIndex = cacheFolderDepth;
             }
 
-            // Each key substring char + separator + key
-            int length = (cacheFolderDepth * 2) + key.Length;
             fixed (char* keyPtr = key)
             {
                 return string.Create(length, (Ptr: (IntPtr)keyPtr, key.Length), (chars, args) =>
@@ -173,7 +200,7 @@ namespace SixLabors.ImageSharp.Web.Caching
                         Unsafe.Add(ref charRef, index++) = separator;
                     }
 
-                    for (int i = 0; i < keySpan.Length; i++)
+                    for (int i = nameStartIndex; i < keySpan.Length; i++)
                     {
                         Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref keyRef, i);
                     }
