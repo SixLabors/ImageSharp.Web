@@ -7,7 +7,7 @@ using SixLabors.ImageSharp.Web.Commands;
 namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
-    /// Creates a case insensitive cache key based on the request scheme, host, path and commands.
+    /// Creates a case insensitive cache key based on the request host, path and commands.
     /// </summary>
     public class UriAbsoluteCaseInsensitiveCacheKey : ICacheKey
     {
