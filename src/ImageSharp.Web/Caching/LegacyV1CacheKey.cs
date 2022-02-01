@@ -3,15 +3,15 @@
 
 using System.Text;
 using Microsoft.AspNetCore.Http;
-using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 
-namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
+namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
-    /// Original implementation of cache key creation.
+    /// Maintained for compatibility purposes only this cache key implementation generates the same
+    /// out as the V1 middleware. If possible, it is recommended to use the <see cref="UriRelativeCacheKey"/>.
     /// </summary>
-    public class CacheKeyBaseline : ICacheKey
+    public class LegacyV1CacheKey : ICacheKey
     {
         /// <inheritdoc/>
         public string Create(HttpContext context, CommandCollection commands)

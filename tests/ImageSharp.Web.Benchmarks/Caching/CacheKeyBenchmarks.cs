@@ -18,32 +18,42 @@ namespace SixLabors.ImageSharp.Web.Benchmarks.Caching
             { "width", "400" }
         };
 
-        private static readonly ICacheKey CacheKeyBaseline = new CacheKeyBaseline();
+        private static readonly ICacheKey LegacyV1CacheKey = new LegacyV1CacheKey();
         private static readonly ICacheKey UriRelativeCacheKey = new UriRelativeCacheKey();
         private static readonly ICacheKey UriAbsoluteCacheKey = new UriAbsoluteCacheKey();
+        private static readonly ICacheKey UriRelativeCaseInsensitiveCacheKey = new UriRelativeCaseInsensitiveCacheKey();
+        private static readonly ICacheKey UriAbsoluteCaseInsensitiveCacheKey = new UriAbsoluteCaseInsensitiveCacheKey();
 
-        [Benchmark(Baseline = true, Description = "Baseline")]
-        public string CreateUsingBaseline() => CacheKeyBaseline.Create(Context, Commands);
+        [Benchmark(Baseline = true, Description = nameof(LegacyV1CacheKey))]
+        public string CreateUsingBaseline() => LegacyV1CacheKey.Create(Context, Commands);
 
-        [Benchmark(Description = "UriRelativeCacheKey")]
+        [Benchmark(Description = nameof(UriRelativeCacheKey))]
         public string CreateUsingUriRelativeCacheKey() => UriRelativeCacheKey.Create(Context, Commands);
 
-        [Benchmark(Description = "UriAbsoluteCacheKey")]
+        [Benchmark(Description = nameof(UriRelativeCaseInsensitiveCacheKey))]
+        public string CreateUsingUriRelativeCaseInsensitiveCacheKey() => UriRelativeCacheKey.Create(Context, Commands);
+
+        [Benchmark(Description = nameof(UriAbsoluteCacheKey))]
         public string CreateUsingUriAbsoluteCacheKey() => UriAbsoluteCacheKey.Create(Context, Commands);
+
+        [Benchmark(Description = nameof(UriAbsoluteCaseInsensitiveCacheKey))]
+        public string CreateUsingUriAbsoluteCaseInsensitiveCacheKey() => UriAbsoluteCacheKey.Create(Context, Commands);
 
         /*
         BenchmarkDotNet=v0.13.1, OS=Windows 10.0.22000
-        Intel Core i7-10750H CPU 2.60GHz, 1 CPU, 12 logical and 6 physical cores
+        Intel Core i7-8650U CPU 1.90GHz (Kaby Lake R), 1 CPU, 8 logical and 4 physical cores
         .NET SDK=6.0.101
           [Host]     : .NET Core 3.1.22 (CoreCLR 4.700.21.56803, CoreFX 4.700.21.57101), X64 RyuJIT
           DefaultJob : .NET Core 3.1.22 (CoreCLR 4.700.21.56803, CoreFX 4.700.21.57101), X64 RyuJIT
 
 
-        |              Method |     Mean |   Error |  StdDev | Ratio | RatioSD |  Gen 0 | Allocated |
-        |-------------------- |---------:|--------:|--------:|------:|--------:|-------:|----------:|
-        |            Baseline | 497.4 ns | 8.26 ns | 7.33 ns |  1.00 |    0.00 | 0.1106 |     696 B |
-        | UriRelativeCacheKey | 270.9 ns | 5.47 ns | 7.11 ns |  0.55 |    0.02 | 0.0587 |     368 B |
-        | UriAbsoluteCacheKey | 447.4 ns | 3.38 ns | 3.16 ns |  0.90 |    0.01 | 0.0939 |     592 B |
+        |                             Method |     Mean |    Error |   StdDev | Ratio | RatioSD |  Gen 0 | Allocated |
+        |----------------------------------- |---------:|---------:|---------:|------:|--------:|-------:|----------:|
+        |                   LegacyV1CacheKey | 666.8 ns | 13.22 ns | 14.14 ns |  1.00 |    0.00 | 0.1659 |     696 B |
+        |                UriRelativeCacheKey | 358.0 ns |  1.98 ns |  1.65 ns |  0.54 |    0.01 | 0.0706 |     296 B |
+        | UriRelativeCaseInsensitiveCacheKey | 363.1 ns |  7.20 ns | 11.21 ns |  0.55 |    0.02 | 0.0706 |     296 B |
+        |                UriAbsoluteCacheKey | 490.3 ns |  5.14 ns |  4.80 ns |  0.74 |    0.02 | 0.0763 |     320 B |
+        | UriAbsoluteCaseInsensitiveCacheKey | 475.4 ns |  4.18 ns |  3.71 ns |  0.71 |    0.02 | 0.0763 |     320 B |
         */
 
         private static HttpContext CreateContext()

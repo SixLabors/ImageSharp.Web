@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using SixLabors.ImageSharp.Web.Commands;
 
 namespace SixLabors.ImageSharp.Web.Caching
@@ -14,6 +13,6 @@ namespace SixLabors.ImageSharp.Web.Caching
     {
         /// <inheritdoc/>
         public string Create(HttpContext context, CommandCollection commands)
-            => UriHelper.BuildAbsolute(context.Request.Scheme, context.Request.Host, context.Request.PathBase, context.Request.Path, QueryString.Create(commands)).ToLowerInvariant();
+            => CacheKeyHelper.BuildAbsoluteKey(CacheKeyHelper.CaseHandling.None, context.Request.Host, context.Request.PathBase, context.Request.Path, QueryString.Create(commands));
     }
 }

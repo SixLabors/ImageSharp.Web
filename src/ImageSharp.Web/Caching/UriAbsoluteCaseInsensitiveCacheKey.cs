@@ -7,12 +7,12 @@ using SixLabors.ImageSharp.Web.Commands;
 namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
-    /// Creates a cache key based on the request path and commands.
+    /// Creates a case insensitive cache key based on the request scheme, host, path and commands.
     /// </summary>
-    public class UriRelativeCacheKey : ICacheKey
+    public class UriAbsoluteCaseInsensitiveCacheKey : ICacheKey
     {
         /// <inheritdoc/>
         public string Create(HttpContext context, CommandCollection commands)
-            => CacheKeyHelper.BuildRelativeKey(CacheKeyHelper.CaseHandling.None, context.Request.PathBase, context.Request.Path, QueryString.Create(commands));
+            => CacheKeyHelper.BuildAbsoluteKey(CacheKeyHelper.CaseHandling.LowerInvariant, context.Request.Host, context.Request.PathBase, context.Request.Path, QueryString.Create(commands));
     }
 }
