@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace SixLabors.ImageSharp.Web.Caching
@@ -14,6 +15,7 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// <remarks>
     /// This class measures time using stopwatch.
     /// </remarks>
+    [ExcludeFromCodeCoverage]
     internal readonly struct TLruLongTicksPolicy<TKey, TValue>
     {
         private readonly long timeToLive;

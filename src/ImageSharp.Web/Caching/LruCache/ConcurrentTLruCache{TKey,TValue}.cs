@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -29,6 +30,7 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// 5. When warm is full, warm tail is moved to warm head or cold depending on WasAccessed.
     /// 6. When cold is full, cold tail is moved to warm head or removed from dictionary on depending on WasAccessed.
     /// </remarks>
+    [ExcludeFromCodeCoverage]
     internal class ConcurrentTLruCache<TKey, TValue>
     {
         private readonly ConcurrentDictionary<TKey, LongTickCountLruItem<TKey, TValue>> dictionary;
