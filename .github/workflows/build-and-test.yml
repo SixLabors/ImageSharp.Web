@@ -77,6 +77,20 @@ jobs:
                   npm install -g azurite
                   azurite --loose &
 
+            - name: Setup s3rver
+              if: matrix.options.os != 'windows-latest'
+              shell: bash
+              run: |
+                  sudo npm install -g s3rver
+                  sudo s3rver -d . &
+
+            - name: Setup s3rver Windows
+              if: matrix.options.os == 'windows-latest'
+              shell: bash
+              run: |
+                  npm install -g s3rver
+                  s3rver -d . &
+
             - name: Setup NuGet Cache
               uses: actions/cache@v2
               id: nuget-cache

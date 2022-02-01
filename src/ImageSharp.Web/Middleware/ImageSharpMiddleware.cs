@@ -71,6 +71,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private readonly IImageWebProcessor[] processors;
 
         /// <summary>
+        /// The cache key.
+        /// </summary>
+        private readonly ICacheKey cacheKey;
+
+        /// <summary>
         /// The image cache.
         /// </summary>
         private readonly IImageCache cache;
@@ -115,6 +120,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="resolvers">A collection of <see cref="IImageProvider"/> instances used to resolve images.</param>
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images.</param>
         /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images.</param>
+        /// <param name="cacheKey">An <see cref="ICacheKey"/> instance used for creating cache keys.</param>
         /// <param name="cacheHash">An <see cref="ICacheHash"/>instance used for calculating cached file names.</param>
         /// <param name="commandParser">The command parser</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
@@ -127,6 +133,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IEnumerable<IImageProvider> resolvers,
             IEnumerable<IImageWebProcessor> processors,
             IImageCache cache,
+            ICacheKey cacheKey,
             ICacheHash cacheHash,
             CommandParser commandParser,
             FormatUtilities formatUtilities,
@@ -139,6 +146,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             Guard.NotNull(resolvers, nameof(resolvers));
             Guard.NotNull(processors, nameof(processors));
             Guard.NotNull(cache, nameof(cache));
+            Guard.NotNull(cacheKey, nameof(cacheKey));
             Guard.NotNull(cacheHash, nameof(cacheHash));
             Guard.NotNull(commandParser, nameof(commandParser));
             Guard.NotNull(formatUtilities, nameof(formatUtilities));
@@ -150,6 +158,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.providers = resolvers as IImageProvider[] ?? resolvers.ToArray();
             this.processors = processors as IImageWebProcessor[] ?? processors.ToArray();
             this.cache = cache;
+            this.cacheKey = cacheKey;
             this.cacheHash = cacheHash;
             this.commandParser = commandParser;
             this.parserCulture = this.options.UseInvariantParsingCulture
@@ -259,9 +268,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
             ImageContext imageContext,
             CommandCollection commands)
         {
-            // Create a cache key based on all the components of the requested url
-            string uri = GetUri(context, commands);
-            string key = this.cacheHash.Create(uri, this.options.CacheHashLength);
+            // Create a hashed cache key
+            string key = this.cacheHash.Create(
+                this.cacheKey.Create(context, commands),
+                this.options.CacheHashLength);
 
             // Check the cache, if present, not out of date and not requiring an update
             // we'll simply serve the file from there.
@@ -506,27 +516,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     Debug.Fail(exception.ToString());
                     throw exception;
             }
-        }
-
-        private static string GetUri(HttpContext context, CommandCollection commands)
-        {
-            var sb = new StringBuilder(context.Request.Host.ToString());
-
-            string pathBase = context.Request.PathBase.ToString();
-            if (!string.IsNullOrWhiteSpace(pathBase))
-            {
-                sb.AppendFormat("{0}/", pathBase);
-            }
-
-            string path = context.Request.Path.ToString();
-            if (!string.IsNullOrWhiteSpace(path))
-            {
-                sb.Append(path);
-            }
-
-            sb.Append(QueryString.Create(commands));
-
-            return sb.ToString().ToLowerInvariant();
         }
     }
 }

@@ -12,10 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\ImageSharp.Web\ImageSharp.Web.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Http"/>
   </ItemGroup>
 
 </Project>

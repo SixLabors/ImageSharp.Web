@@ -97,6 +97,33 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
+        /// Sets the given <see cref="ICacheKey"/> adding it to the service collection.
+        /// </summary>
+        /// <typeparam name="T">The type of class implementing <see cref="ICacheKey"/> to add.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder SetCacheKey<T>(this IImageSharpBuilder builder)
+            where T : class, ICacheKey
+        {
+            var descriptor = new ServiceDescriptor(typeof(ICacheKey), typeof(T), ServiceLifetime.Singleton);
+            builder.Services.Replace(descriptor);
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the given <see cref="ICacheKey"/> adding it to the service collection.
+        /// </summary>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="ICacheKey"/>.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder SetCacheKey(this IImageSharpBuilder builder, Func<IServiceProvider, ICacheKey> implementationFactory)
+        {
+            var descriptor = new ServiceDescriptor(typeof(ICacheKey), implementationFactory, ServiceLifetime.Singleton);
+            builder.Services.Replace(descriptor);
+            return builder;
+        }
+
+        /// <summary>
         /// Sets the given <see cref="ICacheHash"/> adding it to the service collection.
         /// </summary>
         /// <typeparam name="TCacheHash">The type of class implementing <see cref="ICacheHash"/>to add.</typeparam>

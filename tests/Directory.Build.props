@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\ImageSharp.Web.Providers.Azure\ImageSharp.Web.Providers.Azure.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\ImageSharp.Web.Providers.AWS\ImageSharp.Web.Providers.AWS.csproj" />
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\ImageSharp.Web\ImageSharp.Web.csproj" />
   </ItemGroup>
 
