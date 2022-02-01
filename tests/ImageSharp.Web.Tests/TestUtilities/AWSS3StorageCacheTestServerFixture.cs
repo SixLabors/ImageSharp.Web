@@ -3,9 +3,11 @@
 
 using System;
 using System.Threading.Tasks;
+using Amazon.S3;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using SixLabors.ImageSharp.Web.Caching.AWS;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Providers;
@@ -15,7 +17,7 @@ using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 {
-    public class PhysicalFileSystemCacheTestServerFixture : TestServerFixture
+    public class AWSS3StorageCacheTestServerFixture : TestServerFixture
     {
         protected override void ConfigureServices(IServiceCollection services) =>
             services.AddImageSharp(options =>
@@ -85,7 +87,18 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 .AddProvider(AzureBlobStorageImageProviderFactory.Create)
                 .AddProvider(AWSS3StorageImageProviderFactory.Create)
                 .AddProvider<PhysicalFileSystemProvider>()
-                .AddProcessor<CacheBusterWebProcessor>();
+                .AddProcessor<CacheBusterWebProcessor>()
+                .Configure<AWSS3BucketClientOptions>(options =>
+                {
+                    options.Endpoint = TestConstants.AWSEndpoint;
+                    options.BucketName = TestConstants.AWSCacheBucketName;
+                    options.AccessKey = TestConstants.AWSAccessKey;
+                    options.AccessSecret = TestConstants.AWSAccessSecret;
+                    options.Region = TestConstants.AWSRegion;
+
+                    AWSS3StorageCache.CreateIfNotExists(options, S3CannedACL.Private);
+                })
+                .SetCache<AWSS3StorageCache>();
 
         protected override void Configure(IApplicationBuilder app) => app.UseImageSharp();
     }

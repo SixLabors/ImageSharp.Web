@@ -15,8 +15,4 @@
     <PackageReference Include="Microsoft.AspNetCore.Http"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\ImageSharp.Web\ImageSharp.Web.csproj" />
-  </ItemGroup>
-
 </Project>

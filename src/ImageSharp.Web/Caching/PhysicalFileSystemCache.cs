@@ -93,7 +93,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <returns>root path.</returns>
         internal static string GetCacheRoot(PhysicalFileSystemCacheOptions cacheOptions, string webRootPath, string contentRootPath)
         {
-            var cacheRoot = string.IsNullOrEmpty(cacheOptions.CacheRoot)
+            string cacheRoot = string.IsNullOrEmpty(cacheOptions.CacheRoot)
                 ? webRootPath
                 : cacheOptions.CacheRoot;
 

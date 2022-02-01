@@ -13,13 +13,13 @@ using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.Processing
 {
-    public class PhysicalFileSystemCacheServerTests : ServerTestBase<PhysicalFileSystemCacheTestServerFixture>
+    public class AWSS3StorageCacheServerTests : ServerTestBase<AWSS3StorageCacheTestServerFixture>
     {
         private const int Width = 20;
-        private static readonly string Command = "?invalidcommand=qwerty&width=" + Width + "&v=" + Guid.NewGuid().ToString();
-        private static readonly string Command2 = "?invalidcommand=qwerty&width=" + (Width + 1) + "&v=" + Guid.NewGuid().ToString();
+        private static readonly string Command = "?width=" + Width + "&v=" + Guid.NewGuid().ToString();
+        private static readonly string Command2 = "?width=" + (Width + 1) + "&v=" + Guid.NewGuid().ToString();
 
-        public PhysicalFileSystemCacheServerTests(PhysicalFileSystemCacheTestServerFixture fixture)
+        public AWSS3StorageCacheServerTests(AWSS3StorageCacheTestServerFixture fixture)
             : base(fixture)
         {
         }
@@ -108,13 +108,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
         public async Task CanProcessMultipleIdenticalQueriesAsync(string url)
         {
             Task[] tasks = Enumerable.Range(0, 100).Select(i => Task.Run(async () =>
-              {
-                  string command = i % 2 == 0 ? Command : Command2;
-                  using HttpResponseMessage response = await this.HttpClient.GetAsync(url + command);
-                  Assert.NotNull(response);
-                  Assert.True(response.IsSuccessStatusCode);
-                  Assert.True(response.Content.Headers.ContentLength > 0);
-              })).ToArray();
+            {
+                string command = i % 2 == 0 ? Command : Command2;
+                using HttpResponseMessage response = await this.HttpClient.GetAsync(url + command);
+                Assert.NotNull(response);
+                Assert.True(response.IsSuccessStatusCode);
+                Assert.True(response.Content.Headers.ContentLength > 0);
+            })).ToArray();
 
             var all = Task.WhenAll(tasks);
             await all;

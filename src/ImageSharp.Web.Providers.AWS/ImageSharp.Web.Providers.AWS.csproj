@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>SixLabors.ImageSharp.Web.Providers.AWS</AssemblyName>
+    <AssemblyTitle>SixLabors.ImageSharp.Web.Providers.AWS</AssemblyTitle>
+    <RootNamespace>SixLabors.ImageSharp.Web</RootNamespace>
+    <PackageId>SixLabors.ImageSharp.Web.Providers.AWS</PackageId>
+    <PackageIcon>sixlabors.imagesharp.web.128.png</PackageIcon>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/SixLabors/ImageSharp.Web/</RepositoryUrl>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+    <PackageTags>Image Middleware Resize Crop Gif Jpg Jpeg Bitmap Png AWS</PackageTags>
+    <Description>A provider for resolving and caching images via AWS S3 Storage.</Description>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\shared-infrastructure\branding\icons\imagesharp.web\sixlabors.imagesharp.web.128.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ImageSharp.Web\ImageSharp.Web.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\..\shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems" Label="Shared" />
+
+</Project>
