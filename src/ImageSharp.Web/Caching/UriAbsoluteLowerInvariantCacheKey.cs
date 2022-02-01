@@ -9,7 +9,7 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// <summary>
     /// Creates a case insensitive cache key based on the request host, path and commands.
     /// </summary>
-    public class UriAbsoluteCaseInsensitiveCacheKey : ICacheKey
+    public class UriAbsoluteLowerInvariantCacheKey : ICacheKey
     {
         /// <inheritdoc/>
         public string Create(HttpContext context, CommandCollection commands)

@@ -49,7 +49,7 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
             Assert.Single(services, IsService<FormatUtilities>);
             Assert.Single(services, IsServiceImplementationType<IRequestParser, QueryCollectionRequestParser>);
             Assert.Single(services, IsServiceImplementationType<IImageCache, PhysicalFileSystemCache>);
-            Assert.Single(services, IsServiceImplementationType<ICacheKey, UriRelativeCacheKey>);
+            Assert.Single(services, IsServiceImplementationType<ICacheKey, UriRelativeLowerInvariantCacheKey>);
             Assert.Single(services, IsServiceImplementationType<ICacheHash, CacheHash>);
             Assert.Single(services, IsServiceImplementationType<IImageProvider, PhysicalFileSystemProvider>);
             Assert.Single(services, IsServiceImplementationType<IImageWebProcessor, ResizeWebProcessor>);

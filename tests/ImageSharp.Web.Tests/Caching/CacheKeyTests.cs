@@ -14,8 +14,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         private static readonly ICacheKey LegacyV1CacheKey = new LegacyV1CacheKey();
         private static readonly ICacheKey UriRelativeCacheKey = new UriRelativeCacheKey();
         private static readonly ICacheKey UriAbsoluteCacheKey = new UriAbsoluteCacheKey();
-        private static readonly ICacheKey UriRelativeCaseInsensitiveCacheKey = new UriRelativeCaseInsensitiveCacheKey();
-        private static readonly ICacheKey UriAbsoluteCaseInsensitiveCacheKey = new UriAbsoluteCaseInsensitiveCacheKey();
+        private static readonly ICacheKey UriRelativeLowerInvariantCacheKey = new UriRelativeLowerInvariantCacheKey();
+        private static readonly ICacheKey UriAbsoluteLowerInvariantCacheKey = new UriAbsoluteLowerInvariantCacheKey();
 
         [Fact]
         public void UriRelativeCacheKey_Is_Relative()
@@ -33,7 +33,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         }
 
         [Fact]
-        public void UriRelativeCaseInsensitiveCacheKey_Is_RelativeAndLowercase()
+        public void UriRelativeLowerInvariantCacheKey_Is_RelativeAndLowercase()
         {
             HttpContext context = CreateHttpContext();
             var commands = new CommandCollection()
@@ -42,7 +42,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             };
 
             const string expected = "/images/image-12345.jpeg?width=400";
-            string actual = UriRelativeCaseInsensitiveCacheKey.Create(context, commands);
+            string actual = UriRelativeLowerInvariantCacheKey.Create(context, commands);
 
             Assert.Equal(expected, actual);
         }
@@ -63,7 +63,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
         }
 
         [Fact]
-        public void UriAbsoluteCaseInsensitiveCacheKey_Is_AbsoluteAndLowercase()
+        public void UriAbsoluteLowerInvariantCacheKey_Is_AbsoluteAndLowercase()
         {
             HttpContext context = CreateHttpContext();
             var commands = new CommandCollection()
@@ -72,7 +72,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             };
 
             const string expected = "testwebsite.com/images/image-12345.jpeg?width=400";
-            string actual = UriAbsoluteCaseInsensitiveCacheKey.Create(context, commands);
+            string actual = UriAbsoluteLowerInvariantCacheKey.Create(context, commands);
 
             Assert.Equal(expected, actual);
         }
