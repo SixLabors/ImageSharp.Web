@@ -8,14 +8,15 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
 {
     public class PhysicialFileSystemCacheTests
     {
-        [Fact]
-        public void FilePathMatchesReference()
+        [Theory]
+        [InlineData("abcdefghijkl", 0, "abcdefghijkl")]
+        [InlineData("abcdefghijkl", 4, "a/b/c/d/efghijkl")]
+        [InlineData("abcdefghijkl", 8, "a/b/c/d/e/f/g/h/ijkl")]
+        [InlineData("abcdefghijkl", 12, "a/b/c/d/e/f/g/h/i/j/k/l/abcdefghijkl")]
+        [InlineData("abcdefghijkl", 16, "a/b/c/d/e/f/g/h/i/j/k/l/abcdefghijkl")]
+        public void FilePathMatchesReference(string key, int cacheFolderDepth, string expected)
         {
-            const string Key = "abcdefghijkl";
-            const int CachedNameLength = 12;
-
-            string expected = $"{string.Join("/", Key.Substring(0, CachedNameLength).ToCharArray())}/{Key}";
-            string actual = PhysicalFileSystemCache.ToFilePath(Key, CachedNameLength);
+            string actual = PhysicalFileSystemCache.ToFilePath(key, cacheFolderDepth);
 
             Assert.Equal(expected, actual);
         }

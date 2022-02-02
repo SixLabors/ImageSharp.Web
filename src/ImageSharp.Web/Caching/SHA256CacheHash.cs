@@ -16,16 +16,16 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// Hashed keys are the result of the SHA256 computation of the input value for the given length.
     /// This ensures low collision rates with a shorter file name.
     /// </summary>
-    public sealed class CacheHash : ICacheHash
+    public sealed class SHA256CacheHash : ICacheHash
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CacheHash"/> class.
+        /// Initializes a new instance of the <see cref="SHA256CacheHash"/> class.
         /// </summary>
         /// <param name="options">The middleware configuration options.</param>
-        public CacheHash(IOptions<ImageSharpMiddlewareOptions> options)
+        public SHA256CacheHash(IOptions<ImageSharpMiddlewareOptions> options)
         {
             Guard.NotNull(options, nameof(options));
-            Guard.MustBeBetweenOrEqualTo<uint>(options.Value.CachedNameLength, 2, 64, nameof(options.Value.CachedNameLength));
+            Guard.MustBeBetweenOrEqualTo<uint>(options.Value.CacheHashLength, 2, 64, nameof(options.Value.CacheHashLength));
         }
 
         /// <inheritdoc/>
@@ -34,8 +34,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         {
             int byteCount = Encoding.ASCII.GetByteCount(value);
 
-            // Allocating a buffer from the pool is ~27% slower than stackalloc so use
-            // that for short strings
+            // Allocating a buffer from the pool is ~27% slower than stackalloc so use that for short strings
             if (byteCount < 257)
             {
                 return HashValue(value, length, stackalloc byte[byteCount]);
@@ -62,11 +61,11 @@ namespace SixLabors.ImageSharp.Web.Caching
             using var hashAlgorithm = SHA256.Create();
             Encoding.ASCII.GetBytes(value, bufferSpan);
 
-            // Hashed output maxes out at 32 bytes @ 256bit/8 so we're safe to use stackalloc.
+            // Hashed output maxes out at 32 bytes @ 256bit/8 so we're safe to use stackalloc
             Span<byte> hash = stackalloc byte[32];
             hashAlgorithm.TryComputeHash(bufferSpan, hash, out int _);
 
-            // length maxes out at 64 since we throw if options is greater.
+            // Length maxes out at 64 since we throw if options is greater
             return HexEncoder.Encode(hash.Slice(0, (int)(length / 2)));
         }
     }

@@ -51,11 +51,10 @@ namespace SixLabors.ImageSharp.Web.Sample
                     return new PhysicalFileSystemCache(
                                 provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
                                 provider.GetRequiredService<IWebHostEnvironment>(),
-                                provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
                                 provider.GetRequiredService<FormatUtilities>());
                 })
                 .SetCacheKey<UriRelativeLowerInvariantCacheKey>()
-                .SetCacheHash<CacheHash>()
+                .SetCacheHash<SHA256CacheHash>()
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
@@ -88,7 +87,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                         options.Configuration = Configuration.Default;
                         options.BrowserMaxAge = TimeSpan.FromDays(7);
                         options.CacheMaxAge = TimeSpan.FromDays(365);
-                        options.CachedNameLength = 8;
+                        options.CacheHashLength = 8;
                         options.OnParseCommandsAsync = _ => Task.CompletedTask;
                         options.OnBeforeSaveAsync = _ => Task.CompletedTask;
                         options.OnProcessedAsync = _ => Task.CompletedTask;
@@ -111,7 +110,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                         options.Configuration = Configuration.Default;
                         options.BrowserMaxAge = TimeSpan.FromDays(7);
                         options.CacheMaxAge = TimeSpan.FromDays(365);
-                        options.CachedNameLength = 8;
+                        options.CacheHashLength = 8;
                         options.OnParseCommandsAsync = _ => Task.CompletedTask;
                         options.OnBeforeSaveAsync = _ => Task.CompletedTask;
                         options.OnProcessedAsync = _ => Task.CompletedTask;
@@ -127,11 +126,10 @@ namespace SixLabors.ImageSharp.Web.Sample
                     return new PhysicalFileSystemCache(
                         provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
                         provider.GetRequiredService<IWebHostEnvironment>(),
-                        provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
                         provider.GetRequiredService<FormatUtilities>());
                 })
                 .SetCacheKey<UriRelativeLowerInvariantCacheKey>()
-                .SetCacheHash<CacheHash>()
+                .SetCacheHash<SHA256CacheHash>()
                 .ClearProviders()
                 .AddProvider<PhysicalFileSystemProvider>()
                 .ClearProcessors()

@@ -271,7 +271,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             // Create a hashed cache key
             string key = this.cacheHash.Create(
                 this.cacheKey.Create(context, commands),
-                this.options.CachedNameLength);
+                this.options.CacheHashLength);
 
             // Check the cache, if present, not out of date and not requiring an update
             // we'll simply serve the file from there.

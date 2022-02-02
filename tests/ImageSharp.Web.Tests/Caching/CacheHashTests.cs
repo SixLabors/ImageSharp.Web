@@ -13,7 +13,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
     public class CacheHashTests
     {
         private static readonly IOptions<ImageSharpMiddlewareOptions> Options = MSOptions.Create(new ImageSharpMiddlewareOptions());
-        private static readonly ICacheHash CacheHash = new CacheHash(Options);
+        private static readonly ICacheHash CacheHash = new SHA256CacheHash(Options);
 
         [Fact]
         public void CacheHashProducesIdenticalResults()
