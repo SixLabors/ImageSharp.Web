@@ -57,7 +57,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             Guard.NotNull(options, nameof(options));
             Guard.NotNullOrWhiteSpace(environment.WebRootPath, nameof(environment.WebRootPath));
 
-            // Allow configuration of the cache without having to register everything.
+            // Allow configuration of the cache without having to register everything
             PhysicalFileSystemCacheOptions cacheOptions = options != null ? options.Value : new PhysicalFileSystemCacheOptions();
             this.cacheRootPath = GetCacheRoot(cacheOptions, environment.WebRootPath, environment.ContentRootPath);
             this.cacheFolderDepth = (int)cacheOptions.CacheFolderDepth;
@@ -146,17 +146,28 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <param name="cacheFolderDepth">The depth of the nested cache folders structure to store the images.</param>
-        /// <returns>The <see cref="string"/>.</returns>
+        /// <returns>
+        /// The <see cref="string" />.
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe string ToFilePath(string key, int cacheFolderDepth)
         {
-            if (cacheFolderDepth > key.Length)
+            int length;
+            int nameStartIndex;
+            if (cacheFolderDepth >= key.Length)
             {
+                // Keep all characters in file name (legacy behavior)
                 cacheFolderDepth = key.Length;
+                length = (cacheFolderDepth * 2) + key.Length;
+                nameStartIndex = 0;
+            }
+            else
+            {
+                // Remove characters used in folders from file name
+                length = cacheFolderDepth + key.Length;
+                nameStartIndex = cacheFolderDepth;
             }
 
-            // Each key substring char + separator + key
-            int length = (cacheFolderDepth * 2) + key.Length;
             fixed (char* keyPtr = key)
             {
                 return string.Create(length, (Ptr: (IntPtr)keyPtr, key.Length), (chars, args) =>
@@ -173,7 +184,7 @@ namespace SixLabors.ImageSharp.Web.Caching
                         Unsafe.Add(ref charRef, index++) = separator;
                     }
 
-                    for (int i = 0; i < keySpan.Length; i++)
+                    for (int i = nameStartIndex; i < keySpan.Length; i++)
                     {
                         Unsafe.Add(ref charRef, index++) = Unsafe.Add(ref keyRef, i);
                     }
