@@ -14,7 +14,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         public string CacheFolder { get; set; } = "is-cache";
 
         /// <summary>
-        /// Gets or sets the depth of the nested cache folders structure to store the images.
+        /// Gets or sets the depth of the nested cache folders structure to store the images. Defaults to 8.
         /// </summary>
         public uint CacheFolderDepth { get; set; } = 8;
 
