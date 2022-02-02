@@ -152,6 +152,12 @@ namespace SixLabors.ImageSharp.Web.Caching
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe string ToFilePath(string key, int cacheFolderDepth)
         {
+            if (cacheFolderDepth == 0)
+            {
+                // Short-circuit when not nesting folders
+                return key;
+            }
+
             int length;
             int nameStartIndex;
             if (cacheFolderDepth >= key.Length)
