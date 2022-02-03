@@ -16,17 +16,25 @@ jobs:
             matrix:
                 options:
                     - os: macos-latest
-                      framework: netcoreapp3.1
+                      framework: net6.0
                       runtime: -x64
                       codecov: false
                     - os: ubuntu-latest
-                      framework: netcoreapp3.1
+                      framework: net6.0
+                      runtime: -x64
+                      codecov: false
+                    - os: windows-latest
+                      framework: net6.0
+                      runtime: -x64
+                      codecov: true
+                    - os: windows-latest
+                      framework: net5.0
                       runtime: -x64
                       codecov: false
                     - os: windows-latest
                       framework: netcoreapp3.1
                       runtime: -x64
-                      codecov: true
+                      codecov: false
                     - os: windows-latest
                       framework: netcoreapp2.1
                       runtime: -x64

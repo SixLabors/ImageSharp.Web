@@ -24,7 +24,7 @@
     <PackageReference Update="SixLabors.ImageSharp"  Version="2.0.0-alpha.0.165" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp2.1'">
     <FrameworkReference Update="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
