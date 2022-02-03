@@ -12,7 +12,6 @@ using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
-using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
 
@@ -59,7 +58,8 @@ namespace SixLabors.ImageSharp.Web.Sample
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
                 .AddProcessor<BackgroundColorWebProcessor>()
-                .AddProcessor<QualityWebProcessor>();
+                .AddProcessor<QualityWebProcessor>()
+                .AddProcessor<AutoOrientWebProcessor>();
 
             // Add the default service and options.
             //
