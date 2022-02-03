@@ -94,9 +94,9 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <returns><see cref="string"/> representing the fully qualified provider root path.</returns>
         internal static string GetProviderRoot(PhysicalFileSystemProviderOptions providerOptions, string webRootPath, string contentRootPath)
         {
-            string providerRoot = string.IsNullOrWhiteSpace(providerOptions.ProviderRoot)
+            string providerRoot = string.IsNullOrWhiteSpace(providerOptions.ProviderRootPath)
                 ? webRootPath
-                : providerOptions.ProviderRoot;
+                : providerOptions.ProviderRootPath;
 
             return Path.IsPathFullyQualified(providerRoot)
                 ? providerRoot

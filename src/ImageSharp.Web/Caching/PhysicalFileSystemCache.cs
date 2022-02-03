@@ -78,9 +78,9 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <returns><see cref="string"/> representing the fully qualified cache root path.</returns>
         internal static string GetCacheRoot(PhysicalFileSystemCacheOptions cacheOptions, string webRootPath, string contentRootPath)
         {
-            string cacheRoot = string.IsNullOrWhiteSpace(cacheOptions.CacheRoot)
+            string cacheRoot = string.IsNullOrWhiteSpace(cacheOptions.CacheRootPath)
                 ? webRootPath
-                : cacheOptions.CacheRoot;
+                : cacheOptions.CacheRootPath;
 
             return Path.IsPathFullyQualified(cacheRoot)
                 ? Path.Combine(cacheRoot, cacheOptions.CacheFolder)

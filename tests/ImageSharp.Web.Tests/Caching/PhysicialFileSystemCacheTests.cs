@@ -40,7 +40,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
             var cacheOptions = new PhysicalFileSystemCacheOptions
             {
                 CacheFolder = cacheFolder,
-                CacheRoot = cacheRoot
+                CacheRootPath = cacheRoot
             };
 
             string cacheRootResult = PhysicalFileSystemCache.GetCacheRoot(cacheOptions, webRootPath, contentRootPath);

@@ -32,7 +32,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Providers
         {
             var providerOptions = new PhysicalFileSystemProviderOptions
             {
-                ProviderRoot = providerRoot,
+                ProviderRootPath = providerRoot,
             };
 
             string providerRootResult = PhysicalFileSystemProvider.GetProviderRoot(providerOptions, webRootPath, contentRootPath);

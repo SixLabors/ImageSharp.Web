@@ -19,7 +19,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         public uint CacheFolderDepth { get; set; } = 8;
 
         /// <summary>
-        /// Gets or sets the optional cache root folder.
+        /// Gets or sets the optional cache root folder path.
         /// <para>
         /// This value can be <see langword="null"/>, a fully qualified absolute path,
         /// or a path relative to the directory that contains the application
@@ -30,6 +30,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// application content files; commonly 'wwwroot'.
         /// </para>
         /// </summary>
-        public string CacheRoot { get; set; }
+        public string CacheRootPath { get; set; }
     }
 }

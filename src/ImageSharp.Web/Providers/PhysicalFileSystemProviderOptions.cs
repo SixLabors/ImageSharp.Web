@@ -9,7 +9,7 @@ namespace SixLabors.ImageSharp.Web.Providers
     public class PhysicalFileSystemProviderOptions
     {
         /// <summary>
-        /// Gets or sets the optional provider root folder.
+        /// Gets or sets the optional provider root folder path.
         /// <para>
         /// This value can be <see langword="null"/>, a fully qualified absolute path,
         /// or a path relative to the directory that contains the application
@@ -20,6 +20,6 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// application content files; commonly 'wwwroot'.
         /// </para>
         /// </summary>
-        public string ProviderRoot { get; set; }
+        public string ProviderRootPath { get; set; }
     }
 }
