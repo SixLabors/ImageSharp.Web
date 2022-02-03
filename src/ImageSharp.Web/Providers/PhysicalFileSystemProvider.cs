@@ -51,11 +51,11 @@ namespace SixLabors.ImageSharp.Web.Providers
 
             // Allow configuration of the provider without having to register everything
             PhysicalFileSystemProviderOptions providerOptions = options != null ? options.Value : new();
-            string cacheRootPath = GetProviderRoot(providerOptions, environment.WebRootPath, environment.ContentRootPath);
+            string providerRootPath = GetProviderRoot(providerOptions, environment.WebRootPath, environment.ContentRootPath);
 
             // Ensure provider directory is created before initializing the file provider
-            Directory.CreateDirectory(cacheRootPath);
-            this.fileProvider = new PhysicalFileProvider(cacheRootPath);
+            Directory.CreateDirectory(providerRootPath);
+            this.fileProvider = new PhysicalFileProvider(providerRootPath);
             this.formatUtilities = formatUtilities;
         }
 
