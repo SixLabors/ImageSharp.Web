@@ -9,7 +9,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 {
     /// <summary>
     /// Maintained for compatibility purposes only this cache key implementation generates the same
-    /// out as the V1 middleware. If possible, it is recommended to use the <see cref="UriRelativeCacheKey"/>.
+    /// out as the V1 middleware. If possible, it is recommended to use the <see cref="UriRelativeLowerInvariantCacheKey"/>.
     /// </summary>
     public class LegacyV1CacheKey : ICacheKey
     {
