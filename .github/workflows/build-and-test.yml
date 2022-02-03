@@ -16,11 +16,11 @@ jobs:
             matrix:
                 options:
                     - os: macos-latest
-                      framework: net5.0
+                      framework: net6.0
                       runtime: -x64
                       codecov: false
                     - os: ubuntu-latest
-                      framework: net5.0
+                      framework: net6.0
                       runtime: -x64
                       codecov: false
                     - os: windows-latest
@@ -59,6 +59,15 @@ jobs:
 
             - name: Git LFS Pull
               run: git lfs pull
+
+            - name: Setup .NET SDKs
+              uses: actions/setup-dotnet@v1
+              with:
+                dotnet-version: |
+                  6.0.x
+                  5.0.x
+                  3.1.x
+                  2.1.x
 
             - name: Install NuGet
               uses: NuGet/setup-nuget@v1
