@@ -96,10 +96,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// </summary>
         public Func<ImageCommandContext, Task> OnParseCommandsAsync
         {
-            get
-            {
-                return this.onParseCommandsAsync;
-            }
+            get => this.onParseCommandsAsync;
 
             set
             {
@@ -115,10 +112,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// </summary>
         public Func<FormattedImage, Task> OnBeforeSaveAsync
         {
-            get
-            {
-                return this.onBeforeSaveAsync;
-            }
+            get => this.onBeforeSaveAsync;
 
             set
             {
@@ -134,10 +128,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// </summary>
         public Func<ImageProcessingContext, Task> OnProcessedAsync
         {
-            get
-            {
-                return this.onProcessedAsync;
-            }
+            get => this.onProcessedAsync;
 
             set
             {
@@ -153,10 +144,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// </summary>
         public Func<HttpContext, Task> OnPrepareResponseAsync
         {
-            get
-            {
-                return this.onPrepareResponseAsync;
-            }
+            get => this.onPrepareResponseAsync;
 
             set
             {

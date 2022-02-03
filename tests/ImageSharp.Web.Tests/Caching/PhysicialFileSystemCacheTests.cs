@@ -43,7 +43,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching
                 CacheRoot = cacheRoot
             };
 
-            var cacheRootResult = PhysicalFileSystemCache.GetCacheRoot(cacheOptions, webRootPath, contentRootPath);
+            string cacheRootResult = PhysicalFileSystemCache.GetCacheRoot(cacheOptions, webRootPath, contentRootPath);
 
             Assert.Equal(expected, cacheRootResult);
         }

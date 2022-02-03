@@ -21,8 +21,7 @@
     <PackageReference Update="Azure.Storage.Blobs" Version="12.10.0" />
     <PackageReference Update="Microsoft.IO.RecyclableMemoryStream" Version="2.2.0" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
-    <PackageReference Update="MinVer" PrivateAssets="All" Version="2.3.0" />
-    <PackageReference Update="SixLabors.ImageSharp"  Version="2.0.0-alpha.0.156" />
+    <PackageReference Update="SixLabors.ImageSharp"  Version="2.0.0-alpha.0.165" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
