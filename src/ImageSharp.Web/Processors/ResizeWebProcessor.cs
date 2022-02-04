@@ -49,7 +49,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <summary>
         /// The command constant for the resize orientation handling mode.
         /// </summary>
-        public const string Orient = "rorient";
+        public const string Orient = "orient";
 
         /// <summary>
         /// The command constant for the resize compand mode.
