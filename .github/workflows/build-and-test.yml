@@ -52,6 +52,15 @@ jobs:
             - name: Git LFS Pull
               run: git lfs pull
 
+            - name: Setup .NET SDKs
+              uses: actions/setup-dotnet@v1
+              with:
+                dotnet-version: |
+                  6.0.x
+                  5.0.x
+                  3.1.x
+                  2.1.x
+
             - name: Install NuGet
               uses: NuGet/setup-nuget@v1
 
