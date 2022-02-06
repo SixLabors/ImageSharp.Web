@@ -52,7 +52,7 @@ jobs:
       - name: Git Create LFS file list
         run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
 
-      - name: Restore LFS cache
+      - name: Git Setup LFS Cache
         uses: actions/cache@v2
         id: lfs-cache
         with:
