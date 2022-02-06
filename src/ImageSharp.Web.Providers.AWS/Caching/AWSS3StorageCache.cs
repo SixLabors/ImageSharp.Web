@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Providers.AWS;
 using SixLabors.ImageSharp.Web.Resolvers;
 using SixLabors.ImageSharp.Web.Resolvers.AWS;
 
@@ -25,10 +24,10 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
         /// Initializes a new instance of the <see cref="AWSS3StorageCache"/> class.
         /// </summary>
         /// <param name="cacheOptions">The cache options.</param>
-        public AWSS3StorageCache(IOptions<AWSS3BucketClientOptions> cacheOptions)
+        public AWSS3StorageCache(IOptions<AWSS3StorageCacheOptions> cacheOptions)
         {
             Guard.NotNull(cacheOptions, nameof(cacheOptions));
-            AWSS3BucketClientOptions options = cacheOptions.Value;
+            AWSS3StorageCacheOptions options = cacheOptions.Value;
             this.bucket = options.BucketName;
             this.amazonS3Client = AmazonS3ClientFactory.CreateClient(options);
         }
@@ -85,12 +84,12 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
         /// created bucket. If the container already exists, <see langword="null"/>.
         /// </returns>
         public static PutBucketResponse CreateIfNotExists(
-            AWSS3BucketClientOptions options,
+            AWSS3StorageCacheOptions options,
             S3CannedACL acl)
             => AsyncHelper.RunSync(() => CreateIfNotExistsAsync(options, acl));
 
         private static async Task<PutBucketResponse> CreateIfNotExistsAsync(
-            AWSS3BucketClientOptions options,
+            AWSS3StorageCacheOptions options,
             S3CannedACL acl)
         {
             AmazonS3Client client = AmazonS3ClientFactory.CreateClient(options);
