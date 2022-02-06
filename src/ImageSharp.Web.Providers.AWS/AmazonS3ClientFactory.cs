@@ -4,7 +4,6 @@
 using System;
 using Amazon;
 using Amazon.S3;
-using SixLabors.ImageSharp.Web.Providers.AWS;
 
 namespace SixLabors.ImageSharp.Web
 {
@@ -18,7 +17,7 @@ namespace SixLabors.ImageSharp.Web
         /// <returns>
         /// A new <see cref="AmazonS3Client"/>.
         /// </returns>
-        public static AmazonS3Client CreateClient(AWSS3BucketClientOptions options)
+        public static AmazonS3Client CreateClient(IAWSS3BucketClientOptions options)
         {
             if (!string.IsNullOrWhiteSpace(options.Endpoint))
             {
