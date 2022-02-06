@@ -69,15 +69,15 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
         }
 
         [Theory]
-        [InlineData(0, false)]
-        [InlineData(1, false)]
-        [InlineData(2, false)]
-        [InlineData(3, false)]
-        [InlineData(4, false)]
-        [InlineData(5, true)]
-        [InlineData(6, true)]
-        [InlineData(7, true)]
-        [InlineData(8, true)]
+        [InlineData(ExifOrientationMode.Unknown, false)]
+        [InlineData(ExifOrientationMode.TopLeft, false)]
+        [InlineData(ExifOrientationMode.TopRight, false)]
+        [InlineData(ExifOrientationMode.BottomRight, false)]
+        [InlineData(ExifOrientationMode.BottomLeft, false)]
+        [InlineData(ExifOrientationMode.LeftTop, true)]
+        [InlineData(ExifOrientationMode.RightTop, true)]
+        [InlineData(ExifOrientationMode.RightBottom, true)]
+        [InlineData(ExifOrientationMode.LeftBottom, true)]
         public void ResizeWebProcessor_RespectsOrientation(ushort orientation, bool rotated)
         {
             const int width = 4;
@@ -122,15 +122,15 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
         }
 
         [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(2)]
-        [InlineData(3)]
-        [InlineData(4)]
-        [InlineData(5)]
-        [InlineData(6)]
-        [InlineData(7)]
-        [InlineData(8)]
+        [InlineData(ExifOrientationMode.Unknown)]
+        [InlineData(ExifOrientationMode.TopLeft)]
+        [InlineData(ExifOrientationMode.TopRight)]
+        [InlineData(ExifOrientationMode.BottomRight)]
+        [InlineData(ExifOrientationMode.BottomLeft)]
+        [InlineData(ExifOrientationMode.LeftTop)]
+        [InlineData(ExifOrientationMode.RightTop)]
+        [InlineData(ExifOrientationMode.RightBottom)]
+        [InlineData(ExifOrientationMode.LeftBottom)]
         public void ResizeWebProcessor_CanIgnoreOrientation(ushort orientation)
         {
             const int width = 4;

@@ -148,8 +148,10 @@ namespace SixLabors.ImageSharp.Web.Processors
                     IExifValue<ushort> orientation = image.Metadata.ExifProfile.GetValue(ExifTag.Orientation);
                     return orientation.Value switch
                     {
-                        // LeftTop, RightTop, RightBottom, LeftBottom
-                        5 or 6 or 7 or 8 => new Size(height, width),
+                        ExifOrientationMode.LeftTop
+                        or ExifOrientationMode.RightTop
+                        or ExifOrientationMode.RightBottom
+                        or ExifOrientationMode.LeftBottom => new Size(height, width),
                         _ => new Size(width, height),
                     };
                 }
