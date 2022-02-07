@@ -111,11 +111,12 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="destination">The destination stream.</param>
         public void Save(Stream destination) => this.Image.Save(destination, this.encoder);
 
+        /// <summary>
         /// Saves image to the specified destination stream.
         /// </summary>
         /// <param name="destination">The destination stream.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task SaveAsync(Stream destination) => await this.Image.SaveAsync(destination, this.encoder);
+        public Task SaveAsync(Stream destination) => this.Image.SaveAsync(destination, this.encoder);
 
         /// <summary>
         /// Returns a value indicating whether the source image contains EXIF metadata for <see cref="ExifTag.Orientation"/>
