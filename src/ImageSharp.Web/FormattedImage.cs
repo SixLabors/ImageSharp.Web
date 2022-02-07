@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
@@ -93,10 +94,28 @@ namespace SixLabors.ImageSharp.Web
         }
 
         /// <summary>
+        /// Loads the specified source.
+        /// </summary>
+        /// <param name="configuration">The configuration.</param>
+        /// <param name="source">The source.</param>
+        /// <returns>A <see cref="Task{FormattedImage}"/> representing the asynchronous operation.</returns>
+        public static async Task<FormattedImage> LoadAsync(Configuration configuration, Stream source)
+        {
+            (Image<Rgba32> image, IImageFormat format) = await ImageSharp.Image.LoadWithFormatAsync<Rgba32>(configuration, source);
+            return new FormattedImage(image, format);
+        }
+
+        /// <summary>
         /// Saves image to the specified destination stream.
         /// </summary>
         /// <param name="destination">The destination stream.</param>
         public void Save(Stream destination) => this.Image.Save(destination, this.encoder);
+
+        /// Saves image to the specified destination stream.
+        /// </summary>
+        /// <param name="destination">The destination stream.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task SaveAsync(Stream destination) => await this.Image.SaveAsync(destination, this.encoder);
 
         /// <summary>
         /// Returns a value indicating whether the source image contains EXIF metadata for <see cref="ExifTag.Orientation"/>
