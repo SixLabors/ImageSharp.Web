@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Numerics;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp.PixelFormats;
@@ -123,16 +124,16 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
         }
 
         [Theory]
-        [InlineData(ExifOrientationMode.Unknown, false)]
-        [InlineData(ExifOrientationMode.TopLeft, false)]
-        [InlineData(ExifOrientationMode.TopRight, false)]
-        [InlineData(ExifOrientationMode.BottomRight, false)]
-        [InlineData(ExifOrientationMode.BottomLeft, false)]
-        [InlineData(ExifOrientationMode.LeftTop, true)]
-        [InlineData(ExifOrientationMode.RightTop, true)]
-        [InlineData(ExifOrientationMode.RightBottom, true)]
-        [InlineData(ExifOrientationMode.LeftBottom, true)]
-        public void ResizeWebProcessor_RespectsOrientation_Center(ushort orientation, bool rotated)
+        [InlineData(ExifOrientationMode.Unknown)]
+        [InlineData(ExifOrientationMode.TopLeft)]
+        [InlineData(ExifOrientationMode.TopRight)]
+        [InlineData(ExifOrientationMode.BottomRight)]
+        [InlineData(ExifOrientationMode.BottomLeft)]
+        [InlineData(ExifOrientationMode.LeftTop)]
+        [InlineData(ExifOrientationMode.RightTop)]
+        [InlineData(ExifOrientationMode.RightBottom)]
+        [InlineData(ExifOrientationMode.LeftBottom)]
+        public void ResizeWebProcessor_RespectsOrientation_Center(ushort orientation)
         {
             const int width = 4;
             const int height = 6;
@@ -159,25 +160,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 { new(ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch)) }
             };
 
-            using var image = new Image<Rgba32>(1, 1);
+            using var image = new Image<Rgba32>(3, 3);
             image.Metadata.ExifProfile = new();
             image.Metadata.ExifProfile.SetValue(ExifTag.Orientation, orientation);
-
             using var formatted = new FormattedImage(image, PngFormat.Instance);
 
+            PointF expected = GetExpectedCenter(orientation, image.Size(), new PointF(x, y));
             ResizeOptions options = ResizeWebProcessor.GetResizeOptions(formatted, commands, parser, culture);
-            PointF xy = options.CenterCoordinates.Value;
-
-            if (rotated)
-            {
-                Assert.Equal(x, xy.Y);
-                Assert.Equal(y, xy.X);
-            }
-            else
-            {
-                Assert.Equal(x, xy.X);
-                Assert.Equal(y, xy.Y);
-            }
+            Assert.Equal(expected, options.CenterCoordinates);
         }
 
         [Theory]
@@ -219,9 +209,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                     { new(ResizeWebProcessor.Anchor, anchor.ToString()) },
                 };
 
-                ResizeOptions options = ResizeWebProcessor.GetResizeOptions(formatted, commands, parser, culture);
-
                 AnchorPositionMode expected = GetExpectedAnchor(orientation, anchor);
+                ResizeOptions options = ResizeWebProcessor.GetResizeOptions(formatted, commands, parser, culture);
                 Assert.Equal(expected, options.Position);
             }
         }
@@ -272,6 +261,42 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             Assert.Equal(height, image.Height);
         }
 
+        private static PointF GetExpectedCenter(ushort orientation, Size size, PointF center)
+        {
+            AffineTransformBuilder builder = new();
+            switch (orientation)
+            {
+                case ExifOrientationMode.TopRight:
+                    builder.AppendTranslation(new PointF(size.Width - center.X, 0));
+                    break;
+                case ExifOrientationMode.BottomRight:
+                    builder.AppendRotationDegrees(180);
+                    break;
+                case ExifOrientationMode.BottomLeft:
+                    builder.AppendTranslation(new PointF(0, size.Height - center.Y));
+                    break;
+                case ExifOrientationMode.LeftTop:
+                    builder.AppendRotationDegrees(90);
+                    builder.AppendTranslation(new PointF(size.Width - center.X, 0));
+                    break;
+                case ExifOrientationMode.RightTop:
+                    builder.AppendRotationDegrees(90);
+                    break;
+                case ExifOrientationMode.RightBottom:
+                    builder.AppendTranslation(new PointF(0, size.Height - center.Y));
+                    builder.AppendRotationDegrees(270);
+                    break;
+                case ExifOrientationMode.LeftBottom:
+                    builder.AppendRotationDegrees(270);
+                    break;
+                default:
+                    return center;
+            }
+
+            Matrix3x2 matrix = builder.BuildMatrix(size);
+            return Vector2.Transform(center, matrix);
+        }
+
         private static AnchorPositionMode GetExpectedAnchor(ushort orientation, AnchorPositionMode anchor)
             => anchor switch
             {
@@ -292,44 +317,44 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 },
                 AnchorPositionMode.Left => orientation switch
                 {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomRight => AnchorPositionMode.Right,
-                    ExifOrientationMode.LeftTop or ExifOrientationMode.LeftBottom => AnchorPositionMode.Bottom,
-                    ExifOrientationMode.RightTop or ExifOrientationMode.RightBottom => AnchorPositionMode.Top,
+                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomLeft => AnchorPositionMode.Right,
+                    ExifOrientationMode.LeftTop or ExifOrientationMode.LeftBottom => AnchorPositionMode.Top,
+                    ExifOrientationMode.RightTop or ExifOrientationMode.RightBottom => AnchorPositionMode.Bottom,
                     _ => anchor,
                 },
                 AnchorPositionMode.Right => orientation switch
                 {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomRight => AnchorPositionMode.Left,
+                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomLeft => AnchorPositionMode.Left,
                     ExifOrientationMode.LeftTop or ExifOrientationMode.LeftBottom => AnchorPositionMode.Top,
                     ExifOrientationMode.RightTop or ExifOrientationMode.RightBottom => AnchorPositionMode.Bottom,
                     _ => anchor,
                 },
                 AnchorPositionMode.TopLeft => orientation switch
                 {
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftTop => AnchorPositionMode.BottomLeft,
-                    ExifOrientationMode.TopRight or ExifOrientationMode.RightBottom => AnchorPositionMode.TopRight,
-                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.BottomRight,
+                    ExifOrientationMode.TopRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.TopRight,
+                    ExifOrientationMode.BottomRight or ExifOrientationMode.RightTop => AnchorPositionMode.BottomLeft,
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.RightBottom => AnchorPositionMode.BottomRight,
                     _ => anchor,
                 },
                 AnchorPositionMode.TopRight => orientation switch
                 {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.LeftTop => AnchorPositionMode.TopLeft,
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.RightBottom => AnchorPositionMode.BottomRight,
-                    ExifOrientationMode.BottomRight or ExifOrientationMode.RightTop => AnchorPositionMode.BottomLeft,
+                    ExifOrientationMode.TopRight or ExifOrientationMode.RightTop => AnchorPositionMode.TopLeft,
+                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.BottomRight,
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftTop => AnchorPositionMode.BottomLeft,
                     _ => anchor,
                 },
                 AnchorPositionMode.BottomRight => orientation switch
                 {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.RightBottom => AnchorPositionMode.BottomLeft,
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftTop => AnchorPositionMode.TopRight,
-                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.TopLeft,
+                    ExifOrientationMode.TopRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.BottomLeft,
+                    ExifOrientationMode.BottomRight or ExifOrientationMode.RightTop => AnchorPositionMode.TopRight,
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.RightBottom => AnchorPositionMode.TopLeft,
                     _ => anchor,
                 },
                 AnchorPositionMode.BottomLeft => orientation switch
                 {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.LeftTop => AnchorPositionMode.BottomRight,
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.RightBottom => AnchorPositionMode.TopLeft,
-                    ExifOrientationMode.BottomRight or ExifOrientationMode.RightTop => AnchorPositionMode.TopRight,
+                    ExifOrientationMode.TopRight or ExifOrientationMode.RightTop => AnchorPositionMode.BottomRight,
+                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.TopLeft,
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftTop => AnchorPositionMode.TopRight,
                     _ => anchor,
                 },
                 _ => anchor,

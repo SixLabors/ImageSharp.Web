@@ -102,7 +102,7 @@ namespace SixLabors.ImageSharp.Web
         /// Returns a value indicating whether the source image contains EXIF metadata for <see cref="ExifTag.Orientation"/>
         /// indicating that the image is rotated (not flipped).
         /// </summary>
-        /// <param name="orientation">The captured orientation. Use <see cref="ExifOrientationMode"/> for comparison.</param>
+        /// <param name="orientation">The decoded orientation. Use <see cref="ExifOrientationMode"/> for comparison.</param>
         /// <returns>The <see cref="bool"/> indicating whether the image contains EXIF metadata indicating that the image is rotated.</returns>
         public bool IsExifRotated(out ushort orientation)
         {
