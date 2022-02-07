@@ -6,6 +6,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace SixLabors.ImageSharp.Web
@@ -96,6 +97,45 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="destination">The destination stream.</param>
         public void Save(Stream destination) => this.Image.Save(destination, this.encoder);
+
+        /// <summary>
+        /// Returns a value indicating whether the source image contains EXIF metadata for <see cref="ExifTag.Orientation"/>
+        /// indicating that the image is rotated (not flipped).
+        /// </summary>
+        /// <param name="orientation">The captured orientation. Use <see cref="ExifOrientationMode"/> for comparison.</param>
+        /// <returns>The <see cref="bool"/> indicating whether the image contains EXIF metadata indicating that the image is rotated.</returns>
+        public bool IsExifRotated(out ushort orientation)
+        {
+            orientation = ExifOrientationMode.Unknown;
+            if (this.Image.Metadata.ExifProfile != null)
+            {
+                IExifValue<ushort> value = this.Image.Metadata.ExifProfile.GetValue(ExifTag.Orientation);
+                if (value is null)
+                {
+                    return false;
+                }
+
+                if (value.DataType == ExifDataType.Short)
+                {
+                    orientation = value.Value;
+                }
+                else
+                {
+                    orientation = Convert.ToUInt16(value.Value);
+                }
+
+                return orientation switch
+                {
+                    ExifOrientationMode.LeftTop
+                    or ExifOrientationMode.RightTop
+                    or ExifOrientationMode.RightBottom
+                    or ExifOrientationMode.LeftBottom => true,
+                    _ => false,
+                };
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting
