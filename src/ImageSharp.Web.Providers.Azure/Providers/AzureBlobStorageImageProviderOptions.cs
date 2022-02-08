@@ -19,19 +19,12 @@ namespace SixLabors.ImageSharp.Web.Providers.Azure
     /// <summary>
     /// Represents a single Azure Blob Storage connection and container.
     /// </summary>
-    public class AzureBlobContainerClientOptions
+    public class AzureBlobContainerClientOptions : IAzureBlobContainerClientOptions
     {
-        /// <summary>
-        /// Gets or sets the Azure Blob Storage connection string.
-        /// <see href="https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string."/>
-        /// </summary>
+        /// <inheritdoc/>
         public string ConnectionString { get; set; }
 
-        /// <summary>
-        /// Gets or sets the Azure Blob Storage container name.
-        /// Must conform to Azure Blob Storage containiner naming guidlines.
-        /// <see href="https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names"/>
-        /// </summary>
+        /// <inheritdoc/>
         public string ContainerName { get; set; }
     }
 }
