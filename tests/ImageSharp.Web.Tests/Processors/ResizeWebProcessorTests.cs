@@ -342,8 +342,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 AnchorPositionMode.TopRight => orientation switch
                 {
                     ExifOrientationMode.TopRight or ExifOrientationMode.RightTop => AnchorPositionMode.TopLeft,
-                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.BottomRight,
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftTop => AnchorPositionMode.BottomLeft,
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftBottom => AnchorPositionMode.BottomRight,
+                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftTop => AnchorPositionMode.BottomLeft,
                     _ => anchor,
                 },
                 AnchorPositionMode.BottomRight => orientation switch
