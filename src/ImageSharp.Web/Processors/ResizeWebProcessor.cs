@@ -180,23 +180,26 @@ namespace SixLabors.ImageSharp.Web.Processors
                     break;
                 case ExifOrientationMode.BottomRight:
                     builder.AppendRotationDegrees(180);
+                    builder.AppendTranslation(new PointF(0, -(size.Height - center.Y)));
                     break;
                 case ExifOrientationMode.BottomLeft:
-                    builder.AppendTranslation(new PointF(0, size.Height - center.Y));
+                    builder.AppendRotationDegrees(180);
+                    builder.AppendTranslation(new PointF(size.Width - center.X, -(size.Height - center.Y)));
                     break;
                 case ExifOrientationMode.LeftTop:
                     builder.AppendRotationDegrees(90);
                     builder.AppendTranslation(new PointF(size.Width - center.X, 0));
                     break;
                 case ExifOrientationMode.RightTop:
-                    builder.AppendRotationDegrees(90);
+                    builder.AppendRotationDegrees(270);
                     break;
                 case ExifOrientationMode.RightBottom:
-                    builder.AppendTranslation(new PointF(0, size.Height - center.Y));
                     builder.AppendRotationDegrees(270);
+                    builder.AppendTranslation(new PointF(-(size.Width - center.X), -(size.Height - center.Y)));
                     break;
                 case ExifOrientationMode.LeftBottom:
-                    builder.AppendRotationDegrees(270);
+                    builder.AppendRotationDegrees(90);
+                    builder.AppendTranslation(new PointF(-(size.Width - center.X), 0));
                     break;
                 default:
                     return center;
@@ -262,16 +265,16 @@ namespace SixLabors.ImageSharp.Web.Processors
                 },
                 AnchorPositionMode.Left => orientation switch
                 {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomLeft => AnchorPositionMode.Right,
+                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomRight => AnchorPositionMode.Right,
                     ExifOrientationMode.LeftTop or ExifOrientationMode.LeftBottom => AnchorPositionMode.Top,
                     ExifOrientationMode.RightTop or ExifOrientationMode.RightBottom => AnchorPositionMode.Bottom,
                     _ => anchor,
                 },
                 AnchorPositionMode.Right => orientation switch
                 {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomLeft => AnchorPositionMode.Left,
-                    ExifOrientationMode.LeftTop or ExifOrientationMode.LeftBottom => AnchorPositionMode.Top,
-                    ExifOrientationMode.RightTop or ExifOrientationMode.RightBottom => AnchorPositionMode.Bottom,
+                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomRight => AnchorPositionMode.Left,
+                    ExifOrientationMode.LeftTop or ExifOrientationMode.LeftBottom => AnchorPositionMode.Bottom,
+                    ExifOrientationMode.RightTop or ExifOrientationMode.RightBottom => AnchorPositionMode.Top,
                     _ => anchor,
                 },
                 AnchorPositionMode.TopLeft => orientation switch
@@ -291,15 +294,15 @@ namespace SixLabors.ImageSharp.Web.Processors
                 AnchorPositionMode.BottomRight => orientation switch
                 {
                     ExifOrientationMode.TopRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.BottomLeft,
-                    ExifOrientationMode.BottomRight or ExifOrientationMode.RightTop => AnchorPositionMode.TopRight,
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.RightBottom => AnchorPositionMode.TopLeft,
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.RightTop => AnchorPositionMode.TopRight,
+                    ExifOrientationMode.BottomRight or ExifOrientationMode.RightBottom => AnchorPositionMode.TopLeft,
                     _ => anchor,
                 },
                 AnchorPositionMode.BottomLeft => orientation switch
                 {
                     ExifOrientationMode.TopRight or ExifOrientationMode.RightTop => AnchorPositionMode.BottomRight,
-                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.TopLeft,
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftTop => AnchorPositionMode.TopRight,
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftBottom => AnchorPositionMode.TopLeft,
+                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftTop => AnchorPositionMode.TopRight,
                     _ => anchor,
                 },
                 _ => anchor,
