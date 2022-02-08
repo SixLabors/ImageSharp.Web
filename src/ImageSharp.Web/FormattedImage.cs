@@ -15,7 +15,7 @@ namespace SixLabors.ImageSharp.Web
     /// <summary>
     /// A class encapsulating an image with a particular file encoding.
     /// </summary>
-    /// <seealso cref="IDisposable"/>
+    /// <seealso cref="IDisposable" />
     public sealed class FormattedImage : IDisposable
     {
         private readonly ImageFormatManager imageFormatsManager;
@@ -23,7 +23,7 @@ namespace SixLabors.ImageSharp.Web
         private IImageEncoder encoder;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FormattedImage"/> class.
+        /// Initializes a new instance of the <see cref="FormattedImage" /> class.
         /// </summary>
         /// <param name="image">The image.</param>
         /// <param name="format">The format.</param>
@@ -70,7 +70,7 @@ namespace SixLabors.ImageSharp.Web
                     ThrowNull(nameof(value));
                 }
 
-                // The given type should match the format encoder.
+                // The given type should match the format encoder
                 IImageEncoder reference = this.imageFormatsManager.FindEncoder(this.Format);
                 if (reference.GetType() != value.GetType())
                 {
@@ -86,10 +86,11 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <param name="source">The source.</param>
-        /// <returns>The <see cref="FormattedImage"/>.</returns>
+        /// <returns>The <see cref="FormattedImage" />.</returns>
         public static FormattedImage Load(Configuration configuration, Stream source)
         {
             var image = ImageSharp.Image.Load<Rgba32>(configuration, source, out IImageFormat format);
+
             return new FormattedImage(image, format);
         }
 
@@ -98,10 +99,11 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <param name="source">The source.</param>
-        /// <returns>A <see cref="Task{FormattedImage}"/> representing the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task{FormattedImage}" /> representing the asynchronous operation.</returns>
         public static async Task<FormattedImage> LoadAsync(Configuration configuration, Stream source)
         {
             (Image<Rgba32> image, IImageFormat format) = await ImageSharp.Image.LoadWithFormatAsync<Rgba32>(configuration, source);
+
             return new FormattedImage(image, format);
         }
 
@@ -115,26 +117,20 @@ namespace SixLabors.ImageSharp.Web
         /// Saves image to the specified destination stream.
         /// </summary>
         /// <param name="destination">The destination stream.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
         public Task SaveAsync(Stream destination) => this.Image.SaveAsync(destination, this.encoder);
 
         /// <summary>
-        /// Returns a value indicating whether the source image contains EXIF metadata for <see cref="ExifTag.Orientation"/>
-        /// indicating that the image is rotated (not flipped).
+        /// Returns a value indicating whether the source image contains EXIF metadata for <see cref="ExifTag.Orientation" />.
         /// </summary>
-        /// <param name="orientation">The decoded orientation. Use <see cref="ExifOrientationMode"/> for comparison.</param>
-        /// <returns>The <see cref="bool"/> indicating whether the image contains EXIF metadata indicating that the image is rotated.</returns>
-        public bool IsExifRotated(out ushort orientation)
+        /// <param name="orientation">The decoded orientation. Use <see cref="ExifOrientationMode" /> for comparison.</param>
+        /// <returns>The <see cref="bool"/> indicating whether the image contains EXIF metadata for <see cref="ExifTag.Orientation" />.</returns>
+        public bool TryGetExifOrientation(out ushort orientation)
         {
-            orientation = ExifOrientationMode.Unknown;
-            if (this.Image.Metadata.ExifProfile != null)
+            ExifProfile exifProfile = this.Image.Metadata.ExifProfile;
+            if (exifProfile is not null)
             {
-                IExifValue<ushort> value = this.Image.Metadata.ExifProfile.GetValue(ExifTag.Orientation);
-                if (value is null)
-                {
-                    return false;
-                }
-
+                IExifValue<ushort> value = exifProfile.GetValue(ExifTag.Orientation);
                 if (value.DataType == ExifDataType.Short)
                 {
                     orientation = value.Value;
@@ -144,22 +140,15 @@ namespace SixLabors.ImageSharp.Web
                     orientation = Convert.ToUInt16(value.Value);
                 }
 
-                return orientation switch
-                {
-                    ExifOrientationMode.LeftTop
-                    or ExifOrientationMode.RightTop
-                    or ExifOrientationMode.RightBottom
-                    or ExifOrientationMode.LeftBottom => true,
-                    _ => false,
-                };
+                return true;
             }
 
+            orientation = ExifOrientationMode.Unknown;
             return false;
         }
 
         /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting
-        /// unmanaged resources.
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
         public void Dispose()
         {

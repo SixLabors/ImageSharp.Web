@@ -137,8 +137,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
         {
             const int width = 4;
             const int height = 6;
-            const float x = 1;
-            const float y = 2;
+            const float x = 0.5f;
+            const float y = 1;
 
             var converters = new List<ICommandConverter>
             {
@@ -156,7 +156,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             {
                 { new(ResizeWebProcessor.Width, width.ToString()) },
                 { new(ResizeWebProcessor.Height, height.ToString()) },
-                { new(ResizeWebProcessor.Xy, $"{x},{y}") },
+                { new(ResizeWebProcessor.Xy, FormattableString.Invariant($"{x},{y}")) },
                 { new(ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch)) }
             };
 
@@ -165,7 +165,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             image.Metadata.ExifProfile.SetValue(ExifTag.Orientation, orientation);
             using var formatted = new FormattedImage(image, PngFormat.Instance);
 
-            PointF expected = GetExpectedCenter(orientation, image.Size(), new PointF(x, y));
+            PointF expected = GetExpectedCenter(orientation, new PointF(x, y));
             ResizeOptions options = ResizeWebProcessor.GetResizeOptions(formatted, commands, parser, culture);
             Assert.Equal(expected, options.CenterCoordinates);
         }
@@ -247,7 +247,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 { new(ResizeWebProcessor.Width, width.ToString()) },
                 { new(ResizeWebProcessor.Height, height.ToString()) },
                 { new(ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch)) },
-                { new(ResizeWebProcessor.Orient, bool.FalseString) }
+                { new(OrientationHelper.Command, bool.FalseString) }
             };
 
             using var image = new Image<Rgba32>(1, 1);
@@ -261,42 +261,44 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             Assert.Equal(height, image.Height);
         }
 
-        private static PointF GetExpectedCenter(ushort orientation, Size size, PointF center)
+        private static PointF GetExpectedCenter(ushort orientation, PointF center)
         {
             AffineTransformBuilder builder = new();
+            Size sourceSize = new(1, 1);
+
             switch (orientation)
             {
                 case ExifOrientationMode.TopRight:
-                    builder.AppendTranslation(new PointF(size.Width - center.X, 0));
+                    builder.AppendTranslation(new PointF(sourceSize.Width - center.X, 0));
                     break;
                 case ExifOrientationMode.BottomRight:
                     builder.AppendRotationDegrees(180);
-                    builder.AppendTranslation(new PointF(0, -(size.Height - center.Y)));
+                    builder.AppendTranslation(new PointF(0, -(sourceSize.Height - center.Y)));
                     break;
                 case ExifOrientationMode.BottomLeft:
                     builder.AppendRotationDegrees(180);
-                    builder.AppendTranslation(new PointF(size.Width - center.X, -(size.Height - center.Y)));
+                    builder.AppendTranslation(new PointF(sourceSize.Width - center.X, -(sourceSize.Height - center.Y)));
                     break;
                 case ExifOrientationMode.LeftTop:
                     builder.AppendRotationDegrees(90);
-                    builder.AppendTranslation(new PointF(size.Width - center.X, 0));
+                    builder.AppendTranslation(new PointF(sourceSize.Width - center.X, 0));
                     break;
                 case ExifOrientationMode.RightTop:
                     builder.AppendRotationDegrees(270);
                     break;
                 case ExifOrientationMode.RightBottom:
                     builder.AppendRotationDegrees(270);
-                    builder.AppendTranslation(new PointF(-(size.Width - center.X), -(size.Height - center.Y)));
+                    builder.AppendTranslation(new PointF(-(sourceSize.Width - center.X), -(sourceSize.Height - center.Y)));
                     break;
                 case ExifOrientationMode.LeftBottom:
                     builder.AppendRotationDegrees(90);
-                    builder.AppendTranslation(new PointF(-(size.Width - center.X), 0));
+                    builder.AppendTranslation(new PointF(-(sourceSize.Width - center.X), 0));
                     break;
                 default:
                     return center;
             }
 
-            Matrix3x2 matrix = builder.BuildMatrix(size);
+            Matrix3x2 matrix = builder.BuildMatrix(sourceSize);
             return Vector2.Transform(center, matrix);
         }
 
