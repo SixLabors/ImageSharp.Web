@@ -137,8 +137,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
         {
             const int width = 4;
             const int height = 6;
-            const float x = 1;
-            const float y = 2;
+            const float x = .25F;
+            const float y = .5F;
 
             var converters = new List<ICommandConverter>
             {
@@ -165,7 +165,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             image.Metadata.ExifProfile.SetValue(ExifTag.Orientation, orientation);
             using var formatted = new FormattedImage(image, PngFormat.Instance);
 
-            PointF expected = GetExpectedCenter(orientation, image.Size(), new PointF(x, y));
+            PointF expected = GetExpectedCenter(orientation, new PointF(x, y));
             ResizeOptions options = ResizeWebProcessor.GetResizeOptions(formatted, commands, parser, culture);
             Assert.Equal(expected, options.CenterCoordinates);
         }
@@ -261,9 +261,12 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             Assert.Equal(height, image.Height);
         }
 
-        private static PointF GetExpectedCenter(ushort orientation, Size size, PointF center)
+        private static PointF GetExpectedCenter(ushort orientation, PointF center)
         {
+            // New XY is calculated based on flipping and rotating the input XY.
+            // Coordinates range from 0-1, hence the matching source size.
             AffineTransformBuilder builder = new();
+            Size size = new(1, 1);
             switch (orientation)
             {
                 case ExifOrientationMode.TopRight:
@@ -271,26 +274,23 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                     break;
                 case ExifOrientationMode.BottomRight:
                     builder.AppendRotationDegrees(180);
-                    builder.AppendTranslation(new PointF(0, -(size.Height - center.Y)));
                     break;
                 case ExifOrientationMode.BottomLeft:
-                    builder.AppendRotationDegrees(180);
-                    builder.AppendTranslation(new PointF(size.Width - center.X, -(size.Height - center.Y)));
+                    builder.AppendTranslation(new PointF(0, size.Height - center.Y));
                     break;
                 case ExifOrientationMode.LeftTop:
-                    builder.AppendRotationDegrees(90);
                     builder.AppendTranslation(new PointF(size.Width - center.X, 0));
+                    builder.AppendRotationDegrees(270);
                     break;
                 case ExifOrientationMode.RightTop:
                     builder.AppendRotationDegrees(270);
                     break;
                 case ExifOrientationMode.RightBottom:
-                    builder.AppendRotationDegrees(270);
-                    builder.AppendTranslation(new PointF(-(size.Width - center.X), -(size.Height - center.Y)));
+                    builder.AppendTranslation(new PointF(size.Width - center.X, 0));
+                    builder.AppendRotationDegrees(90);
                     break;
                 case ExifOrientationMode.LeftBottom:
                     builder.AppendRotationDegrees(90);
-                    builder.AppendTranslation(new PointF(-(size.Width - center.X), 0));
                     break;
                 default:
                     return center;
