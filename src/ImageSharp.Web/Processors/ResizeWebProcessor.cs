@@ -112,9 +112,9 @@ namespace SixLabors.ImageSharp.Web.Processors
                 return null;
             }
 
-            bool rotated = ShouldHandleExifRotation(image, commands, parser, culture, out ushort orientation);
+            ushort orientation = GetExifOrientation(image, commands, parser, culture);
 
-            Size size = ParseSize(rotated, commands, parser, culture);
+            Size size = ParseSize(orientation, commands, parser, culture);
 
             if (size.Width <= 0 && size.Height <= 0)
             {
@@ -137,7 +137,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         private static Size ParseSize(
-            bool rotated,
+            ushort orientation,
             CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
@@ -145,7 +145,10 @@ namespace SixLabors.ImageSharp.Web.Processors
             // The command parser will reject negative numbers as it clamps values to ranges.
             int width = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(Width), culture);
             int height = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(Height), culture);
-            return rotated ? new Size(height, width) : new Size(width, height);
+
+            return IsExifOrientationRotated(orientation)
+                ? new Size(height, width)
+                : new Size(width, height);
         }
 
         private static PointF? GetCenter(
@@ -345,23 +348,32 @@ namespace SixLabors.ImageSharp.Web.Processors
             return KnownResamplers.Bicubic;
         }
 
-        private static bool ShouldHandleExifRotation(FormattedImage image, CommandCollection commands, CommandParser parser, CultureInfo culture, out ushort orientation)
+        private static ushort GetExifOrientation(FormattedImage image, CommandCollection commands, CommandParser parser, CultureInfo culture)
         {
             // Browsers now implement 'image-orientation: from-image' by default.
             // https://developer.mozilla.org/en-US/docs/web/css/image-orientation
             // This makes orientation handling confusing for users who expect images to be resized in accordance
             // to what they observe rather than pure (and correct) methods.
             //
-            // To accomodate this we parse the dimensions to use based upon decoded EXIF orientation values, switching
-            // the width/height parameters when images are rotated (not flipped).
+            // To accomodate this we parse the dimensions to use based upon decoded EXIF orientation values.
             // We default to 'true' for EXIF orientation handling. By passing 'false' it can be turned off.
             if (commands.Contains(Orient) && !parser.ParseValue<bool>(commands.GetValueOrDefault(Orient), culture))
             {
-                orientation = ExifOrientationMode.Unknown;
-                return false;
+                return ExifOrientationMode.Unknown;
             }
 
-            return image.IsExifRotated(out orientation);
+            image.TryGetExifOrientation(out ushort orientation);
+            return orientation;
         }
+
+        private static bool IsExifOrientationRotated(ushort orientation)
+            => orientation switch
+            {
+                ExifOrientationMode.LeftTop
+                or ExifOrientationMode.RightTop
+                or ExifOrientationMode.RightBottom
+                or ExifOrientationMode.LeftBottom => true,
+                _ => false,
+            };
     }
 }

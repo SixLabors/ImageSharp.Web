@@ -119,39 +119,38 @@ namespace SixLabors.ImageSharp.Web
         public Task SaveAsync(Stream destination) => this.Image.SaveAsync(destination, this.encoder);
 
         /// <summary>
-        /// Returns a value indicating whether the source image contains EXIF metadata for <see cref="ExifTag.Orientation"/>
-        /// indicating that the image is rotated (not flipped).
+        /// Gets the EXIF orientation metata for the <see cref="FormattedImage"/>.
         /// </summary>
-        /// <param name="orientation">The decoded orientation. Use <see cref="ExifOrientationMode"/> for comparison.</param>
-        /// <returns>The <see cref="bool"/> indicating whether the image contains EXIF metadata indicating that the image is rotated.</returns>
-        public bool IsExifRotated(out ushort orientation)
+        /// <param name="value">
+        /// When this method returns, contains the value parsed from decoded EXIF metadata; otherwise,
+        /// the default value for the type of the <paramref name="value"/> parameter.
+        /// This parameter is passed uninitialized. Use <see cref="ExifOrientationMode"/> for comparison.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the <see cref="FormattedImage"/> contains EXIF orientation metadata
+        /// for <see cref="ExifTag.Orientation"/>; otherwise, <see langword="false"/>.
+        /// </returns>
+        public bool TryGetExifOrientation(out ushort value)
         {
-            orientation = ExifOrientationMode.Unknown;
+            value = ExifOrientationMode.Unknown;
             if (this.Image.Metadata.ExifProfile != null)
             {
-                IExifValue<ushort> value = this.Image.Metadata.ExifProfile.GetValue(ExifTag.Orientation);
-                if (value is null)
+                IExifValue<ushort> orientation = this.Image.Metadata.ExifProfile.GetValue(ExifTag.Orientation);
+                if (orientation is null)
                 {
                     return false;
                 }
 
-                if (value.DataType == ExifDataType.Short)
+                if (orientation.DataType == ExifDataType.Short)
                 {
-                    orientation = value.Value;
+                    value = orientation.Value;
                 }
                 else
                 {
-                    orientation = Convert.ToUInt16(value.Value);
+                    value = Convert.ToUInt16(orientation.Value);
                 }
 
-                return orientation switch
-                {
-                    ExifOrientationMode.LeftTop
-                    or ExifOrientationMode.RightTop
-                    or ExifOrientationMode.RightBottom
-                    or ExifOrientationMode.LeftBottom => true,
-                    _ => false,
-                };
+                return true;
             }
 
             return false;
