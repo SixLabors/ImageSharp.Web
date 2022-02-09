@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using SixLabors.ImageSharp.Web.Commands;
@@ -41,9 +42,14 @@ namespace SixLabors.ImageSharp.Web.Processors
         public const string Sampler = "rsampler";
 
         /// <summary>
-        /// The command constant for the resize sampler.
+        /// The command constant for the resize anchor position.
         /// </summary>
         public const string Anchor = "ranchor";
+
+        /// <summary>
+        /// The command constant for the resize orientation handling mode.
+        /// </summary>
+        public const string Orient = "orient";
 
         /// <summary>
         /// The command constant for the resize compand mode.
@@ -59,7 +65,8 @@ namespace SixLabors.ImageSharp.Web.Processors
                 Mode,
                 Sampler,
                 Anchor,
-                Compand
+                Compand,
+                Orient
             };
 
         /// <inheritdoc/>
@@ -73,7 +80,7 @@ namespace SixLabors.ImageSharp.Web.Processors
             CommandParser parser,
             CultureInfo culture)
         {
-            ResizeOptions options = GetResizeOptions(commands, parser, culture);
+            ResizeOptions options = GetResizeOptions(image.Image, commands, parser, culture);
 
             if (options != null)
             {
@@ -84,6 +91,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         private static ResizeOptions GetResizeOptions(
+            Image image,
             CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
@@ -93,7 +101,7 @@ namespace SixLabors.ImageSharp.Web.Processors
                 return null;
             }
 
-            Size size = ParseSize(commands, parser, culture);
+            Size size = ParseSize(image, commands, parser, culture);
 
             if (size.Width <= 0 && size.Height <= 0)
             {
@@ -116,15 +124,40 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         private static Size ParseSize(
+            Image image,
             CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
         {
             // The command parser will reject negative numbers as it clamps values to ranges.
-            uint width = parser.ParseValue<uint>(commands.GetValueOrDefault(Width), culture);
-            uint height = parser.ParseValue<uint>(commands.GetValueOrDefault(Height), culture);
+            int width = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(Width), culture);
+            int height = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(Height), culture);
 
-            return new Size((int)width, (int)height);
+            // Browsers now implement 'image-orientation: from-image' by default.
+            // https://developer.mozilla.org/en-US/docs/web/css/image-orientation
+            // This makes orientation handling confusing for users who expect images to be resized in accordance
+            // to what they observe rather than pure (and correct) methods.
+            //
+            // To accomodate this we parse the dimensions to use based upon decoded EXIF orientation values, switching
+            // the width/height parameters when images are rotated (not flipped).
+            // We default to 'true' for EXIF orientation handling. By passing 'false' it can be turned off.
+            if (!commands.Contains(Orient) || parser.ParseValue<bool>(commands.GetValueOrDefault(Orient), culture))
+            {
+                if (image.Metadata.ExifProfile != null)
+                {
+                    IExifValue<ushort> orientation = image.Metadata.ExifProfile.GetValue(ExifTag.Orientation);
+                    return orientation.Value switch
+                    {
+                        ExifOrientationMode.LeftTop
+                        or ExifOrientationMode.RightTop
+                        or ExifOrientationMode.RightBottom
+                        or ExifOrientationMode.LeftBottom => new Size(height, width),
+                        _ => new Size(width, height),
+                    };
+                }
+            }
+
+            return new Size(width, height);
         }
 
         private static PointF? GetCenter(
@@ -166,40 +199,25 @@ namespace SixLabors.ImageSharp.Web.Processors
 
             if (sampler != null)
             {
-                switch (sampler.ToLowerInvariant())
+                // No need to do a case test here. Parsed commands are automatically converted to lowercase.
+                return sampler switch
                 {
-                    case "nearest":
-                    case "nearestneighbor":
-                        return KnownResamplers.NearestNeighbor;
-                    case "box":
-                        return KnownResamplers.Box;
-                    case "mitchell":
-                    case "mitchellnetravali":
-                        return KnownResamplers.MitchellNetravali;
-                    case "catmull":
-                    case "catmullrom":
-                        return KnownResamplers.CatmullRom;
-                    case "lanczos2":
-                        return KnownResamplers.Lanczos2;
-                    case "lanczos3":
-                        return KnownResamplers.Lanczos3;
-                    case "lanczos5":
-                        return KnownResamplers.Lanczos5;
-                    case "lanczos8":
-                        return KnownResamplers.Lanczos8;
-                    case "welch":
-                        return KnownResamplers.Welch;
-                    case "robidoux":
-                        return KnownResamplers.Robidoux;
-                    case "robidouxsharp":
-                        return KnownResamplers.RobidouxSharp;
-                    case "spline":
-                        return KnownResamplers.Spline;
-                    case "triangle":
-                        return KnownResamplers.Triangle;
-                    case "hermite":
-                        return KnownResamplers.Hermite;
-                }
+                    "nearest" or "nearestneighbor" => KnownResamplers.NearestNeighbor,
+                    "box" => KnownResamplers.Box,
+                    "mitchell" or "mitchellnetravali" => KnownResamplers.MitchellNetravali,
+                    "catmull" or "catmullrom" => KnownResamplers.CatmullRom,
+                    "lanczos2" => KnownResamplers.Lanczos2,
+                    "lanczos3" => KnownResamplers.Lanczos3,
+                    "lanczos5" => KnownResamplers.Lanczos5,
+                    "lanczos8" => KnownResamplers.Lanczos8,
+                    "welch" => KnownResamplers.Welch,
+                    "robidoux" => KnownResamplers.Robidoux,
+                    "robidouxsharp" => KnownResamplers.RobidouxSharp,
+                    "spline" => KnownResamplers.Spline,
+                    "triangle" => KnownResamplers.Triangle,
+                    "hermite" => KnownResamplers.Hermite,
+                    _ => KnownResamplers.Bicubic,
+                };
             }
 
             return KnownResamplers.Bicubic;

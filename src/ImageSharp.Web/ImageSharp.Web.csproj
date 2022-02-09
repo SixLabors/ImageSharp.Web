@@ -9,7 +9,7 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/SixLabors/ImageSharp.Web/</RepositoryUrl>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
-    <PackageTags>Image Middleware Resize Crop Gif Jpg Jpeg Bitmap Png Core Cache ASP</PackageTags>
+    <PackageTags>Image Middleware Resize Crop Gif Jpg Jpeg Bitmap Png WebP Tiff Core Cache ASP</PackageTags>
     <Description>ImageSharp Middleware for serving images via a url based API.</Description>
   </PropertyGroup>
 

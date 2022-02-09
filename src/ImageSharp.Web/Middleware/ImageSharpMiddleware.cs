@@ -335,7 +335,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 }
                                 else
                                 {
-                                    using var image = FormattedImage.Load(this.options.Configuration, inStream);
+                                    using FormattedImage image = await FormattedImage.LoadAsync(this.options.Configuration, inStream);
 
                                     image.Process(
                                         this.logger,
