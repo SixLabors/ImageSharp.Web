@@ -47,14 +47,11 @@ namespace SixLabors.ImageSharp.Web.Caching
 #endif
             FormatUtilities formatUtilities)
         {
+            Guard.NotNull(options, nameof(options));
             Guard.NotNull(environment, nameof(environment));
-            Guard.NotNullOrWhiteSpace(environment.WebRootPath, nameof(environment.WebRootPath));
 
-            // Allow configuration of the cache without having to register everything
-            PhysicalFileSystemCacheOptions cacheOptions = options != null ? options.Value : new();
-            this.cacheRootPath = GetCacheRoot(cacheOptions, environment.WebRootPath, environment.ContentRootPath);
-            this.cacheFolderDepth = (int)cacheOptions.CacheFolderDepth;
-
+            this.cacheRootPath = GetCacheRoot(options.Value, environment.WebRootPath, environment.ContentRootPath);
+            this.cacheFolderDepth = (int)options.Value.CacheFolderDepth;
             this.formatUtilities = formatUtilities;
         }
 
@@ -67,9 +64,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <returns><see cref="string"/> representing the fully qualified cache root path.</returns>
         internal static string GetCacheRoot(PhysicalFileSystemCacheOptions cacheOptions, string webRootPath, string contentRootPath)
         {
-            string cacheRoot = string.IsNullOrWhiteSpace(cacheOptions.CacheRootPath)
-                ? webRootPath
-                : cacheOptions.CacheRootPath;
+            string cacheRoot = cacheOptions.CacheRootPath ?? webRootPath ?? "wwwroot";
 
             return Path.IsPathFullyQualified(cacheRoot)
                 ? Path.Combine(cacheRoot, cacheOptions.CacheFolder)

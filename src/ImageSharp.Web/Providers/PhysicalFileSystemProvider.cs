@@ -42,13 +42,10 @@ namespace SixLabors.ImageSharp.Web.Providers
 #endif
             FormatUtilities formatUtilities)
         {
+            Guard.NotNull(options, nameof(options));
             Guard.NotNull(environment, nameof(environment));
-            Guard.NotNullOrWhiteSpace(environment.WebRootPath, nameof(environment.WebRootPath));
 
-            // Allow configuration of the provider without having to register everything
-            PhysicalFileSystemProviderOptions providerOptions = options != null ? options.Value : new();
-            this.providerRootPath = GetProviderRoot(providerOptions, environment.WebRootPath, environment.ContentRootPath);
-
+            this.providerRootPath = GetProviderRoot(options.Value, environment.WebRootPath, environment.ContentRootPath);
             this.formatUtilities = formatUtilities;
         }
 
@@ -87,9 +84,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <returns><see cref="string"/> representing the fully qualified provider root path.</returns>
         internal static string GetProviderRoot(PhysicalFileSystemProviderOptions providerOptions, string webRootPath, string contentRootPath)
         {
-            string providerRoot = string.IsNullOrWhiteSpace(providerOptions.ProviderRootPath)
-                ? webRootPath
-                : providerOptions.ProviderRootPath;
+            string providerRoot = providerOptions.ProviderRootPath ?? webRootPath ?? "wwwroot";
 
             return Path.IsPathFullyQualified(providerRoot)
                 ? providerRoot
