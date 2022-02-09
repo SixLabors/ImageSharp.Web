@@ -47,6 +47,12 @@ namespace SixLabors.ImageSharp.Web.Providers
 
             this.providerRootPath = GetProviderRoot(options.Value, environment.WebRootPath, environment.ContentRootPath);
             this.formatUtilities = formatUtilities;
+
+            // Disable provider by default when no root path is configured or webroot doesn't exist
+            if (this.providerRootPath == null)
+            {
+                this.Match = _ => false;
+            }
         }
 
         /// <inheritdoc/>
@@ -87,12 +93,32 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <returns><see cref="string"/> representing the fully qualified provider root path.</returns>
         internal static string GetProviderRoot(PhysicalFileSystemProviderOptions providerOptions, string webRootPath, string contentRootPath)
         {
-            string providerRoot = providerOptions.ProviderRootPath ?? webRootPath ?? "wwwroot";
-            string fullPath = Path.IsPathFullyQualified(providerRoot)
-                ? providerRoot
-                : Path.GetFullPath(providerRoot, contentRootPath);
+            string providerRootPath = providerOptions.ProviderRootPath ?? webRootPath;
+            if (providerRootPath == null)
+            {
+                // Default to /wwwroot if it exists
+                string wwwroot = Path.Combine(contentRootPath, "wwwroot");
+                if (Directory.Exists(wwwroot))
+                {
+                    providerRootPath = wwwroot;
+                }
+            }
 
-            return EnsureTrailingSlash(fullPath);
+            if (!string.IsNullOrEmpty(providerRootPath))
+            {
+                string fullPath = Path.IsPathFullyQualified(providerRootPath)
+                    ? providerRootPath
+                    : Path.GetFullPath(providerRootPath, contentRootPath);
+
+                if (!Directory.Exists(fullPath))
+                {
+                    Directory.CreateDirectory(fullPath);
+                }
+
+                return EnsureTrailingSlash(fullPath);
+            }
+
+            return null;
         }
 
         internal static string EnsureTrailingSlash(string path)

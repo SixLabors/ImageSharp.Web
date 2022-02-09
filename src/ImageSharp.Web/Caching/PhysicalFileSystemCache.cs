@@ -94,7 +94,10 @@ namespace SixLabors.ImageSharp.Web.Caching
             string directory = Path.GetDirectoryName(path);
 
             // Ensure cache directory is created before creating files
-            Directory.CreateDirectory(directory);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
             using (FileStream fileStream = File.Create(imagePath))
             {
