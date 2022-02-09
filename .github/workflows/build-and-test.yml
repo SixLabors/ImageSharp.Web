@@ -15,20 +15,54 @@ jobs:
     strategy:
       matrix:
         options:
+          - os: ubuntu-latest
+            framework: net6.0
+            sdk: 6.0.x
+            runtime: -x64
+            codecov: false
           - os: macos-latest
-            framework: netcoreapp3.1
+            framework: net6.0
+            sdk: 6.0.x
+            runtime: -x64
+            codecov: false
+          - os: windows-latest
+            framework: net6.0
+            sdk: 6.0.x
+            runtime: -x64
+            codecov: true
+          - os: ubuntu-latest
+            framework: net5.0
+            sdk: 5.0.x
+            runtime: -x64
+            codecov: false
+          - os: macos-latest
+            framework: net5.0
+            sdk: 5.0.x
+            runtime: -x64
+            codecov: false
+          - os: windows-latest
+            framework: net5.0
+            sdk: 5.0.x
             runtime: -x64
             codecov: false
           - os: ubuntu-latest
             framework: netcoreapp3.1
+            sdk: 3.1.x
+            runtime: -x64
+            codecov: false
+          - os: macos-latest
+            framework: netcoreapp3.1
+            sdk: 3.1.x
             runtime: -x64
             codecov: false
           - os: windows-latest
             framework: netcoreapp3.1
+            sdk: 3.1.x
             runtime: -x64
-            codecov: true
+            codecov: false
           - os: windows-latest
             framework: netcoreapp2.1
+            sdk: 2.1.x
             runtime: -x64
             codecov: false
 
@@ -62,8 +96,8 @@ jobs:
       - name: Git Pull LFS
         run: git lfs pull
 
-            - name: Install NuGet
-              uses: NuGet/setup-nuget@v1
+      - name: Install NuGet
+        uses: NuGet/setup-nuget@v1
 
       - name: NuGet Setup Cache
         uses: actions/cache@v2
@@ -102,13 +136,10 @@ jobs:
           s3rver -d . &
 
       - name: DotNet Setup
+        if: ${{matrix.options.sdk}}
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: |
-            6.0.x
-            5.0.x
-            3.1.x
-            2.1.x
+          dotnet-version: ${{matrix.options.sdk}}
 
       - name: DotNet Build
         shell: pwsh
