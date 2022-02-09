@@ -64,11 +64,27 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <returns><see cref="string"/> representing the fully qualified cache root path.</returns>
         internal static string GetCacheRoot(PhysicalFileSystemCacheOptions cacheOptions, string webRootPath, string contentRootPath)
         {
-            string cacheRoot = cacheOptions.CacheRootPath ?? webRootPath ?? "wwwroot";
+            string cacheRootPath = cacheOptions.CacheRootPath ?? webRootPath;
+            if (string.IsNullOrEmpty(cacheRootPath))
+            {
+                throw new InvalidOperationException("The cache root path can't be determined, make sure it's explicitly configured or the webroot is set.");
+            }
 
-            return Path.IsPathFullyQualified(cacheRoot)
-                ? Path.Combine(cacheRoot, cacheOptions.CacheFolder)
-                : Path.GetFullPath(Path.Combine(cacheRoot, cacheOptions.CacheFolder), contentRootPath);
+            if (!Path.IsPathFullyQualified(cacheRootPath))
+            {
+                // Ensure this is an absolute path (resolved to the content root path)
+                cacheRootPath = Path.GetFullPath(cacheRootPath, contentRootPath);
+            }
+
+            string cacheFolderPath = Path.Combine(cacheRootPath, cacheOptions.CacheFolder);
+
+            // Ensure directory exists
+            if (!Directory.Exists(cacheFolderPath))
+            {
+                Directory.CreateDirectory(cacheFolderPath);
+            }
+
+            return PathUtils.EnsureTrailingSlash(cacheFolderPath);
         }
 
         /// <inheritdoc/>

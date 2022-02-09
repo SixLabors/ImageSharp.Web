@@ -47,12 +47,6 @@ namespace SixLabors.ImageSharp.Web.Providers
 
             this.providerRootPath = GetProviderRoot(options.Value, environment.WebRootPath, environment.ContentRootPath);
             this.formatUtilities = formatUtilities;
-
-            // Disable provider by default when no root path is configured or webroot doesn't exist
-            if (this.providerRootPath == null)
-            {
-                this.Match = _ => false;
-            }
         }
 
         /// <inheritdoc/>
@@ -70,7 +64,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         {
             // Use Join because request path starts with a slash
             string fullPath = Path.GetFullPath(Path.Join(this.providerRootPath, context.Request.Path.Value));
-            if (fullPath.StartsWith(this.providerRootPath, StringComparison.OrdinalIgnoreCase))
+            if (PathUtils.IsUnderneathRoot(fullPath, this.providerRootPath))
             {
                 // Check to see if the file exists
                 var fileInfo = new FileInfo(fullPath);
@@ -94,42 +88,24 @@ namespace SixLabors.ImageSharp.Web.Providers
         internal static string GetProviderRoot(PhysicalFileSystemProviderOptions providerOptions, string webRootPath, string contentRootPath)
         {
             string providerRootPath = providerOptions.ProviderRootPath ?? webRootPath;
-            if (providerRootPath == null)
+            if (string.IsNullOrEmpty(providerRootPath))
             {
-                // Default to /wwwroot if it exists
-                string wwwroot = Path.Combine(contentRootPath, "wwwroot");
-                if (Directory.Exists(wwwroot))
-                {
-                    providerRootPath = wwwroot;
-                }
+                throw new InvalidOperationException("The provider root path can't be determined, make sure it's explicitly configured or the webroot is set.");
             }
 
-            if (!string.IsNullOrEmpty(providerRootPath))
+            if (!Path.IsPathFullyQualified(providerRootPath))
             {
-                string fullPath = Path.IsPathFullyQualified(providerRootPath)
-                    ? providerRootPath
-                    : Path.GetFullPath(providerRootPath, contentRootPath);
-
-                if (!Directory.Exists(fullPath))
-                {
-                    Directory.CreateDirectory(fullPath);
-                }
-
-                return EnsureTrailingSlash(fullPath);
+                // Ensure this is an absolute path (resolved to the content root path)
+                providerRootPath = Path.GetFullPath(providerRootPath, contentRootPath);
             }
 
-            return null;
-        }
-
-        internal static string EnsureTrailingSlash(string path)
-        {
-            if (!string.IsNullOrEmpty(path) &&
-                path[path.Length - 1] != Path.DirectorySeparatorChar)
+            // Ensure directory exists
+            if (!Directory.Exists(providerRootPath))
             {
-                return path + Path.DirectorySeparatorChar;
+                Directory.CreateDirectory(providerRootPath);
             }
 
-            return path;
+            return PathUtils.EnsureTrailingSlash(providerRootPath);
         }
     }
 }
