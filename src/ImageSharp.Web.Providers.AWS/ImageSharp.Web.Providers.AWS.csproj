@@ -13,9 +13,18 @@
     <Description>A provider for resolving and caching images via AWS S3 Storage.</Description>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
-  </PropertyGroup>
+  <Choose>
+    <When Condition="$(SIXLABORS_TESTING) == true">
+      <PropertyGroup>
+        <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <TargetFrameworks>netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
 
   <ItemGroup>
     <None Include="..\..\shared-infrastructure\branding\icons\imagesharp.web\sixlabors.imagesharp.web.128.png" Pack="true" PackagePath="" />
