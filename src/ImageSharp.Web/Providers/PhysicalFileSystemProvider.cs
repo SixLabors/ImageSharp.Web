@@ -47,12 +47,6 @@ namespace SixLabors.ImageSharp.Web.Providers
 
             this.providerRootPath = GetProviderRoot(options.Value, environment.WebRootPath, environment.ContentRootPath);
             this.formatUtilities = formatUtilities;
-
-            // Ensure provider directory exists
-            if (!Directory.Exists(this.providerRootPath))
-            {
-                Directory.CreateDirectory(this.providerRootPath);
-            }
         }
 
         /// <inheritdoc/>

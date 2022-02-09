@@ -53,12 +53,6 @@ namespace SixLabors.ImageSharp.Web.Caching
             this.cacheRootPath = GetCacheRoot(options.Value, environment.WebRootPath, environment.ContentRootPath);
             this.cacheFolderDepth = (int)options.Value.CacheFolderDepth;
             this.formatUtilities = formatUtilities;
-
-            // Ensure cache directory exists
-            if (!Directory.Exists(this.cacheRootPath))
-            {
-                Directory.CreateDirectory(this.cacheRootPath);
-            }
         }
 
         /// <summary>
