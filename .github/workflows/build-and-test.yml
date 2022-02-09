@@ -17,57 +17,46 @@ jobs:
         options:
           - os: ubuntu-latest
             framework: net6.0
-            sdk: 6.0.x
             runtime: -x64
             codecov: false
           - os: macos-latest
             framework: net6.0
-            sdk: 6.0.x
             runtime: -x64
             codecov: false
           - os: windows-latest
             framework: net6.0
-            sdk: 6.0.x
             runtime: -x64
             codecov: true
           - os: ubuntu-latest
             framework: net5.0
-            sdk: 5.0.x
             runtime: -x64
             codecov: false
           - os: macos-latest
             framework: net5.0
-            sdk: 5.0.x
             runtime: -x64
             codecov: false
           - os: windows-latest
             framework: net5.0
-            sdk: 5.0.x
             runtime: -x64
             codecov: false
           - os: ubuntu-latest
             framework: netcoreapp3.1
-            sdk: 3.1.x
             runtime: -x64
             codecov: false
           - os: macos-latest
             framework: netcoreapp3.1
-            sdk: 3.1.x
             runtime: -x64
             codecov: false
           - os: windows-latest
             framework: netcoreapp3.1
-            sdk: 3.1.x
             runtime: -x64
             codecov: false
           - os: windows-latest
             framework: netcoreapp2.1
-            sdk: 2.1.x
             runtime: -x64
             codecov: false
 
     runs-on: ${{matrix.options.os}}
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     steps:
       - name: Git Config
@@ -83,7 +72,7 @@ jobs:
           submodules: recursive
 
       # See https://github.com/actions/checkout/issues/165#issuecomment-657673315
-      - name: Git Create LFS file list
+      - name: Git Create LFS FileList
         run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
 
       - name: Git Setup LFS Cache
@@ -96,7 +85,7 @@ jobs:
       - name: Git Pull LFS
         run: git lfs pull
 
-      - name: Install NuGet
+      - name: NuGet Install
         uses: NuGet/setup-nuget@v1
 
       - name: NuGet Setup Cache
@@ -136,10 +125,13 @@ jobs:
           s3rver -d . &
 
       - name: DotNet Setup
-        if: ${{matrix.options.sdk}}
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: ${{matrix.options.sdk}}
+          dotnet-version: |
+            6.0.x
+            5.0.x
+            3.1.x
+            2.1.x
 
       - name: DotNet Build
         shell: pwsh
