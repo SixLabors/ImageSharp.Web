@@ -32,7 +32,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// <inheritdoc/>
         public async Task<ImageCacheMetadata> GetMetaDataAsync()
         {
-            using Stream stream = this.metaFileInfo.OpenRead();
+            using Stream stream = OpenFileStream(this.metaFileInfo.FullName);
             this.metadata = await ImageCacheMetadata.ReadAsync(stream);
             return this.metadata;
         }
@@ -44,7 +44,21 @@ namespace SixLabors.ImageSharp.Web.Resolvers
                 this.metaFileInfo.FullName,
                 this.formatUtilities.GetExtensionFromContentType(this.metadata.ContentType));
 
-            return Task.FromResult<Stream>(File.OpenRead(path));
+            return Task.FromResult(OpenFileStream(path));
+        }
+
+        private static Stream OpenFileStream(string path)
+        {
+            // We are setting buffer size to 1 to prevent FileStream from allocating it's internal buffer
+            // 0 causes constructor to throw
+            int bufferSize = 1;
+            return new FileStream(
+                path,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite,
+                bufferSize,
+                FileOptions.Asynchronous | FileOptions.SequentialScan);
         }
     }
 }

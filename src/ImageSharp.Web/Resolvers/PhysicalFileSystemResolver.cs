@@ -29,6 +29,18 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         public Task<ImageMetadata> GetMetaDataAsync() => Task.FromResult(this.metadata);
 
         /// <inheritdoc/>
-        public Task<Stream> OpenReadAsync() => Task.FromResult<Stream>(this.fileInfo.OpenRead());
+        public Task<Stream> OpenReadAsync()
+        {
+            // We are setting buffer size to 1 to prevent FileStream from allocating it's internal buffer
+            // 0 causes constructor to throw
+            int bufferSize = 1;
+            return Task.FromResult<Stream>(new FileStream(
+                this.fileInfo.FullName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite,
+                bufferSize,
+                FileOptions.Asynchronous | FileOptions.SequentialScan));
+        }
     }
 }
