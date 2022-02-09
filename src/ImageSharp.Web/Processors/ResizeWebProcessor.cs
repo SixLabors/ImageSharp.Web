@@ -3,7 +3,9 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Numerics;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using SixLabors.ImageSharp.Web.Commands;
@@ -41,9 +43,14 @@ namespace SixLabors.ImageSharp.Web.Processors
         public const string Sampler = "rsampler";
 
         /// <summary>
-        /// The command constant for the resize sampler.
+        /// The command constant for the resize anchor position.
         /// </summary>
         public const string Anchor = "ranchor";
+
+        /// <summary>
+        /// The command constant for the resize orientation handling mode.
+        /// </summary>
+        public const string Orient = "orient";
 
         /// <summary>
         /// The command constant for the resize compand mode.
@@ -59,7 +66,8 @@ namespace SixLabors.ImageSharp.Web.Processors
                 Mode,
                 Sampler,
                 Anchor,
-                Compand
+                Compand,
+                Orient
             };
 
         /// <inheritdoc/>
@@ -73,7 +81,7 @@ namespace SixLabors.ImageSharp.Web.Processors
             CommandParser parser,
             CultureInfo culture)
         {
-            ResizeOptions options = GetResizeOptions(commands, parser, culture);
+            ResizeOptions options = GetResizeOptions(image, commands, parser, culture);
 
             if (options != null)
             {
@@ -83,7 +91,18 @@ namespace SixLabors.ImageSharp.Web.Processors
             return image;
         }
 
-        private static ResizeOptions GetResizeOptions(
+        /// <summary>
+        /// Parses the command collection returning the resize options.
+        /// </summary>
+        /// <param name="image">The image to process.</param>
+        /// <param name="commands">The ordered collection containing the processing commands.</param>
+        /// <param name="parser">The command parser use for parting commands.</param>
+        /// <param name="culture">
+        /// The <see cref="CultureInfo"/> to use as the current parsing culture.
+        /// </param>
+        /// <returns>The <see cref="ResizeOptions"/>.</returns>
+        internal static ResizeOptions GetResizeOptions(
+            FormattedImage image,
             CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
@@ -93,18 +112,20 @@ namespace SixLabors.ImageSharp.Web.Processors
                 return null;
             }
 
-            Size size = ParseSize(commands, parser, culture);
+            ushort orientation = GetExifOrientation(image, commands, parser, culture);
+
+            Size size = ParseSize(orientation, commands, parser, culture);
 
             if (size.Width <= 0 && size.Height <= 0)
             {
                 return null;
             }
 
-            var options = new ResizeOptions
+            ResizeOptions options = new()
             {
                 Size = size,
-                CenterCoordinates = GetCenter(commands, parser, culture),
-                Position = GetAnchor(commands, parser, culture),
+                CenterCoordinates = GetCenter(orientation, commands, parser, culture),
+                Position = GetAnchor(orientation, commands, parser, culture),
                 Mode = GetMode(commands, parser, culture),
                 Compand = GetCompandMode(commands, parser, culture),
             };
@@ -116,18 +137,22 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         private static Size ParseSize(
+            ushort orientation,
             CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
         {
             // The command parser will reject negative numbers as it clamps values to ranges.
-            uint width = parser.ParseValue<uint>(commands.GetValueOrDefault(Width), culture);
-            uint height = parser.ParseValue<uint>(commands.GetValueOrDefault(Height), culture);
+            int width = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(Width), culture);
+            int height = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(Height), culture);
 
-            return new Size((int)width, (int)height);
+            return IsExifOrientationRotated(orientation)
+                ? new Size(height, width)
+                : new Size(width, height);
         }
 
         private static PointF? GetCenter(
+            ushort orientation,
             CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
@@ -139,7 +164,47 @@ namespace SixLabors.ImageSharp.Web.Processors
                 return null;
             }
 
-            return new PointF(coordinates[0], coordinates[1]);
+            PointF center = new(coordinates[0], coordinates[1]);
+            if (orientation is >= ExifOrientationMode.Unknown and <= ExifOrientationMode.TopLeft)
+            {
+                return center;
+            }
+
+            // New XY is calculated based on flipping and rotating the input XY.
+            // Coordinates range from 0-1, hence the matching source size.
+            AffineTransformBuilder builder = new();
+            Size size = new(1, 1);
+            switch (orientation)
+            {
+                case ExifOrientationMode.TopRight:
+                    builder.AppendTranslation(new PointF(size.Width - center.X, 0));
+                    break;
+                case ExifOrientationMode.BottomRight:
+                    builder.AppendRotationDegrees(180);
+                    break;
+                case ExifOrientationMode.BottomLeft:
+                    builder.AppendTranslation(new PointF(0, size.Height - center.Y));
+                    break;
+                case ExifOrientationMode.LeftTop:
+                    builder.AppendTranslation(new PointF(size.Width - center.X, 0));
+                    builder.AppendRotationDegrees(270);
+                    break;
+                case ExifOrientationMode.RightTop:
+                    builder.AppendRotationDegrees(270);
+                    break;
+                case ExifOrientationMode.RightBottom:
+                    builder.AppendTranslation(new PointF(size.Width - center.X, 0));
+                    builder.AppendRotationDegrees(90);
+                    break;
+                case ExifOrientationMode.LeftBottom:
+                    builder.AppendRotationDegrees(90);
+                    break;
+                default:
+                    return center;
+            }
+
+            Matrix3x2 matrix = builder.BuildMatrix(size);
+            return Vector2.Transform(center, matrix);
         }
 
         private static ResizeMode GetMode(
@@ -149,10 +214,98 @@ namespace SixLabors.ImageSharp.Web.Processors
             => parser.ParseValue<ResizeMode>(commands.GetValueOrDefault(Mode), culture);
 
         private static AnchorPositionMode GetAnchor(
+            ushort orientation,
             CommandCollection commands,
             CommandParser parser,
             CultureInfo culture)
-            => parser.ParseValue<AnchorPositionMode>(commands.GetValueOrDefault(Anchor), culture);
+        {
+            AnchorPositionMode anchor = parser.ParseValue<AnchorPositionMode>(commands.GetValueOrDefault(Anchor), culture);
+            if (orientation is >= ExifOrientationMode.Unknown and <= ExifOrientationMode.TopLeft)
+            {
+                return anchor;
+            }
+
+            /*
+                New anchor position is determined by calculating the direction of the anchor relative to the source image.
+                In the following example, the TopRight anchor becomes BottomRight
+
+                            T                              L
+                +-----------------------+           +--------------+
+                |                      *|           |              |
+                |                       |           |              |
+              L |           TL          | R         |              |
+                |                       |           |              |
+                |                       |         B |      LB      | T
+                |                       |           |              |
+                +-----------------------+           |              |
+                            B                       |              |
+                                                    |              |
+                                                    |             *|
+                                                    +--------------+
+                                                            R
+          */
+            return anchor switch
+            {
+                AnchorPositionMode.Center => anchor,
+                AnchorPositionMode.Top => orientation switch
+                {
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.BottomRight => AnchorPositionMode.Bottom,
+                    ExifOrientationMode.LeftTop or ExifOrientationMode.RightTop => AnchorPositionMode.Left,
+                    ExifOrientationMode.LeftBottom or ExifOrientationMode.RightBottom => AnchorPositionMode.Right,
+                    _ => anchor,
+                },
+                AnchorPositionMode.Bottom => orientation switch
+                {
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.BottomRight => AnchorPositionMode.Top,
+                    ExifOrientationMode.LeftTop or ExifOrientationMode.RightTop => AnchorPositionMode.Right,
+                    ExifOrientationMode.LeftBottom or ExifOrientationMode.RightBottom => AnchorPositionMode.Left,
+                    _ => anchor,
+                },
+                AnchorPositionMode.Left => orientation switch
+                {
+                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomRight => AnchorPositionMode.Right,
+                    ExifOrientationMode.LeftTop or ExifOrientationMode.LeftBottom => AnchorPositionMode.Top,
+                    ExifOrientationMode.RightTop or ExifOrientationMode.RightBottom => AnchorPositionMode.Bottom,
+                    _ => anchor,
+                },
+                AnchorPositionMode.Right => orientation switch
+                {
+                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomRight => AnchorPositionMode.Left,
+                    ExifOrientationMode.LeftTop or ExifOrientationMode.LeftBottom => AnchorPositionMode.Bottom,
+                    ExifOrientationMode.RightTop or ExifOrientationMode.RightBottom => AnchorPositionMode.Top,
+                    _ => anchor,
+                },
+                AnchorPositionMode.TopLeft => orientation switch
+                {
+                    ExifOrientationMode.TopRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.TopRight,
+                    ExifOrientationMode.BottomRight or ExifOrientationMode.RightTop => AnchorPositionMode.BottomLeft,
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.RightBottom => AnchorPositionMode.BottomRight,
+                    _ => anchor,
+                },
+                AnchorPositionMode.TopRight => orientation switch
+                {
+                    ExifOrientationMode.TopRight or ExifOrientationMode.RightTop => AnchorPositionMode.TopLeft,
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftBottom => AnchorPositionMode.BottomRight,
+                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftTop => AnchorPositionMode.BottomLeft,
+                    _ => anchor,
+                },
+                AnchorPositionMode.BottomRight => orientation switch
+                {
+                    ExifOrientationMode.TopRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.BottomLeft,
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.RightTop => AnchorPositionMode.TopRight,
+                    ExifOrientationMode.BottomRight or ExifOrientationMode.RightBottom => AnchorPositionMode.TopLeft,
+                    _ => anchor,
+                },
+                AnchorPositionMode.BottomLeft => orientation switch
+                {
+                    ExifOrientationMode.TopRight or ExifOrientationMode.RightTop => AnchorPositionMode.BottomRight,
+                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftBottom => AnchorPositionMode.TopLeft,
+                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftTop => AnchorPositionMode.TopRight,
+                    _ => anchor,
+                },
+                _ => anchor,
+            };
+        }
 
         private static bool GetCompandMode(
             CommandCollection commands,
@@ -166,43 +319,56 @@ namespace SixLabors.ImageSharp.Web.Processors
 
             if (sampler != null)
             {
-                switch (sampler.ToLowerInvariant())
+                // No need to do a case test here. Parsed commands are automatically converted to lowercase.
+                return sampler switch
                 {
-                    case "nearest":
-                    case "nearestneighbor":
-                        return KnownResamplers.NearestNeighbor;
-                    case "box":
-                        return KnownResamplers.Box;
-                    case "mitchell":
-                    case "mitchellnetravali":
-                        return KnownResamplers.MitchellNetravali;
-                    case "catmull":
-                    case "catmullrom":
-                        return KnownResamplers.CatmullRom;
-                    case "lanczos2":
-                        return KnownResamplers.Lanczos2;
-                    case "lanczos3":
-                        return KnownResamplers.Lanczos3;
-                    case "lanczos5":
-                        return KnownResamplers.Lanczos5;
-                    case "lanczos8":
-                        return KnownResamplers.Lanczos8;
-                    case "welch":
-                        return KnownResamplers.Welch;
-                    case "robidoux":
-                        return KnownResamplers.Robidoux;
-                    case "robidouxsharp":
-                        return KnownResamplers.RobidouxSharp;
-                    case "spline":
-                        return KnownResamplers.Spline;
-                    case "triangle":
-                        return KnownResamplers.Triangle;
-                    case "hermite":
-                        return KnownResamplers.Hermite;
-                }
+                    "nearest" or "nearestneighbor" => KnownResamplers.NearestNeighbor,
+                    "box" => KnownResamplers.Box,
+                    "mitchell" or "mitchellnetravali" => KnownResamplers.MitchellNetravali,
+                    "catmull" or "catmullrom" => KnownResamplers.CatmullRom,
+                    "lanczos2" => KnownResamplers.Lanczos2,
+                    "lanczos3" => KnownResamplers.Lanczos3,
+                    "lanczos5" => KnownResamplers.Lanczos5,
+                    "lanczos8" => KnownResamplers.Lanczos8,
+                    "welch" => KnownResamplers.Welch,
+                    "robidoux" => KnownResamplers.Robidoux,
+                    "robidouxsharp" => KnownResamplers.RobidouxSharp,
+                    "spline" => KnownResamplers.Spline,
+                    "triangle" => KnownResamplers.Triangle,
+                    "hermite" => KnownResamplers.Hermite,
+                    _ => KnownResamplers.Bicubic,
+                };
             }
 
             return KnownResamplers.Bicubic;
         }
+
+        private static ushort GetExifOrientation(FormattedImage image, CommandCollection commands, CommandParser parser, CultureInfo culture)
+        {
+            // Browsers now implement 'image-orientation: from-image' by default.
+            // https://developer.mozilla.org/en-US/docs/web/css/image-orientation
+            // This makes orientation handling confusing for users who expect images to be resized in accordance
+            // to what they observe rather than pure (and correct) methods.
+            //
+            // To accomodate this we parse the dimensions to use based upon decoded EXIF orientation values.
+            // We default to 'true' for EXIF orientation handling. By passing 'false' it can be turned off.
+            if (commands.Contains(Orient) && !parser.ParseValue<bool>(commands.GetValueOrDefault(Orient), culture))
+            {
+                return ExifOrientationMode.Unknown;
+            }
+
+            image.TryGetExifOrientation(out ushort orientation);
+            return orientation;
+        }
+
+        private static bool IsExifOrientationRotated(ushort orientation)
+            => orientation switch
+            {
+                ExifOrientationMode.LeftTop
+                or ExifOrientationMode.RightTop
+                or ExifOrientationMode.RightBottom
+                or ExifOrientationMode.LeftBottom => true,
+                _ => false,
+            };
     }
 }

@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -32,13 +31,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// Used to temporarily store source metadata reads to reduce the overhead of cache lookups.
         /// </summary>
         private static readonly ConcurrentTLruCache<string, ImageMetadata> SourceMetadataLru
-            = new(1024, TimeSpan.FromMinutes(5));
+            = new(1024, TimeSpan.FromSeconds(30));
 
         /// <summary>
         /// Used to temporarily store cache resolver reads to reduce the overhead of cache lookups.
         /// </summary>
         private static readonly ConcurrentTLruCache<string, (IImageCacheResolver, ImageCacheMetadata)> CacheResolverLru
-            = new(1024, TimeSpan.FromMinutes(5));
+            = new(1024, TimeSpan.FromSeconds(30));
 
         /// <summary>
         /// The function processing the Http request.
@@ -335,7 +334,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 }
                                 else
                                 {
-                                    using var image = FormattedImage.Load(this.options.Configuration, inStream);
+                                    using FormattedImage image = await FormattedImage.LoadAsync(this.options.Configuration, inStream);
 
                                     image.Process(
                                         this.logger,

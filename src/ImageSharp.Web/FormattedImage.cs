@@ -4,8 +4,10 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace SixLabors.ImageSharp.Web
@@ -92,10 +94,67 @@ namespace SixLabors.ImageSharp.Web
         }
 
         /// <summary>
+        /// Loads the specified source.
+        /// </summary>
+        /// <param name="configuration">The configuration.</param>
+        /// <param name="source">The source.</param>
+        /// <returns>A <see cref="Task{FormattedImage}"/> representing the asynchronous operation.</returns>
+        public static async Task<FormattedImage> LoadAsync(Configuration configuration, Stream source)
+        {
+            (Image<Rgba32> image, IImageFormat format) = await ImageSharp.Image.LoadWithFormatAsync<Rgba32>(configuration, source);
+            return new FormattedImage(image, format);
+        }
+
+        /// <summary>
         /// Saves image to the specified destination stream.
         /// </summary>
         /// <param name="destination">The destination stream.</param>
         public void Save(Stream destination) => this.Image.Save(destination, this.encoder);
+
+        /// <summary>
+        /// Saves image to the specified destination stream.
+        /// </summary>
+        /// <param name="destination">The destination stream.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task SaveAsync(Stream destination) => this.Image.SaveAsync(destination, this.encoder);
+
+        /// <summary>
+        /// Gets the EXIF orientation metata for the <see cref="FormattedImage"/>.
+        /// </summary>
+        /// <param name="value">
+        /// When this method returns, contains the value parsed from decoded EXIF metadata; otherwise,
+        /// the default value for the type of the <paramref name="value"/> parameter.
+        /// This parameter is passed uninitialized. Use <see cref="ExifOrientationMode"/> for comparison.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the <see cref="FormattedImage"/> contains EXIF orientation metadata
+        /// for <see cref="ExifTag.Orientation"/>; otherwise, <see langword="false"/>.
+        /// </returns>
+        public bool TryGetExifOrientation(out ushort value)
+        {
+            value = ExifOrientationMode.Unknown;
+            if (this.Image.Metadata.ExifProfile != null)
+            {
+                IExifValue<ushort> orientation = this.Image.Metadata.ExifProfile.GetValue(ExifTag.Orientation);
+                if (orientation is null)
+                {
+                    return false;
+                }
+
+                if (orientation.DataType == ExifDataType.Short)
+                {
+                    value = orientation.Value;
+                }
+                else
+                {
+                    value = Convert.ToUInt16(orientation.Value);
+                }
+
+                return true;
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting
