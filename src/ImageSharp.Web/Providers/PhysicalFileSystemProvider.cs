@@ -62,17 +62,20 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <inheritdoc/>
         public Task<IImageResolver> GetAsync(HttpContext context)
         {
-            string path = Path.Join(this.providerRootPath, context.Request.Path.Value);
-
-            // Check to see if the file exists
-            var fileInfo = new FileInfo(path);
-            if (!fileInfo.Exists)
+            // Use Join because request path starts with a slash
+            string fullPath = Path.GetFullPath(Path.Join(this.providerRootPath, context.Request.Path.Value));
+            if (fullPath.StartsWith(this.providerRootPath, StringComparison.OrdinalIgnoreCase))
             {
-                return Task.FromResult<IImageResolver>(null);
+                // Check to see if the file exists
+                var fileInfo = new FileInfo(fullPath);
+                if (fileInfo.Exists)
+                {
+                    var metadata = new ImageMetadata(fileInfo.LastWriteTimeUtc, fileInfo.Length);
+                    return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
+                }
             }
 
-            var metadata = new ImageMetadata(fileInfo.LastWriteTimeUtc, fileInfo.Length);
-            return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
+            return Task.FromResult<IImageResolver>(null);
         }
 
         /// <summary>
@@ -85,10 +88,22 @@ namespace SixLabors.ImageSharp.Web.Providers
         internal static string GetProviderRoot(PhysicalFileSystemProviderOptions providerOptions, string webRootPath, string contentRootPath)
         {
             string providerRoot = providerOptions.ProviderRootPath ?? webRootPath ?? "wwwroot";
-
-            return Path.IsPathFullyQualified(providerRoot)
+            string fullPath = Path.IsPathFullyQualified(providerRoot)
                 ? providerRoot
                 : Path.GetFullPath(providerRoot, contentRootPath);
+
+            return EnsureTrailingSlash(fullPath);
+        }
+
+        internal static string EnsureTrailingSlash(string path)
+        {
+            if (!string.IsNullOrEmpty(path) &&
+                path[path.Length - 1] != Path.DirectorySeparatorChar)
+            {
+                return path + Path.DirectorySeparatorChar;
+            }
+
+            return path;
         }
     }
 }
