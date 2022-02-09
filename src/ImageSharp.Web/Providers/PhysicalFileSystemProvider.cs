@@ -47,6 +47,12 @@ namespace SixLabors.ImageSharp.Web.Providers
 
             this.providerRootPath = GetProviderRoot(options.Value, environment.WebRootPath, environment.ContentRootPath);
             this.formatUtilities = formatUtilities;
+
+            // Ensure provider directory exists
+            if (!Directory.Exists(this.providerRootPath))
+            {
+                Directory.CreateDirectory(this.providerRootPath);
+            }
         }
 
         /// <inheritdoc/>
@@ -97,12 +103,6 @@ namespace SixLabors.ImageSharp.Web.Providers
             {
                 // Ensure this is an absolute path (resolved to the content root path)
                 providerRootPath = Path.GetFullPath(providerRootPath, contentRootPath);
-            }
-
-            // Ensure directory exists
-            if (!Directory.Exists(providerRootPath))
-            {
-                Directory.CreateDirectory(providerRootPath);
             }
 
             return PathUtils.EnsureTrailingSlash(providerRootPath);
