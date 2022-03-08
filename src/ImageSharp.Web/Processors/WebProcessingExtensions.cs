@@ -21,7 +21,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <param name="logger">The type used for performing logging.</param>
         /// <param name="processors">The collection of available processors.</param>
         /// <param name="commands">The parsed collection of processing commands.</param>
-        /// <param name="commandParser">The command parser use for parting commands.</param>
+        /// <param name="parser">The command parser use for parting commands.</param>
         /// <param name="culture">
         /// The <see cref="CultureInfo"/> to use as the current parsing culture.
         /// </param>
@@ -29,14 +29,14 @@ namespace SixLabors.ImageSharp.Web.Processors
         public static FormattedImage Process(
             this FormattedImage source,
             ILogger logger,
-            IEnumerable<IImageWebProcessor> processors,
+            IReadOnlyList<(int Index, IImageWebProcessor Processor)> processors,
             CommandCollection commands,
-            CommandParser commandParser,
+            CommandParser parser,
             CultureInfo culture)
         {
-            foreach (IImageWebProcessor processor in processors.GetBySupportedCommands(commands))
+            foreach ((int Index, IImageWebProcessor Processor) processor in processors)
             {
-                source = processor.Process(source, logger, commands, commandParser, culture);
+                source = processor.Processor.Process(source, logger, commands, parser, culture);
             }
 
             return source;
@@ -50,10 +50,9 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <returns>
         /// The sorted proccessors that supports any of the specified commands.
         /// </returns>
-        public static IEnumerable<IImageWebProcessor> GetBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, CommandCollection commands)
+        public static IReadOnlyList<(int Index, IImageWebProcessor Processor)> OrderBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, CommandCollection commands)
         {
-            var indexedProcessors = new List<(int Index, IImageWebProcessor Processor)>();
-
+            List<(int Index, IImageWebProcessor Processor)> indexedProcessors = new();
             foreach (IImageWebProcessor processor in processors)
             {
                 // Get index of first supported command
@@ -65,12 +64,7 @@ namespace SixLabors.ImageSharp.Web.Processors
             }
 
             indexedProcessors.Sort((x, y) => x.Index.CompareTo(y.Index));
-
-            // Return sorted processors
-            foreach ((int _, IImageWebProcessor processor) in indexedProcessors)
-            {
-                yield return processor;
-            }
+            return indexedProcessors;
         }
 
         /// <summary>
@@ -92,6 +86,32 @@ namespace SixLabors.ImageSharp.Web.Processors
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether the image to be processed should be decoded using a pixel format that supports
+        /// an alpha component for correct processing.
+        /// </summary>
+        /// <param name="processors">The collection of ordered processors.</param>
+        /// <param name="commands">The ordered collection containing the processing commands.</param>
+        /// <param name="parser">The command parser use for parting commands.</param>
+        /// <param name="culture">
+        /// The <see cref="CultureInfo"/> to use as the current parsing culture.
+        /// </param>
+        /// <returns>The <see cref="bool"/> indicating whether an alpha component is required.</returns>
+        public static bool RequiresAlphaComponent(
+            this IReadOnlyList<(int Index, IImageWebProcessor Processor)> processors,
+            CommandCollection commands,
+            CommandParser parser,
+            CultureInfo culture)
+        {
+            bool requiresAlpha = false;
+            foreach ((int Index, IImageWebProcessor Processor) processor in processors)
+            {
+                requiresAlpha |= processor.Processor.RequiresAlphaComponent(commands, parser, culture);
+            }
+
+            return requiresAlpha;
         }
     }
 }

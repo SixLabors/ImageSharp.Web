@@ -64,5 +64,8 @@ namespace SixLabors.ImageSharp.Web.Processors
 
             return image;
         }
+
+        /// <inheritdoc/>
+        public bool RequiresAlphaComponent(CommandCollection commands, CommandParser parser, CultureInfo culture) => true;
     }
 }

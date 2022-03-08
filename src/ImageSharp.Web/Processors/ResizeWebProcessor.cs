@@ -123,6 +123,13 @@ namespace SixLabors.ImageSharp.Web.Processors
             return options;
         }
 
+        /// <inheritdoc/>
+        public bool RequiresAlphaComponent(CommandCollection commands, CommandParser parser, CultureInfo culture)
+        {
+            ResizeMode mode = parser.ParseValue<ResizeMode>(commands.GetValueOrDefault(Mode), culture);
+            return mode is ResizeMode.Pad or ResizeMode.BoxPad;
+        }
+
         private static Size ParseSize(
             Image image,
             CommandCollection commands,
