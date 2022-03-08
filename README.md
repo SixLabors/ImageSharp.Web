@@ -1,14 +1,14 @@
 <h1 align="center">
 
-<img src="https://raw.githubusercontent.com/SixLabors/Branding/master/icons/imagesharp.web/sixlabors.imagesharp.web.svg?sanitize=true" alt="SixLabors.ImageSharp.Web" width="256"/>
+<img src="https://raw.githubusercontent.com/SixLabors/Branding/main/icons/imagesharp.web/sixlabors.imagesharp.web.svg?sanitize=true" alt="SixLabors.ImageSharp.Web" width="256"/>
 <br/>
 SixLabors.ImageSharp.Web
 </h1>
 
 <div align="center">
 
-[![Build Status](https://img.shields.io/github/workflow/status/SixLabors/ImageSharp.Web/Build/master)](https://github.com/SixLabors/ImageSharp.Web/actions)
-[![Code coverage](https://codecov.io/gh/SixLabors/ImageSharp.Web/branch/master/graph/badge.svg)](https://codecov.io/gh/SixLabors/ImageSharp.Web)
+[![Build Status](https://img.shields.io/github/workflow/status/SixLabors/ImageSharp.Web/Build/main)](https://github.com/SixLabors/ImageSharp.Web/actions)
+[![Code coverage](https://codecov.io/gh/SixLabors/ImageSharp.Web/branch/main/graph/badge.svg)](https://codecov.io/gh/SixLabors/ImageSharp.Web)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![GitHub issues](https://img.shields.io/github/issues/SixLabors/ImageSharp.Web.svg)](https://github.com/SixLabors/ImageSharp.Web/issues)
 
@@ -38,7 +38,7 @@ Support the efforts of the development of the Six Labors projects.
 ## Questions
 
 - Do you have questions? We are happy to help! Please [join our Discussions Forum](https://github.com/SixLabors/ImageSharp/discussions/category_choices), or ask them on [Stack Overflow](https://stackoverflow.com) using the `ImageSharp.Web` tag. Please do not open issues for questions.
-- Please read our [Contribution Guide](https://github.com/SixLabors/ImageSharp.Web/blob/master/.github/CONTRIBUTING.md) before opening issues or pull requests!
+- Please read our [Contribution Guide](https://github.com/SixLabors/ImageSharp.Web/blob/main/.github/CONTRIBUTING.md) before opening issues or pull requests!
 
 
 ## Code of Conduct  
@@ -110,7 +110,7 @@ sudo s3rver -d . &
 
 ## How can you help?
 
-Please... Spread the word, contribute algorithms, submit performance improvements, unit tests, no input is too little. Make sure to read our [Contribution Guide](https://github.com/SixLabors/ImageSharp.Web/blob/master/.github/CONTRIBUTING.md) before opening a PR.
+Please... Spread the word, contribute algorithms, submit performance improvements, unit tests, no input is too little. Make sure to read our [Contribution Guide](https://github.com/SixLabors/ImageSharp.Web/blob/main/.github/CONTRIBUTING.md) before opening a PR.
 
 ## The ImageSharp.Web Team
 
