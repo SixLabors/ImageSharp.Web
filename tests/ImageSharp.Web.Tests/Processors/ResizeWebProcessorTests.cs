@@ -261,6 +261,32 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             Assert.Equal(height, image.Height);
         }
 
+        [Theory]
+        [InlineData(ResizeMode.Crop, false)]
+        [InlineData(ResizeMode.Pad, true)]
+        [InlineData(ResizeMode.BoxPad, true)]
+        [InlineData(ResizeMode.Max, false)]
+        [InlineData(ResizeMode.Min, false)]
+        [InlineData(ResizeMode.Stretch, false)]
+        [InlineData(ResizeMode.Manual, false)]
+        public void ResizeWebProcessor_CanReportAlphaRequirements(ResizeMode resizeMode, bool requiresAlpha)
+        {
+            var converters = new List<ICommandConverter>
+            {
+                new EnumConverter(),
+            };
+
+            var parser = new CommandParser(converters);
+            CultureInfo culture = CultureInfo.InvariantCulture;
+
+            CommandCollection commands = new()
+            {
+                { new(ResizeWebProcessor.Mode, resizeMode.ToString()) },
+            };
+
+            Assert.Equal(requiresAlpha, new ResizeWebProcessor().RequiresAlphaComponent(commands, parser, culture));
+        }
+
         private static PointF GetExpectedCenter(ushort orientation, PointF center)
         {
             // New XY is calculated based on flipping and rotating the input XY.

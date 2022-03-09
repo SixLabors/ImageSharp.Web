@@ -2,10 +2,14 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Formats.Bmp;
 using SixLabors.ImageSharp.Formats.Gif;
+using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Commands.Converters;
@@ -17,6 +21,16 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
 {
     public class FormatWebProcessorTests
     {
+        public static TheoryData<string> FormatNameData { get; }
+            = new TheoryData<string>
+            {
+                { BmpFormat.Instance.Name },
+                { GifFormat.Instance.Name },
+                { PngFormat.Instance.Name },
+                { JpegFormat.Instance.Name },
+                { WebpFormat.Instance.Name },
+            };
+
         [Fact]
         public void FormatWebProcessor_UpdatesFormat()
         {
@@ -36,6 +50,22 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 .Process(formatted, null, commands, parser, culture);
 
             Assert.Equal(formatted.Format, GifFormat.Instance);
+        }
+
+        [Theory]
+        [MemberData(nameof(FormatNameData))]
+        public void FormatWebProcessor_CanReportAlphaRequirements(string format)
+        {
+            CommandParser parser = new(Array.Empty<ICommandConverter>());
+            CultureInfo culture = CultureInfo.InvariantCulture;
+
+            CommandCollection commands = new()
+            {
+                { new(FormatWebProcessor.Format, format) },
+            };
+
+            FormatWebProcessor processor = new(Options.Create(new ImageSharpMiddlewareOptions()));
+            Assert.True(processor.RequiresAlphaComponent(commands, parser, culture));
         }
     }
 }

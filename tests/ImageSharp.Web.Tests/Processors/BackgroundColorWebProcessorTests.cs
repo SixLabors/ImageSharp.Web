@@ -32,5 +32,23 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
 
             Assert.True(Color.Orange.Equals(image[0, 0]));
         }
+
+        [Theory]
+        [InlineData(nameof(Color.Orange))]
+        [InlineData(nameof(Color.Black))]
+        [InlineData(nameof(Color.Blue))]
+        [InlineData(nameof(Color.RebeccaPurple))]
+        public void BackgroundColorWebProcessor_CanReportAlphaRequirements(string color)
+        {
+            CommandParser parser = new(new[] { new ColorConverter() });
+            CultureInfo culture = CultureInfo.InvariantCulture;
+
+            CommandCollection commands = new()
+            {
+                { new(BackgroundColorWebProcessor.Color, color) }
+            };
+
+            Assert.True(new BackgroundColorWebProcessor().RequiresAlphaComponent(commands, parser, culture));
+        }
     }
 }

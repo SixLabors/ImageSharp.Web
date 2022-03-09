@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -15,6 +16,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
 {
     public class QualityWebProcessorTests
     {
+        private readonly Random random = new();
+
         [Fact]
         public void QualityWebProcessor_UpdatesJpegQuality()
         {
@@ -62,6 +65,25 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             Assert.Equal(WebpFormat.Instance, formatted.Format);
             Assert.Equal(42, ((WebpEncoder)formatted.Encoder).Quality);
             Assert.Equal(WebpFileFormatType.Lossy, ((WebpEncoder)formatted.Encoder).FileFormat);
+        }
+
+        [Fact]
+        public void QualityWebProcessor_CanReportAlphaRequirements()
+        {
+            var converters = new List<ICommandConverter>
+            {
+                new IntegralNumberConverter<int>(),
+            };
+
+            var parser = new CommandParser(converters);
+            CultureInfo culture = CultureInfo.InvariantCulture;
+
+            CommandCollection commands = new()
+            {
+                { new(QualityWebProcessor.Quality, this.random.Next(1, 100).ToString()) },
+            };
+
+            Assert.False(new QualityWebProcessor().RequiresAlphaComponent(commands, parser, culture));
         }
     }
 }
