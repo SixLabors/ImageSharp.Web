@@ -338,7 +338,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                     FormattedImage image = null;
                                     try
                                     {
-                                        // Now we ca finally process the image.
+                                        // Now we can finally process the image.
                                         // We first sort the processor collection by command order then use that collection to determine whether the decoded image pixel format
                                         // explicitly requires an alpha component in order to allow correct processing.
                                         //

@@ -45,7 +45,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 new ArrayConverter<float>(),
                 new EnumConverter(),
                 new SimpleCommandConverter<bool>(),
-                new SimpleCommandConverter<float>()
+                new SimpleCommandConverter<float>(),
+                new ColorConverter()
             };
 
             var parser = new CommandParser(converters);
@@ -91,7 +92,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 new ArrayConverter<float>(),
                 new EnumConverter(),
                 new SimpleCommandConverter<bool>(),
-                new SimpleCommandConverter<float>()
+                new SimpleCommandConverter<float>(),
+                new ColorConverter()
             };
 
             var parser = new CommandParser(converters);
@@ -146,7 +148,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 new ArrayConverter<float>(),
                 new EnumConverter(),
                 new SimpleCommandConverter<bool>(),
-                new SimpleCommandConverter<float>()
+                new SimpleCommandConverter<float>(),
+                new ColorConverter()
             };
 
             var parser = new CommandParser(converters);
@@ -188,7 +191,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 new ArrayConverter<float>(),
                 new EnumConverter(),
                 new SimpleCommandConverter<bool>(),
-                new SimpleCommandConverter<float>()
+                new SimpleCommandConverter<float>(),
+                new ColorConverter()
             };
 
             var parser = new CommandParser(converters);
@@ -236,7 +240,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 new ArrayConverter<float>(),
                 new EnumConverter(),
                 new SimpleCommandConverter<bool>(),
-                new SimpleCommandConverter<float>()
+                new SimpleCommandConverter<float>(),
+                new ColorConverter()
             };
 
             var parser = new CommandParser(converters);
