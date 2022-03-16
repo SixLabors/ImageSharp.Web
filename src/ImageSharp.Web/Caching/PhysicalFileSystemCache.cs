@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -29,11 +28,6 @@ namespace SixLabors.ImageSharp.Web.Caching
         private readonly int cacheFolderDepth;
 
         /// <summary>
-        /// The file provider abstraction.
-        /// </summary>
-        private readonly IFileProvider fileProvider;
-
-        /// <summary>
         /// Contains various format helper methods based on the current configuration.
         /// </summary>
         private readonly FormatUtilities formatUtilities;
@@ -53,19 +47,11 @@ namespace SixLabors.ImageSharp.Web.Caching
 #endif
             FormatUtilities formatUtilities)
         {
-            Guard.NotNull(environment, nameof(environment));
             Guard.NotNull(options, nameof(options));
-            Guard.NotNullOrWhiteSpace(environment.WebRootPath, nameof(environment.WebRootPath));
+            Guard.NotNull(environment, nameof(environment));
 
-            // Allow configuration of the cache without having to register everything
-            PhysicalFileSystemCacheOptions cacheOptions = options != null ? options.Value : new();
-            this.cacheRootPath = GetCacheRoot(cacheOptions, environment.WebRootPath, environment.ContentRootPath);
-            this.cacheFolderDepth = (int)cacheOptions.CacheFolderDepth;
-
-            // Ensure cache directory is created before initializing the file provider
-            Directory.CreateDirectory(this.cacheRootPath);
-
-            this.fileProvider = new PhysicalFileProvider(this.cacheRootPath);
+            this.cacheRootPath = GetCacheRoot(options.Value, environment.WebRootPath, environment.ContentRootPath);
+            this.cacheFolderDepth = (int)options.Value.CacheFolderDepth;
             this.formatUtilities = formatUtilities;
         }
 
@@ -78,13 +64,21 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <returns><see cref="string"/> representing the fully qualified cache root path.</returns>
         internal static string GetCacheRoot(PhysicalFileSystemCacheOptions cacheOptions, string webRootPath, string contentRootPath)
         {
-            string cacheRoot = string.IsNullOrWhiteSpace(cacheOptions.CacheRootPath)
-                ? webRootPath
-                : cacheOptions.CacheRootPath;
+            string cacheRootPath = cacheOptions.CacheRootPath ?? webRootPath;
+            if (string.IsNullOrEmpty(cacheRootPath))
+            {
+                throw new InvalidOperationException("The cache root path can't be determined, make sure it's explicitly configured or the webroot is set.");
+            }
 
-            return Path.IsPathFullyQualified(cacheRoot)
-                ? Path.Combine(cacheRoot, cacheOptions.CacheFolder)
-                : Path.GetFullPath(Path.Combine(cacheRoot, cacheOptions.CacheFolder), contentRootPath);
+            if (!Path.IsPathFullyQualified(cacheRootPath))
+            {
+                // Ensure this is an absolute path (resolved to the content root path)
+                cacheRootPath = Path.GetFullPath(cacheRootPath, contentRootPath);
+            }
+
+            string cacheFolderPath = Path.Combine(cacheRootPath, cacheOptions.CacheFolder);
+
+            return PathUtils.EnsureTrailingSlash(cacheFolderPath);
         }
 
         /// <inheritdoc/>
@@ -92,7 +86,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         {
             string path = ToFilePath(key, this.cacheFolderDepth);
 
-            IFileInfo metaFileInfo = this.fileProvider.GetFileInfo(this.ToMetaDataFilePath(path));
+            var metaFileInfo = new FileInfo(this.ToMetaDataFilePath(path));
             if (!metaFileInfo.Exists)
             {
                 return Task.FromResult<IImageCacheResolver>(null);
@@ -110,7 +104,10 @@ namespace SixLabors.ImageSharp.Web.Caching
             string directory = Path.GetDirectoryName(path);
 
             // Ensure cache directory is created before creating files
-            Directory.CreateDirectory(directory);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
             using (FileStream fileStream = File.Create(imagePath))
             {

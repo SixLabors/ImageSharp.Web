@@ -1,9 +1,8 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.FileProviders;
 
 namespace SixLabors.ImageSharp.Web.Resolvers
 {
@@ -12,7 +11,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
     /// </summary>
     public class PhysicalFileSystemResolver : IImageResolver
     {
-        private readonly IFileInfo fileInfo;
+        private readonly FileInfo fileInfo;
         private readonly ImageMetadata metadata;
 
         /// <summary>
@@ -20,7 +19,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         /// </summary>
         /// <param name="fileInfo">The input file info.</param>
         /// <param name="metadata">The image metadata associated with this file.</param>
-        public PhysicalFileSystemResolver(IFileInfo fileInfo, in ImageMetadata metadata)
+        public PhysicalFileSystemResolver(FileInfo fileInfo, in ImageMetadata metadata)
         {
             this.fileInfo = fileInfo;
             this.metadata = metadata;
@@ -30,6 +29,18 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         public Task<ImageMetadata> GetMetaDataAsync() => Task.FromResult(this.metadata);
 
         /// <inheritdoc/>
-        public Task<Stream> OpenReadAsync() => Task.FromResult(this.fileInfo.CreateReadStream());
+        public Task<Stream> OpenReadAsync()
+        {
+            // We are setting buffer size to 1 to prevent FileStream from allocating it's internal buffer
+            // 0 causes constructor to throw
+            int bufferSize = 1;
+            return Task.FromResult<Stream>(new FileStream(
+                this.fileInfo.FullName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite,
+                bufferSize,
+                FileOptions.Asynchronous | FileOptions.SequentialScan));
+        }
     }
 }
