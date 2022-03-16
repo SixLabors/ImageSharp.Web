@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--Do not upgrade this. Last Version that supports .NET Core 2.1-->
+    <!--TODO: Do not upgrade this. Last Version that supports .NET Core 2.1-->
     <PackageReference Include="Azure.Storage.Blobs" Version="12.10.0" />
   </ItemGroup>
 

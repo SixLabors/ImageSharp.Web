@@ -76,13 +76,9 @@ namespace SixLabors.ImageSharp.Web.Tests.Processing
 
             response = await this.HttpClient.SendAsync(request);
 
-#if !ENV_CI
-            // TODO: This test is flaky in the CI environment when testing
-            // and sometimes returns an OK response. Likely due to the 3rd party AWS shim.
             Assert.Equal(HttpStatusCode.NotModified, response.StatusCode);
             Assert.Equal(0, response.Content.Headers.ContentLength);
             Assert.Equal(format.DefaultMimeType, response.Content.Headers.ContentType.MediaType);
-#endif
 
             request.Dispose();
             response.Dispose();
