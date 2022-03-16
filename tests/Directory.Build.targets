@@ -33,7 +33,7 @@
     <PackageReference Update="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp2.1'">
     <PackageReference Update="Microsoft.AspNetCore.TestHost" Version="3.1.1" />
   </ItemGroup>
 
