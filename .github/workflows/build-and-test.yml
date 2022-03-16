@@ -15,25 +15,48 @@ jobs:
     strategy:
       matrix:
         options:
+          - os: ubuntu-latest
+            framework: net6.0
+            runtime: -x64
+            codecov: false
           - os: macos-latest
-            framework: netcoreapp3.1
+            framework: net6.0
+            runtime: -x64
+            codecov: false
+          - os: windows-latest
+            framework: net6.0
+            runtime: -x64
+            codecov: true
+          - os: ubuntu-latest
+            framework: net5.0
+            runtime: -x64
+            codecov: false
+          - os: macos-latest
+            framework: net5.0
+            runtime: -x64
+            codecov: false
+          - os: windows-latest
+            framework: net5.0
             runtime: -x64
             codecov: false
           - os: ubuntu-latest
             framework: netcoreapp3.1
             runtime: -x64
             codecov: false
+          - os: macos-latest
+            framework: netcoreapp3.1
+            runtime: -x64
+            codecov: false
           - os: windows-latest
             framework: netcoreapp3.1
             runtime: -x64
-            codecov: true
+            codecov: false
           - os: windows-latest
             framework: netcoreapp2.1
             runtime: -x64
             codecov: false
 
     runs-on: ${{matrix.options.os}}
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     steps:
       - name: Git Config
@@ -49,7 +72,7 @@ jobs:
           submodules: recursive
 
       # See https://github.com/actions/checkout/issues/165#issuecomment-657673315
-      - name: Git Create LFS file list
+      - name: Git Create LFS FileList
         run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
 
       - name: Git Setup LFS Cache

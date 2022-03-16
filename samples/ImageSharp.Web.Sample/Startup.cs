@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
@@ -43,17 +42,17 @@ namespace SixLabors.ImageSharp.Web.Sample
                 .SetRequestParser<QueryCollectionRequestParser>()
                 .Configure<PhysicalFileSystemCacheOptions>(options =>
                 {
+                    options.CacheRootPath = null;
                     options.CacheFolder = "is-cache";
+                    options.CacheFolderDepth = 8;
                 })
-                .SetCache(provider =>
-                {
-                    return new PhysicalFileSystemCache(
-                                provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
-                                provider.GetRequiredService<IWebHostEnvironment>(),
-                                provider.GetRequiredService<FormatUtilities>());
-                })
+                .SetCache<PhysicalFileSystemCache>()
                 .SetCacheKey<UriRelativeLowerInvariantCacheKey>()
                 .SetCacheHash<SHA256CacheHash>()
+                .Configure<PhysicalFileSystemProviderOptions>(options =>
+                {
+                    options.ProviderRootPath = null;
+                })
                 .AddProvider<PhysicalFileSystemProvider>()
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
@@ -80,18 +79,17 @@ namespace SixLabors.ImageSharp.Web.Sample
 
         private void ConfigureDefaultServicesAndCustomOptions(IServiceCollection services)
         {
-            services.AddImageSharp(
-                options =>
-                    {
-                        options.Configuration = Configuration.Default;
-                        options.BrowserMaxAge = TimeSpan.FromDays(7);
-                        options.CacheMaxAge = TimeSpan.FromDays(365);
-                        options.CacheHashLength = 8;
-                        options.OnParseCommandsAsync = _ => Task.CompletedTask;
-                        options.OnBeforeSaveAsync = _ => Task.CompletedTask;
-                        options.OnProcessedAsync = _ => Task.CompletedTask;
-                        options.OnPrepareResponseAsync = _ => Task.CompletedTask;
-                    });
+            services.AddImageSharp(options =>
+            {
+                options.Configuration = Configuration.Default;
+                options.BrowserMaxAge = TimeSpan.FromDays(7);
+                options.CacheMaxAge = TimeSpan.FromDays(365);
+                options.CacheHashLength = 8;
+                options.OnParseCommandsAsync = _ => Task.CompletedTask;
+                options.OnBeforeSaveAsync = _ => Task.CompletedTask;
+                options.OnProcessedAsync = _ => Task.CompletedTask;
+                options.OnPrepareResponseAsync = _ => Task.CompletedTask;
+            });
         }
 
         private void ConfigureCustomServicesAndDefaultOptions(IServiceCollection services)
@@ -103,30 +101,23 @@ namespace SixLabors.ImageSharp.Web.Sample
 
         private void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
         {
-            services.AddImageSharp(
-                options =>
-                    {
-                        options.Configuration = Configuration.Default;
-                        options.BrowserMaxAge = TimeSpan.FromDays(7);
-                        options.CacheMaxAge = TimeSpan.FromDays(365);
-                        options.CacheHashLength = 8;
-                        options.OnParseCommandsAsync = _ => Task.CompletedTask;
-                        options.OnBeforeSaveAsync = _ => Task.CompletedTask;
-                        options.OnProcessedAsync = _ => Task.CompletedTask;
-                        options.OnPrepareResponseAsync = _ => Task.CompletedTask;
-                    })
+            services.AddImageSharp(options =>
+            {
+                options.Configuration = Configuration.Default;
+                options.BrowserMaxAge = TimeSpan.FromDays(7);
+                options.CacheMaxAge = TimeSpan.FromDays(365);
+                options.CacheHashLength = 8;
+                options.OnParseCommandsAsync = _ => Task.CompletedTask;
+                options.OnBeforeSaveAsync = _ => Task.CompletedTask;
+                options.OnProcessedAsync = _ => Task.CompletedTask;
+                options.OnPrepareResponseAsync = _ => Task.CompletedTask;
+            })
                 .SetRequestParser<QueryCollectionRequestParser>()
                 .Configure<PhysicalFileSystemCacheOptions>(options =>
                 {
                     options.CacheFolder = "different-cache";
                 })
-                .SetCache(provider =>
-                {
-                    return new PhysicalFileSystemCache(
-                        provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
-                        provider.GetRequiredService<IWebHostEnvironment>(),
-                        provider.GetRequiredService<FormatUtilities>());
-                })
+                .SetCache<PhysicalFileSystemCache>()
                 .SetCacheKey<UriRelativeLowerInvariantCacheKey>()
                 .SetCacheHash<SHA256CacheHash>()
                 .ClearProviders()

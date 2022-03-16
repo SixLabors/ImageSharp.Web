@@ -3,14 +3,14 @@
   <PropertyGroup>
     <RootNamespace>SixLabors.ImageSharp.Web.Tests</RootNamespace>
     <AssemblyName>SixLabors.ImageSharp.Web.Tests</AssemblyName>
-    <TargetFrameworks>netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp2.1'">
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
   </ItemGroup>
 

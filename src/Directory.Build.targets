@@ -24,7 +24,7 @@
     <PackageReference Update="SixLabors.ImageSharp"  Version="2.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp2.1'">
     <FrameworkReference Update="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
@@ -35,6 +35,5 @@
     <PackageReference Update="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageReference Update="Microsoft.Extensions.Caching.Abstractions" Version="2.2.0" />
     <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
-    <PackageReference Update="Microsoft.Extensions.FileProviders.Physical" Version="2.2.0"/>
   </ItemGroup>
 </Project>
