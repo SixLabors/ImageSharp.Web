@@ -22,6 +22,6 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
             CultureInfo culture)
             => image;
 
-        public bool RequiresAlphaComponent(CommandCollection commands, CommandParser parser, CultureInfo culture) => false;
+        public bool RequiresAlphaAwarePixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture) => false;
     }
 }

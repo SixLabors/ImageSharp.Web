@@ -17,11 +17,7 @@
   <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.targets" />
 
   <ItemGroup>
-    <PackageReference Update="AWSSDK.S3" Version="3.7.7.16" />
-    <PackageReference Update="Azure.Storage.Blobs" Version="12.10.0" />
-    <PackageReference Update="Microsoft.IO.RecyclableMemoryStream" Version="2.2.0" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
-    <PackageReference Update="SixLabors.ImageSharp"  Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp2.1'">

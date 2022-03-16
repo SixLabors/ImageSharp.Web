@@ -108,7 +108,7 @@ namespace SixLabors.ImageSharp.Web.Processors
             bool requiresAlpha = false;
             foreach ((int Index, IImageWebProcessor Processor) processor in processors)
             {
-                requiresAlpha |= processor.Processor.RequiresAlphaComponent(commands, parser, culture);
+                requiresAlpha |= processor.Processor.RequiresAlphaAwarePixelFormat(commands, parser, culture);
             }
 
             return requiresAlpha;

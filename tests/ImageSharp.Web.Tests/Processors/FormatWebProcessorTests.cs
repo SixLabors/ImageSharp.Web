@@ -65,7 +65,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             };
 
             FormatWebProcessor processor = new(Options.Create(new ImageSharpMiddlewareOptions()));
-            Assert.True(processor.RequiresAlphaComponent(commands, parser, culture));
+            Assert.True(processor.RequiresAlphaAwarePixelFormat(commands, parser, culture));
         }
     }
 }

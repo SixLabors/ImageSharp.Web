@@ -6,10 +6,6 @@
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Azure.Storage.Blobs" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp2.1'">
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
   </ItemGroup>
@@ -20,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="SubFolder\imagesharp-logo.png">
+    <None Update="SubFolder\sixlabors.imagesharp.web.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="xunit.runner.json">

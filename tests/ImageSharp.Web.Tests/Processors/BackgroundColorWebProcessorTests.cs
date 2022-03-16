@@ -48,7 +48,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 { new(BackgroundColorWebProcessor.Color, color) }
             };
 
-            Assert.True(new BackgroundColorWebProcessor().RequiresAlphaComponent(commands, parser, culture));
+            Assert.True(new BackgroundColorWebProcessor().RequiresAlphaAwarePixelFormat(commands, parser, culture));
         }
     }
 }

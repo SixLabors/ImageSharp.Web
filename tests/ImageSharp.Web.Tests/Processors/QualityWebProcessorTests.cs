@@ -83,7 +83,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 { new(QualityWebProcessor.Quality, this.random.Next(1, 100).ToString()) },
             };
 
-            Assert.False(new QualityWebProcessor().RequiresAlphaComponent(commands, parser, culture));
+            Assert.False(new QualityWebProcessor().RequiresAlphaAwarePixelFormat(commands, parser, culture));
         }
     }
 }
