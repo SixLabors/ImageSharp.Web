@@ -25,6 +25,6 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 return result;
             }
         }
-    }
 #endif
+    }
 }
