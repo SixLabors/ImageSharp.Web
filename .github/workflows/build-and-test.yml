@@ -144,7 +144,6 @@ jobs:
         run: ./ci-test.ps1 "${{matrix.options.os}}" "${{matrix.options.framework}}" "${{matrix.options.runtime}}" "${{matrix.options.codecov}}"
         env:
           SIXLABORS_TESTING: True
-          CI: True # This should be true but doesn't seem to be.
           XUNIT_PATH: .\tests\ImageSharp.Web.Tests # Required for xunit
 
       - name: Codecov Update

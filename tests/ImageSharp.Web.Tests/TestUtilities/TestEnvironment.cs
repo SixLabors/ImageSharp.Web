@@ -3,6 +3,7 @@
 #if !ENV_CI
 using System;
 #endif
+
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 {
     internal static class TestEnvironment
