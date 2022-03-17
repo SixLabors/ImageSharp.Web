@@ -89,8 +89,11 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         /// <summary>
+        /// <para>
         /// Returns a value indicating whether the image to be processed should be decoded using a pixel format that supports
         /// an alpha component for correct processing.
+        /// </para>
+        /// <para>This method is used to determine whether optimizations can be enabled to reduce memory consumption during processing.</para>
         /// </summary>
         /// <param name="processors">The collection of ordered processors.</param>
         /// <param name="commands">The ordered collection containing the processing commands.</param>
@@ -99,7 +102,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// The <see cref="CultureInfo"/> to use as the current parsing culture.
         /// </param>
         /// <returns>The <see cref="bool"/> indicating whether an alpha component is required.</returns>
-        public static bool RequiresAlphaComponent(
+        public static bool RequiresAlphaAwarePixelFormat(
             this IReadOnlyList<(int Index, IImageWebProcessor Processor)> processors,
             CommandCollection commands,
             CommandParser parser,
