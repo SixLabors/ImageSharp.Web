@@ -24,6 +24,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             {
                 new KeyValuePair<string, string>("webroot", string.Empty)
             })
+            .AddEnvironmentVariables()
             .Build();
 
             IWebHostBuilder builder = new WebHostBuilder()
