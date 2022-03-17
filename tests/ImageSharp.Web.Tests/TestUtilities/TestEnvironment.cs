@@ -1,8 +1,8 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
-
+#if !ENV_CI
 using System;
-
+#endif
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 {
     internal static class TestEnvironment
