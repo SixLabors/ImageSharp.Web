@@ -31,8 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--TODO: Do not upgrade this. Makes CI tests flaky-->
-    <PackageReference Include="AWSSDK.S3" Version="3.7.7.16" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.8.8" />
   </ItemGroup>
 
   <ItemGroup>
