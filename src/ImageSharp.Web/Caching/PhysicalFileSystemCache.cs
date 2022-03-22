@@ -84,7 +84,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <inheritdoc/>
         public Task<IImageCacheResolver> GetAsync(string key)
         {
-            string path = ToFilePath(key, this.cacheFolderDepth);
+            string path = Path.Combine(this.cacheRootPath, ToFilePath(key, this.cacheFolderDepth));
 
             var metaFileInfo = new FileInfo(this.ToMetaDataFilePath(path));
             if (!metaFileInfo.Exists)
