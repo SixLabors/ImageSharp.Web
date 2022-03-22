@@ -289,7 +289,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 { new(ResizeWebProcessor.Mode, resizeMode.ToString()) },
             };
 
-            Assert.Equal(requiresAlpha, new ResizeWebProcessor().RequiresAlphaAwarePixelFormat(commands, parser, culture));
+            Assert.Equal(requiresAlpha, new ResizeWebProcessor().RequiresTrueColorPixelFormat(commands, parser, culture));
         }
 
         private static PointF GetExpectedCenter(ushort orientation, PointF center)

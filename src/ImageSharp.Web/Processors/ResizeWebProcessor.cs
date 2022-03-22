@@ -144,7 +144,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         /// <inheritdoc/>
-        public bool RequiresAlphaAwarePixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture)
+        public bool RequiresTrueColorPixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture)
         {
             ResizeMode mode = parser.ParseValue<ResizeMode>(commands.GetValueOrDefault(Mode), culture);
             return mode is ResizeMode.Pad or ResizeMode.BoxPad;

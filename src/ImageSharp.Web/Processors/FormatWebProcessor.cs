@@ -66,6 +66,6 @@ namespace SixLabors.ImageSharp.Web.Processors
         }
 
         /// <inheritdoc/>
-        public bool RequiresAlphaAwarePixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture) => false;
+        public bool RequiresTrueColorPixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture) => false;
     }
 }

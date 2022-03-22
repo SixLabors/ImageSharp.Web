@@ -38,8 +38,8 @@ namespace SixLabors.ImageSharp.Web.Processors
 
         /// <summary>
         /// <para>
-        /// Returns a value indicating whether the image to be processed should be decoded using a pixel format that supports
-        /// an alpha component for correct processing.
+        /// Returns a value indicating whether the image to be processed should be decoded using a 32 bit True Color pixel format - 8 bits per color component
+        /// plus an 8 bit alpha channel <see href="https://en.wikipedia.org/wiki/Color_depth#True_color_(24-bit)"/>.
         /// </para>
         /// <para>This method is used to determine whether optimizations can be enabled to reduce memory consumption during processing.</para>
         /// </summary>
@@ -48,7 +48,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <param name="culture">
         /// The <see cref="CultureInfo"/> to use as the current parsing culture.
         /// </param>
-        /// <returns>The <see cref="bool"/> indicating whether a pixel format containing an alpha component is required.</returns>
-        bool RequiresAlphaAwarePixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture);
+        /// <returns>The <see cref="bool"/> indicating whether a 32 bit True Color pixel format is required.</returns>
+        bool RequiresTrueColorPixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture);
     }
 }

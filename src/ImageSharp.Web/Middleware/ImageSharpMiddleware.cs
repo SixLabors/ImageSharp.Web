@@ -345,7 +345,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                         // The non-generic variant will decode to the correct pixel format based upon the encoded image metadata which can yield
                                         // massive memory savings.
                                         IReadOnlyList<(int Index, IImageWebProcessor Processor)> sortedProcessors = this.processors.OrderBySupportedCommands(commands);
-                                        bool requiresAlpha = sortedProcessors.RequiresAlphaAwarePixelFormat(commands, this.commandParser, this.parserCulture);
+                                        bool requiresAlpha = sortedProcessors.RequiresTrueColorPixelFormat(commands, this.commandParser, this.parserCulture);
 
                                         if (requiresAlpha)
                                         {
