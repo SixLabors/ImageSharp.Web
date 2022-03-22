@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IO;
@@ -184,12 +185,14 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Performs operations upon the current request.
         /// </summary>
-        /// <param name="context">The current HTTP request context.</param>
+        /// <param name="httpContext">The current HTTP request context.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public async Task Invoke(HttpContext context)
+        public Task Invoke(HttpContext httpContext) => this.Invoke(httpContext, false);
+
+        private async Task Invoke(HttpContext httpContext, bool retry)
         {
             // We expect to get concrete collection type which removes virtual dispatch concerns and enumerator allocations
-            CommandCollection commands = this.requestParser.ParseRequestCommands(context);
+            CommandCollection commands = this.requestParser.ParseRequestCommands(httpContext);
 
             if (commands.Count > 0)
             {
@@ -209,13 +212,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
 
             await this.options.OnParseCommandsAsync.Invoke(
-                new ImageCommandContext(context, commands, this.commandParser, this.parserCulture));
+                new ImageCommandContext(httpContext, commands, this.commandParser, this.parserCulture));
 
             // Get the correct service for the request
             IImageProvider provider = null;
             foreach (IImageProvider resolver in this.providers)
             {
-                if (resolver.Match(context))
+                if (resolver.Match(httpContext))
                 {
                     provider = resolver;
                     break;
@@ -223,30 +226,30 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
 
             if ((commands.Count == 0 && provider?.ProcessingBehavior != ProcessingBehavior.All)
-                || provider?.IsValidRequest(context) != true)
+                || provider?.IsValidRequest(httpContext) != true)
             {
                 // Nothing to do. call the next delegate/middleware in the pipeline
-                await this.next(context);
+                await this.next(httpContext);
                 return;
             }
 
-            IImageResolver sourceImageResolver = await provider.GetAsync(context);
+            IImageResolver sourceImageResolver = await provider.GetAsync(httpContext);
 
             if (sourceImageResolver is null)
             {
                 // Log the error but let the pipeline handle the 404
                 // by calling the next delegate/middleware in the pipeline.
-                var imageContext = new ImageContext(context, this.options);
-                this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
-                await this.next(context);
+                this.logger.LogImageResolveFailed(httpContext.Request.GetDisplayUrl());
+                await this.next(httpContext);
                 return;
             }
 
             await this.ProcessRequestAsync(
-                context,
+                httpContext,
                 sourceImageResolver,
-                new ImageContext(context, this.options),
-                commands);
+                new ImageContext(httpContext, this.options),
+                commands,
+                retry);
         }
 
         private void StripUnknownCommands(CommandCollection commands, int startAtIndex)
@@ -263,14 +266,15 @@ namespace SixLabors.ImageSharp.Web.Middleware
         }
 
         private async Task ProcessRequestAsync(
-            HttpContext context,
+            HttpContext httpContext,
             IImageResolver sourceImageResolver,
             ImageContext imageContext,
-            CommandCollection commands)
+            CommandCollection commands,
+            bool retry)
         {
             // Create a hashed cache key
             string key = this.cacheHash.Create(
-                this.cacheKey.Create(context, commands),
+                this.cacheKey.Create(httpContext, commands),
                 this.options.CacheHashLength);
 
             // Check the cache, if present, not out of date and not requiring an update
@@ -283,7 +287,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             if (!readResult.IsNewOrUpdated)
             {
-                await this.SendResponseAsync(imageContext, key, readResult.CacheImageMetadata, readResult.Resolver, null);
+                await this.SendResponseAsync(httpContext, imageContext, key, readResult.CacheImageMetadata, readResult.Resolver, null, retry);
                 return;
             }
 
@@ -379,7 +383,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             outStream.Position = 0;
                             string contentType = format.DefaultMimeType;
                             string extension = this.formatUtilities.GetExtensionFromContentType(contentType);
-                            await this.options.OnProcessedAsync.Invoke(new ImageProcessingContext(context, outStream, commands, contentType, extension));
+                            await this.options.OnProcessedAsync.Invoke(new ImageProcessingContext(httpContext, outStream, commands, contentType, extension));
                             outStream.Position = 0;
 
                             cachedImageMetadata = new ImageCacheMetadata(
@@ -409,7 +413,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     }
                 }
 
-                await this.SendResponseAsync(imageContext, key, readResult.CacheImageMetadata, readResult.Resolver, outStream);
+                await this.SendResponseAsync(httpContext, imageContext, key, readResult.CacheImageMetadata, readResult.Resolver, outStream, retry);
             }
             finally
             {
@@ -490,11 +494,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
         }
 
         private async Task SendResponseAsync(
+            HttpContext httpContext,
             ImageContext imageContext,
             string key,
             ImageCacheMetadata metadata,
             IImageCacheResolver cacheResolver,
-            Stream stream)
+            Stream stream,
+            bool retry)
         {
             imageContext.ComprehendRequestHeaders(metadata.CacheLastWriteTimeUtc, metadata.ContentLength);
 
@@ -518,9 +524,28 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     }
                     else
                     {
-                        using (Stream cacheStream = await cacheResolver.OpenReadAsync())
+                        try
                         {
+                            using Stream cacheStream = await cacheResolver.OpenReadAsync();
                             await imageContext.SendAsync(cacheStream, metadata);
+                        }
+                        catch (Exception ex)
+                        {
+                            if (!retry)
+                            {
+                                // The image has failed to be returned from the cache.
+                                // This can happen if the cached image has been physically deleted but the item is still in the LRU cache.
+                                // We'll retry running the request again in it's entirety. This ensures any changes to the source are tracked also.
+                                CacheResolverLru.TryRemove(key);
+                                await this.Invoke(httpContext);
+                                return;
+                            }
+
+                            // We've already tried to run this request before.
+                            // Log the error internally then rethrow.
+                            // We don't call next here, the pipeline will automatically handle it
+                            this.logger.LogImageProcessingFailed(imageContext.GetDisplayUrl(), ex);
+                            throw;
                         }
                     }
 
