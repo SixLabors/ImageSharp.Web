@@ -86,9 +86,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
         }
 
         /// <summary>
-        /// Returns the current HTTP request display url.
+        /// Returns the current HTTP image request display url.
         /// </summary>
-        /// <returns>The. </returns>
+        /// <returns>
+        /// The combined components of the image request URL in a fully un-escaped form (except
+        /// for the QueryString) suitable only for display.
+        /// </returns>
         public string GetDisplayUrl() => this.request.GetDisplayUrl();
 
         /// <summary>

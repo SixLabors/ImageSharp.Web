@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IO;
@@ -238,8 +239,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             {
                 // Log the error but let the pipeline handle the 404
                 // by calling the next delegate/middleware in the pipeline.
-                var imageContext = new ImageContext(httpContext, this.options);
-                this.logger.LogImageResolveFailed(imageContext.GetDisplayUrl());
+                this.logger.LogImageResolveFailed(httpContext.Request.GetDisplayUrl());
                 await this.next(httpContext);
                 return;
             }
