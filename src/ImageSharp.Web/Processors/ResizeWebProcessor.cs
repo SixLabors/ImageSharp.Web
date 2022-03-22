@@ -48,6 +48,11 @@ namespace SixLabors.ImageSharp.Web.Processors
         public const string Anchor = "ranchor";
 
         /// <summary>
+        /// The command constant for the resize padding background color.
+        /// </summary>
+        public const string Color = "rcolor";
+
+        /// <summary>
         /// The command constant for the resize orientation handling mode.
         /// </summary>
         public const string Orient = "orient";
@@ -67,7 +72,8 @@ namespace SixLabors.ImageSharp.Web.Processors
                 Sampler,
                 Anchor,
                 Compand,
-                Orient
+                Orient,
+                Color
             };
 
         /// <inheritdoc/>
@@ -132,8 +138,16 @@ namespace SixLabors.ImageSharp.Web.Processors
 
             // Defaults to Bicubic if not set.
             options.Sampler = GetSampler(commands);
+            options.PadColor = parser.ParseValue<Color>(commands.GetValueOrDefault(Color), culture);
 
             return options;
+        }
+
+        /// <inheritdoc/>
+        public bool RequiresTrueColorPixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture)
+        {
+            ResizeMode mode = parser.ParseValue<ResizeMode>(commands.GetValueOrDefault(Mode), culture);
+            return mode is ResizeMode.Pad or ResizeMode.BoxPad;
         }
 
         private static Size ParseSize(

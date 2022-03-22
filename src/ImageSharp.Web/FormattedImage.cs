@@ -27,7 +27,7 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="image">The image.</param>
         /// <param name="format">The format.</param>
-        internal FormattedImage(Image<Rgba32> image, IImageFormat format)
+        internal FormattedImage(Image image, IImageFormat format)
         {
             this.Image = image;
             this.imageFormatsManager = image.GetConfiguration().ImageFormatsManager;
@@ -35,9 +35,9 @@ namespace SixLabors.ImageSharp.Web
         }
 
         /// <summary>
-        /// Gets the image.
+        /// Gets the decoded image.
         /// </summary>
-        public Image<Rgba32> Image { get; private set; }
+        public Image Image { get; private set; }
 
         /// <summary>
         /// Gets or sets the format.
@@ -82,41 +82,36 @@ namespace SixLabors.ImageSharp.Web
         }
 
         /// <summary>
-        /// Loads the specified source.
+        /// Create a new instance of the <see cref="FormattedImage"/> class from the given stream.
         /// </summary>
+        /// <typeparam name="TPixel">The pixel format.</typeparam>
         /// <param name="configuration">The configuration.</param>
         /// <param name="source">The source.</param>
-        /// <returns>The <see cref="FormattedImage"/>.</returns>
-        public static FormattedImage Load(Configuration configuration, Stream source)
+        /// <returns>A <see cref="Task{FormattedImage}"/> representing the asynchronous operation.</returns>
+        internal static async Task<FormattedImage> LoadAsync<TPixel>(Configuration configuration, Stream source)
+            where TPixel : unmanaged, IPixel<TPixel>
         {
-            var image = ImageSharp.Image.Load<Rgba32>(configuration, source, out IImageFormat format);
+            (Image<TPixel> image, IImageFormat format) = await Image.LoadWithFormatAsync<TPixel>(configuration, source);
             return new FormattedImage(image, format);
         }
 
         /// <summary>
-        /// Loads the specified source.
+        /// Create a new instance of the <see cref="FormattedImage"/> class from the given stream.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <param name="source">The source.</param>
         /// <returns>A <see cref="Task{FormattedImage}"/> representing the asynchronous operation.</returns>
-        public static async Task<FormattedImage> LoadAsync(Configuration configuration, Stream source)
+        internal static async Task<FormattedImage> LoadAsync(Configuration configuration, Stream source)
         {
-            (Image<Rgba32> image, IImageFormat format) = await ImageSharp.Image.LoadWithFormatAsync<Rgba32>(configuration, source);
+            (Image image, IImageFormat format) = await Image.LoadWithFormatAsync(configuration, source);
             return new FormattedImage(image, format);
         }
 
         /// <summary>
-        /// Saves image to the specified destination stream.
+        /// Saves the <see cref="FormattedImage"/> to the specified destination stream.
         /// </summary>
         /// <param name="destination">The destination stream.</param>
-        public void Save(Stream destination) => this.Image.Save(destination, this.encoder);
-
-        /// <summary>
-        /// Saves image to the specified destination stream.
-        /// </summary>
-        /// <param name="destination">The destination stream.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task SaveAsync(Stream destination) => this.Image.SaveAsync(destination, this.encoder);
+        internal void Save(Stream destination) => this.Image.Save(destination, this.encoder);
 
         /// <summary>
         /// Gets the EXIF orientation metata for the <see cref="FormattedImage"/>.

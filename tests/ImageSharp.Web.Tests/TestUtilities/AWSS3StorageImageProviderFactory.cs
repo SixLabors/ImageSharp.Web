@@ -91,7 +91,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 IFileInfo file = environment.WebRootFileProvider.GetFileInfo(TestConstants.ImagePath);
                 using Stream stream = file.CreateReadStream();
 
-                // Set the max-age property so we get coverage for testing is in our AWS provider.
+                // Set the max-age property so we get coverage for testing in our AWS provider.
                 var cacheControl = new CacheControlHeaderValue
                 {
                     Public = true,

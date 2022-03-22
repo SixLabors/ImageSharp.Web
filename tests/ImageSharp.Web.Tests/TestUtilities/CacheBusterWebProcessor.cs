@@ -22,5 +22,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             CommandParser parser,
             CultureInfo culture)
             => image;
+
+        public bool RequiresTrueColorPixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture) => false;
     }
 }

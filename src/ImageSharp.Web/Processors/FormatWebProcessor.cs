@@ -64,5 +64,8 @@ namespace SixLabors.ImageSharp.Web.Processors
 
             return image;
         }
+
+        /// <inheritdoc/>
+        public bool RequiresTrueColorPixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture) => false;
     }
 }

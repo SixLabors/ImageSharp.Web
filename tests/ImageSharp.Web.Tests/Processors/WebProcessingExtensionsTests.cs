@@ -1,7 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System.Linq;
+using System.Collections.Generic;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Tests.DependencyInjection;
@@ -29,11 +29,11 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
                 new(ResizeWebProcessor.Height, null)
             };
 
-            IImageWebProcessor[] supportedProcessors = processors.GetBySupportedCommands(commands).ToArray();
+            IReadOnlyList<(int Index, IImageWebProcessor Processor)> supportedProcessors = processors.OrderBySupportedCommands(commands);
 
-            Assert.Equal(2, supportedProcessors.Length);
-            Assert.IsType<ResizeWebProcessor>(supportedProcessors[0]);
-            Assert.IsType<QualityWebProcessor>(supportedProcessors[1]);
+            Assert.Equal(2, supportedProcessors.Count);
+            Assert.IsType<ResizeWebProcessor>(supportedProcessors[0].Processor);
+            Assert.IsType<QualityWebProcessor>(supportedProcessors[1].Processor);
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
 
             CommandCollection commands = new();
 
-            IImageWebProcessor[] supportedProcessors = processors.GetBySupportedCommands(commands).ToArray();
+            IReadOnlyList<(int Index, IImageWebProcessor Processor)> supportedProcessors = processors.OrderBySupportedCommands(commands);
 
             Assert.Empty(supportedProcessors);
         }

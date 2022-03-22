@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IO;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
@@ -334,19 +335,43 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 }
                                 else
                                 {
-                                    using FormattedImage image = await FormattedImage.LoadAsync(this.options.Configuration, inStream);
+                                    FormattedImage image = null;
+                                    try
+                                    {
+                                        // Now we can finally process the image.
+                                        // We first sort the processor collection by command order then use that collection to determine whether the decoded image pixel format
+                                        // explicitly requires an alpha component in order to allow correct processing.
+                                        //
+                                        // The non-generic variant will decode to the correct pixel format based upon the encoded image metadata which can yield
+                                        // massive memory savings.
+                                        IReadOnlyList<(int Index, IImageWebProcessor Processor)> sortedProcessors = this.processors.OrderBySupportedCommands(commands);
+                                        bool requiresAlpha = sortedProcessors.RequiresTrueColorPixelFormat(commands, this.commandParser, this.parserCulture);
 
-                                    image.Process(
-                                        this.logger,
-                                        this.processors,
-                                        commands,
-                                        this.commandParser,
-                                        this.parserCulture);
+                                        if (requiresAlpha)
+                                        {
+                                            image = await FormattedImage.LoadAsync<Rgba32>(this.options.Configuration, inStream);
+                                        }
+                                        else
+                                        {
+                                            image = await FormattedImage.LoadAsync(this.options.Configuration, inStream);
+                                        }
 
-                                    await this.options.OnBeforeSaveAsync.Invoke(image);
+                                        image.Process(
+                                            this.logger,
+                                            sortedProcessors,
+                                            commands,
+                                            this.commandParser,
+                                            this.parserCulture);
 
-                                    image.Save(outStream);
-                                    format = image.Format;
+                                        await this.options.OnBeforeSaveAsync.Invoke(image);
+
+                                        image.Save(outStream);
+                                        format = image.Format;
+                                    }
+                                    finally
+                                    {
+                                        image?.Dispose();
+                                    }
                                 }
                             }
 
