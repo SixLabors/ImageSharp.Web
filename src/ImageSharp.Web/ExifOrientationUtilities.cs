@@ -38,23 +38,23 @@ namespace SixLabors.ImageSharp.Web
             switch (orientation)
             {
                 case ExifOrientationMode.TopRight:
-                    builder.AppendTranslation(new Vector2(size.Width - normalized.X, 0));
+                    builder.AppendTranslation(new Vector2(FlipNormalized(normalized.X), 0));
                     break;
                 case ExifOrientationMode.BottomRight:
                     builder.AppendRotationDegrees(180);
                     break;
                 case ExifOrientationMode.BottomLeft:
-                    builder.AppendTranslation(new Vector2(0, size.Height - normalized.Y));
+                    builder.AppendTranslation(new Vector2(0, FlipNormalized(normalized.Y)));
                     break;
                 case ExifOrientationMode.LeftTop:
-                    builder.AppendTranslation(new Vector2(size.Width - normalized.X, 0));
+                    builder.AppendTranslation(new Vector2(FlipNormalized(normalized.X), 0));
                     builder.AppendRotationDegrees(270);
                     break;
                 case ExifOrientationMode.RightTop:
                     builder.AppendRotationDegrees(270);
                     break;
                 case ExifOrientationMode.RightBottom:
-                    builder.AppendTranslation(new Vector2(size.Width - normalized.X, 0));
+                    builder.AppendTranslation(new Vector2(FlipNormalized(normalized.X), 0));
                     builder.AppendRotationDegrees(90);
                     break;
                 case ExifOrientationMode.LeftBottom:
@@ -198,5 +198,8 @@ namespace SixLabors.ImageSharp.Web
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Vector2 DeNormalize(Vector2 x, Vector2 min, Vector2 max) => min + (x * (max - min));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static float FlipNormalized(float origin) => (2F * -origin) + 1F;
     }
 }
