@@ -64,7 +64,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         {
             // Use Join because request path starts with a slash
             string fullPath = Path.GetFullPath(Path.Join(this.providerRootPath, context.Request.Path.Value));
-            if (PathUtils.IsUnderneathRoot(fullPath, this.providerRootPath))
+            if (PathUtilities.IsUnderneathRoot(fullPath, this.providerRootPath))
             {
                 // Check to see if the file exists
                 var fileInfo = new FileInfo(fullPath);
@@ -99,7 +99,7 @@ namespace SixLabors.ImageSharp.Web.Providers
                 providerRootPath = Path.GetFullPath(providerRootPath, contentRootPath);
             }
 
-            return PathUtils.EnsureTrailingSlash(providerRootPath);
+            return PathUtilities.EnsureTrailingSlash(providerRootPath);
         }
     }
 }
