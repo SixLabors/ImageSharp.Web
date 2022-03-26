@@ -31,30 +31,31 @@ namespace SixLabors.ImageSharp.Web
             }
 
             // New XY is calculated based on flipping and rotating the input XY.
-            // Coordinates are normalized to a range of 0-1 so we can pass a constant integer size to the transform builder.
-            Vector2 normalized = Normalize(position, min, max);
+            // Coordinate ranges are normalized to a range of 0-1 so we can pass a
+            // constant integer size to the transform builder.
+            Vector2 scaled = Scale(position, min, max);
             AffineTransformBuilder builder = new();
             Size size = new(1, 1);
             switch (orientation)
             {
                 case ExifOrientationMode.TopRight:
-                    builder.AppendTranslation(new Vector2(FlipNormalized(normalized.X), 0));
+                    builder.AppendTranslation(new Vector2(FlipScaled(scaled.X), 0));
                     break;
                 case ExifOrientationMode.BottomRight:
                     builder.AppendRotationDegrees(180);
                     break;
                 case ExifOrientationMode.BottomLeft:
-                    builder.AppendTranslation(new Vector2(0, FlipNormalized(normalized.Y)));
+                    builder.AppendTranslation(new Vector2(0, FlipScaled(scaled.Y)));
                     break;
                 case ExifOrientationMode.LeftTop:
-                    builder.AppendTranslation(new Vector2(FlipNormalized(normalized.X), 0));
+                    builder.AppendTranslation(new Vector2(FlipScaled(scaled.X), 0));
                     builder.AppendRotationDegrees(270);
                     break;
                 case ExifOrientationMode.RightTop:
                     builder.AppendRotationDegrees(270);
                     break;
                 case ExifOrientationMode.RightBottom:
-                    builder.AppendTranslation(new Vector2(FlipNormalized(normalized.X), 0));
+                    builder.AppendTranslation(new Vector2(FlipScaled(scaled.X), 0));
                     builder.AppendRotationDegrees(90);
                     break;
                 case ExifOrientationMode.LeftBottom:
@@ -65,7 +66,7 @@ namespace SixLabors.ImageSharp.Web
             }
 
             Matrix3x2 matrix = builder.BuildMatrix(size);
-            return DeNormalize(Vector2.Transform(normalized, matrix), min, max);
+            return DeScale(Vector2.Transform(scaled, matrix), min, max);
         }
 
         /// <summary>
@@ -194,12 +195,12 @@ namespace SixLabors.ImageSharp.Web
             };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Vector2 Normalize(Vector2 x, Vector2 min, Vector2 max) => (x - min) / (max - min);
+        private static Vector2 Scale(Vector2 x, Vector2 min, Vector2 max) => (x - min) / (max - min);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Vector2 DeNormalize(Vector2 x, Vector2 min, Vector2 max) => min + (x * (max - min));
+        private static Vector2 DeScale(Vector2 x, Vector2 min, Vector2 max) => min + (x * (max - min));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float FlipNormalized(float origin) => (2F * -origin) + 1F;
+        private static float FlipScaled(float origin) => (2F * -origin) + 1F;
     }
 }

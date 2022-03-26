@@ -294,7 +294,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
 
         private static PointF GetExpectedCenter(ushort orientation, PointF center)
         {
-            static float FlipNormalized(float origin) => (2F * -origin) + 1F;
+            static float Flip(float origin) => (2F * -origin) + 1F;
 
             // New XY is calculated based on flipping and rotating the input XY.
             // Coordinates range from 0-1, hence the matching source size.
@@ -303,23 +303,23 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             switch (orientation)
             {
                 case ExifOrientationMode.TopRight:
-                    builder.AppendTranslation(new PointF(FlipNormalized(center.X), 0));
+                    builder.AppendTranslation(new PointF(Flip(center.X), 0));
                     break;
                 case ExifOrientationMode.BottomRight:
                     builder.AppendRotationDegrees(180);
                     break;
                 case ExifOrientationMode.BottomLeft:
-                    builder.AppendTranslation(new PointF(0, FlipNormalized(center.Y)));
+                    builder.AppendTranslation(new PointF(0, Flip(center.Y)));
                     break;
                 case ExifOrientationMode.LeftTop:
-                    builder.AppendTranslation(new PointF(FlipNormalized(center.X), 0));
+                    builder.AppendTranslation(new PointF(Flip(center.X), 0));
                     builder.AppendRotationDegrees(270);
                     break;
                 case ExifOrientationMode.RightTop:
                     builder.AppendRotationDegrees(270);
                     break;
                 case ExifOrientationMode.RightBottom:
-                    builder.AppendTranslation(new PointF(FlipNormalized(center.X), 0));
+                    builder.AppendTranslation(new PointF(Flip(center.X), 0));
                     builder.AppendRotationDegrees(90);
                     break;
                 case ExifOrientationMode.LeftBottom:
