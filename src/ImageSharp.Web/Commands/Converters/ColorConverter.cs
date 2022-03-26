@@ -13,23 +13,23 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// <summary>
     /// Allows the conversion of strings into rgba32 pixel colors.
     /// </summary>
-    internal class ColorConverter : ICommandConverter<Color>
+    public sealed class ColorConverter : ICommandConverter<Color>
     {
         /// <summary>
         /// The web color hexadecimal regex. Matches strings arranged
         /// in rgb, rgba, rrggbb, or rrggbbaa format to match web syntax.
         /// </summary>
-        private static readonly Regex HexColorRegex = new Regex("([0-9a-fA-F]{3}){1,2}", RegexOptions.Compiled);
+        private static readonly Regex HexColorRegex = new("([0-9a-fA-F]{3}){1,2}", RegexOptions.Compiled);
 
         /// <summary>
         /// The number color regex.
         /// </summary>
-        private static readonly Regex NumberRegex = new Regex(@"\d+", RegexOptions.Compiled);
+        private static readonly Regex NumberRegex = new(@"\d+", RegexOptions.Compiled);
 
         /// <summary>
         /// The color constants table map.
         /// </summary>
-        private static readonly Lazy<IDictionary<string, Color>> ColorConstantsTable = new Lazy<IDictionary<string, Color>>(InitializeColorConstantsTable);
+        private static readonly Lazy<IDictionary<string, Color>> ColorConstantsTable = new(InitializeColorConstantsTable);
 
         /// <inheritdoc/>
         public Type Type => typeof(Color);

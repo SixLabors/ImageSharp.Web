@@ -13,8 +13,9 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// Converts the value of a string to a generic list.
     /// </summary>
     /// <typeparam name="T">The type of result to return.</typeparam>
-    internal sealed class ListConverter<T> : ICommandConverter<List<T>>
+    public sealed class ListConverter<T> : ICommandConverter<List<T>>
     {
+        /// <inheritdoc/>
         public Type Type => typeof(List<T>);
 
         /// <inheritdoc/>
