@@ -66,7 +66,7 @@ namespace SixLabors.ImageSharp.Web
             }
 
             Matrix3x2 matrix = builder.BuildMatrix(size);
-            return DeScale(Vector2.Transform(scaled, matrix), min, max);
+            return DeScale(Vector2.Transform(scaled, matrix), SwapXY(min, orientation), SwapXY(max, orientation));
         }
 
         /// <summary>
@@ -202,5 +202,11 @@ namespace SixLabors.ImageSharp.Web
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float FlipScaled(float origin) => (2F * -origin) + 1F;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Vector2 SwapXY(Vector2 position, ushort orientation)
+            => IsExifOrientationRotated(orientation)
+            ? new Vector2(position.Y, position.X)
+            : position;
     }
 }
