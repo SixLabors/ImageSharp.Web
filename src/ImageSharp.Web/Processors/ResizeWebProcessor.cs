@@ -71,9 +71,9 @@ namespace SixLabors.ImageSharp.Web.Processors
                 Mode,
                 Sampler,
                 Anchor,
-                Compand,
+                Color,
                 Orient,
-                Color
+                Compand
             };
 
         /// <inheritdoc/>
@@ -127,20 +127,16 @@ namespace SixLabors.ImageSharp.Web.Processors
                 return null;
             }
 
-            ResizeOptions options = new()
+            return new()
             {
                 Size = size,
                 CenterCoordinates = GetCenter(orientation, commands, parser, culture),
                 Position = GetAnchor(orientation, commands, parser, culture),
                 Mode = GetMode(commands, parser, culture),
                 Compand = GetCompandMode(commands, parser, culture),
+                Sampler = GetSampler(commands),
+                PadColor = parser.ParseValue<Color>(commands.GetValueOrDefault(Color), culture)
             };
-
-            // Defaults to Bicubic if not set.
-            options.Sampler = GetSampler(commands);
-            options.PadColor = parser.ParseValue<Color>(commands.GetValueOrDefault(Color), culture);
-
-            return options;
         }
 
         /// <inheritdoc/>
@@ -176,7 +172,7 @@ namespace SixLabors.ImageSharp.Web.Processors
                 return null;
             }
 
-            PointF center = new(coordinates[0], coordinates[1]);
+            Vector2 center = new(coordinates[0], coordinates[1]);
             return ExifOrientationUtilities.Transform(center, Vector2.Zero, Vector2.One, orientation);
         }
 
