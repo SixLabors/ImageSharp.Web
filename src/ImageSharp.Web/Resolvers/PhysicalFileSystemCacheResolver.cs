@@ -14,7 +14,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
     {
         private readonly FileInfo metaFileInfo;
         private readonly FormatUtilities formatUtilities;
-        private ImageCacheMetadata metadata;
+        private ImageCacheMetadata? metadata;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemCacheResolver"/> class.
@@ -30,21 +30,23 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         }
 
         /// <inheritdoc/>
-        public async Task<ImageCacheMetadata> GetMetaDataAsync()
-        {
-            using Stream stream = OpenFileStream(this.metaFileInfo.FullName);
-            this.metadata = await ImageCacheMetadata.ReadAsync(stream);
-            return this.metadata;
-        }
+        public async Task<ImageCacheMetadata> GetMetaDataAsync() => this.metadata ??= await this.ReadMetadataAsync();
 
         /// <inheritdoc/>
-        public Task<Stream> OpenReadAsync()
+        public async Task<Stream> OpenReadAsync()
         {
+            ImageCacheMetadata metadata = await this.GetMetaDataAsync();
             string path = Path.ChangeExtension(
                 this.metaFileInfo.FullName,
-                this.formatUtilities.GetExtensionFromContentType(this.metadata.ContentType));
+                this.formatUtilities.GetExtensionFromContentType(metadata.ContentType));
 
-            return Task.FromResult(OpenFileStream(path));
+            return OpenFileStream(path);
+        }
+
+        private async Task<ImageCacheMetadata> ReadMetadataAsync()
+        {
+            using Stream stream = OpenFileStream(this.metaFileInfo.FullName);
+            return await ImageCacheMetadata.ReadAsync(stream);
         }
 
         private static Stream OpenFileStream(string path)
