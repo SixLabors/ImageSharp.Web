@@ -91,93 +91,119 @@ namespace SixLabors.ImageSharp.Web
         /// The transformed anchor.
         /// </returns>
         public static AnchorPositionMode Transform(AnchorPositionMode anchor, ushort orientation)
-        {
-            if (orientation is >= ExifOrientationMode.Unknown and <= ExifOrientationMode.TopLeft)
-            {
-                return anchor;
-            }
-
-            /*
-                New anchor position is determined by calculating the direction of the anchor relative to the source image.
-                In the following example, the TopRight anchor becomes BottomRight
-
-                            T                              L
-                +-----------------------+           +--------------+
-                |                      *|           |              |
-                |                       |           |              |
-              L |           TL          | R         |              |
-                |                       |           |              |
-                |                       |         B |      LB      | T
-                |                       |           |              |
-                +-----------------------+           |              |
-                            B                       |              |
-                                                    |              |
-                                                    |             *|
-                                                    +--------------+
-                                                            R
+        /*
+              New anchor position is determined by calculating the direction of the anchor relative to the source image.
+              In the following example, the TopRight anchor becomes BottomRight
+                          T                              L
+              +-----------------------+           +--------------+
+              |                      *|           |              |
+              |                       |           |              |
+            L |           TL          | R         |              |
+              |                       |           |              |
+              |                       |         B |      LB      | T
+              |                       |           |              |
+              +-----------------------+           |              |
+                          B                       |              |
+                                                  |              |
+                                                  |             *|
+                                                  +--------------+
+                                                          R
           */
-            return anchor switch
-            {
-                AnchorPositionMode.Center => anchor,
-                AnchorPositionMode.Top => orientation switch
-                {
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.BottomRight => AnchorPositionMode.Bottom,
-                    ExifOrientationMode.LeftTop or ExifOrientationMode.RightTop => AnchorPositionMode.Left,
-                    ExifOrientationMode.LeftBottom or ExifOrientationMode.RightBottom => AnchorPositionMode.Right,
-                    _ => anchor,
-                },
-                AnchorPositionMode.Bottom => orientation switch
-                {
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.BottomRight => AnchorPositionMode.Top,
-                    ExifOrientationMode.LeftTop or ExifOrientationMode.RightTop => AnchorPositionMode.Right,
-                    ExifOrientationMode.LeftBottom or ExifOrientationMode.RightBottom => AnchorPositionMode.Left,
-                    _ => anchor,
-                },
-                AnchorPositionMode.Left => orientation switch
-                {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomRight => AnchorPositionMode.Right,
-                    ExifOrientationMode.LeftTop or ExifOrientationMode.LeftBottom => AnchorPositionMode.Top,
-                    ExifOrientationMode.RightTop or ExifOrientationMode.RightBottom => AnchorPositionMode.Bottom,
-                    _ => anchor,
-                },
-                AnchorPositionMode.Right => orientation switch
-                {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.BottomRight => AnchorPositionMode.Left,
-                    ExifOrientationMode.LeftTop or ExifOrientationMode.LeftBottom => AnchorPositionMode.Bottom,
-                    ExifOrientationMode.RightTop or ExifOrientationMode.RightBottom => AnchorPositionMode.Top,
-                    _ => anchor,
-                },
-                AnchorPositionMode.TopLeft => orientation switch
-                {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.TopRight,
-                    ExifOrientationMode.BottomRight or ExifOrientationMode.RightTop => AnchorPositionMode.BottomLeft,
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.RightBottom => AnchorPositionMode.BottomRight,
-                    _ => anchor,
-                },
-                AnchorPositionMode.TopRight => orientation switch
-                {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.RightTop => AnchorPositionMode.TopLeft,
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftBottom => AnchorPositionMode.BottomRight,
-                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftTop => AnchorPositionMode.BottomLeft,
-                    _ => anchor,
-                },
-                AnchorPositionMode.BottomRight => orientation switch
-                {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.LeftBottom => AnchorPositionMode.BottomLeft,
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.RightTop => AnchorPositionMode.TopRight,
-                    ExifOrientationMode.BottomRight or ExifOrientationMode.RightBottom => AnchorPositionMode.TopLeft,
-                    _ => anchor,
-                },
-                AnchorPositionMode.BottomLeft => orientation switch
-                {
-                    ExifOrientationMode.TopRight or ExifOrientationMode.RightTop => AnchorPositionMode.BottomRight,
-                    ExifOrientationMode.BottomLeft or ExifOrientationMode.LeftBottom => AnchorPositionMode.TopLeft,
-                    ExifOrientationMode.BottomRight or ExifOrientationMode.LeftTop => AnchorPositionMode.TopRight,
-                    _ => anchor,
-                },
-                _ => anchor,
-            };
-        }
+          => orientation switch
+          {
+              ExifOrientationMode.TopRight => anchor switch
+              {
+                  AnchorPositionMode.Center => AnchorPositionMode.Center,
+                  AnchorPositionMode.Top => AnchorPositionMode.Top,
+                  AnchorPositionMode.Bottom => AnchorPositionMode.Bottom,
+                  AnchorPositionMode.Left => AnchorPositionMode.Right,
+                  AnchorPositionMode.Right => AnchorPositionMode.Left,
+                  AnchorPositionMode.TopLeft => AnchorPositionMode.TopRight,
+                  AnchorPositionMode.TopRight => AnchorPositionMode.TopLeft,
+                  AnchorPositionMode.BottomRight => AnchorPositionMode.BottomLeft,
+                  AnchorPositionMode.BottomLeft => AnchorPositionMode.BottomRight,
+                  _ => anchor
+              },
+              ExifOrientationMode.BottomRight => anchor switch
+              {
+                  AnchorPositionMode.Center => AnchorPositionMode.Center,
+                  AnchorPositionMode.Top => AnchorPositionMode.Bottom,
+                  AnchorPositionMode.Bottom => AnchorPositionMode.Top,
+                  AnchorPositionMode.Left => AnchorPositionMode.Right,
+                  AnchorPositionMode.Right => AnchorPositionMode.Left,
+                  AnchorPositionMode.TopLeft => AnchorPositionMode.BottomRight,
+                  AnchorPositionMode.TopRight => AnchorPositionMode.BottomLeft,
+                  AnchorPositionMode.BottomRight => AnchorPositionMode.TopLeft,
+                  AnchorPositionMode.BottomLeft => AnchorPositionMode.TopRight,
+                  _ => anchor
+              },
+              ExifOrientationMode.BottomLeft => anchor switch
+              {
+                  AnchorPositionMode.Center => AnchorPositionMode.Center,
+                  AnchorPositionMode.Top => AnchorPositionMode.Bottom,
+                  AnchorPositionMode.Bottom => AnchorPositionMode.Top,
+                  AnchorPositionMode.Left => AnchorPositionMode.Left,
+                  AnchorPositionMode.Right => AnchorPositionMode.Right,
+                  AnchorPositionMode.TopLeft => AnchorPositionMode.BottomLeft,
+                  AnchorPositionMode.TopRight => AnchorPositionMode.BottomRight,
+                  AnchorPositionMode.BottomRight => AnchorPositionMode.TopRight,
+                  AnchorPositionMode.BottomLeft => AnchorPositionMode.TopLeft,
+                  _ => anchor
+              },
+              ExifOrientationMode.LeftTop => anchor switch
+              {
+                  AnchorPositionMode.Center => AnchorPositionMode.Center,
+                  AnchorPositionMode.Top => AnchorPositionMode.Left,
+                  AnchorPositionMode.Bottom => AnchorPositionMode.Right,
+                  AnchorPositionMode.Left => AnchorPositionMode.Top,
+                  AnchorPositionMode.Right => AnchorPositionMode.Bottom,
+                  AnchorPositionMode.TopLeft => AnchorPositionMode.TopLeft,
+                  AnchorPositionMode.TopRight => AnchorPositionMode.BottomLeft,
+                  AnchorPositionMode.BottomRight => AnchorPositionMode.BottomRight,
+                  AnchorPositionMode.BottomLeft => AnchorPositionMode.TopRight,
+                  _ => anchor
+              },
+              ExifOrientationMode.RightTop => anchor switch
+              {
+                  AnchorPositionMode.Center => AnchorPositionMode.Center,
+                  AnchorPositionMode.Top => AnchorPositionMode.Left,
+                  AnchorPositionMode.Bottom => AnchorPositionMode.Right,
+                  AnchorPositionMode.Left => AnchorPositionMode.Bottom,
+                  AnchorPositionMode.Right => AnchorPositionMode.Top,
+                  AnchorPositionMode.TopLeft => AnchorPositionMode.BottomLeft,
+                  AnchorPositionMode.TopRight => AnchorPositionMode.TopLeft,
+                  AnchorPositionMode.BottomRight => AnchorPositionMode.TopRight,
+                  AnchorPositionMode.BottomLeft => AnchorPositionMode.BottomRight,
+                  _ => anchor
+              },
+              ExifOrientationMode.RightBottom => anchor switch
+              {
+                  AnchorPositionMode.Center => AnchorPositionMode.Center,
+                  AnchorPositionMode.Top => AnchorPositionMode.Right,
+                  AnchorPositionMode.Bottom => AnchorPositionMode.Left,
+                  AnchorPositionMode.Left => AnchorPositionMode.Bottom,
+                  AnchorPositionMode.Right => AnchorPositionMode.Top,
+                  AnchorPositionMode.TopLeft => AnchorPositionMode.BottomRight,
+                  AnchorPositionMode.TopRight => AnchorPositionMode.TopRight,
+                  AnchorPositionMode.BottomRight => AnchorPositionMode.TopLeft,
+                  AnchorPositionMode.BottomLeft => AnchorPositionMode.BottomLeft,
+                  _ => anchor
+              },
+              ExifOrientationMode.LeftBottom => anchor switch
+              {
+                  AnchorPositionMode.Center => AnchorPositionMode.Center,
+                  AnchorPositionMode.Top => AnchorPositionMode.Right,
+                  AnchorPositionMode.Bottom => AnchorPositionMode.Left,
+                  AnchorPositionMode.Left => AnchorPositionMode.Top,
+                  AnchorPositionMode.Right => AnchorPositionMode.Bottom,
+                  AnchorPositionMode.TopLeft => AnchorPositionMode.TopRight,
+                  AnchorPositionMode.TopRight => AnchorPositionMode.BottomRight,
+                  AnchorPositionMode.BottomRight => AnchorPositionMode.BottomLeft,
+                  AnchorPositionMode.BottomLeft => AnchorPositionMode.TopLeft,
+                  _ => anchor
+              },
+              _ => anchor
+          };
 
         /// <summary>
         /// Returns a value indicating whether an EXIF orientation is rotated (not flipped).
