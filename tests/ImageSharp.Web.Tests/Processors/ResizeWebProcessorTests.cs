@@ -159,7 +159,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors
             {
                 { new(ResizeWebProcessor.Width, width.ToString()) },
                 { new(ResizeWebProcessor.Height, height.ToString()) },
-                { new(ResizeWebProcessor.Xy, $"{x},{y}") },
+                { new(ResizeWebProcessor.Xy, FormattableString.Invariant($"{x},{y}")) },
                 { new(ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch)) }
             };
 
