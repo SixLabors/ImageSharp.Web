@@ -3,8 +3,6 @@
 
 using System;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Commands.Converters;
@@ -26,7 +24,15 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
         /// <returns>An <see cref="IImageSharpBuilder"/> that can be used to further configure the ImageSharp services.</returns>
         public static IImageSharpBuilder AddImageSharp(this IServiceCollection services)
-            => AddImageSharp(services, _ => { });
+        {
+            Guard.NotNull(services, nameof(services));
+
+            IImageSharpBuilder builder = new ImageSharpBuilder(services);
+
+            AddDefaultServices(builder);
+
+            return builder;
+        }
 
         /// <summary>
         /// Adds ImageSharp services to the specified <see cref="IServiceCollection" /> with the given options.
@@ -41,21 +47,13 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             Guard.NotNull(services, nameof(services));
             Guard.NotNull(setupAction, nameof(setupAction));
 
-            services.TryAddTransient<IConfigureOptions<ImageSharpMiddlewareOptions>, ImageSharpConfiguration>();
+            services.Configure(setupAction);
 
-            IImageSharpBuilder builder = new ImageSharpBuilder(services);
-
-            AddDefaultServices(builder, setupAction);
-
-            return builder;
+            return AddImageSharp(services);
         }
 
-        private static void AddDefaultServices(
-            IImageSharpBuilder builder,
-            Action<ImageSharpMiddlewareOptions> setupAction)
+        private static void AddDefaultServices(IImageSharpBuilder builder)
         {
-            builder.Services.Configure(setupAction);
-
             builder.Services.AddSingleton<FormatUtilities>();
 
             builder.Services.AddSingleton<AsyncKeyReaderWriterLock<string>>();
