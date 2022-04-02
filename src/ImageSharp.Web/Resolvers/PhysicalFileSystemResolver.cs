@@ -12,21 +12,15 @@ namespace SixLabors.ImageSharp.Web.Resolvers
     public class PhysicalFileSystemResolver : IImageResolver
     {
         private readonly FileInfo fileInfo;
-        private readonly ImageMetadata metadata;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemResolver"/> class.
         /// </summary>
         /// <param name="fileInfo">The input file info.</param>
-        /// <param name="metadata">The image metadata associated with this file.</param>
-        public PhysicalFileSystemResolver(FileInfo fileInfo, in ImageMetadata metadata)
-        {
-            this.fileInfo = fileInfo;
-            this.metadata = metadata;
-        }
+        public PhysicalFileSystemResolver(FileInfo fileInfo) => this.fileInfo = fileInfo;
 
         /// <inheritdoc/>
-        public Task<ImageMetadata> GetMetaDataAsync() => Task.FromResult(this.metadata);
+        public Task<ImageMetadata> GetMetaDataAsync() => Task.FromResult(new ImageMetadata(this.fileInfo.LastWriteTimeUtc, this.fileInfo.Length));
 
         /// <inheritdoc/>
         public Task<Stream> OpenReadAsync()

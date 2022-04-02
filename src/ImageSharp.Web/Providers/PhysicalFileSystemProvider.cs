@@ -70,8 +70,7 @@ namespace SixLabors.ImageSharp.Web.Providers
                 var fileInfo = new FileInfo(fullPath);
                 if (fileInfo.Exists)
                 {
-                    var metadata = new ImageMetadata(fileInfo.LastWriteTimeUtc, fileInfo.Length);
-                    return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
+                    return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo));
                 }
             }
 
