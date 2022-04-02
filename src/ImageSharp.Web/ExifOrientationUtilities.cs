@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
@@ -25,8 +26,9 @@ namespace SixLabors.ImageSharp.Web
         /// </returns>
         public static Vector2 Transform(Vector2 position, Vector2 min, Vector2 max, ushort orientation)
         {
-            if (orientation is >= ExifOrientationMode.Unknown and <= ExifOrientationMode.TopLeft)
+            if (orientation is <= ExifOrientationMode.TopLeft or > ExifOrientationMode.LeftBottom)
             {
+                // Short circuit orientations that are not transformed below
                 return position;
             }
 
@@ -62,7 +64,7 @@ namespace SixLabors.ImageSharp.Web
                     builder.AppendRotationDegrees(90);
                     break;
                 default:
-                    return position;
+                    break;
             }
 
             Matrix3x2 matrix = builder.BuildMatrix(size);
