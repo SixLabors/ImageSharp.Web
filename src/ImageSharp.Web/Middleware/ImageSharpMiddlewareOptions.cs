@@ -24,28 +24,17 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 return Task.CompletedTask;
             }
 
-            // It's a good idea to have this to provide very basic security.
-            uint width = c.Parser.ParseValue<uint>(
-                c.Commands.GetValueOrDefault(ResizeWebProcessor.Width),
-                c.Culture);
-
-            uint height = c.Parser.ParseValue<uint>(
-                c.Commands.GetValueOrDefault(ResizeWebProcessor.Height),
-                c.Culture);
-
-            if (width > 4000 && height > 4000)
+            // It's a good idea to have this to provide very basic security
+            int width = c.Parser.ParseValue<int>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Width), c.Culture);
+            if (width is <= 0 or > 4000)
             {
                 c.Commands.Remove(ResizeWebProcessor.Width);
-                c.Commands.Remove(ResizeWebProcessor.Height);
             }
 
-            float[] coordinates = c.Parser.ParseValue<float[]>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Xy), c.Culture);
-
-            if (coordinates.Length != 2
-            || coordinates[1] < 0 || coordinates[1] > 1
-            || coordinates[0] < 0 || coordinates[0] > 1)
+            int height = c.Parser.ParseValue<int>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Height), c.Culture);
+            if (height is <= 0 or > 4000)
             {
-                c.Commands.Remove(ResizeWebProcessor.Xy);
+                c.Commands.Remove(ResizeWebProcessor.Height);
             }
 
             return Task.CompletedTask;
