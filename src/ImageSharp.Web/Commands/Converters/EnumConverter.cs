@@ -11,8 +11,9 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// <summary>
     /// The enum converter. Allows conversion to enumerations.
     /// </summary>
-    internal sealed class EnumConverter : ICommandConverter<object>
+    public sealed class EnumConverter : ICommandConverter<object>
     {
+        /// <inheritdoc/>
         public Type Type => typeof(Enum);
 
         /// <inheritdoc/>

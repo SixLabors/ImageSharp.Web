@@ -13,7 +13,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// Converts the value of a string to a generic array.
     /// </summary>
     /// <typeparam name="T">The parameter type to convert to.</typeparam>
-    internal sealed class ArrayConverter<T> : ICommandConverter<T[]>
+    public sealed class ArrayConverter<T> : ICommandConverter<T[]>
     {
         /// <inheritdoc/>
         public Type Type => typeof(T[]);

@@ -19,6 +19,7 @@ namespace SixLabors.ImageSharp.Web
     public sealed class FormattedImage : IDisposable
     {
         private readonly ImageFormatManager imageFormatsManager;
+        private readonly bool keepOpen;
         private IImageFormat format;
         private IImageEncoder encoder;
 
@@ -27,11 +28,23 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="image">The image.</param>
         /// <param name="format">The format.</param>
-        internal FormattedImage(Image image, IImageFormat format)
+        public FormattedImage(Image image, IImageFormat format)
+            : this(image, format, true)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FormattedImage"/> class.
+        /// </summary>
+        /// <param name="image">The image.</param>
+        /// <param name="format">The format.</param>
+        /// <param name="keepOpen">Whether to keep the source image open upon disposing the <see cref="FormattedImage"/> object.</param>
+        private FormattedImage(Image image, IImageFormat format, bool keepOpen)
         {
             this.Image = image;
             this.imageFormatsManager = image.GetConfiguration().ImageFormatsManager;
             this.Format = format;
+            this.keepOpen = keepOpen;
         }
 
         /// <summary>
@@ -92,7 +105,7 @@ namespace SixLabors.ImageSharp.Web
             where TPixel : unmanaged, IPixel<TPixel>
         {
             (Image<TPixel> image, IImageFormat format) = await Image.LoadWithFormatAsync<TPixel>(configuration, source);
-            return new FormattedImage(image, format);
+            return new FormattedImage(image, format, false);
         }
 
         /// <summary>
@@ -104,7 +117,7 @@ namespace SixLabors.ImageSharp.Web
         internal static async Task<FormattedImage> LoadAsync(Configuration configuration, Stream source)
         {
             (Image image, IImageFormat format) = await Image.LoadWithFormatAsync(configuration, source);
-            return new FormattedImage(image, format);
+            return new FormattedImage(image, format, false);
         }
 
         /// <summary>
@@ -157,8 +170,11 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         public void Dispose()
         {
-            this.Image?.Dispose();
-            this.Image = null;
+            if (!this.keepOpen)
+            {
+                this.Image?.Dispose();
+                this.Image = null;
+            }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

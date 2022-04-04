@@ -10,7 +10,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// The generic converter for integral types.
     /// </summary>
     /// <inheritdoc/>
-    internal sealed class IntegralNumberConverter<T> : ICommandConverter<T>
+    public sealed class IntegralNumberConverter<T> : ICommandConverter<T>
         where T : struct, IConvertible, IComparable<T>
     {
         /// <inheritdoc/>

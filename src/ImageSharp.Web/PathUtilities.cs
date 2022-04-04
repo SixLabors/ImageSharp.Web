@@ -6,7 +6,7 @@ using System.IO;
 
 namespace SixLabors.ImageSharp.Web
 {
-    internal static class PathUtils
+    internal static class PathUtilities
     {
         /// <summary>
         /// Ensures the path ends with a trailing slash (directory separator).

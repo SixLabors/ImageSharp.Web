@@ -15,7 +15,7 @@ using SixLabors.ImageSharp.Web.Processors;
 namespace SixLabors.ImageSharp.Web
 {
     /// <summary>
-    /// Contains various helper methods based on the given configuration.
+    /// Contains various helper methods for working with image formats based on the given configuration.
     /// </summary>
     public sealed class FormatUtilities
     {

@@ -78,7 +78,7 @@ namespace SixLabors.ImageSharp.Web.Caching
 
             string cacheFolderPath = Path.Combine(cacheRootPath, cacheOptions.CacheFolder);
 
-            return PathUtils.EnsureTrailingSlash(cacheFolderPath);
+            return PathUtilities.EnsureTrailingSlash(cacheFolderPath);
         }
 
         /// <inheritdoc/>
