@@ -156,6 +156,45 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         }
 
         /// <summary>
+        /// Inserts the given <see cref="IImageProvider"/> at the give index into to the provider collection within the service collection.
+        /// </summary>
+        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="index">The zero-based index at which the provider should be inserted.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder InsertProvider<TProvider>(this IImageSharpBuilder builder, int index)
+            where TProvider : class, IImageProvider
+        {
+            var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider) && x.Lifetime == ServiceLifetime.Singleton).ToList();
+            builder.ClearProviders();
+
+            descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider, TProvider>());
+
+            builder.Services.TryAddEnumerable(descriptors);
+            return builder;
+        }
+
+        /// <summary>
+        /// Inserts the given <see cref="IImageProvider"/>  at the give index into the provider collection within the service collection.
+        /// </summary>
+        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="index">The zero-based index at which the provider should be inserted.</param>
+        /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder InsertProvider<TProvider>(this IImageSharpBuilder builder, int index, Func<IServiceProvider, TProvider> implementationFactory)
+            where TProvider : class, IImageProvider
+        {
+            var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider) && x.Lifetime == ServiceLifetime.Singleton).ToList();
+            builder.ClearProviders();
+
+            descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider>(implementationFactory));
+
+            builder.Services.TryAddEnumerable(descriptors);
+            return builder;
+        }
+
+        /// <summary>
         /// Removes the given <see cref="IImageProvider"/> from the provider collection within the service collection.
         /// </summary>
         /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
