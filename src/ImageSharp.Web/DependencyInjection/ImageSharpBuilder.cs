@@ -1,7 +1,6 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace SixLabors.ImageSharp.Web.DependencyInjection
@@ -15,7 +14,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// Initializes a new instance of the <see cref="ImageSharpBuilder"/> class.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
-        public ImageSharpBuilder(IServiceCollection services) => this.Services = services ?? throw new ArgumentNullException(nameof(services));
+        public ImageSharpBuilder(IServiceCollection services) => this.Services = services;
 
         /// <inheritdoc/>
         public IServiceCollection Services { get; }

@@ -24,7 +24,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
         /// <returns>An <see cref="IImageSharpBuilder"/> that can be used to further configure the ImageSharp services.</returns>
         public static IImageSharpBuilder AddImageSharp(this IServiceCollection services)
-            => new ImageSharpBuilder(services).AddRequiredServices().AddDefaultServices();
+            => new ImageSharpBuilder(services).AddDefaultServices();
 
         /// <summary>
         /// Adds ImageSharp services to the specified <see cref="IServiceCollection" /> with the given options.
@@ -35,19 +35,14 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpBuilder AddImageSharp(this IServiceCollection services, Action<ImageSharpMiddlewareOptions> configureOptions)
             => services.AddImageSharp().Configure(configureOptions);
 
-        private static IImageSharpBuilder AddRequiredServices(this IImageSharpBuilder builder)
+        private static IImageSharpBuilder AddDefaultServices(this IImageSharpBuilder builder)
         {
             builder.Services.AddSingleton<FormatUtilities>();
-            builder.Services.AddSingleton<CommandParser>();
             builder.Services.AddSingleton<AsyncKeyReaderWriterLock<string>>();
 
+            // Command parsing
+            builder.Services.AddSingleton<CommandParser>();
             builder.SetRequestParser<QueryCollectionRequestParser>();
-
-            builder.SetCache<PhysicalFileSystemCache>();
-
-            builder.SetCacheKey<UriRelativeLowerInvariantCacheKey>();
-
-            builder.SetCacheHash<SHA256CacheHash>();
 
             builder.AddConverter<IntegralNumberConverter<sbyte>>();
             builder.AddConverter<IntegralNumberConverter<byte>>();
@@ -95,13 +90,15 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             builder.AddConverter<ColorConverter>();
             builder.AddConverter<EnumConverter>();
 
-            return builder;
-        }
+            // Cache
+            builder.SetCache<PhysicalFileSystemCache>();
+            builder.SetCacheKey<UriRelativeLowerInvariantCacheKey>();
+            builder.SetCacheHash<SHA256CacheHash>();
 
-        private static IImageSharpBuilder AddDefaultServices(this IImageSharpBuilder builder)
-        {
+            // Providers
             builder.AddProvider<PhysicalFileSystemProvider>();
 
+            // Processors
             builder.AddProcessor<ResizeWebProcessor>()
                    .AddProcessor<FormatWebProcessor>()
                    .AddProcessor<BackgroundColorWebProcessor>()
