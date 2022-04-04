@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp.Web.Caching;
 
@@ -33,7 +34,11 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         public async Task<ImageCacheMetadata> GetMetaDataAsync()
         {
             using Stream stream = OpenFileStream(this.metaFileInfo.FullName);
-            this.metadata = await ImageCacheMetadata.ReadAsync(stream);
+            if (this.metadata == default)
+            {
+                this.metadata = await ImageCacheMetadata.ReadAsync(stream);
+            }
+
             return this.metadata;
         }
 
@@ -47,11 +52,12 @@ namespace SixLabors.ImageSharp.Web.Resolvers
             return Task.FromResult(OpenFileStream(path));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Stream OpenFileStream(string path)
         {
             // We are setting buffer size to 1 to prevent FileStream from allocating it's internal buffer
             // 0 causes constructor to throw
-            int bufferSize = 1;
+            const int bufferSize = 1;
             return new FileStream(
                 path,
                 FileMode.Open,
