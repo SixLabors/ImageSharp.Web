@@ -42,7 +42,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         }
 
         /// <inheritdoc/>
-        public virtual ProcessingBehavior ProcessingBehavior { get; }
+        public ProcessingBehavior ProcessingBehavior { get; }
 
         /// <inheritdoc/>
         public virtual Func<HttpContext, bool> Match { get; set; } = _ => true;
