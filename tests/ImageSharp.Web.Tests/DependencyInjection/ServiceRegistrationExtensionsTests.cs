@@ -1,6 +1,8 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Web.Caching;
@@ -39,6 +41,8 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
             => IsService<TService>(descriptor) &&
                (descriptor.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TImplementation) ||
                descriptor.ImplementationFactory?.Invoke(null)?.GetType() == typeof(TImplementation)); // OK to invoke the factory in tests
+
+        private static IReadOnlyList<ServiceDescriptor> GetCollection<T>(IServiceCollection serviceDescriptors) => serviceDescriptors.Where(x => x.ServiceType == typeof(T)).ToList();
 
         [Fact]
         public void DefaultServicesAreRegistered()
@@ -175,6 +179,24 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
         }
 
         [Fact]
+        public void CanInsertRemoveImageProviders()
+        {
+            var services = new ServiceCollection();
+            IImageSharpBuilder builder = services.AddImageSharp();
+
+            builder.InsertProvider<MockImageProvider>(0);
+            Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
+            Assert.Single(services, IsServiceImplementationType<IImageProvider, MockImageProvider>);
+
+            IReadOnlyList<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
+            Assert.Equal(2, providers.Count);
+            Assert.True(IsService<IImageProvider, MockImageProvider>(providers[0]));
+
+            builder.RemoveProvider<MockImageProvider>();
+            Assert.DoesNotContain(services, IsService<IImageProvider, MockImageProvider>);
+        }
+
+        [Fact]
         public void CanAddRemoveFactoryImageProviders()
         {
             var services = new ServiceCollection();
@@ -183,6 +205,25 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
             builder.AddProvider(_ => new MockImageProvider());
             Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
             Assert.Single(services, IsServiceImplementationFactory<IImageProvider, MockImageProvider>);
+
+            builder.RemoveProvider<MockImageProvider>();
+            Assert.DoesNotContain(services, IsService<IImageProvider, MockImageProvider>);
+        }
+
+        [Fact]
+        public void CanInsertRemoveFactoryImageProviders()
+        {
+            var services = new ServiceCollection();
+            IImageSharpBuilder builder = services.AddImageSharp();
+
+            builder.InsertProvider(0, _ => new MockImageProvider());
+            Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
+            Assert.Single(services, IsServiceImplementationFactory<IImageProvider, MockImageProvider>);
+
+            IReadOnlyList<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
+            Assert.Equal(2, providers.Count);
+            Assert.True(IsService<IImageProvider, MockImageProvider>(providers[0]));
+            Assert.True(IsServiceImplementationFactory<IImageProvider, MockImageProvider>(providers[0]));
 
             builder.RemoveProvider<MockImageProvider>();
             Assert.DoesNotContain(services, IsService<IImageProvider, MockImageProvider>);
