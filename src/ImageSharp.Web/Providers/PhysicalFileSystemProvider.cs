@@ -29,11 +29,7 @@ namespace SixLabors.ImageSharp.Web.Providers
 #endif
             FormatUtilities formatUtilities)
             : base(GetProvider(options?.Value, environment), formatUtilities)
-        {
-        }
-
-        /// <inheritdoc/>
-        public override ProcessingBehavior ProcessingBehavior { get; protected set; } = ProcessingBehavior.All;
+            => this.ProcessingBehavior = options.Value.ProcessingBehavior;
 
         /// <summary>
         /// Determine the provider root path
@@ -47,7 +43,7 @@ namespace SixLabors.ImageSharp.Web.Providers
             string providerRootPath = options.ProviderRootPath ?? webRootPath;
             if (string.IsNullOrEmpty(providerRootPath))
             {
-                throw new InvalidOperationException("The provider root path can't be determined, make sure it's explicitly configured or the webroot is set.");
+                throw new InvalidOperationException("The provider root path cannot be determined, make sure it's explicitly configured or the webroot is set.");
             }
 
             if (!Path.IsPathFullyQualified(providerRootPath))

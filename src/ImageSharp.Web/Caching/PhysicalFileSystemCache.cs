@@ -67,7 +67,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             string cacheRootPath = cacheOptions.CacheRootPath ?? webRootPath;
             if (string.IsNullOrEmpty(cacheRootPath))
             {
-                throw new InvalidOperationException("The cache root path can't be determined, make sure it's explicitly configured or the webroot is set.");
+                throw new InvalidOperationException("The cache root path cannot be determined, make sure it's explicitly configured or the webroot is set.");
             }
 
             if (!Path.IsPathFullyQualified(cacheRootPath))
