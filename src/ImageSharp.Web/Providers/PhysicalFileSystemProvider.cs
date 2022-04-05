@@ -28,8 +28,9 @@ namespace SixLabors.ImageSharp.Web.Providers
             IWebHostEnvironment environment,
 #endif
             FormatUtilities formatUtilities)
-            : base(GetProvider(options?.Value, environment), formatUtilities)
-            => this.ProcessingBehavior = options.Value.ProcessingBehavior;
+            : base(GetProvider(options, environment), options.Value.ProcessingBehavior, formatUtilities)
+        {
+        }
 
         /// <summary>
         /// Determine the provider root path
@@ -56,7 +57,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         }
 
         private static PhysicalFileProvider GetProvider(
-            PhysicalFileSystemProviderOptions options,
+            IOptions<PhysicalFileSystemProviderOptions> options,
 #if NETCOREAPP2_1
             IHostingEnvironment environment)
 #else
@@ -65,7 +66,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         {
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(environment, nameof(environment));
-            return new(GetProviderRoot(options, environment.WebRootPath, environment.ContentRootPath));
+            return new(GetProviderRoot(options.Value, environment.WebRootPath, environment.ContentRootPath));
         }
     }
 }
