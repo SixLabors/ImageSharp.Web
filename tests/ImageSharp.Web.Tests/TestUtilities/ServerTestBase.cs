@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 {
+    [Collection("Server tests")]
     public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
         where TFixture : TestServerFixture
     {
