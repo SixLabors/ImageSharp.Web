@@ -165,7 +165,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpBuilder InsertProvider<TProvider>(this IImageSharpBuilder builder, int index)
             where TProvider : class, IImageProvider
         {
-            var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider) && x.Lifetime == ServiceLifetime.Singleton).ToList();
+            var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
             builder.ClearProviders();
 
             descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider, TProvider>());
@@ -185,7 +185,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpBuilder InsertProvider<TProvider>(this IImageSharpBuilder builder, int index, Func<IServiceProvider, TProvider> implementationFactory)
             where TProvider : class, IImageProvider
         {
-            var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider) && x.Lifetime == ServiceLifetime.Singleton).ToList();
+            var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
             builder.ClearProviders();
 
             descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider>(implementationFactory));
@@ -205,7 +205,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         {
             ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
                 x.ServiceType == typeof(IImageProvider)
-                && x.Lifetime == ServiceLifetime.Singleton
                 && (x.ImplementationType == typeof(TProvider)
                 || (x.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TProvider))));
 
