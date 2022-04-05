@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -191,9 +192,30 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
             IReadOnlyList<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
             Assert.Equal(2, providers.Count);
             Assert.True(IsService<IImageProvider, MockImageProvider>(providers[0]));
+            Assert.True(IsServiceImplementationType<IImageProvider, MockImageProvider>(providers[0]));
 
             builder.RemoveProvider<MockImageProvider>();
             Assert.DoesNotContain(services, IsService<IImageProvider, MockImageProvider>);
+        }
+
+        [Fact]
+        public void CanInsertIdempotentImageProviders()
+        {
+            var services = new ServiceCollection();
+            IImageSharpBuilder builder = services.AddImageSharp();
+
+            builder.InsertProvider<MockImageProvider>(0);
+            builder.InsertProvider<MockImageProvider>(1);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.InsertProvider<MockImageProvider>(2));
+
+            Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
+            Assert.Single(services, IsServiceImplementationType<IImageProvider, MockImageProvider>);
+
+            IReadOnlyList<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
+            Assert.Equal(2, providers.Count);
+            Assert.True(IsService<IImageProvider, MockImageProvider>(providers[1]));
+            Assert.True(IsServiceImplementationType<IImageProvider, MockImageProvider>(providers[1]));
         }
 
         [Fact]
@@ -208,6 +230,26 @@ namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
 
             builder.RemoveProvider<MockImageProvider>();
             Assert.DoesNotContain(services, IsService<IImageProvider, MockImageProvider>);
+        }
+
+        [Fact]
+        public void CanInsertIdempotentFactoryImageProviders()
+        {
+            var services = new ServiceCollection();
+            IImageSharpBuilder builder = services.AddImageSharp();
+
+            builder.InsertProvider(0, _ => new MockImageProvider());
+            builder.InsertProvider(1, _ => new MockImageProvider());
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.InsertProvider(2, _ => new MockImageProvider()));
+
+            Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
+            Assert.Single(services, IsServiceImplementationFactory<IImageProvider, MockImageProvider>);
+
+            IReadOnlyList<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
+            Assert.Equal(2, providers.Count);
+            Assert.True(IsService<IImageProvider, MockImageProvider>(providers[1]));
+            Assert.True(IsServiceImplementationFactory<IImageProvider, MockImageProvider>(providers[1]));
         }
 
         [Fact]

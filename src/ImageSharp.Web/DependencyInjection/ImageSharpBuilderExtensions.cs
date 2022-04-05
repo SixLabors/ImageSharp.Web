@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -166,11 +165,12 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             where TProvider : class, IImageProvider
         {
             var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
-            builder.ClearProviders();
-
+            descriptors.RemoveAll(x => x.GetImplementationType() == typeof(TProvider));
             descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider, TProvider>());
 
+            builder.ClearProviders();
             builder.Services.TryAddEnumerable(descriptors);
+
             return builder;
         }
 
@@ -186,11 +186,12 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             where TProvider : class, IImageProvider
         {
             var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
-            builder.ClearProviders();
-
+            descriptors.RemoveAll(x => x.GetImplementationType() == typeof(TProvider));
             descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider>(implementationFactory));
 
+            builder.ClearProviders();
             builder.Services.TryAddEnumerable(descriptors);
+
             return builder;
         }
 
@@ -203,11 +204,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpBuilder RemoveProvider<TProvider>(this IImageSharpBuilder builder)
             where TProvider : class, IImageProvider
         {
-            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
-                x.ServiceType == typeof(IImageProvider)
-                && (x.ImplementationType == typeof(TProvider)
-                || (x.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TProvider))));
-
+            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(IImageProvider) && x.GetImplementationType() == typeof(TProvider));
             if (descriptor != null)
             {
                 builder.Services.Remove(descriptor);
@@ -264,12 +261,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpBuilder RemoveProcessor<TProcessor>(this IImageSharpBuilder builder)
             where TProcessor : class, IImageWebProcessor
         {
-            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
-                x.ServiceType == typeof(IImageWebProcessor)
-                && x.Lifetime == ServiceLifetime.Singleton
-                && (x.ImplementationType == typeof(TProcessor)
-                || (x.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TProcessor))));
-
+            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(IImageWebProcessor) && x.GetImplementationType() == typeof(TProcessor));
             if (descriptor != null)
             {
                 builder.Services.Remove(descriptor);
@@ -326,12 +318,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         public static IImageSharpBuilder RemoveConverter<TConverter>(this IImageSharpBuilder builder)
             where TConverter : class, ICommandConverter
         {
-            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
-                x.ServiceType == typeof(ICommandConverter)
-                && x.Lifetime == ServiceLifetime.Singleton
-                && (x.ImplementationType == typeof(TConverter)
-                || (x.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TConverter))));
-
+            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(ICommandConverter) && x.GetImplementationType() == typeof(TConverter));
             if (descriptor != null)
             {
                 builder.Services.Remove(descriptor);
@@ -379,5 +366,10 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             builder.Services.Configure(configureOptions);
             return builder;
         }
+
+        private static Type GetImplementationType(this ServiceDescriptor descriptor)
+            => descriptor.ImplementationType
+            ?? descriptor.ImplementationInstance?.GetType()
+            ?? descriptor.ImplementationFactory?.GetType().GenericTypeArguments[1];
     }
 }
