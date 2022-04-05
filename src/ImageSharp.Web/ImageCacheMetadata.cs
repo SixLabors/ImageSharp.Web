@@ -156,13 +156,11 @@ namespace SixLabors.ImageSharp.Web
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(ImageCacheMetadata other)
-        {
-            return this.SourceLastWriteTimeUtc == other.SourceLastWriteTimeUtc
-                   && this.CacheLastWriteTimeUtc == other.CacheLastWriteTimeUtc
-                   && this.ContentType == other.ContentType
-                   && this.CacheControlMaxAge == other.CacheControlMaxAge
-                   && this.ContentLength == other.ContentLength;
-        }
+            => this.SourceLastWriteTimeUtc == other.SourceLastWriteTimeUtc
+            && this.CacheLastWriteTimeUtc == other.CacheLastWriteTimeUtc
+            && this.ContentType == other.ContentType
+            && this.CacheControlMaxAge == other.CacheControlMaxAge
+            && this.ContentLength == other.ContentLength;
 
         /// <inheritdoc/>
         public override bool Equals(object obj)
@@ -181,8 +179,7 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <returns>The <see cref="Dictionary{String, String}"/>.</returns>
         public Dictionary<string, string> ToDictionary()
-        {
-            return new Dictionary<string, string>
+            => new()
             {
                 { SourceLastModifiedKey, this.SourceLastWriteTimeUtc.ToString("o") },
                 { CacheLastModifiedKey, this.CacheLastWriteTimeUtc.ToString("o") },
@@ -190,7 +187,6 @@ namespace SixLabors.ImageSharp.Web
                 { CacheControlKey, this.CacheControlMaxAge.TotalSeconds.ToString(NumberFormatInfo.InvariantInfo) },
                 { ContentLengthKey, this.ContentLength.ToString(NumberFormatInfo.InvariantInfo) }
             };
-        }
 
         /// <inheritdoc/>
         public override string ToString()
