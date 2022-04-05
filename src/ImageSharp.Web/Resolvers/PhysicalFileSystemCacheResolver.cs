@@ -35,7 +35,7 @@ namespace SixLabors.ImageSharp.Web.Resolvers
         {
             if (this.metadata == default)
             {
-                using Stream stream = OpenFileStream(this.metaFileInfo.FullName);
+                using FileStream stream = OpenFileStream(this.metaFileInfo.FullName);
                 this.metadata = await ImageCacheMetadata.ReadAsync(stream);
             }
 
