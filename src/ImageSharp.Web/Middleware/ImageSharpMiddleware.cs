@@ -191,8 +191,17 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
         private async Task Invoke(HttpContext httpContext, bool retry)
         {
-            // We expect to get concrete collection type which removes virtual dispatch concerns and enumerator allocations
             CommandCollection commands = this.requestParser.ParseRequestCommands(httpContext);
+
+            // First check for a HMAC token and capture before the command is stripped out.
+            byte[] secret = this.options.HMACSecretKey;
+            bool doHMAC = false;
+            string token = null;
+            if (secret?.Length > 0)
+            {
+                doHMAC = true;
+                token = commands.GetValueOrDefault(HMACUtilities.TokenCommand);
+            }
 
             if (commands.Count > 0)
             {
@@ -211,8 +220,22 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
             }
 
-            await this.options.OnParseCommandsAsync.Invoke(
-                new ImageCommandContext(httpContext, commands, this.commandParser, this.parserCulture));
+            ImageCommandContext imageCommandContext = new(httpContext, commands, this.commandParser, this.parserCulture);
+
+            if (doHMAC)
+            {
+                // Compare the passed token to our generated mac.
+                string mac = await this.options.OnComputeHMACAsync(imageCommandContext, secret);
+                if (mac != token)
+                {
+                    // Throw a 401. We don't log the error to avoid attempts at log poisoning.
+                    httpContext.Response.Clear();
+                    httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return;
+                }
+            }
+
+            await this.options.OnParseCommandsAsync.Invoke(imageCommandContext);
 
             // Get the correct service for the request
             IImageProvider provider = null;

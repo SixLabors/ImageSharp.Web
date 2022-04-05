@@ -4,9 +4,9 @@
 using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using SixLabors.ImageSharp.Web.Caching;
 
 namespace SixLabors.ImageSharp.Web
 {
@@ -16,54 +16,81 @@ namespace SixLabors.ImageSharp.Web
     public static class HMACUtilities
     {
         /// <summary>
+        /// The command used by image requests for transporting Hash-based Message Authentication Code (HMAC) tokens.
+        /// </summary>
+        public const string TokenCommand = "hmac";
+
+        /// <summary>
         /// Computes a Hash-based Message Authentication Code (HMAC) by using the SHA256 hash function.
         /// </summary>
         /// <param name="value">The value to hash</param>
         /// <param name="secret">
-        /// The secret key for <see cref="HMACSHA256"/>encryption.
+        /// The secret key for <see cref="HMACSHA256"/> encryption.
         /// The key can be any length. However, the recommended size is 64 bytes.
         /// </param>
         /// <returns>The hashed <see cref="string"/>.</returns>
-        public static unsafe string CreateSHA256HashCode(string value, byte[] secret)
+        public static unsafe string ComputeHMACSHA256(string value, byte[] secret)
         {
-            static void Action(Span<char> chars, (IntPtr Ptr, int Length, string Value, byte[] Secret) args)
-            {
-                var bytes = new Span<byte>((byte*)args.Ptr, args.Length);
-                Encoding.ASCII.GetBytes(args.Value, bytes);
-                using var hashAlgorithm = new HMACSHA256(args.Secret);
-                hashAlgorithm.TryComputeHash(bytes, MemoryMarshal.Cast<char, byte>(chars), out int _);
-            }
+            // TODO: In .NET 6 we can use single instance versions
+            using var hmac = new HMACSHA256(secret);
+            return CreateHMAC(value, hmac);
+        }
 
-            // Bits to chars - 256/8/2
-            return CreateHMAC(value, secret, 16, Action);
+        /// <summary>
+        /// Computes a Hash-based Message Authentication Code (HMAC) by using the SHA384 hash function.
+        /// </summary>
+        /// <param name="value">The value to hash</param>
+        /// <param name="secret">
+        /// The secret key for <see cref="HMACSHA256"/> encryption.
+        /// The key can be any length. However, the recommended size is 128 bytes.
+        /// </param>
+        /// <returns>The hashed <see cref="string"/>.</returns>
+        public static unsafe string ComputeHMACSHA384(string value, byte[] secret)
+        {
+            using var hmac = new HMACSHA384(secret);
+            return CreateHMAC(value, hmac);
+        }
+
+        /// <summary>
+        /// Computes a Hash-based Message Authentication Code (HMAC) by using the SHA512 hash function.
+        /// </summary>
+        /// <param name="value">The value to hash</param>
+        /// <param name="secret">
+        /// The secret key for <see cref="HMACSHA256"/> encryption.
+        /// The key can be any length. However, the recommended size is 128 bytes.
+        /// </param>
+        /// <returns>The hashed <see cref="string"/>.</returns>
+        public static unsafe string ComputeHMACSHA512(string value, byte[] secret)
+        {
+            using var hmac = new HMACSHA512(secret);
+            return CreateHMAC(value, hmac);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe string CreateHMAC(string value, byte[] secret, int length, SpanAction<char, (IntPtr Ptr, int Length, string Value, byte[] Secret)> action)
+        private static unsafe string CreateHMAC(string value, HMAC hmac)
         {
             int byteCount = Encoding.ASCII.GetByteCount(value);
-
-            // Allocating a buffer from the pool is ~27% slower than stackalloc so use that for short strings
-            if (byteCount < 257)
-            {
-                fixed (byte* bytesPtr = stackalloc byte[byteCount])
-                {
-                    return string.Create(length, ((IntPtr)bytesPtr, byteCount, value, secret), action);
-                }
-            }
-
             byte[] buffer = null;
+
             try
             {
-                buffer = ArrayPool<byte>.Shared.Rent(byteCount);
-                fixed (byte* bytesPtr = buffer.AsSpan(0, byteCount))
-                {
-                    return string.Create(length, ((IntPtr)bytesPtr, byteCount, value, secret), action);
-                }
+                // Allocating a buffer from the pool is ~27% slower than stackalloc so use that for short strings
+                Span<byte> bytes = byteCount <= 128
+                    ? stackalloc byte[byteCount]
+                    : (buffer = ArrayPool<byte>.Shared.Rent(byteCount)).AsSpan(0, byteCount);
+
+                Encoding.ASCII.GetBytes(value, bytes);
+
+                // Safe to always stackalloc here. We max out at 64 bytes.
+                Span<byte> hash = stackalloc byte[hmac.HashSize / 8];
+                hmac.TryComputeHash(bytes, hash, out int _);
+
+                // Finally encode the hash to make it web safe.
+                return HexEncoder.Encode(hash);
             }
             finally
             {
-                if (buffer != null)
+                if (buffer is not null)
                 {
                     ArrayPool<byte>.Shared.Return(buffer);
                 }

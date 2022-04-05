@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
 using SixLabors.ImageSharp.Web.Commands;
-using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
 
 namespace SixLabors.ImageSharp.Web.Middleware
@@ -17,40 +16,18 @@ namespace SixLabors.ImageSharp.Web.Middleware
     /// </summary>
     public class ImageSharpMiddlewareOptions
     {
-        private Func<ImageCommandContext, Task> onParseCommandsAsync = c =>
+        private Func<ImageCommandContext, byte[], Task<string>> onComputeHMACAsync = (context, secret) =>
         {
-            if (c.Commands.Count == 0)
-            {
-                return Task.CompletedTask;
-            }
+            string uri = CaseHandlingUriBuilder.BuildRelative(
+                 CaseHandlingUriBuilder.CaseHandling.LowerInvariant,
+                 context.Context.Request.PathBase,
+                 context.Context.Request.Path,
+                 QueryString.Create(context.Commands));
 
-            // It's a good idea to have this to provide very basic security.
-            uint width = c.Parser.ParseValue<uint>(
-                c.Commands.GetValueOrDefault(ResizeWebProcessor.Width),
-                c.Culture);
-
-            uint height = c.Parser.ParseValue<uint>(
-                c.Commands.GetValueOrDefault(ResizeWebProcessor.Height),
-                c.Culture);
-
-            if (width > 4000 && height > 4000)
-            {
-                c.Commands.Remove(ResizeWebProcessor.Width);
-                c.Commands.Remove(ResizeWebProcessor.Height);
-            }
-
-            float[] coordinates = c.Parser.ParseValue<float[]>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Xy), c.Culture);
-
-            if (coordinates.Length != 2
-            || coordinates[1] < 0 || coordinates[1] > 1
-            || coordinates[0] < 0 || coordinates[0] > 1)
-            {
-                c.Commands.Remove(ResizeWebProcessor.Xy);
-            }
-
-            return Task.CompletedTask;
+            return Task.FromResult(HMACUtilities.ComputeHMACSHA256(uri, secret));
         };
 
+        private Func<ImageCommandContext, Task> onParseCommandsAsync = _ => Task.CompletedTask;
         private Func<FormattedImage, Task> onBeforeSaveAsync = _ => Task.CompletedTask;
         private Func<ImageProcessingContext, Task> onProcessedAsync = _ => Task.CompletedTask;
         private Func<HttpContext, Task> onPrepareResponseAsync = _ => Task.CompletedTask;
@@ -97,6 +74,30 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// images in the image cache. Defaults to 12 characters.
         /// </summary>
         public uint CacheHashLength { get; set; } = 12;
+
+        /// <summary>
+        /// Gets or sets the secret key for Hash-based Message Authentication Code (HMAC) encryption.
+        /// </summary>
+        /// <remarks>
+        /// The key can be any length. However, the recommended size is at least 64 bytes. If the length is zero then no authentication is performed.
+        /// </remarks>
+        public byte[] HMACSecretKey { get; set; } = Array.Empty<byte>();
+
+        /// <summary>
+        /// Gets or sets the method used to compute a Hash-based Message Authentication Code (HMAC) for request authentication.
+        /// Defaults to <see cref="HMACUtilities.ComputeHMACSHA256(string, byte[])"/> using an invariant lowercase relative Uri
+        /// generated using <see cref="CaseHandlingUriBuilder.BuildRelative(CaseHandlingUriBuilder.CaseHandling, PathString, PathString, QueryString)"/>.
+        /// </summary>
+        public Func<ImageCommandContext, byte[], Task<string>> OnComputeHMACAsync
+        {
+            get => this.onComputeHMACAsync;
+
+            set
+            {
+                Guard.NotNull(value, nameof(this.onComputeHMACAsync));
+                this.onComputeHMACAsync = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the additional command parsing method that can be used to used to augment commands.
