@@ -22,7 +22,7 @@ namespace SixLabors.ImageSharp.Web.Providers
             IWebHostEnvironment environment,
 #endif
             FormatUtilities formatUtilities)
-            : base(environment.WebRootFileProvider, formatUtilities)
+            : base(environment.WebRootFileProvider, ProcessingBehavior.CommandOnly, formatUtilities)
         {
         }
     }

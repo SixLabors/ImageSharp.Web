@@ -13,7 +13,7 @@ namespace SixLabors.ImageSharp.Web.Providers
     /// <summary>
     /// Returns images from an <see cref="IFileProvider"/> abstraction.
     /// </summary>
-    public class FileProviderImageProvider : IImageProvider
+    public abstract class FileProviderImageProvider : IImageProvider
     {
         /// <summary>
         /// The file provider abstraction.
@@ -29,21 +29,26 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// Initializes a new instance of the <see cref="FileProviderImageProvider"/> class.
         /// </summary>
         /// <param name="fileProvider">The file provider.</param>
+        /// <param name="processingBehavior">The processing behavior.</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
-        public FileProviderImageProvider(IFileProvider fileProvider, FormatUtilities formatUtilities)
+        protected FileProviderImageProvider(IFileProvider fileProvider, ProcessingBehavior processingBehavior, FormatUtilities formatUtilities)
         {
-            this.fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
-            this.formatUtilities = formatUtilities ?? throw new ArgumentNullException(nameof(formatUtilities));
+            Guard.NotNull(fileProvider, nameof(fileProvider));
+            Guard.NotNull(formatUtilities, nameof(formatUtilities));
+
+            this.fileProvider = fileProvider;
+            this.formatUtilities = formatUtilities;
+            this.ProcessingBehavior = processingBehavior;
         }
 
         /// <inheritdoc/>
-        public ProcessingBehavior ProcessingBehavior { get; protected set; } = ProcessingBehavior.CommandOnly;
+        public ProcessingBehavior ProcessingBehavior { get; }
 
         /// <inheritdoc/>
-        public Func<HttpContext, bool> Match { get; set; } = _ => true;
+        public virtual Func<HttpContext, bool> Match { get; set; } = _ => true;
 
         /// <inheritdoc/>
-        public bool IsValidRequest(HttpContext context)
+        public virtual bool IsValidRequest(HttpContext context)
             => this.formatUtilities.TryGetExtensionFromUri(context.Request.GetDisplayUrl(), out _);
 
         /// <inheritdoc/>
