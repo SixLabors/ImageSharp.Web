@@ -22,7 +22,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Sets the given <see cref="IRequestParser"/> adding it to the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="IRequestParser"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="IRequestParser"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder SetRequestParser<TImplementation>(this IImageSharpBuilder builder)
@@ -49,7 +49,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Sets the given <see cref="IImageCache"/> adding it to the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageCache"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageCache"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder SetCache<TImplementation>(this IImageSharpBuilder builder)
@@ -103,7 +103,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Sets the given <see cref="ICacheHash"/> adding it to the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="ICacheHash"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="ICacheHash"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder SetCacheHash<TImplementation>(this IImageSharpBuilder builder)
@@ -130,7 +130,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Adds the given <see cref="IImageProvider"/> to the provider collection within the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder AddProvider<TImplementation>(this IImageSharpBuilder builder)
@@ -144,7 +144,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Adds the given <see cref="IImageProvider"/> to the provider collection within the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
@@ -159,7 +159,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Inserts the given <see cref="IImageProvider"/> at the give index into to the provider collection within the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="index">The zero-based index at which the provider should be inserted.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
@@ -179,7 +179,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Inserts the given <see cref="IImageProvider"/>  at the give index into the provider collection within the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="index">The zero-based index at which the provider should be inserted.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
@@ -200,7 +200,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Removes the given <see cref="IImageProvider"/> from the provider collection within the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder RemoveProvider<TImplementation>(this IImageSharpBuilder builder)
@@ -230,7 +230,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Adds the given <see cref="IImageWebProcessor"/> to the processor collection within the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageWebProcessor"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageWebProcessor"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder AddProcessor<TImplementation>(this IImageSharpBuilder builder)
@@ -244,7 +244,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Adds the given <see cref="IImageWebProcessor"/> to the processor collection within the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageWebProcessor"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageWebProcessor"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
@@ -259,7 +259,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Removes the given <see cref="IImageWebProcessor"/> from the processor collection within the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageWebProcessor"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="IImageWebProcessor"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder RemoveProcessor<TImplementation>(this IImageSharpBuilder builder)
@@ -289,7 +289,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Adds the given <see cref="ICommandConverter"/> to the converter collection within the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="ICommandConverter"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="ICommandConverter"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder AddConverter<TImplementation>(this IImageSharpBuilder builder)
@@ -303,7 +303,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Adds the given <see cref="ICommandConverter"/> to the converter collection within the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="ICommandConverter"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="ICommandConverter"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="ICommandConverter"/>.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
@@ -318,7 +318,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Removes the given <see cref="ICommandConverter"/> from the converter collection within the service collection.
         /// </summary>
-        /// <typeparam name="TImplementation">The type of class implementing <see cref="ICommandConverter"/>to add.</typeparam>
+        /// <typeparam name="TImplementation">The type of class implementing <see cref="ICommandConverter"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder RemoveConverter<TImplementation>(this IImageSharpBuilder builder)
@@ -350,12 +350,12 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// </summary>
         /// <typeparam name="TOptions">The options type to be configured.</typeparam>
         /// <param name="builder">The core builder.</param>
-        /// <param name="configuration">The configuration being bound.</param>
+        /// <param name="config">The configuration being bound.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        public static IImageSharpBuilder Configure<TOptions>(this IImageSharpBuilder builder, IConfiguration configuration)
+        public static IImageSharpBuilder Configure<TOptions>(this IImageSharpBuilder builder, IConfiguration config)
              where TOptions : class
         {
-            builder.Services.Configure<TOptions>(configuration);
+            builder.Services.Configure<TOptions>(config);
 
             return builder;
         }
@@ -371,6 +371,21 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
              where TOptions : class
         {
             builder.Services.Configure(configureOptions);
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Registers an action used to configure a particular type of options. Note: These are run after all <see cref="Configure{TOptions}(IImageSharpBuilder, Action{TOptions})"/>.
+        /// </summary>
+        /// <typeparam name="TOptions">The options type to be configured.</typeparam>
+        /// <param name="builder">The core builder.</param>
+        /// <param name="configureOptions">The action used to configure the options.</param>
+        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
+        public static IImageSharpBuilder PostConfigure<TOptions>(this IImageSharpBuilder builder, Action<TOptions> configureOptions)
+             where TOptions : class
+        {
+            builder.Services.PostConfigure(configureOptions);
 
             return builder;
         }
