@@ -26,15 +26,13 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             HttpResponseMessage response = await this.HttpClient.GetAsync(url + this.Fixture.Commands[0]);
             Assert.NotNull(response);
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-            Assert.True(response.Headers.Contains("WWW-Authenticate"));
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
             // Now send an invalid token
             response = await this.HttpClient.GetAsync(url + this.Fixture.Commands[0] + "&" + HMACUtilities.TokenCommand + "=INVALID");
             Assert.NotNull(response);
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-            Assert.True(response.Headers.Contains("WWW-Authenticate"));
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         protected override string AugmentCommand(string command)

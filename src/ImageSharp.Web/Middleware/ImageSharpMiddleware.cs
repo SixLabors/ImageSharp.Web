@@ -201,11 +201,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             // First check for a HMAC token and capture before the command is stripped out.
             byte[] secret = this.options.HMACSecretKey;
-            bool doHMAC = false;
+            bool checkHMAC = false;
             string token = null;
             if (secret?.Length > 0)
             {
-                doHMAC = true;
+                checkHMAC = true;
                 token = commands.GetValueOrDefault(HMACUtilities.TokenCommand);
             }
 
@@ -218,7 +218,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     if (!this.knownCommands.Contains(command))
                     {
                         // Need to actually remove, allocates new list to allow modifications
-                        this.StripUnknownCommands(commands, startAtIndex: index);
+                        this.StripUnknownCommands(commands, index);
                         break;
                     }
 
@@ -226,11 +226,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
             }
 
-            ImageCommandContext imageCommandContext = new(httpContext, commands, this.commandParser, this.parserCulture);
-
-            await this.options.OnParseCommandsAsync.Invoke(imageCommandContext);
-
-            // Get the correct service for the request
+            // Get the correct provider for the request
             IImageProvider provider = null;
             foreach (IImageProvider resolver in this.providers)
             {
@@ -241,30 +237,44 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
             }
 
-            if ((commands.Count == 0 && provider?.ProcessingBehavior != ProcessingBehavior.All)
-                || provider?.IsValidRequest(httpContext) != true)
+            if (provider?.IsValidRequest(httpContext) != true)
             {
                 // Nothing to do. call the next delegate/middleware in the pipeline
                 await this.next(httpContext);
                 return;
             }
 
-            // At this point we know that this is a valid image request
-            // Check for a token if required and reject if invalid.
-            if (doHMAC)
-            {
-                if (token is null)
-                {
-                    // Throw a 401. We don't log the error to avoid attempts at log poisoning.
-                    SetUnauthorized(httpContext);
-                    return;
-                }
+            ImageCommandContext imageCommandContext = new(httpContext, commands, this.commandParser, this.parserCulture);
 
-                // Compare the passed token to our generated mac.
-                string mac = await HMACTokenLru.GetOrAddAsync(token, _ => this.options.OnComputeHMACAsync(imageCommandContext, secret));
-                if (mac != token)
+            // At this point we know that this is an image request so should attempt to compute a validating HMAC..
+            string hmac = null;
+            if (checkHMAC && token != null)
+            {
+                // Generate and cache a HMAC to validate against based upon the current valid commands from the request.
+                //
+                // If the command collection differs following the stripping of invalid commands prior to this point then this will mean
+                // the token will not match our validating HMAC, however, this would be indicative of an attack and should be treated as such.
+                //
+                // As a rule all image requests should contain valid commands only.
+                hmac = await HMACTokenLru.GetOrAddAsync(token, _ => this.options.OnComputeHMACAsync(imageCommandContext, secret));
+            }
+
+            await this.options.OnParseCommandsAsync.Invoke(imageCommandContext);
+
+            if (commands.Count == 0 && provider?.ProcessingBehavior != ProcessingBehavior.All)
+            {
+                // Nothing to do. call the next delegate/middleware in the pipeline
+                await this.next(httpContext);
+                return;
+            }
+
+            // At this point we know that this is an image request designed for processing via this middleware.
+            // Check for a token if required and reject if invalid.
+            if (checkHMAC)
+            {
+                if (token == null || hmac != token)
                 {
-                    SetUnauthorized(httpContext);
+                    SetBadRequest(httpContext);
                     return;
                 }
             }
@@ -288,11 +298,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 retry);
         }
 
-        private static void SetUnauthorized(HttpContext httpContext)
+        private static void SetBadRequest(HttpContext httpContext)
         {
+            // We return a 400 rather than a 401 as we do not want to prompt follow up requests.
+            // We don't log the error to avoid attempts at log poisoning.
             httpContext.Response.Clear();
-            httpContext.Response.Headers.Add("WWW-Authenticate", "HMAC realm=\"" + httpContext.Request.Host + "\"");
-            httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
         }
 
         private void StripUnknownCommands(CommandCollection commands, int startAtIndex)
