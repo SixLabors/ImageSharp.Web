@@ -42,6 +42,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
             = new(1024, TimeSpan.FromSeconds(30));
 
         /// <summary>
+        /// Used to temporarily store cached HMAC-s to reduce the overhead of HMAC token generation.
+        /// </summary>
+        private static readonly ConcurrentTLruCache<string, string> HMACTokenLru
+            = new(1024, TimeSpan.FromSeconds(30));
+
+        /// <summary>
         /// The function processing the Http request.
         /// </summary>
         private readonly RequestDelegate next;
@@ -222,19 +228,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             ImageCommandContext imageCommandContext = new(httpContext, commands, this.commandParser, this.parserCulture);
 
-            if (doHMAC)
-            {
-                // Compare the passed token to our generated mac.
-                string mac = await this.options.OnComputeHMACAsync(imageCommandContext, secret);
-                if (mac != token)
-                {
-                    // Throw a 401. We don't log the error to avoid attempts at log poisoning.
-                    httpContext.Response.Clear();
-                    httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    return;
-                }
-            }
-
             await this.options.OnParseCommandsAsync.Invoke(imageCommandContext);
 
             // Get the correct service for the request
@@ -256,6 +249,26 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 return;
             }
 
+            // At this point we know that this is a valid image request
+            // Check for a token if required and reject if invalid.
+            if (doHMAC)
+            {
+                if (token is null)
+                {
+                    // Throw a 401. We don't log the error to avoid attempts at log poisoning.
+                    SetUnauthorized(httpContext);
+                    return;
+                }
+
+                // Compare the passed token to our generated mac.
+                string mac = await HMACTokenLru.GetOrAddAsync(token, _ => this.options.OnComputeHMACAsync(imageCommandContext, secret));
+                if (mac != token)
+                {
+                    SetUnauthorized(httpContext);
+                    return;
+                }
+            }
+
             IImageResolver sourceImageResolver = await provider.GetAsync(httpContext);
 
             if (sourceImageResolver is null)
@@ -273,6 +286,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 new ImageContext(httpContext, this.options),
                 commands,
                 retry);
+        }
+
+        private static void SetUnauthorized(HttpContext httpContext)
+        {
+            httpContext.Response.Clear();
+            httpContext.Response.Headers.Add("WWW-Authenticate", "HMAC realm=\"" + httpContext.Request.Host + "\"");
+            httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
         }
 
         private void StripUnknownCommands(CommandCollection commands, int startAtIndex)
