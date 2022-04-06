@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IO;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.DependencyInjection;
@@ -37,13 +38,15 @@ namespace SixLabors.ImageSharp.Web.Sample
         /// </summary>
         /// <param name="services">The collection of service desscriptors.</param>
         public void ConfigureServices(IServiceCollection services)
-            => services.AddImageSharp(); // Add the default service and options
+            => services.AddImageSharp(); // Add the default services and options
 
-        // Or add the default service and custom options
+        // Or add the default services and custom options
         private void ConfigureDefaultServicesAndCustomOptions(IServiceCollection services)
             => services.AddImageSharp(options =>
             {
                 options.Configuration = Configuration.Default;
+                options.MemoryStreamManager = new RecyclableMemoryStreamManager();
+                options.UseInvariantParsingCulture = true;
                 options.BrowserMaxAge = TimeSpan.FromDays(7);
                 options.CacheMaxAge = TimeSpan.FromDays(365);
                 options.CacheHashLength = 12;
@@ -65,25 +68,32 @@ namespace SixLabors.ImageSharp.Web.Sample
             => services.AddImageSharp(options =>
             {
                 options.Configuration = Configuration.Default;
+                options.MemoryStreamManager = new RecyclableMemoryStreamManager();
+                options.UseInvariantParsingCulture = true;
                 options.BrowserMaxAge = TimeSpan.FromDays(7);
                 options.CacheMaxAge = TimeSpan.FromDays(365);
-                options.CacheHashLength = 8;
+                options.CacheHashLength = 12;
                 options.OnParseCommandsAsync = _ => Task.CompletedTask;
                 options.OnBeforeSaveAsync = _ => Task.CompletedTask;
                 options.OnProcessedAsync = _ => Task.CompletedTask;
                 options.OnPrepareResponseAsync = _ => Task.CompletedTask;
             })
             .SetRequestParser<QueryCollectionRequestParser>()
+            .SetCache<PhysicalFileSystemCache>()
             .Configure<PhysicalFileSystemCacheOptions>(options =>
             {
-                options.CacheFolder = "different-cache";
-                options.CacheFolderDepth = 6;
+                options.CacheFolder = "is-cache";
+                options.CacheFolderDepth = 8;
             })
-            .SetCache<PhysicalFileSystemCache>()
             .SetCacheKey<UriRelativeLowerInvariantCacheKey>()
             .SetCacheHash<SHA256CacheHash>()
             .ClearProviders()
             .AddProvider<PhysicalFileSystemProvider>()
+            .Configure<PhysicalFileSystemProviderOptions>(options =>
+            {
+                options.ProviderRootPath = null;
+                options.ProcessingBehavior = ProcessingBehavior.CommandOnly;
+            })
             .ClearProcessors()
             .AddProcessor<ResizeWebProcessor>()
             .AddProcessor<FormatWebProcessor>()
