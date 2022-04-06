@@ -37,6 +37,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
 
         private static IImageSharpBuilder AddDefaultServices(this IImageSharpBuilder builder)
         {
+            builder.Services.AddOptions();
             builder.Services.AddSingleton<FormatUtilities>();
             builder.Services.AddSingleton<AsyncKeyReaderWriterLock<string>>();
 
