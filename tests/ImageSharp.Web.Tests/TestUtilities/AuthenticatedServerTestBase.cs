@@ -37,8 +37,8 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 
         protected override string AugmentCommand(string command)
         {
-            // Mimic the case sensitive url format used by the token and default options.
-            string uri = (this.ImageSource + command).Replace("http://localhost", string.Empty);
+            // Mimic the lowecase relative url format used by the token and default options.
+            string uri = (this.ImageSource + command).Replace("http://localhost", string.Empty).ToLowerInvariant();
             string token = HMACUtilities.ComputeHMACSHA256(uri, AuthenticatedTestServerFixture.HMACSecretKey);
             return command + "&" + HMACUtilities.TokenCommand + "=" + token;
         }

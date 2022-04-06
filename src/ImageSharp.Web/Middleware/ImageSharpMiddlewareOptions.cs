@@ -19,7 +19,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private Func<ImageCommandContext, byte[], Task<string>> onComputeHMACAsync = (context, secret) =>
         {
             string uri = CaseHandlingUriBuilder.BuildRelative(
-                 CaseHandlingUriBuilder.CaseHandling.None,
+                 CaseHandlingUriBuilder.CaseHandling.LowerInvariant,
                  context.Context.Request.PathBase,
                  context.Context.Request.Path,
                  QueryString.Create(context.Commands));
@@ -85,7 +85,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
         /// <summary>
         /// Gets or sets the method used to compute a Hash-based Message Authentication Code (HMAC) for request authentication.
-        /// Defaults to <see cref="HMACUtilities.ComputeHMACSHA256(string, byte[])"/> using a relative Uri
+        /// Defaults to <see cref="HMACUtilities.ComputeHMACSHA256(string, byte[])"/> using an invariant lowercase relative Uri
         /// generated using <see cref="CaseHandlingUriBuilder.BuildRelative(CaseHandlingUriBuilder.CaseHandling, PathString, PathString, QueryString)"/>.
         /// </summary>
         public Func<ImageCommandContext, byte[], Task<string>> OnComputeHMACAsync
