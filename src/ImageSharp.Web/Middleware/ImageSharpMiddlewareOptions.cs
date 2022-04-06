@@ -25,7 +25,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
 
             // It's a good idea to have this to provide very basic security.
-            // We can safely use the static resize processor properties.
             uint width = c.Parser.ParseValue<uint>(
                 c.Commands.GetValueOrDefault(ResizeWebProcessor.Width),
                 c.Culture);
@@ -38,6 +37,15 @@ namespace SixLabors.ImageSharp.Web.Middleware
             {
                 c.Commands.Remove(ResizeWebProcessor.Width);
                 c.Commands.Remove(ResizeWebProcessor.Height);
+            }
+
+            float[] coordinates = c.Parser.ParseValue<float[]>(c.Commands.GetValueOrDefault(ResizeWebProcessor.Xy), c.Culture);
+
+            if (coordinates.Length != 2
+            || coordinates[1] < 0 || coordinates[1] > 1
+            || coordinates[0] < 0 || coordinates[0] > 1)
+            {
+                c.Commands.Remove(ResizeWebProcessor.Xy);
             }
 
             return Task.CompletedTask;
