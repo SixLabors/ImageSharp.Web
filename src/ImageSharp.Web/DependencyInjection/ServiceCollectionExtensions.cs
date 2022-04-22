@@ -41,8 +41,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             Guard.NotNull(services, nameof(services));
             Guard.NotNull(setupAction, nameof(setupAction));
 
-            services.TryAddTransient<IConfigureOptions<ImageSharpMiddlewareOptions>, ImageSharpConfiguration>();
-
             IImageSharpBuilder builder = new ImageSharpBuilder(services);
 
             AddDefaultServices(builder, setupAction);
