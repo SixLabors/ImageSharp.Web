@@ -3,6 +3,8 @@
 
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Commands.Converters;
@@ -24,26 +26,52 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
         /// <returns>An <see cref="IImageSharpBuilder"/> that can be used to further configure the ImageSharp services.</returns>
         public static IImageSharpBuilder AddImageSharp(this IServiceCollection services)
-            => new ImageSharpBuilder(services).AddDefaultServices();
+            => AddImageSharp(services, _ => { });
 
         /// <summary>
         /// Adds ImageSharp services to the specified <see cref="IServiceCollection" /> with the given options.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
-        /// <param name="configureOptions">An <see cref="Action{ImageSharpMiddlewareOptions}"/> to configure the provided <see cref="ImageSharpMiddlewareOptions"/>.</param>
+        /// <param name="setupAction">An <see cref="Action{ImageSharpMiddlewareOptions}"/> to configure the provided <see cref="ImageSharpMiddlewareOptions"/>.</param>
         /// <returns>An <see cref="IImageSharpBuilder"/> that can be used to further configure the ImageSharp services.</returns>
-        public static IImageSharpBuilder AddImageSharp(this IServiceCollection services, Action<ImageSharpMiddlewareOptions> configureOptions)
-            => services.AddImageSharp().Configure(configureOptions);
-
-        private static IImageSharpBuilder AddDefaultServices(this IImageSharpBuilder builder)
+        public static IImageSharpBuilder AddImageSharp(
+            this IServiceCollection services,
+            Action<ImageSharpMiddlewareOptions> setupAction)
         {
-            builder.Services.AddOptions();
+            Guard.NotNull(services, nameof(services));
+            Guard.NotNull(setupAction, nameof(setupAction));
+
+            IImageSharpBuilder builder = new ImageSharpBuilder(services);
+
+            AddDefaultServices(builder, setupAction);
+
+            return builder;
+        }
+
+        private static void AddDefaultServices(
+            IImageSharpBuilder builder,
+            Action<ImageSharpMiddlewareOptions> setupAction)
+        {
+            builder.Services.Configure(setupAction);
+
             builder.Services.AddSingleton<FormatUtilities>();
+
             builder.Services.AddSingleton<AsyncKeyReaderWriterLock<string>>();
 
-            // Command parsing
-            builder.Services.AddSingleton<CommandParser>();
             builder.SetRequestParser<QueryCollectionRequestParser>();
+
+            builder.SetCache<PhysicalFileSystemCache>();
+
+            builder.SetCacheKey<UriRelativeLowerInvariantCacheKey>();
+
+            builder.SetCacheHash<SHA256CacheHash>();
+
+            builder.AddProvider<PhysicalFileSystemProvider>();
+
+            builder.AddProcessor<ResizeWebProcessor>()
+                   .AddProcessor<FormatWebProcessor>()
+                   .AddProcessor<BackgroundColorWebProcessor>()
+                   .AddProcessor<QualityWebProcessor>();
 
             builder.AddConverter<IntegralNumberConverter<sbyte>>();
             builder.AddConverter<IntegralNumberConverter<byte>>();
@@ -91,21 +119,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             builder.AddConverter<ColorConverter>();
             builder.AddConverter<EnumConverter>();
 
-            // Cache
-            builder.SetCache<PhysicalFileSystemCache>();
-            builder.SetCacheKey<UriRelativeLowerInvariantCacheKey>();
-            builder.SetCacheHash<SHA256CacheHash>();
-
-            // Providers
-            builder.AddProvider<PhysicalFileSystemProvider>();
-
-            // Processors
-            builder.AddProcessor<ResizeWebProcessor>()
-                   .AddProcessor<FormatWebProcessor>()
-                   .AddProcessor<BackgroundColorWebProcessor>()
-                   .AddProcessor<QualityWebProcessor>();
-
-            return builder;
+            builder.Services.AddSingleton<CommandParser>();
         }
     }
 }
