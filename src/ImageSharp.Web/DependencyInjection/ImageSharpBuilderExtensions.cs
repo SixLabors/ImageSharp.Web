@@ -130,13 +130,13 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Adds the given <see cref="IImageProvider"/> to the provider collection within the service collection.
         /// </summary>
-        /// <typeparam name="T">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
+        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        public static IImageSharpBuilder AddProvider<T>(this IImageSharpBuilder builder)
-            where T : class, IImageProvider
+        public static IImageSharpBuilder AddProvider<TProvider>(this IImageSharpBuilder builder)
+            where TProvider : class, IImageProvider
         {
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageProvider, T>());
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageProvider, TProvider>());
 
             return builder;
         }
