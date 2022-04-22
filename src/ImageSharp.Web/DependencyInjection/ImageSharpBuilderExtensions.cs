@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -23,14 +22,14 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Sets the given <see cref="IRequestParser"/> adding it to the service collection.
         /// </summary>
-        /// <typeparam name="TParser">The type of class implementing <see cref="IRequestParser"/>to add.</typeparam>
+        /// <typeparam name="TParser">The type of class implementing <see cref="IRequestParser"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder SetRequestParser<TParser>(this IImageSharpBuilder builder)
             where TParser : class, IRequestParser
         {
-            var descriptor = new ServiceDescriptor(typeof(IRequestParser), typeof(TParser), ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
+            builder.Services.Replace(ServiceDescriptor.Singleton<IRequestParser, TParser>());
+
             return builder;
         }
 
@@ -42,22 +41,22 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder SetRequestParser(this IImageSharpBuilder builder, Func<IServiceProvider, IRequestParser> implementationFactory)
         {
-            var descriptor = new ServiceDescriptor(typeof(IRequestParser), implementationFactory, ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
+            builder.Services.Replace(ServiceDescriptor.Singleton(implementationFactory));
+
             return builder;
         }
 
         /// <summary>
         /// Sets the given <see cref="IImageCache"/> adding it to the service collection.
         /// </summary>
-        /// <typeparam name="TCache">The type of class implementing <see cref="IImageCache"/>to add.</typeparam>
+        /// <typeparam name="TCache">The type of class implementing <see cref="IImageCache"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder SetCache<TCache>(this IImageSharpBuilder builder)
             where TCache : class, IImageCache
         {
-            var descriptor = new ServiceDescriptor(typeof(IImageCache), typeof(TCache), ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
+            builder.Services.Replace(ServiceDescriptor.Singleton<IImageCache, TCache>());
+
             return builder;
         }
 
@@ -69,22 +68,22 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder SetCache(this IImageSharpBuilder builder, Func<IServiceProvider, IImageCache> implementationFactory)
         {
-            var descriptor = new ServiceDescriptor(typeof(IImageCache), implementationFactory, ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
+            builder.Services.Replace(ServiceDescriptor.Singleton(implementationFactory));
+
             return builder;
         }
 
         /// <summary>
         /// Sets the given <see cref="ICacheKey"/> adding it to the service collection.
         /// </summary>
-        /// <typeparam name="T">The type of class implementing <see cref="ICacheKey"/> to add.</typeparam>
+        /// <typeparam name="TCacheKey">The type of class implementing <see cref="ICacheKey"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        public static IImageSharpBuilder SetCacheKey<T>(this IImageSharpBuilder builder)
-            where T : class, ICacheKey
+        public static IImageSharpBuilder SetCacheKey<TCacheKey>(this IImageSharpBuilder builder)
+            where TCacheKey : class, ICacheKey
         {
-            var descriptor = new ServiceDescriptor(typeof(ICacheKey), typeof(T), ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
+            builder.Services.Replace(ServiceDescriptor.Singleton<ICacheKey, TCacheKey>());
+
             return builder;
         }
 
@@ -96,22 +95,22 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder SetCacheKey(this IImageSharpBuilder builder, Func<IServiceProvider, ICacheKey> implementationFactory)
         {
-            var descriptor = new ServiceDescriptor(typeof(ICacheKey), implementationFactory, ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
+            builder.Services.Replace(ServiceDescriptor.Singleton(implementationFactory));
+
             return builder;
         }
 
         /// <summary>
         /// Sets the given <see cref="ICacheHash"/> adding it to the service collection.
         /// </summary>
-        /// <typeparam name="TCacheHash">The type of class implementing <see cref="ICacheHash"/>to add.</typeparam>
+        /// <typeparam name="TCacheHash">The type of class implementing <see cref="ICacheHash"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder SetCacheHash<TCacheHash>(this IImageSharpBuilder builder)
             where TCacheHash : class, ICacheHash
         {
-            var descriptor = new ServiceDescriptor(typeof(ICacheHash), typeof(TCacheHash), ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
+            builder.Services.Replace(ServiceDescriptor.Singleton<ICacheHash, TCacheHash>());
+
             return builder;
         }
 
@@ -123,28 +122,29 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder SetCacheHash(this IImageSharpBuilder builder, Func<IServiceProvider, ICacheHash> implementationFactory)
         {
-            var descriptor = new ServiceDescriptor(typeof(ICacheHash), implementationFactory, ServiceLifetime.Singleton);
-            builder.Services.Replace(descriptor);
+            builder.Services.Replace(ServiceDescriptor.Singleton(implementationFactory));
+
             return builder;
         }
 
         /// <summary>
         /// Adds the given <see cref="IImageProvider"/> to the provider collection within the service collection.
         /// </summary>
-        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder AddProvider<TProvider>(this IImageSharpBuilder builder)
             where TProvider : class, IImageProvider
         {
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageProvider, TProvider>());
+
             return builder;
         }
 
         /// <summary>
         /// Adds the given <see cref="IImageProvider"/> to the provider collection within the service collection.
         /// </summary>
-        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
@@ -152,13 +152,14 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             where TProvider : class, IImageProvider
         {
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageProvider>(implementationFactory));
+
             return builder;
         }
 
         /// <summary>
         /// Inserts the given <see cref="IImageProvider"/> at the give index into to the provider collection within the service collection.
         /// </summary>
-        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="index">The zero-based index at which the provider should be inserted.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
@@ -166,18 +167,19 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             where TProvider : class, IImageProvider
         {
             var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
-            builder.ClearProviders();
-
+            descriptors.RemoveAll(x => x.GetImplementationType() == typeof(TProvider));
             descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider, TProvider>());
 
+            builder.ClearProviders();
             builder.Services.TryAddEnumerable(descriptors);
+
             return builder;
         }
 
         /// <summary>
         /// Inserts the given <see cref="IImageProvider"/>  at the give index into the provider collection within the service collection.
         /// </summary>
-        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="index">The zero-based index at which the provider should be inserted.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
@@ -186,28 +188,25 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             where TProvider : class, IImageProvider
         {
             var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
-            builder.ClearProviders();
-
+            descriptors.RemoveAll(x => x.GetImplementationType() == typeof(TProvider));
             descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider>(implementationFactory));
 
+            builder.ClearProviders();
             builder.Services.TryAddEnumerable(descriptors);
+
             return builder;
         }
 
         /// <summary>
         /// Removes the given <see cref="IImageProvider"/> from the provider collection within the service collection.
         /// </summary>
-        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/>to add.</typeparam>
+        /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder RemoveProvider<TProvider>(this IImageSharpBuilder builder)
             where TProvider : class, IImageProvider
         {
-            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
-                x.ServiceType == typeof(IImageProvider)
-                && (x.ImplementationType == typeof(TProvider)
-                || (x.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TProvider))));
-
+            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(IImageProvider) && x.GetImplementationType() == typeof(TProvider));
             if (descriptor != null)
             {
                 builder.Services.Remove(descriptor);
@@ -223,7 +222,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder ClearProviders(this IImageSharpBuilder builder)
         {
-            builder.Services.RemoveAll(typeof(IImageProvider));
+            builder.Services.RemoveAll<IImageProvider>();
 
             return builder;
         }
@@ -231,20 +230,21 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Adds the given <see cref="IImageWebProcessor"/> to the processor collection within the service collection.
         /// </summary>
-        /// <typeparam name="TProcessor">The type of class implementing <see cref="IImageWebProcessor"/>to add.</typeparam>
+        /// <typeparam name="T">The type of class implementing <see cref="IImageWebProcessor"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        public static IImageSharpBuilder AddProcessor<TProcessor>(this IImageSharpBuilder builder)
-            where TProcessor : class, IImageWebProcessor
+        public static IImageSharpBuilder AddProcessor<T>(this IImageSharpBuilder builder)
+            where T : class, IImageWebProcessor
         {
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageWebProcessor, TProcessor>());
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageWebProcessor, T>());
+
             return builder;
         }
 
         /// <summary>
         /// Adds the given <see cref="IImageWebProcessor"/> to the processor collection within the service collection.
         /// </summary>
-        /// <typeparam name="TProcessor">The type of class implementing <see cref="IImageWebProcessor"/>to add.</typeparam>
+        /// <typeparam name="TProcessor">The type of class implementing <see cref="IImageWebProcessor"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="IImageProvider"/>.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
@@ -252,24 +252,20 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             where TProcessor : class, IImageWebProcessor
         {
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageWebProcessor>(implementationFactory));
+
             return builder;
         }
 
         /// <summary>
         /// Removes the given <see cref="IImageWebProcessor"/> from the processor collection within the service collection.
         /// </summary>
-        /// <typeparam name="TProcessor">The type of class implementing <see cref="IImageWebProcessor"/>to add.</typeparam>
+        /// <typeparam name="TProcessor">The type of class implementing <see cref="IImageWebProcessor"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder RemoveProcessor<TProcessor>(this IImageSharpBuilder builder)
             where TProcessor : class, IImageWebProcessor
         {
-            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
-                x.ServiceType == typeof(IImageWebProcessor)
-                && x.Lifetime == ServiceLifetime.Singleton
-                && (x.ImplementationType == typeof(TProcessor)
-                || (x.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TProcessor))));
-
+            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(IImageWebProcessor) && x.GetImplementationType() == typeof(TProcessor));
             if (descriptor != null)
             {
                 builder.Services.Remove(descriptor);
@@ -285,7 +281,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder ClearProcessors(this IImageSharpBuilder builder)
         {
-            builder.Services.RemoveAll(typeof(IImageWebProcessor));
+            builder.Services.RemoveAll<IImageWebProcessor>();
 
             return builder;
         }
@@ -293,20 +289,21 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <summary>
         /// Adds the given <see cref="ICommandConverter"/> to the converter collection within the service collection.
         /// </summary>
-        /// <typeparam name="TConverter">The type of class implementing <see cref="ICommandConverter"/>to add.</typeparam>
+        /// <typeparam name="TConverter">The type of class implementing <see cref="ICommandConverter"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder AddConverter<TConverter>(this IImageSharpBuilder builder)
             where TConverter : class, ICommandConverter
         {
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ICommandConverter, TConverter>());
+
             return builder;
         }
 
         /// <summary>
         /// Adds the given <see cref="ICommandConverter"/> to the converter collection within the service collection.
         /// </summary>
-        /// <typeparam name="TConverter">The type of class implementing <see cref="ICommandConverter"/>to add.</typeparam>
+        /// <typeparam name="TConverter">The type of class implementing <see cref="ICommandConverter"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <param name="implementationFactory">The factory method for returning a <see cref="ICommandConverter"/>.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
@@ -314,24 +311,20 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             where TConverter : class, ICommandConverter
         {
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ICommandConverter>(implementationFactory));
+
             return builder;
         }
 
         /// <summary>
         /// Removes the given <see cref="ICommandConverter"/> from the converter collection within the service collection.
         /// </summary>
-        /// <typeparam name="TConverter">The type of class implementing <see cref="ICommandConverter"/>to add.</typeparam>
+        /// <typeparam name="TConverter">The type of class implementing <see cref="ICommandConverter"/> to add.</typeparam>
         /// <param name="builder">The core builder.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder RemoveConverter<TConverter>(this IImageSharpBuilder builder)
             where TConverter : class, ICommandConverter
         {
-            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x =>
-                x.ServiceType == typeof(ICommandConverter)
-                && x.Lifetime == ServiceLifetime.Singleton
-                && (x.ImplementationType == typeof(TConverter)
-                || (x.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TConverter))));
-
+            ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(ICommandConverter) && x.GetImplementationType() == typeof(TConverter));
             if (descriptor != null)
             {
                 builder.Services.Remove(descriptor);
@@ -347,7 +340,7 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
         public static IImageSharpBuilder ClearConverters(this IImageSharpBuilder builder)
         {
-            builder.Services.RemoveAll(typeof(ICommandConverter));
+            builder.Services.RemoveAll<ICommandConverter>();
 
             return builder;
         }
@@ -357,12 +350,13 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
         /// </summary>
         /// <typeparam name="TOptions">The options type to be configured.</typeparam>
         /// <param name="builder">The core builder.</param>
-        /// <param name="configuration">The configuration being bound.</param>
+        /// <param name="config">The configuration being bound.</param>
         /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        public static IImageSharpBuilder Configure<TOptions>(this IImageSharpBuilder builder, IConfiguration configuration)
+        public static IImageSharpBuilder Configure<TOptions>(this IImageSharpBuilder builder, IConfiguration config)
              where TOptions : class
         {
-            builder.Services.Configure<TOptions>(configuration);
+            builder.Services.Configure<TOptions>(config);
+
             return builder;
         }
 
@@ -377,7 +371,13 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
              where TOptions : class
         {
             builder.Services.Configure(configureOptions);
+
             return builder;
         }
+
+        private static Type GetImplementationType(this ServiceDescriptor descriptor)
+            => descriptor.ImplementationType
+            ?? descriptor.ImplementationInstance?.GetType()
+            ?? descriptor.ImplementationFactory?.GetType().GenericTypeArguments[1];
     }
 }

@@ -6,18 +6,29 @@ using System.Buffers;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Http;
 
-namespace SixLabors.ImageSharp.Web.Caching
+namespace SixLabors.ImageSharp.Web
 {
     /// <summary>
-    /// Optimized helper methods for generating cache keys from URI components. Much of this code has been adapted from the MIT licensed .NET runtime.
+    /// Optimized helper methods for generating encoded Uris from URI components.
+    /// Much of this code has been adapted from the MIT licensed .NET runtime.
     /// </summary>
-    internal static class CacheKeyHelper
+    public static class CaseHandlingUriBuilder
     {
         private static readonly SpanAction<char, (bool LowerInvariant, string Host, string PathBase, string Path, string Query)> InitializeAbsoluteUriStringSpanAction = new(InitializeAbsoluteUriString);
 
+        /// <summary>
+        /// Provides Uri case handling options.
+        /// </summary>
         public enum CaseHandling
         {
+            /// <summary>
+            /// No adjustments to casing are made.
+            /// </summary>
             None,
+
+            /// <summary>
+            /// All URI components are converted to lower case using the invariant culture before combining.
+            /// </summary>
             LowerInvariant
         }
 
@@ -29,14 +40,14 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="path">The portion of the request path that identifies the requested resource.</param>
         /// <param name="query">The query, if any.</param>
         /// <returns>The combined URI components, properly encoded for use in HTTP headers.</returns>
-        public static string BuildRelativeKey(
+        public static string BuildRelative(
             CaseHandling handling,
             PathString pathBase = default,
             PathString path = default,
             QueryString query = default)
 
             // Take any potential performance hit vs concatination for code reading sanity.
-            => BuildAbsoluteKey(handling, default, pathBase, path, query);
+            => BuildAbsolute(handling, default, pathBase, path, query);
 
         /// <summary>
         /// Combines the given URI components into a string that is properly encoded for use in HTTP headers.
@@ -48,7 +59,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="path">The portion of the request path that identifies the requested resource.</param>
         /// <param name="query">The query, if any.</param>
         /// <returns>The combined URI components, properly encoded for use in HTTP headers.</returns>
-        public static string BuildAbsoluteKey(
+        public static string BuildAbsolute(
             CaseHandling handling,
             HostString host,
             PathString pathBase = default,
@@ -113,7 +124,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             => index + text.ToLowerInvariant(buffer.Slice(index, text.Length));
 
         /// <summary>
-        /// Initializes the URI <see cref="string"/> for <see cref="BuildAbsoluteKey(CaseHandling, HostString, PathString, PathString, QueryString)"/>.
+        /// Initializes the URI <see cref="string"/> for <see cref="BuildAbsolute(CaseHandling, HostString, PathString, PathString, QueryString)"/>.
         /// </summary>
         /// <param name="buffer">The URI <see cref="string"/>'s <see cref="char"/> buffer.</param>
         /// <param name="uriParts">The URI parts.</param>

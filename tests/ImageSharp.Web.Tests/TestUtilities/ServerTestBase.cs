@@ -14,15 +14,15 @@ using Xunit.Abstractions;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 {
+    [Collection("Server tests")]
     public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
         where TFixture : TestServerFixture
     {
         private const int Width = 20;
-        private static readonly string Command = "?width=" + Width + "&v=" + Guid.NewGuid().ToString();
-        private static readonly string Command2 = "?width=" + (Width + 1) + "&v=" + Guid.NewGuid().ToString();
 
         protected ServerTestBase(TFixture fixture, ITestOutputHelper outputHelper, string imageSource)
         {
+            this.Fixture = fixture;
             this.HttpClient = fixture.HttpClient;
             this.OutputHelper = outputHelper;
             this.ImageSource = imageSource;
@@ -33,6 +33,8 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 this.OutputHelper.WriteLine($"Key = {item.Key}, Value = {item.Value}");
             }
         }
+
+        public TFixture Fixture { get; }
 
         public HttpClient HttpClient { get; }
 
@@ -49,7 +51,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             IImageFormat format = Configuration.Default.ImageFormatsManager.FindFormatByFileExtension(ext);
 
             // First response
-            HttpResponseMessage response = await this.HttpClient.GetAsync(url + Command);
+            HttpResponseMessage response = await this.HttpClient.GetAsync(url + this.AugmentCommand(this.Fixture.Commands[0]));
 
             Assert.NotNull(response);
             Assert.True(response.IsSuccessStatusCode);
@@ -65,7 +67,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             response.Dispose();
 
             // Cached Response
-            response = await this.HttpClient.GetAsync(url + Command);
+            response = await this.HttpClient.GetAsync(url + this.AugmentCommand(this.Fixture.Commands[0]));
 
             Assert.NotNull(response);
             Assert.True(response.IsSuccessStatusCode);
@@ -83,7 +85,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             // 304 response
             var request = new HttpRequestMessage
             {
-                RequestUri = new Uri(url + Command),
+                RequestUri = new Uri(url + this.AugmentCommand(this.Fixture.Commands[0])),
                 Method = HttpMethod.Get,
             };
 
@@ -106,7 +108,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             // 412 response
             request = new HttpRequestMessage
             {
-                RequestUri = new Uri(url + Command),
+                RequestUri = new Uri(url + this.AugmentCommand(this.Fixture.Commands[0])),
                 Method = HttpMethod.Get,
             };
 
@@ -125,10 +127,12 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
         public async Task CanProcessMultipleIdenticalQueriesAsync()
         {
             string url = this.ImageSource;
+            string command1 = this.AugmentCommand(this.Fixture.Commands[0]);
+            string command2 = this.AugmentCommand(this.Fixture.Commands[1]);
 
             Task[] tasks = Enumerable.Range(0, 100).Select(i => Task.Run(async () =>
             {
-                string command = i % 2 == 0 ? Command : Command2;
+                string command = i % 2 == 0 ? command1 : command2;
                 using HttpResponseMessage response = await this.HttpClient.GetAsync(url + command);
                 Assert.NotNull(response);
                 Assert.True(response.IsSuccessStatusCode);
@@ -139,5 +143,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             await all;
             Assert.True(all.IsCompletedSuccessfully);
         }
+
+        protected virtual string AugmentCommand(string command) => command;
     }
 }
