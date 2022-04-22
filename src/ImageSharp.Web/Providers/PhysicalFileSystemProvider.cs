@@ -3,30 +3,17 @@
 
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Resolvers;
 
 namespace SixLabors.ImageSharp.Web.Providers
 {
     /// <summary>
     /// Returns images stored in the local physical file system.
     /// </summary>
-    public class PhysicalFileSystemProvider : IImageProvider
+    public sealed class PhysicalFileSystemProvider : FileProviderImageProvider
     {
-        /// <summary>
-        /// The root path for the provider.
-        /// </summary>
-        private readonly string providerRootPath;
-
-        /// <summary>
-        /// Contains various format helper methods based on the current configuration.
-        /// </summary>
-        private readonly FormatUtilities formatUtilities;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PhysicalFileSystemProvider"/> class.
         /// </summary>
@@ -41,56 +28,23 @@ namespace SixLabors.ImageSharp.Web.Providers
             IWebHostEnvironment environment,
 #endif
             FormatUtilities formatUtilities)
+            : base(GetProvider(options, environment), options.Value.ProcessingBehavior, formatUtilities)
         {
-            Guard.NotNull(options, nameof(options));
-            Guard.NotNull(environment, nameof(environment));
-
-            this.providerRootPath = GetProviderRoot(options.Value, environment.WebRootPath, environment.ContentRootPath);
-            this.formatUtilities = formatUtilities;
-        }
-
-        /// <inheritdoc/>
-        public ProcessingBehavior ProcessingBehavior { get; } = ProcessingBehavior.CommandOnly;
-
-        /// <inheritdoc/>
-        public Func<HttpContext, bool> Match { get; set; } = _ => true;
-
-        /// <inheritdoc/>
-        public bool IsValidRequest(HttpContext context)
-            => this.formatUtilities.TryGetExtensionFromUri(context.Request.GetDisplayUrl(), out _);
-
-        /// <inheritdoc/>
-        public Task<IImageResolver> GetAsync(HttpContext context)
-        {
-            // Use Join because request path starts with a slash
-            string fullPath = Path.GetFullPath(Path.Join(this.providerRootPath, context.Request.Path.Value));
-            if (PathUtilities.IsUnderneathRoot(fullPath, this.providerRootPath))
-            {
-                // Check to see if the file exists
-                var fileInfo = new FileInfo(fullPath);
-                if (fileInfo.Exists)
-                {
-                    var metadata = new ImageMetadata(fileInfo.LastWriteTimeUtc, fileInfo.Length);
-                    return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
-                }
-            }
-
-            return Task.FromResult<IImageResolver>(null);
         }
 
         /// <summary>
         /// Determine the provider root path
         /// </summary>
-        /// <param name="providerOptions">The provider options.</param>
+        /// <param name="options">The provider options.</param>
         /// <param name="webRootPath">The web root path.</param>
         /// <param name="contentRootPath">The content root path.</param>
         /// <returns><see cref="string"/> representing the fully qualified provider root path.</returns>
-        internal static string GetProviderRoot(PhysicalFileSystemProviderOptions providerOptions, string webRootPath, string contentRootPath)
+        internal static string GetProviderRoot(PhysicalFileSystemProviderOptions options, string webRootPath, string contentRootPath)
         {
-            string providerRootPath = providerOptions.ProviderRootPath ?? webRootPath;
+            string providerRootPath = options.ProviderRootPath ?? webRootPath;
             if (string.IsNullOrEmpty(providerRootPath))
             {
-                throw new InvalidOperationException("The provider root path can't be determined, make sure it's explicitly configured or the webroot is set.");
+                throw new InvalidOperationException("The provider root path cannot be determined, make sure it's explicitly configured or the webroot is set.");
             }
 
             if (!Path.IsPathFullyQualified(providerRootPath))
@@ -100,6 +54,19 @@ namespace SixLabors.ImageSharp.Web.Providers
             }
 
             return PathUtilities.EnsureTrailingSlash(providerRootPath);
+        }
+
+        private static PhysicalFileProvider GetProvider(
+            IOptions<PhysicalFileSystemProviderOptions> options,
+#if NETCOREAPP2_1
+            IHostingEnvironment environment)
+#else
+            IWebHostEnvironment environment)
+#endif
+        {
+            Guard.NotNull(options, nameof(options));
+            Guard.NotNull(environment, nameof(environment));
+            return new(GetProviderRoot(options.Value, environment.WebRootPath, environment.ContentRootPath));
         }
     }
 }

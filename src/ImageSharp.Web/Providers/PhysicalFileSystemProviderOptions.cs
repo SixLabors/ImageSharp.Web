@@ -21,5 +21,10 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// </para>
         /// </summary>
         public string ProviderRootPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the processing behavior. Defaults to <see cref="ProcessingBehavior.CommandOnly"/>.
+        /// </summary>
+        public ProcessingBehavior ProcessingBehavior { get; set; } = ProcessingBehavior.CommandOnly;
     }
 }

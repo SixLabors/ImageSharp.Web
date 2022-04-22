@@ -13,6 +13,6 @@ namespace SixLabors.ImageSharp.Web.Caching
     {
         /// <inheritdoc/>
         public string Create(HttpContext context, CommandCollection commands)
-            => CacheKeyHelper.BuildRelativeKey(CacheKeyHelper.CaseHandling.None, context.Request.PathBase, context.Request.Path, QueryString.Create(commands));
+            => CaseHandlingUriBuilder.BuildRelative(CaseHandlingUriBuilder.CaseHandling.None, context.Request.PathBase, context.Request.Path, QueryString.Create(commands));
     }
 }
