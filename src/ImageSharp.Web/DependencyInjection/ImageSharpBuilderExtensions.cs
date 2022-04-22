@@ -375,22 +375,6 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             return builder;
         }
 
-        /// <summary>
-        /// Registers an action used to configure a particular type of options.
-        /// Note: These are run after all <see cref="Configure{T}(IImageSharpBuilder, Action{T})"/>.
-        /// </summary>
-        /// <typeparam name="T">The options type to be configured.</typeparam>
-        /// <param name="builder">The core builder.</param>
-        /// <param name="configureOptions">The action used to configure the options.</param>
-        /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-        public static IImageSharpBuilder PostConfigure<T>(this IImageSharpBuilder builder, Action<T> configureOptions)
-             where T : class
-        {
-            builder.Services.PostConfigure(configureOptions);
-
-            return builder;
-        }
-
         private static Type GetImplementationType(this ServiceDescriptor descriptor)
             => descriptor.ImplementationType
             ?? descriptor.ImplementationInstance?.GetType()
