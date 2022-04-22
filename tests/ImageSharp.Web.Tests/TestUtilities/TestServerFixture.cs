@@ -19,6 +19,10 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 {
     public abstract class TestServerFixture : IDisposable
     {
+        private const int Width = 20;
+        private static readonly string Command = "?width=" + Width + "&v=" + Guid.NewGuid().ToString();
+        private static readonly string Command2 = "?width=" + (Width + 1) + "&v=" + Guid.NewGuid().ToString();
+
         private TestServer server;
         private bool isDisposed;
 
@@ -44,7 +48,13 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 
         public HttpClient HttpClient { get; private set; }
 
-        public IServiceProvider Services { get; private set; }
+        public IServiceProvider Services { get; }
+
+        public virtual IReadOnlyList<string> Commands { get; } = new List<string>
+        {
+            Command,
+            Command2
+        };
 
         protected void ConfigureServices(IServiceCollection services)
         {
@@ -97,6 +107,8 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 
                     return onPrepareResponseAsync.Invoke(context);
                 };
+
+                this.ConfigureImageSharpOptions(options);
             })
             .ClearProviders()
             .AddProcessor<CacheBusterWebProcessor>();
@@ -105,6 +117,10 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
         }
 
         protected virtual void Configure(IApplicationBuilder app) => app.UseImageSharp();
+
+        protected virtual void ConfigureImageSharpOptions(ImageSharpMiddlewareOptions options)
+        {
+        }
 
         protected abstract void ConfigureCustomServices(IServiceCollection services, IImageSharpBuilder builder);
 

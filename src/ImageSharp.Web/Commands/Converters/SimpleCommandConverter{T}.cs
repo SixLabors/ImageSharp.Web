@@ -11,7 +11,7 @@ namespace SixLabors.ImageSharp.Web.Commands.Converters
     /// The generic converter for simple types that implement <see cref="IConvertible"/>.
     /// </summary>
     /// <typeparam name="T">The type of object to convert to.</typeparam>
-    internal sealed class SimpleCommandConverter<T> : ICommandConverter<T>
+    public sealed class SimpleCommandConverter<T> : ICommandConverter<T>
         where T : IConvertible
     {
         /// <inheritdoc/>

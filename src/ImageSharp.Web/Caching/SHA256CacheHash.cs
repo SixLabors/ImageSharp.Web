@@ -33,18 +33,16 @@ namespace SixLabors.ImageSharp.Web.Caching
         public string Create(string value, uint length)
         {
             int byteCount = Encoding.ASCII.GetByteCount(value);
-
-            // Allocating a buffer from the pool is ~27% slower than stackalloc so use that for short strings
-            if (byteCount < 257)
-            {
-                return HashValue(value, length, stackalloc byte[byteCount]);
-            }
-
             byte[] buffer = null;
+
             try
             {
-                buffer = ArrayPool<byte>.Shared.Rent(byteCount);
-                return HashValue(value, length, buffer.AsSpan(0, byteCount));
+                // Allocating a buffer from the pool is ~27% slower than stackalloc so use that for short strings
+                Span<byte> bytes = byteCount <= 128
+                    ? stackalloc byte[byteCount]
+                    : (buffer = ArrayPool<byte>.Shared.Rent(byteCount)).AsSpan(0, byteCount);
+
+                return HashValue(value, length, bytes);
             }
             finally
             {
