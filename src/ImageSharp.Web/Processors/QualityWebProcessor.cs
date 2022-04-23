@@ -12,7 +12,7 @@ using SixLabors.ImageSharp.Web.Commands;
 namespace SixLabors.ImageSharp.Web.Processors
 {
     /// <summary>
-    /// Allows the setting of quality for the jpeg image format.
+    /// Allows the setting of quality for the jpeg and webp image format.
     /// </summary>
     public class QualityWebProcessor : IImageWebProcessor
     {
