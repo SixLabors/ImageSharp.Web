@@ -29,16 +29,7 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// <summary>
         /// Gets an <see cref="IEnumerable{String}"/> representing the keys of the collection.
         /// </summary>
-        public IEnumerable<string> Keys
-        {
-            get
-            {
-                foreach (KeyValuePair<string, string> item in this)
-                {
-                    yield return this.GetKeyForItem(item);
-                }
-            }
-        }
+        public IEnumerable<string> Keys => this.Dictionary.Keys; // TODO Change return type to ICollection<string> in next major release
 
         /// <summary>
         /// Gets or sets the value associated with the specified key.

@@ -211,18 +211,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             if (commands.Count > 0)
             {
-                // Strip out any unknown commands, if needed.
-                int index = 0;
+                // Strip out any unknown commands
                 foreach (string command in commands.Keys)
                 {
                     if (!this.knownCommands.Contains(command))
                     {
-                        // Need to actually remove, allocates new list to allow modifications
-                        this.StripUnknownCommands(commands, index);
-                        break;
+                        commands.Remove(command);
                     }
-
-                    index++;
                 }
             }
 
@@ -304,19 +299,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
             // We don't log the error to avoid attempts at log poisoning.
             httpContext.Response.Clear();
             httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-        }
-
-        private void StripUnknownCommands(CommandCollection commands, int startAtIndex)
-        {
-            var keys = new List<string>(commands.Keys);
-            for (int index = startAtIndex; index < keys.Count; index++)
-            {
-                string command = keys[index];
-                if (!this.knownCommands.Contains(command))
-                {
-                    commands.Remove(command);
-                }
-            }
         }
 
         private async Task ProcessRequestAsync(
