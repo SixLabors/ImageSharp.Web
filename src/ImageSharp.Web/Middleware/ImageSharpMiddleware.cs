@@ -197,6 +197,24 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
         private async Task Invoke(HttpContext httpContext, bool retry)
         {
+            // Get the correct provider for the request
+            IImageProvider provider = null;
+            foreach (IImageProvider resolver in this.providers)
+            {
+                if (resolver.Match(httpContext))
+                {
+                    provider = resolver;
+                    break;
+                }
+            }
+
+            if (provider?.IsValidRequest(httpContext) != true)
+            {
+                // Nothing to do. call the next delegate/middleware in the pipeline
+                await this.next(httpContext);
+                return;
+            }
+
             CommandCollection commands = this.requestParser.ParseRequestCommands(httpContext);
 
             // First check for a HMAC token and capture before the command is stripped out.
@@ -219,24 +237,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         commands.Remove(command);
                     }
                 }
-            }
-
-            // Get the correct provider for the request
-            IImageProvider provider = null;
-            foreach (IImageProvider resolver in this.providers)
-            {
-                if (resolver.Match(httpContext))
-                {
-                    provider = resolver;
-                    break;
-                }
-            }
-
-            if (provider?.IsValidRequest(httpContext) != true)
-            {
-                // Nothing to do. call the next delegate/middleware in the pipeline
-                await this.next(httpContext);
-                return;
             }
 
             ImageCommandContext imageCommandContext = new(httpContext, commands, this.commandParser, this.parserCulture);
