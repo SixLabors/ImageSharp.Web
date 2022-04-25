@@ -193,7 +193,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// </summary>
         /// <param name="httpContext">The current HTTP request context.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public Task Invoke(HttpContext httpContext) => this.Invoke(httpContext, false);
+        public Task Invoke(HttpContext httpContext) => this.Invoke(httpContext, true);
 
         private async Task Invoke(HttpContext httpContext, bool retry)
         {
@@ -585,13 +585,13 @@ namespace SixLabors.ImageSharp.Web.Middleware
                         }
                         catch (Exception ex)
                         {
-                            if (!retry)
+                            if (retry)
                             {
                                 // The image has failed to be returned from the cache.
                                 // This can happen if the cached image has been physically deleted but the item is still in the LRU cache.
                                 // We'll retry running the request again in it's entirety. This ensures any changes to the source are tracked also.
                                 CacheResolverLru.TryRemove(key);
-                                await this.Invoke(httpContext);
+                                await this.Invoke(httpContext, false);
                                 return;
                             }
 
@@ -614,6 +614,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                     this.logger.LogImagePreconditionFailed(imageContext.GetDisplayUrl());
                     await imageContext.SendStatusAsync(ResponseConstants.Status412PreconditionFailed, metadata);
                     return;
+
                 default:
                     var exception = new NotImplementedException(imageContext.GetPreconditionState().ToString());
                     Debug.Fail(exception.ToString());
