@@ -42,13 +42,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             = new(1024, TimeSpan.FromSeconds(30));
 
         /// <summary>
-        /// Used to temporarily store cached HMAC-s to reduce the overhead of HMAC token generation.
-        /// </summary>
-        private static readonly ConcurrentTLruCache<string, string> HMACTokenLru
-            = new(1024, TimeSpan.FromSeconds(30));
-
-        /// <summary>
-        /// The function processing the Http request.
+        /// The function processing the next HTTP request.
         /// </summary>
         private readonly RequestDelegate next;
 
@@ -201,11 +195,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             // First check for a HMAC token and capture before the command is stripped out.
             byte[] secret = this.options.HMACSecretKey;
-            bool checkHMAC = false;
+            bool computeHMAC = false;
             string token = null;
             if (secret?.Length > 0)
             {
-                checkHMAC = true;
+                computeHMAC = true;
                 token = commands.GetValueOrDefault(HMACUtilities.TokenCommand);
             }
 
@@ -246,17 +240,17 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             ImageCommandContext imageCommandContext = new(httpContext, commands, this.commandParser, this.parserCulture);
 
-            // At this point we know that this is an image request so should attempt to compute a validating HMAC..
+            // At this point we know that this is an image request so should attempt to compute a validating HMAC.
             string hmac = null;
-            if (checkHMAC && token != null)
+            if (computeHMAC)
             {
-                // Generate and cache a HMAC to validate against based upon the current valid commands from the request.
+                // Compute an HMAC to validate against based upon the current valid commands from the request.
                 //
                 // If the command collection differs following the stripping of invalid commands prior to this point then this will mean
                 // the token will not match our validating HMAC, however, this would be indicative of an attack and should be treated as such.
                 //
                 // As a rule all image requests should contain valid commands only.
-                hmac = await HMACTokenLru.GetOrAddAsync(token, _ => this.options.OnComputeHMACAsync(imageCommandContext, secret));
+                hmac = await this.options.OnComputeHMACAsync(imageCommandContext, secret);
             }
 
             await this.options.OnParseCommandsAsync.Invoke(imageCommandContext);
@@ -269,14 +263,11 @@ namespace SixLabors.ImageSharp.Web.Middleware
             }
 
             // At this point we know that this is an image request designed for processing via this middleware.
-            // Check for a token if required and reject if invalid.
-            if (checkHMAC)
+            // Check for a computed HMAC and reject if token is invalid.
+            if (hmac != null && hmac != token)
             {
-                if (token == null || hmac != token)
-                {
-                    SetBadRequest(httpContext);
-                    return;
-                }
+                SetBadRequest(httpContext);
+                return;
             }
 
             IImageResolver sourceImageResolver = await provider.GetAsync(httpContext);
