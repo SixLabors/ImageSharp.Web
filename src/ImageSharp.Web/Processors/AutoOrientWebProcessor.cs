@@ -16,7 +16,7 @@ namespace SixLabors.ImageSharp.Web.Processors
     public class AutoOrientWebProcessor : IImageWebProcessor
     {
         /// <summary>
-        /// The command for changing the orientation.
+        /// The command for changing the orientation according to the EXIF information.
         /// </summary>
         public const string AutoOrient = "autoorient";
 
@@ -44,5 +44,8 @@ namespace SixLabors.ImageSharp.Web.Processors
 
             return image;
         }
+
+        /// <inheritdoc/>
+        public bool RequiresTrueColorPixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture) => false;
     }
 }
