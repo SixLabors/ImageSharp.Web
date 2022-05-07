@@ -35,7 +35,7 @@ namespace SixLabors.ImageSharp.Web.Sample
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
         /// </summary>
-        /// <param name="services">The collection of service desscriptors.</param>
+        /// <param name="services">The collection of service descriptors.</param>
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddImageSharp()
@@ -57,7 +57,8 @@ namespace SixLabors.ImageSharp.Web.Sample
                 .AddProcessor<ResizeWebProcessor>()
                 .AddProcessor<FormatWebProcessor>()
                 .AddProcessor<BackgroundColorWebProcessor>()
-                .AddProcessor<QualityWebProcessor>();
+                .AddProcessor<QualityWebProcessor>()
+                .AddProcessor<AutoOrientWebProcessor>();
 
             // Add the default service and options.
             //
