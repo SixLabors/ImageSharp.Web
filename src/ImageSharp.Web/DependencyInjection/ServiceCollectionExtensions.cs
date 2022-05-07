@@ -71,7 +71,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
             builder.AddProcessor<ResizeWebProcessor>()
                    .AddProcessor<FormatWebProcessor>()
                    .AddProcessor<BackgroundColorWebProcessor>()
-                   .AddProcessor<QualityWebProcessor>();
+                   .AddProcessor<QualityWebProcessor>()
+                   .AddProcessor<AutoOrientWebProcessor>();
 
             builder.AddConverter<IntegralNumberConverter<sbyte>>();
             builder.AddConverter<IntegralNumberConverter<byte>>();

@@ -48,7 +48,7 @@ namespace SixLabors.ImageSharp.Web.Processors
         /// <param name="processors">The collection of available processors.</param>
         /// <param name="commands">The parsed collection of processing commands.</param>
         /// <returns>
-        /// The sorted proccessors that supports any of the specified commands.
+        /// The sorted processors that supports any of the specified commands.
         /// </returns>
         public static IReadOnlyList<(int Index, IImageWebProcessor Processor)> OrderBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, CommandCollection commands)
         {
