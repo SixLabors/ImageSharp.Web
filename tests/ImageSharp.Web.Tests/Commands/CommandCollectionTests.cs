@@ -178,6 +178,24 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         }
 
         [Fact]
+        public void KeysAndUnorderedKeysContainSameValues()
+        {
+            string[] keys = new[] { "a", "b", "c", "d" };
+
+            CommandCollection collection = new();
+            foreach (string key in keys)
+            {
+                collection.Insert(0, new(key, null));
+            }
+
+            foreach (string key in keys)
+            {
+                Assert.Contains(key, collection.Keys);
+                Assert.Contains(key, collection.UnorderedKeys);
+            }
+        }
+
+        [Fact]
         public void GetByInvalidKeyThrowsCorrectly()
             => Assert.Throws<KeyNotFoundException>(() =>
             {

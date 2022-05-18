@@ -41,6 +41,11 @@ namespace SixLabors.ImageSharp.Web.Commands
         }
 
         /// <summary>
+        /// Gets an <see cref="ICollection{String}"/> representing the keys of the collection in an undefined manner.
+        /// </summary>
+        internal ICollection<string> UnorderedKeys => this.Dictionary.Keys;
+
+        /// <summary>
         /// Gets or sets the value associated with the specified key.
         /// </summary>
         /// <param name="key">The key of the value to get or set.</param>
