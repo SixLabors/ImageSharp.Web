@@ -23,7 +23,7 @@ namespace SixLabors.ImageSharp.Web
             {
                 // AccessKey can be empty.
                 // AccessSecret can be empty.
-                AmazonS3Config config = new() { ServiceURL = options.Endpoint, ForcePathStyle = true };
+                AmazonS3Config config = new() { ServiceURL = options.Endpoint, ForcePathStyle = true, AuthenticationRegion = options.Region };
                 return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
             }
             else if (!string.IsNullOrWhiteSpace(options.AccessKey))
