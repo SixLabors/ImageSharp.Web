@@ -591,7 +591,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                                 // This can happen if the cached image has been physically deleted but the item is still in the LRU cache.
                                 // We'll retry running the request again in it's entirety. This ensures any changes to the source are tracked also.
                                 CacheResolverLru.TryRemove(key);
-                                await this.Invoke(httpContext);
+                                await this.Invoke(httpContext, true);
                                 return;
                             }
 
