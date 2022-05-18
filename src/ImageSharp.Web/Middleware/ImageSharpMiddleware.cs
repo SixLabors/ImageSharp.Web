@@ -246,7 +246,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             ImageCommandContext imageCommandContext = new(httpContext, commands, this.commandParser, this.parserCulture);
 
-            // At this point we know that this is an image request so should attempt to compute a validating HMAC..
+            // At this point we know that this is an image request so should attempt to compute a validating HMAC.
             string hmac = null;
             if (checkHMAC && token != null)
             {
@@ -256,7 +256,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 // the token will not match our validating HMAC, however, this would be indicative of an attack and should be treated as such.
                 //
                 // As a rule all image requests should contain valid commands only.
-                hmac = await HMACTokenLru.GetOrAddAsync(token, _ => this.options.OnComputeHMACAsync(imageCommandContext, secret));
+                // Key generation uses string.Create under the hood with very low allocation so should be good enough as a cache key.
+                hmac = await HMACTokenLru.GetOrAddAsync(httpContext.Request.GetEncodedUrl(), _ => this.options.OnComputeHMACAsync(imageCommandContext, secret));
             }
 
             await this.options.OnParseCommandsAsync.Invoke(imageCommandContext);
