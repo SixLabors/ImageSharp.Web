@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Collections.Generic;
 using SixLabors.ImageSharp.Web.Commands;
 using Xunit;
@@ -14,6 +15,15 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         {
             CommandCollection collection = new();
             collection.Add(new("a", "b"));
+            Assert.Single(collection);
+        }
+
+        [Fact]
+        public void CannotAddDuplicateCommands()
+        {
+            CommandCollection collection = new();
+            collection.Add(new("a", "b"));
+            Assert.Throws<ArgumentException>(() => collection.Add(new("a", "b")));
             Assert.Single(collection);
         }
 
@@ -49,6 +59,15 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
         }
 
         [Fact]
+        public void CannotInsertDuplicateCommands()
+        {
+            CommandCollection collection = new();
+            collection.Add(new("a", "b"));
+            Assert.Throws<ArgumentException>(() => collection.Insert(0, new("a", "b")));
+            Assert.Single(collection);
+        }
+
+        [Fact]
         public void CanInsertCommandsViaKey()
         {
             KeyValuePair<string, string> kv1 = new("a", "b");
@@ -66,6 +85,15 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
 
             Assert.Equal(1, collection.IndexOf(kv1));
             Assert.Equal(0, collection.IndexOf(kv2));
+        }
+
+        [Fact]
+        public void CannotInsertDuplicateCommandsViaKey()
+        {
+            CommandCollection collection = new();
+            collection.Add(new("a", "b"));
+            Assert.Throws<ArgumentException>(() => collection.Insert(0, "a", "b"));
+            Assert.Single(collection);
         }
 
         [Fact]
