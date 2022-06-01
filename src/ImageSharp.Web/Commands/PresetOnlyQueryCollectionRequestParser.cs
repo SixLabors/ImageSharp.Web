@@ -39,7 +39,8 @@ namespace SixLabors.ImageSharp.Web.Commands
                 return new();
             }
 
-            string requestedPreset = context.Request.Query[QueryKey][0];
+            StringValues query = context.Request.Query[QueryKey];
+            string requestedPreset = query[query.Count - 1];
             if (this.presets.TryGetValue(requestedPreset, out CommandCollection collection))
             {
                 return collection;
@@ -63,7 +64,8 @@ namespace SixLabors.ImageSharp.Web.Commands
             CommandCollection transformed = new();
             foreach (KeyValuePair<string, StringValues> pair in parsed)
             {
-                transformed.Add(new(pair.Key, pair.Value.ToString()));
+                // Use the indexer for both set and query. This replaces any previously parsed values.
+                transformed[pair.Key] = pair.Value[pair.Value.Count - 1];
             }
 
             return transformed;
