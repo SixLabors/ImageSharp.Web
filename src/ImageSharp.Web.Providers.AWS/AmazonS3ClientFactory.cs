@@ -23,6 +23,7 @@ namespace SixLabors.ImageSharp.Web
             {
                 // AccessKey can be empty.
                 // AccessSecret can be empty.
+                // PathStyle endpoint doesn't support AccelerateEndpoint.
                 AmazonS3Config config = new() { ServiceURL = options.Endpoint, ForcePathStyle = true, AuthenticationRegion = options.Region };
                 return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
             }
@@ -31,12 +32,14 @@ namespace SixLabors.ImageSharp.Web
                 // AccessSecret can be empty.
                 Guard.NotNullOrWhiteSpace(options.Region, nameof(options.Region));
                 var region = RegionEndpoint.GetBySystemName(options.Region);
-                return new AmazonS3Client(options.AccessKey, options.AccessSecret, region);
+                AmazonS3Config config = new() { RegionEndpoint = region, UseAccelerateEndpoint = options.UseAccelerateEndpoint };
+                return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
             }
             else if (!string.IsNullOrWhiteSpace(options.Region))
             {
                 var region = RegionEndpoint.GetBySystemName(options.Region);
-                return new AmazonS3Client(region);
+                AmazonS3Config config = new() { RegionEndpoint = region, UseAccelerateEndpoint = options.UseAccelerateEndpoint };
+                return new AmazonS3Client(config);
             }
             else
             {
