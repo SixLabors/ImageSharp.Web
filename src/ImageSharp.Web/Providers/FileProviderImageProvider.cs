@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -54,7 +55,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <inheritdoc/>
         public Task<IImageResolver> GetAsync(HttpContext context)
         {
-            IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path);
+            IFileInfo fileInfo = this.fileProvider.GetFileInfo(WebUtility.UrlDecode(context.Request.Path));
             if (!fileInfo.Exists)
             {
                 return Task.FromResult<IImageResolver>(null);
