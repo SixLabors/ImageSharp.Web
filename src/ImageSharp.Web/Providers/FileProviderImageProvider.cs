@@ -55,7 +55,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <inheritdoc/>
         public Task<IImageResolver> GetAsync(HttpContext context)
         {
-            IFileInfo fileInfo = this.fileProvider.GetFileInfo(WebUtility.UrlDecode(context.Request.Path));
+            IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
             if (!fileInfo.Exists)
             {
                 return Task.FromResult<IImageResolver>(null);
