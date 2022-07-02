@@ -66,10 +66,10 @@ namespace SixLabors.ImageSharp.Web
             PathString path = default,
             QueryString query = default)
         {
-            string hostText = host.ToString();
-            string pathBaseText = pathBase.ToString();
-            string pathText = path.ToString();
-            string queryText = query.ToString();
+            string hostText = host.ToUriComponent();
+            string pathBaseText = pathBase.ToUriComponent();
+            string pathText = path.ToUriComponent();
+            string queryText = query.ToUriComponent();
 
             // PERF: Calculate string length to allocate correct buffer size for string.Create.
             int length =
@@ -95,6 +95,46 @@ namespace SixLabors.ImageSharp.Web
             }
 
             return string.Create(length, (handling == CaseHandling.LowerInvariant, hostText, pathBaseText, pathText, queryText), InitializeAbsoluteUriStringSpanAction);
+        }
+
+        /// <summary>
+        /// Generates a string from the given absolute or relative Uri that is appropriately encoded for use in
+        /// HTTP headers. Note that a unicode host name will be encoded as punycode.
+        /// </summary>
+        /// <param name="handling">Determines case handling for the result.</param>
+        /// <param name="uri">The Uri to encode.</param>
+        /// <returns>The encoded string version of <paramref name="uri"/>.</returns>
+        public static string Encode(CaseHandling handling, string uri)
+            => Encode(handling, new Uri(uri, UriKind.RelativeOrAbsolute));
+
+        /// <summary>
+        /// Generates a string from the given absolute or relative Uri that is appropriately encoded for use in
+        /// HTTP headers. Note that a unicode host name will be encoded as punycode.
+        /// </summary>
+        /// <param name="handling">Determines case handling for the result.</param>
+        /// <param name="uri">The Uri to encode.</param>
+        /// <returns>The encoded string version of <paramref name="uri"/>.</returns>
+        public static string Encode(CaseHandling handling, Uri uri)
+        {
+            Guard.NotNull(uri, nameof(uri));
+            if (uri.IsAbsoluteUri)
+            {
+                return BuildAbsolute(
+                    handling,
+                    host: HostString.FromUriComponent(uri),
+                    pathBase: PathString.FromUriComponent(uri),
+                    query: QueryString.FromUriComponent(uri));
+            }
+            else
+            {
+                string components = uri.GetComponents(UriComponents.SerializationInfoString, UriFormat.UriEscaped);
+                if (handling == CaseHandling.LowerInvariant)
+                {
+                    return components.ToLowerInvariant();
+                }
+
+                return components;
+            }
         }
 
         /// <summary>
