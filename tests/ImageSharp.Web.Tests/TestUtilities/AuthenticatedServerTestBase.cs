@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -38,7 +39,9 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
         protected override string AugmentCommand(string command)
         {
             // Mimic the lowecase relative url format used by the token and default options.
-            string uri = (this.ImageSource + command).Replace("http://localhost", string.Empty).ToLowerInvariant();
+            string uri = (this.ImageSource + command).Replace("http://localhost", string.Empty);
+            uri = CaseHandlingUriBuilder.Encode(CaseHandlingUriBuilder.CaseHandling.LowerInvariant, uri);
+
             string token = HMACUtilities.ComputeHMACSHA256(uri, AuthenticatedTestServerFixture.HMACSecretKey);
             return command + "&" + HMACUtilities.TokenCommand + "=" + token;
         }
