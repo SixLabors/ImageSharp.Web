@@ -35,5 +35,8 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
 
         /// <inheritdoc/>
         public string Endpoint { get; set; }
+
+        /// <inheritdoc/>
+        public bool UseAccelerateEndpoint { get; set; }
     }
 }

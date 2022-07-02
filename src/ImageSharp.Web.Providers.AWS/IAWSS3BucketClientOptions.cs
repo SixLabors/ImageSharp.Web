@@ -37,5 +37,11 @@ namespace SixLabors.ImageSharp.Web
         /// to be set to localhost.
         /// </summary>
         string Endpoint { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the S3 accelerate endpoint is used.
+        /// The feature must be enabled on the bucket. Follow AWS instruction on <see href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/transfer-acceleration.html"/>.
+        /// </summary>
+        bool UseAccelerateEndpoint { get; set; }
     }
 }
