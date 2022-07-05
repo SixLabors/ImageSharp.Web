@@ -13,11 +13,12 @@ namespace SixLabors.ImageSharp.Web
     /// </summary>
     internal static class AsyncHelper
     {
-        private static readonly TaskFactory TaskFactory = new
-            (CancellationToken.None,
-            TaskCreationOptions.None,
-            TaskContinuationOptions.None,
-            TaskScheduler.Default);
+        private static readonly TaskFactory TaskFactory
+            = new(
+                CancellationToken.None,
+                TaskCreationOptions.None,
+                TaskContinuationOptions.None,
+                TaskScheduler.Default);
 
         /// <summary>
         /// Executes an async <see cref="Task"/> method synchronously.

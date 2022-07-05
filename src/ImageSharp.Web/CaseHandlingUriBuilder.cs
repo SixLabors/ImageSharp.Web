@@ -14,6 +14,7 @@ namespace SixLabors.ImageSharp.Web
     /// </summary>
     public static class CaseHandlingUriBuilder
     {
+        private static readonly Uri FallbackBaseUri = new("http://localhost/");
         private static readonly SpanAction<char, (bool LowerInvariant, string Host, string PathBase, string Path, string Query)> InitializeAbsoluteUriStringSpanAction = new(InitializeAbsoluteUriString);
 
         /// <summary>
@@ -127,13 +128,11 @@ namespace SixLabors.ImageSharp.Web
             }
             else
             {
-                string components = uri.GetComponents(UriComponents.SerializationInfoString, UriFormat.UriEscaped);
-                if (handling == CaseHandling.LowerInvariant)
-                {
-                    return components.ToLowerInvariant();
-                }
-
-                return components;
+                Uri faux = new(FallbackBaseUri, uri);
+                return BuildRelative(
+                    handling,
+                    pathBase: PathString.FromUriComponent(faux),
+                    query: QueryString.FromUriComponent(faux));
             }
         }
 

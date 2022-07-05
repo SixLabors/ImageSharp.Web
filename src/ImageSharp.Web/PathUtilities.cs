@@ -1,7 +1,6 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
 using System.IO;
 
 namespace SixLabors.ImageSharp.Web
@@ -25,16 +24,5 @@ namespace SixLabors.ImageSharp.Web
 
             return path;
         }
-
-        /// <summary>
-        /// Determines whether the <paramref name="path" /> is located underneath the specified <paramref name="rootPath" />.
-        /// </summary>
-        /// <param name="path">The fully qualified path to test.</param>
-        /// <param name="rootPath">The root path (needs to end with a directory separator).</param>
-        /// <returns>
-        ///   <c>true</c> if the path is located underneath the specified root path; otherwise, <c>false</c>.
-        /// </returns>
-        internal static bool IsUnderneathRoot(string path, string rootPath)
-            => path.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase);
     }
 }

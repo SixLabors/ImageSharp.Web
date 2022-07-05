@@ -34,10 +34,7 @@ namespace SixLabors.ImageSharp.Web
             {
                 string[] extensions = imageFormat.FileExtensions.ToArray();
 
-                foreach (string extension in extensions)
-                {
-                    this.extensions.Add(extension);
-                }
+                this.extensions.AddRange(extensions);
 
                 this.extensionsByMimeType[imageFormat.DefaultMimeType] = extensions[0];
             }

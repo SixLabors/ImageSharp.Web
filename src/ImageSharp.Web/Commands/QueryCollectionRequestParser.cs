@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
 
 namespace SixLabors.ImageSharp.Web.Commands
@@ -22,11 +21,8 @@ namespace SixLabors.ImageSharp.Web.Commands
                 return new();
             }
 
-            // TODO: Investigate skipping the double allocation here.
-            // In .NET 6 we can directly use the QueryStringEnumerable type and enumerate stright to our command collection
-            Dictionary<string, StringValues> parsed = QueryHelpers.ParseQuery(context.Request.QueryString.ToUriComponent());
             CommandCollection transformed = new();
-            foreach (KeyValuePair<string, StringValues> pair in parsed)
+            foreach (KeyValuePair<string, StringValues> pair in context.Request.Query)
             {
                 // Use the indexer for both set and query. This replaces any previously parsed values.
                 transformed[pair.Key] = pair.Value[pair.Value.Count - 1];
