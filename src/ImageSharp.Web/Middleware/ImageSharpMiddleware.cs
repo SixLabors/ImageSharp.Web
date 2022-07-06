@@ -129,7 +129,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="cache">An <see cref="IImageCache"/> instance used for caching images.</param>
         /// <param name="cacheKey">An <see cref="ICacheKey"/> instance used for creating cache keys.</param>
         /// <param name="cacheHash">An <see cref="ICacheHash"/>instance used for calculating cached file names.</param>
-        /// <param name="commandParser">The command parser</param>
+        /// <param name="commandParser">The command parser.</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         /// <param name="asyncKeyLock">The async key lock</param>
         public ImageSharpMiddleware(

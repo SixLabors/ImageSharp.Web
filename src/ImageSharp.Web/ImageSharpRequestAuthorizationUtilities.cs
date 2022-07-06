@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -28,10 +28,11 @@ namespace SixLabors.ImageSharp.Web
         /// The command used by image requests for transporting Hash-based Message Authentication Code (HMAC) tokens.
         /// </summary>
         public const string TokenCommand = HMACUtilities.TokenCommand;
-
         private static readonly Uri FallbackBaseUri = new("http://localhost/");
         private readonly HashSet<string> knownCommands;
         private readonly ImageSharpMiddlewareOptions options;
+        private readonly CommandParser commandParser;
+        private readonly CultureInfo parserCulture;
         private readonly IRequestParser requestParser;
         private readonly IServiceProvider serviceProvider;
 
@@ -41,17 +42,25 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="options">The middleware configuration options.</param>
         /// <param name="requestParser">An <see cref="IRequestParser"/> instance used to parse image requests for commands.</param>
         /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images.</param>
+        /// <param name="commandParser">The command parser.</param>
         /// <param name="serviceProvider">The service provider.</param>
         public ImageSharpRequestAuthorizationUtilities(
             IOptions<ImageSharpMiddlewareOptions> options,
             IRequestParser requestParser,
             IEnumerable<IImageWebProcessor> processors,
+            CommandParser commandParser,
             IServiceProvider serviceProvider)
         {
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(requestParser, nameof(requestParser));
             Guard.NotNull(processors, nameof(processors));
             Guard.NotNull(serviceProvider, nameof(serviceProvider));
+
+            this.options = options.Value;
+            this.commandParser = commandParser;
+            this.parserCulture = this.options.UseInvariantParsingCulture
+                ? CultureInfo.InvariantCulture
+                : CultureInfo.CurrentCulture;
 
             HashSet<string> commands = new(StringComparer.OrdinalIgnoreCase);
             foreach (IImageWebProcessor processor in processors)
@@ -63,7 +72,6 @@ namespace SixLabors.ImageSharp.Web
             }
 
             this.knownCommands = commands;
-            this.options = options.Value;
         }
 
         /// <summary>
@@ -90,32 +98,116 @@ namespace SixLabors.ImageSharp.Web
         /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
         /// </summary>
         /// <param name="uri">The uri to compute the code from.</param>
+        /// <param name="handling">The command collection handling.</param>
         /// <returns>The computed HMAC.</returns>
-        public string ComputeHMAC(string uri)
-            => this.ComputeHMAC(new Uri(uri));
+        public string ComputeHMAC(string uri, CommandHandling handling)
+            => this.ComputeHMAC(new Uri(uri), handling);
 
         /// <summary>
         /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
         /// </summary>
         /// <param name="uri">The uri to compute the code from.</param>
+        /// <param name="handling">The command collection handling.</param>
         /// <returns>The computed HMAC.</returns>
-        public string ComputeHMAC(Uri uri)
-            => AsyncHelper.RunSync(() => this.ComputeHMACAsync(uri));
+        public Task<string> ComputeHMACAsync(string uri, CommandHandling handling)
+            => this.ComputeHMACAsync(new Uri(uri), handling);
 
         /// <summary>
         /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
         /// </summary>
         /// <param name="uri">The uri to compute the code from.</param>
+        /// <param name="handling">The command collection handling.</param>
         /// <returns>The computed HMAC.</returns>
-        public Task<string> ComputeHMACAsync(string uri)
-            => this.ComputeHMACAsync(new Uri(uri));
+        public string ComputeHMAC(Uri uri, CommandHandling handling)
+        {
+            ToComponents(
+                uri,
+                out HostString host,
+                out PathString path,
+                out QueryString queryString);
+
+            return this.ComputeHMAC(host, path, queryString, handling);
+        }
 
         /// <summary>
         /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
         /// </summary>
         /// <param name="uri">The uri to compute the code from.</param>
+        /// <param name="handling">The command collection handling.</param>
         /// <returns>The computed HMAC.</returns>
-        public async Task<string> ComputeHMACAsync(Uri uri)
+        public Task<string> ComputeHMACAsync(Uri uri, CommandHandling handling)
+        {
+            ToComponents(
+                uri,
+                out HostString host,
+                out PathString path,
+                out QueryString queryString);
+
+            return this.ComputeHMACAsync(host, path, queryString, handling);
+        }
+
+        /// <summary>
+        /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
+        /// </summary>
+        /// <param name="host">The host header.</param>
+        /// <param name="path">The path or pathbase.</param>
+        /// <param name="queryString">The querystring.</param>
+        /// <param name="handling">The command collection handling.</param>
+        /// <returns>The computed HMAC.</returns>
+        public string ComputeHMAC(HostString host, PathString path, QueryString queryString, CommandHandling handling)
+            => this.ComputeHMAC(host, path, queryString, handling);
+
+        /// <summary>
+        /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
+        /// </summary>
+        /// <param name="host">The host header.</param>
+        /// <param name="path">The path or pathbase.</param>
+        /// <param name="queryString">The querystring.</param>
+        /// <param name="handling">The command collection handling.</param>
+        /// <returns>The computed HMAC.</returns>
+        public Task<string> ComputeHMACAsync(HostString host, PathString path, QueryString queryString, CommandHandling handling)
+            => this.ComputeHMACAsync(host, path, queryString, new(QueryHelpers.ParseQuery(queryString.Value)), handling);
+
+        /// <summary>
+        /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
+        /// </summary>
+        /// <param name="host">The host header.</param>
+        /// <param name="path">The path or pathbase.</param>
+        /// <param name="queryString">The querystring.</param>
+        /// <param name="query">The query collection.</param>
+        /// <param name="handling">The command collection handling.</param>
+        /// <returns>The computed HMAC.</returns>
+        public string ComputeHMAC(HostString host, PathString path, QueryString queryString, QueryCollection query, CommandHandling handling)
+            => this.ComputeHMAC(this.ToHttpContext(host, path, queryString, query), handling);
+
+        /// <summary>
+        /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
+        /// </summary>
+        /// <param name="host">The host header.</param>
+        /// <param name="path">The path or pathbase.</param>
+        /// <param name="queryString">The querystring.</param>
+        /// <param name="query">The query collection.</param>
+        /// <param name="handling">The command collection handling.</param>
+        /// <returns>The computed HMAC.</returns>
+        public Task<string> ComputeHMACAsync(HostString host, PathString path, QueryString queryString, QueryCollection query, CommandHandling handling)
+            => this.ComputeHMACAsync(this.ToHttpContext(host, path, queryString, query), handling);
+
+        /// <summary>
+        /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
+        /// </summary>
+        /// <param name="context">The request HTTP context.</param>
+        /// <param name="handling">The command collection handling.</param>
+        /// <returns>The computed HMAC.</returns>
+        public string ComputeHMAC(HttpContext context, CommandHandling handling)
+            => AsyncHelper.RunSync(() => this.ComputeHMACAsync(context, handling));
+
+        /// <summary>
+        /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
+        /// </summary>
+        /// <param name="context">The request HTTP context.</param>
+        /// <param name="handling">The command collection handling.</param>
+        /// <returns>The computed HMAC.</returns>
+        public async Task<string> ComputeHMACAsync(HttpContext context, CommandHandling handling)
         {
             byte[] secret = this.options.HMACSecretKey;
             if (secret is null || secret.Length == 0)
@@ -123,29 +215,13 @@ namespace SixLabors.ImageSharp.Web
                 return null;
             }
 
-            // We need to generate a HttpRequest to use the rest of the services.
-            DefaultHttpContext context = new() { RequestServices = this.serviceProvider };
-            HttpRequest request = context.Request;
-
-            ToComponents(
-                uri,
-                out HostString host,
-                out PathString path,
-                out QueryString queryString,
-                out QueryCollection query);
-
-            request.Host = host;
-            request.Path = path;
-            request.QueryString = queryString;
-            request.Query = query;
-
             CommandCollection commands = this.requestParser.ParseRequestCommands(context);
+            if (handling == CommandHandling.Sanitize)
+            {
+                this.StripUnknownCommands(commands);
+            }
 
-            // The provided URI should not contain invalid commands since image URI geneneration
-            // should be tightly controlled by the running application but we will strip any out anyway.
-            this.StripUnknownCommands(commands);
-
-            ImageCommandContext imageCommandContext = new(context, commands, null, null);
+            ImageCommandContext imageCommandContext = new(context, commands, this.commandParser, this.parserCulture);
             return await this.options.OnComputeHMACAsync(imageCommandContext, secret);
         }
 
@@ -153,15 +229,13 @@ namespace SixLabors.ImageSharp.Web
             Uri uri,
             out HostString host,
             out PathString path,
-            out QueryString queryString,
-            out QueryCollection query)
+            out QueryString queryString)
         {
             if (uri.IsAbsoluteUri)
             {
                 host = HostString.FromUriComponent(uri);
                 path = PathString.FromUriComponent(uri);
                 queryString = QueryString.FromUriComponent(uri);
-                query = GetQueryComponent(queryString);
             }
             else
             {
@@ -169,12 +243,20 @@ namespace SixLabors.ImageSharp.Web
                 host = default;
                 path = PathString.FromUriComponent(faux);
                 queryString = QueryString.FromUriComponent(faux);
-                query = GetQueryComponent(queryString);
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static QueryCollection GetQueryComponent(QueryString query)
-            => new(QueryHelpers.ParseQuery(query.Value));
+        private HttpContext ToHttpContext(HostString host, PathString path, QueryString queryString, QueryCollection query)
+        {
+            DefaultHttpContext context = new() { RequestServices = this.serviceProvider };
+            HttpRequest request = context.Request;
+            request.Method = HttpMethods.Get;
+            request.Host = host;
+            request.Path = path;
+            request.QueryString = queryString;
+            request.Query = query;
+
+            return context;
+        }
     }
 }
