@@ -54,13 +54,16 @@ namespace SixLabors.ImageSharp.Web
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(requestParser, nameof(requestParser));
             Guard.NotNull(processors, nameof(processors));
+            Guard.NotNull(commandParser, nameof(commandParser));
             Guard.NotNull(serviceProvider, nameof(serviceProvider));
 
             this.options = options.Value;
+            this.requestParser = requestParser;
             this.commandParser = commandParser;
             this.parserCulture = this.options.UseInvariantParsingCulture
                 ? CultureInfo.InvariantCulture
                 : CultureInfo.CurrentCulture;
+            this.serviceProvider = serviceProvider;
 
             HashSet<string> commands = new(StringComparer.OrdinalIgnoreCase);
             foreach (IImageWebProcessor processor in processors)
@@ -101,7 +104,7 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="handling">The command collection handling.</param>
         /// <returns>The computed HMAC.</returns>
         public string ComputeHMAC(string uri, CommandHandling handling)
-            => this.ComputeHMAC(new Uri(uri), handling);
+            => this.ComputeHMAC(new Uri(uri, UriKind.RelativeOrAbsolute), handling);
 
         /// <summary>
         /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
@@ -110,7 +113,7 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="handling">The command collection handling.</param>
         /// <returns>The computed HMAC.</returns>
         public Task<string> ComputeHMACAsync(string uri, CommandHandling handling)
-            => this.ComputeHMACAsync(new Uri(uri), handling);
+            => this.ComputeHMACAsync(new Uri(uri, UriKind.RelativeOrAbsolute), handling);
 
         /// <summary>
         /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
@@ -155,7 +158,7 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="handling">The command collection handling.</param>
         /// <returns>The computed HMAC.</returns>
         public string ComputeHMAC(HostString host, PathString path, QueryString queryString, CommandHandling handling)
-            => this.ComputeHMAC(host, path, queryString, handling);
+            => this.ComputeHMAC(host, path, queryString, new(QueryHelpers.ParseQuery(queryString.Value)), handling);
 
         /// <summary>
         /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
@@ -223,6 +226,29 @@ namespace SixLabors.ImageSharp.Web
 
             ImageCommandContext imageCommandContext = new(context, commands, this.commandParser, this.parserCulture);
             return await this.options.OnComputeHMACAsync(imageCommandContext, secret);
+        }
+
+        /// <summary>
+        /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
+        /// </summary>
+        /// <param name="context">Contains information about the current image request and parsed commands.</param>
+        /// <param name="handling">The command collection handling.</param>
+        /// <returns>The computed HMAC.</returns>
+        internal async Task<string> ComputeHMACAsync(ImageCommandContext context, CommandHandling handling)
+        {
+            byte[] secret = this.options.HMACSecretKey;
+            if (secret is null || secret.Length == 0)
+            {
+                return null;
+            }
+
+            CommandCollection commands = this.requestParser.ParseRequestCommands(context.Context);
+            if (handling == CommandHandling.Sanitize)
+            {
+                this.StripUnknownCommands(commands);
+            }
+
+            return await this.options.OnComputeHMACAsync(context, secret);
         }
 
         private static void ToComponents(

@@ -15,7 +15,8 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// <inheritdoc/>
         public CommandCollection ParseRequestCommands(HttpContext context)
         {
-            if (context.Request.Query.Count == 0)
+            IQueryCollection query = context.Request.Query;
+            if (query is null || query.Count == 0)
             {
                 // We return new to ensure the collection is still mutable via events.
                 return new();

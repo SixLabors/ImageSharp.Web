@@ -60,6 +60,8 @@ namespace SixLabors.ImageSharp.Web.DependencyInjection
 
             builder.SetRequestParser<QueryCollectionRequestParser>();
 
+            builder.Services.AddSingleton<ImageSharpRequestAuthorizationUtilities>();
+
             builder.SetCache<PhysicalFileSystemCache>();
 
             builder.SetCacheKey<UriRelativeLowerInvariantCacheKey>();

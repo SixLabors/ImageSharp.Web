@@ -33,13 +33,16 @@ namespace SixLabors.ImageSharp.Web.Commands
         /// <inheritdoc/>
         public CommandCollection ParseRequestCommands(HttpContext context)
         {
-            if (context.Request.Query.Count == 0 || !context.Request.Query.ContainsKey(QueryKey))
+            IQueryCollection queryCollection = context.Request.Query;
+            if (queryCollection is null
+                || queryCollection.Count == 0
+                || !queryCollection.ContainsKey(QueryKey))
             {
                 // We return new here and below to ensure the collection is still mutable via events.
                 return new();
             }
 
-            StringValues query = context.Request.Query[QueryKey];
+            StringValues query = queryCollection[QueryKey];
             string requestedPreset = query[query.Count - 1];
             if (this.presets.TryGetValue(requestedPreset, out CommandCollection collection))
             {

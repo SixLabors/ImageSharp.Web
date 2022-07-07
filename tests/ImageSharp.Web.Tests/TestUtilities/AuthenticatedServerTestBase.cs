@@ -1,10 +1,10 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -13,9 +13,16 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
     public abstract class AuthenticatedServerTestBase<TFixture> : ServerTestBase<TFixture>
          where TFixture : AuthenticatedTestServerFixture
     {
+        private readonly ImageSharpRequestAuthorizationUtilities authorizationUtilities;
+        private readonly string relativeImageSouce;
+
         protected AuthenticatedServerTestBase(TFixture fixture, ITestOutputHelper outputHelper, string imageSource)
             : base(fixture, outputHelper, imageSource)
         {
+            this.authorizationUtilities =
+                       this.Fixture.Services.GetRequiredService<ImageSharpRequestAuthorizationUtilities>();
+
+            this.relativeImageSouce = this.ImageSource.Replace("http://localhost", string.Empty);
         }
 
         [Fact]
@@ -38,12 +45,9 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 
         protected override string AugmentCommand(string command)
         {
-            // Mimic the lowecase relative url format used by the token and default options.
-            string uri = (this.ImageSource + command).Replace("http://localhost", string.Empty);
-            uri = CaseHandlingUriBuilder.Encode(CaseHandlingUriBuilder.CaseHandling.LowerInvariant, uri);
-
-            string token = HMACUtilities.ComputeHMACSHA256(uri, AuthenticatedTestServerFixture.HMACSecretKey);
-            return command + "&" + HMACUtilities.TokenCommand + "=" + token;
+            string uri = this.relativeImageSouce + command;
+            string token = this.authorizationUtilities.ComputeHMAC(uri, CommandHandling.Sanitize);
+            return command + "&" + ImageSharpRequestAuthorizationUtilities.TokenCommand + "=" + token;
         }
     }
 }
