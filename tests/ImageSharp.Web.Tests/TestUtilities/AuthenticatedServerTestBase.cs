@@ -43,11 +43,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        protected override string AugmentCommand(string command)
+        protected override async Task<string> AugmentCommandAsync(string command)
         {
             string uri = this.relativeImageSouce + command;
-            string token = this.authorizationUtilities.ComputeHMAC(uri, CommandHandling.Sanitize);
+            string token = await this.GetTokenAsync(uri);
             return command + "&" + ImageSharpRequestAuthorizationUtilities.TokenCommand + "=" + token;
+        }
+
+        private async Task<string> GetTokenAsync(string uri)
+        {
+            string tokenSync = this.authorizationUtilities.ComputeHMAC(uri, CommandHandling.Sanitize);
+            string tokenAsync = await this.authorizationUtilities.ComputeHMACAsync(uri, CommandHandling.Sanitize);
+
+            Assert.Equal(tokenSync, tokenAsync);
+            return tokenSync;
         }
     }
 }
