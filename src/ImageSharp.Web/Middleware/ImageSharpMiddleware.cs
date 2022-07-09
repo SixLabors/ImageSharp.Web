@@ -236,7 +236,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 // Key generation uses string.Create under the hood with very low allocation so should be good enough as a cache key.
                 hmac = await HMACTokenLru.GetOrAddAsync(
                     httpContext.Request.GetEncodedUrl(),
-                    _ => this.authorizationUtilities.ComputeHMACAsync(imageCommandContext, CommandHandling.None));
+                    _ => this.authorizationUtilities.ComputeHMACAsync(imageCommandContext));
             }
 
             await this.options.OnParseCommandsAsync.Invoke(imageCommandContext);

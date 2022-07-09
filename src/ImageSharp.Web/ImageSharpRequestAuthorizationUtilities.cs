@@ -231,25 +231,14 @@ namespace SixLabors.ImageSharp.Web
         /// <summary>
         /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
         /// </summary>
+        /// <remarks>
+        /// This method is only called by the middleware and only if required.
+        /// As such, standard checks are avoided.
+        /// </remarks>
         /// <param name="context">Contains information about the current image request and parsed commands.</param>
-        /// <param name="handling">The command collection handling.</param>
         /// <returns>The computed HMAC.</returns>
-        internal async Task<string> ComputeHMACAsync(ImageCommandContext context, CommandHandling handling)
-        {
-            byte[] secret = this.options.HMACSecretKey;
-            if (secret is null || secret.Length == 0)
-            {
-                return null;
-            }
-
-            CommandCollection commands = this.requestParser.ParseRequestCommands(context.Context);
-            if (handling == CommandHandling.Sanitize)
-            {
-                this.StripUnknownCommands(commands);
-            }
-
-            return await this.options.OnComputeHMACAsync(context, secret);
-        }
+        internal Task<string> ComputeHMACAsync(ImageCommandContext context)
+            => this.options.OnComputeHMACAsync(context, this.options.HMACSecretKey);
 
         private static void ToComponents(
             Uri uri,

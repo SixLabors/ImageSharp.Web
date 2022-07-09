@@ -159,7 +159,7 @@ namespace SixLabors.ImageSharp.Web
                 Uri faux = new(FallbackBaseUri, uri);
                 return BuildRelative(
                     handling,
-                    pathBase: PathString.FromUriComponent(faux),
+                    path: PathString.FromUriComponent(faux),
                     query: QueryString.FromUriComponent(faux));
             }
         }
@@ -210,7 +210,7 @@ namespace SixLabors.ImageSharp.Web
 
             if (uriParts.Scheme.Length > 0)
             {
-                index = CopyTextToBuffer(buffer, index, uriParts.Scheme.AsSpan());
+                index = CopyTextToBufferLowerInvariant(buffer, index, uriParts.Scheme.AsSpan());
                 index = CopyTextToBuffer(buffer, index, Uri.SchemeDelimiter.AsSpan());
             }
 

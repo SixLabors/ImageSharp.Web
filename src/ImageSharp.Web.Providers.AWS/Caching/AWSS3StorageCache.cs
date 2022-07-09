@@ -126,7 +126,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
         /// <summary>
         /// <see href="https://github.com/aspnet/AspNetIdentity/blob/b7826741279450c58b230ece98bd04b4815beabf/src/Microsoft.AspNet.Identity.Core/AsyncHelper.cs"/>
         /// </summary>
-        internal static class AsyncHelper
+        private static class AsyncHelper
         {
             private static readonly TaskFactory TaskFactory
                 = new(

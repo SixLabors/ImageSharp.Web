@@ -23,7 +23,7 @@ namespace SixLabors.ImageSharp.Web.Commands
             }
 
             CommandCollection transformed = new();
-            foreach (KeyValuePair<string, StringValues> pair in context.Request.Query)
+            foreach (KeyValuePair<string, StringValues> pair in query)
             {
                 // Use the indexer for both set and query. This replaces any previously parsed values.
                 transformed[pair.Key] = pair.Value[pair.Value.Count - 1];
