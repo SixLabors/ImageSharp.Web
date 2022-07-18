@@ -133,7 +133,10 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="uri">The Uri to encode.</param>
         /// <returns>The encoded string version of <paramref name="uri"/>.</returns>
         public static string Encode(CaseHandling handling, string uri)
-            => Encode(handling, new Uri(uri, UriKind.RelativeOrAbsolute));
+        {
+            Guard.NotNull(uri, nameof(uri));
+            return Encode(handling, new Uri(uri, UriKind.RelativeOrAbsolute));
+        }
 
         /// <summary>
         /// Generates a string from the given absolute or relative Uri that is appropriately encoded for use in

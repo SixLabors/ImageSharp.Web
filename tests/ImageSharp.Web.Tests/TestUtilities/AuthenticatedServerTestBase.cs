@@ -37,7 +37,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
             // Now send an invalid token
-            response = await this.HttpClient.GetAsync(url + this.Fixture.Commands[0] + "&" + HMACUtilities.TokenCommand + "=INVALID");
+            response = await this.HttpClient.GetAsync(url + this.Fixture.Commands[0] + "&" + ImageSharpRequestAuthorizationUtilities.TokenCommand + "=INVALID");
             Assert.NotNull(response);
             Assert.False(response.IsSuccessStatusCode);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
