@@ -161,6 +161,12 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS
                     return false;
                 }
 
+                // If the object exists but the client is not authorized to access it, then a "Forbidden" will be thrown.
+                if (string.Equals(e.ErrorCode, "Forbidden"))
+                {
+                    return false;
+                }
+
                 throw;
             }
         }
