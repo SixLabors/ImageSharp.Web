@@ -26,6 +26,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
     <PackageReference Update="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.2.0" />
+    <PackageReference Update="Microsoft.AspNetCore.Http" Version="2.2.0"/>
     <PackageReference Update="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Update="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
     <PackageReference Update="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />

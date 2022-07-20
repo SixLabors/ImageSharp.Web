@@ -14,7 +14,8 @@ namespace SixLabors.ImageSharp.Web
     /// </summary>
     public static class CaseHandlingUriBuilder
     {
-        private static readonly SpanAction<char, (bool LowerInvariant, string Host, string PathBase, string Path, string Query)> InitializeAbsoluteUriStringSpanAction = new(InitializeAbsoluteUriString);
+        private static readonly Uri FallbackBaseUri = new("http://localhost/");
+        private static readonly SpanAction<char, (bool LowerInvariant, string Scheme, string Host, string PathBase, string Path, string Query)> InitializeAbsoluteUriStringSpanAction = new(InitializeAbsoluteUriString);
 
         /// <summary>
         /// Provides Uri case handling options.
@@ -51,7 +52,8 @@ namespace SixLabors.ImageSharp.Web
 
         /// <summary>
         /// Combines the given URI components into a string that is properly encoded for use in HTTP headers.
-        /// Note that unicode in the HostString will be encoded as punycode.
+        /// Note that unicode in the HostString will be encoded as punycode and the scheme is not included
+        /// in the result.
         /// </summary>
         /// <param name="handling">Determines case handling for the result. <paramref name="query"/> is always converted to invariant lowercase.</param>
         /// <param name="host">The host portion of the uri normally included in the Host header. This may include the port.</param>
@@ -65,7 +67,29 @@ namespace SixLabors.ImageSharp.Web
             PathString pathBase = default,
             PathString path = default,
             QueryString query = default)
+            => BuildAbsolute(handling, string.Empty, host, pathBase, path, query);
+
+        /// <summary>
+        /// Combines the given URI components into a string that is properly encoded for use in HTTP headers.
+        /// Note that unicode in the HostString will be encoded as punycode.
+        /// </summary>
+        /// <param name="handling">Determines case handling for the result. <paramref name="query"/> is always converted to invariant lowercase.</param>
+        /// <param name="scheme">http, https, etc.</param>
+        /// <param name="host">The host portion of the uri normally included in the Host header. This may include the port.</param>
+        /// <param name="pathBase">The first portion of the request path associated with application root.</param>
+        /// <param name="path">The portion of the request path that identifies the requested resource.</param>
+        /// <param name="query">The query, if any.</param>
+        /// <returns>The combined URI components, properly encoded for use in HTTP headers.</returns>
+        public static string BuildAbsolute(
+            CaseHandling handling,
+            string scheme,
+            HostString host,
+            PathString pathBase = default,
+            PathString path = default,
+            QueryString query = default)
         {
+            Guard.NotNull(scheme, nameof(scheme));
+
             string hostText = host.ToUriComponent();
             string pathBaseText = pathBase.ToUriComponent();
             string pathText = path.ToUriComponent();
@@ -73,6 +97,7 @@ namespace SixLabors.ImageSharp.Web
 
             // PERF: Calculate string length to allocate correct buffer size for string.Create.
             int length =
+                (scheme.Length > 0 ? scheme.Length + Uri.SchemeDelimiter.Length : 0) +
                 hostText.Length +
                 pathBaseText.Length +
                 pathText.Length +
@@ -94,7 +119,10 @@ namespace SixLabors.ImageSharp.Web
                 length--;
             }
 
-            return string.Create(length, (handling == CaseHandling.LowerInvariant, hostText, pathBaseText, pathText, queryText), InitializeAbsoluteUriStringSpanAction);
+            return string.Create(
+                length,
+                (handling == CaseHandling.LowerInvariant, scheme, hostText, pathBaseText, pathText, queryText),
+                InitializeAbsoluteUriStringSpanAction);
         }
 
         /// <summary>
@@ -105,7 +133,10 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="uri">The Uri to encode.</param>
         /// <returns>The encoded string version of <paramref name="uri"/>.</returns>
         public static string Encode(CaseHandling handling, string uri)
-            => Encode(handling, new Uri(uri, UriKind.RelativeOrAbsolute));
+        {
+            Guard.NotNull(uri, nameof(uri));
+            return Encode(handling, new Uri(uri, UriKind.RelativeOrAbsolute));
+        }
 
         /// <summary>
         /// Generates a string from the given absolute or relative Uri that is appropriately encoded for use in
@@ -121,19 +152,18 @@ namespace SixLabors.ImageSharp.Web
             {
                 return BuildAbsolute(
                     handling,
+                    scheme: uri.Scheme,
                     host: HostString.FromUriComponent(uri),
                     pathBase: PathString.FromUriComponent(uri),
                     query: QueryString.FromUriComponent(uri));
             }
             else
             {
-                string components = uri.GetComponents(UriComponents.SerializationInfoString, UriFormat.UriEscaped);
-                if (handling == CaseHandling.LowerInvariant)
-                {
-                    return components.ToLowerInvariant();
-                }
-
-                return components;
+                Uri faux = new(FallbackBaseUri, uri);
+                return BuildRelative(
+                    handling,
+                    path: PathString.FromUriComponent(faux),
+                    query: QueryString.FromUriComponent(faux));
             }
         }
 
@@ -168,7 +198,7 @@ namespace SixLabors.ImageSharp.Web
         /// </summary>
         /// <param name="buffer">The URI <see cref="string"/>'s <see cref="char"/> buffer.</param>
         /// <param name="uriParts">The URI parts.</param>
-        private static void InitializeAbsoluteUriString(Span<char> buffer, (bool Lower, string Host, string PathBase, string Path, string Query) uriParts)
+        private static void InitializeAbsoluteUriString(Span<char> buffer, (bool Lower, string Scheme, string Host, string PathBase, string Path, string Query) uriParts)
         {
             int index = 0;
             ReadOnlySpan<char> pathBaseSpan = uriParts.PathBase.AsSpan();
@@ -179,6 +209,12 @@ namespace SixLabors.ImageSharp.Web
                 // to trim one of them.
                 // Trim the last slash from pathBase. The total length was decremented before the call to string.Create.
                 pathBaseSpan = pathBaseSpan.Slice(0, pathBaseSpan.Length - 1);
+            }
+
+            if (uriParts.Scheme.Length > 0)
+            {
+                index = CopyTextToBufferLowerInvariant(buffer, index, uriParts.Scheme.AsSpan());
+                index = CopyTextToBuffer(buffer, index, Uri.SchemeDelimiter.AsSpan());
             }
 
             if (uriParts.Lower)
