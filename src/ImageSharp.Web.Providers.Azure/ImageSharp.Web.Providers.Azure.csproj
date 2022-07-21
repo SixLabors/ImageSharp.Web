@@ -32,7 +32,7 @@
 
   <ItemGroup>
     <!--TODO: Do not upgrade this. Last Version that supports .NET Core 2.1-->
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.10.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.13.0" />
   </ItemGroup>
 
   <ItemGroup>
