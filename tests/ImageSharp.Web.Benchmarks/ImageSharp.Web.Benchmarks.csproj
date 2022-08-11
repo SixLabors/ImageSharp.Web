@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
     <AssemblyName>ImageSharp.Web.Benchmarks</AssemblyName>
     <RootNamespace>SixLabors.ImageSharp.Web.Benchmarks</RootNamespace>
     <GenerateProgramFile>false</GenerateProgramFile>
@@ -14,8 +14,4 @@
     <PackageReference Include="BenchmarkDotNet"/>
   </ItemGroup>
   
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <PackageReference Include="Microsoft.AspNetCore.Http"/>
-  </ItemGroup>
-
 </Project>

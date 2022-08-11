@@ -40,11 +40,7 @@ namespace SixLabors.ImageSharp.Web.Caching
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public PhysicalFileSystemCache(
             IOptions<PhysicalFileSystemCacheOptions> options,
-#if NETCOREAPP2_1
-            IHostingEnvironment environment,
-#else
             IWebHostEnvironment environment,
-#endif
             FormatUtilities formatUtilities)
         {
             Guard.NotNull(options, nameof(options));

@@ -16,11 +16,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <param name="environment">The web hosting environment.</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public WebRootImageProvider(
-#if NETCOREAPP2_1
-            IHostingEnvironment environment,
-#else
             IWebHostEnvironment environment,
-#endif
             FormatUtilities formatUtilities)
             : base(environment.WebRootFileProvider, ProcessingBehavior.CommandOnly, formatUtilities)
         {

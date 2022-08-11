@@ -33,11 +33,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             var container = new BlobContainerClient(containerOptions.ConnectionString, containerOptions.ContainerName);
             container.CreateIfNotExists(PublicAccessType.Blob);
 
-#if NETCOREAPP2_1
-            IHostingEnvironment environment = services.GetRequiredService<IHostingEnvironment>();
-#else
             IWebHostEnvironment environment = services.GetRequiredService<IWebHostEnvironment>();
-#endif
 
             BlobClient blob = container.GetBlobClient(TestConstants.ImagePath);
 

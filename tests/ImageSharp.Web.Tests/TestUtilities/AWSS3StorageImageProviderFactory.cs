@@ -70,11 +70,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 }
             }
 
-#if NETCOREAPP2_1
-            IHostingEnvironment environment = services.GetRequiredService<IHostingEnvironment>();
-#else
             IWebHostEnvironment environment = services.GetRequiredService<IWebHostEnvironment>();
-#endif
 
             try
             {
