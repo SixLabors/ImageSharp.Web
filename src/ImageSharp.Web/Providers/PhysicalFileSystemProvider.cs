@@ -22,11 +22,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public PhysicalFileSystemProvider(
             IOptions<PhysicalFileSystemProviderOptions> options,
-#if NETCOREAPP2_1
-            IHostingEnvironment environment,
-#else
             IWebHostEnvironment environment,
-#endif
             FormatUtilities formatUtilities)
             : base(GetProvider(options, environment), options.Value.ProcessingBehavior, formatUtilities)
         {
@@ -58,11 +54,7 @@ namespace SixLabors.ImageSharp.Web.Providers
 
         private static PhysicalFileProvider GetProvider(
             IOptions<PhysicalFileSystemProviderOptions> options,
-#if NETCOREAPP2_1
-            IHostingEnvironment environment)
-#else
             IWebHostEnvironment environment)
-#endif
         {
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(environment, nameof(environment));

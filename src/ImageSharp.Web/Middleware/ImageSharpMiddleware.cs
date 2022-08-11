@@ -449,19 +449,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 return default;
             }
 
-#if NETCOREAPP2_1
-            try
-            {
-                stream.Dispose();
-                return default;
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
-#else
             return stream.DisposeAsync();
-#endif
         }
 
         private async Task<ImageWorkerResult> IsNewOrUpdatedAsync(
