@@ -25,5 +25,8 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS
 
         /// <inheritdoc/>
         public bool UseAccelerateEndpoint { get; set; }
+
+        /// <inheritdoc/>
+        public TimeSpan? Timeout { get; set; }
     }
 }

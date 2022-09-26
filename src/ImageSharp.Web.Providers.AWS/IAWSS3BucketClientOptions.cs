@@ -43,5 +43,11 @@ namespace SixLabors.ImageSharp.Web
         /// The feature must be enabled on the bucket. Follow AWS instruction on <see href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/transfer-acceleration.html"/>.
         /// </summary>
         bool UseAccelerateEndpoint { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating the timeout for the S3 client.
+        /// If the value is set, the value is assigned to the Timeout property of the HttpWebRequest/HttpClient object used to send requests.
+        /// </summary>
+        TimeSpan? Timeout { get; set; }
     }
 }
