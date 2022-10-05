@@ -1,6 +1,8 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
+
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
 {
     public static class TestConstants
@@ -18,5 +20,6 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
         public const string PhysicalTestImage = "http://localhost/" + ImagePath;
         public const string AzureTestImage = "http://localhost/" + AzureContainerName + "/" + ImagePath;
         public const string AWSTestImage = "http://localhost/" + AWSBucketName + "/" + ImagePath;
+        public static readonly TimeSpan AWSTimeout = TimeSpan.FromSeconds(10);
     }
 }

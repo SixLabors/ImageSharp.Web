@@ -3,6 +3,7 @@
 
 using System;
 using Amazon;
+using Amazon.Runtime;
 using Amazon.S3;
 
 namespace SixLabors.ImageSharp.Web
@@ -25,6 +26,7 @@ namespace SixLabors.ImageSharp.Web
                 // AccessSecret can be empty.
                 // PathStyle endpoint doesn't support AccelerateEndpoint.
                 AmazonS3Config config = new() { ServiceURL = options.Endpoint, ForcePathStyle = true, AuthenticationRegion = options.Region };
+                SetTimeout(config, options.Timeout);
                 return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
             }
             else if (!string.IsNullOrWhiteSpace(options.AccessKey))
@@ -33,17 +35,28 @@ namespace SixLabors.ImageSharp.Web
                 Guard.NotNullOrWhiteSpace(options.Region, nameof(options.Region));
                 var region = RegionEndpoint.GetBySystemName(options.Region);
                 AmazonS3Config config = new() { RegionEndpoint = region, UseAccelerateEndpoint = options.UseAccelerateEndpoint };
+                SetTimeout(config, options.Timeout);
                 return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
             }
             else if (!string.IsNullOrWhiteSpace(options.Region))
             {
                 var region = RegionEndpoint.GetBySystemName(options.Region);
                 AmazonS3Config config = new() { RegionEndpoint = region, UseAccelerateEndpoint = options.UseAccelerateEndpoint };
+                SetTimeout(config, options.Timeout);
                 return new AmazonS3Client(config);
             }
             else
             {
                 throw new ArgumentException("Invalid configuration.", nameof(options));
+            }
+        }
+
+        private static void SetTimeout(ClientConfig config, TimeSpan? timeout)
+        {
+            // We don't want to override the default timeout if it's not set.
+            if (timeout.HasValue)
+            {
+                config.Timeout = timeout.Value;
             }
         }
     }

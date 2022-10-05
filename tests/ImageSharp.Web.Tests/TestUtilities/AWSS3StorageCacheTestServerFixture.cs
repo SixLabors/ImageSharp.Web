@@ -21,7 +21,8 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                     BucketName = TestConstants.AWSBucketName,
                     AccessKey = TestConstants.AWSAccessKey,
                     AccessSecret = TestConstants.AWSAccessSecret,
-                    Region = TestConstants.AWSRegion
+                    Region = TestConstants.AWSRegion,
+                    Timeout = TestConstants.AWSTimeout,
                 }))
             .AddProvider(AWSS3StorageImageProviderFactory.Create)
             .Configure<AWSS3StorageCacheOptions>(o =>
@@ -31,6 +32,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
                 o.AccessKey = TestConstants.AWSAccessKey;
                 o.AccessSecret = TestConstants.AWSAccessSecret;
                 o.Region = TestConstants.AWSRegion;
+                o.Timeout = TestConstants.AWSTimeout;
 
                 AWSS3StorageCache.CreateIfNotExists(o, S3CannedACL.Private);
             })

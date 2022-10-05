@@ -109,7 +109,7 @@ jobs:
           s3rver -d . &
 
       - name: DotNet Setup
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: |
             6.0.x
