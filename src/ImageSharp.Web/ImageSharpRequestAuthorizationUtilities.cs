@@ -223,6 +223,20 @@ namespace SixLabors.ImageSharp.Web
             return await this.options.OnComputeHMACAsync(imageCommandContext, secret);
         }
 
+        internal string ComputeHMAC(string uri, CommandCollection commands, byte[] secret)
+        {
+            ToComponents(
+                new Uri(uri, UriKind.RelativeOrAbsolute),
+                out HostString host,
+                out PathString path,
+                out QueryString queryString);
+
+            var context = this.ToHttpContext(host, path, queryString, new(QueryHelpers.ParseQuery(queryString.Value)));
+            ImageCommandContext imageCommandContext = new(context, commands, this.commandParser, this.parserCulture);
+
+            return AsyncHelper.RunSync(() => this.options.OnComputeHMACAsync(imageCommandContext, secret));
+        }
+
         /// <summary>
         /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
         /// </summary>

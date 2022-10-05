@@ -1,0 +1,1001 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "ImageSharp URI API Samples";
+}
+
+@section Css {
+    <style>
+        body {
+            text-align: center;
+            font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        h1, h2, h3 {
+            width: 100%;
+        }
+
+        code {
+            background-color: #1e1e1e;
+            color: #c8c8c8;
+            padding: .2rem;
+            box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.1), 0 1px 1px 0 rgba(0, 0, 0, 0.07), 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        section {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+            section > p {
+                flex: 0 0 100%;
+            }
+
+            section > div {
+                flex: 0 0 50%;
+            }
+
+        img {
+            border: 1px solid #e3e3e3;
+        }
+    </style>
+}
+    <section>
+        <h2>Unmodified</h2>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.svg?width=300</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.svg" width="300" />
+            </p>
+        </div>
+    </section>
+    <section>
+        <h2>Resize</h2>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&height=200</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" height="200" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&height=200&rmode=stretch</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" height="200" asp-rmode="ResizeMode.Stretch" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&height=200&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" height="200" asp-rmode="ResizeMode.Pad" asp-rcolor="Color.LimeGreen" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&rsampler=lanczos3</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-rsampler="Resampler.Lanczos3" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&rsampler=nearestneighbor</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-rsampler="Resampler.NearestNeighbor" />
+            </p>
+        </div>
+    </section>
+    <hr />
+    <section>
+        <h2>Format</h2>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&format=jpg</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-format="Format.Jpg" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&format=bmp</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-format="Format.Bmp" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&format=gif</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-format="Format.Gif" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&format=webp</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-format="Format.WebP" />
+            </p>
+        </div>
+    </section>
+    <hr />
+    <section>
+        <h2>Jpeg Quality</h2>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&format=jpg&quality=100</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-quality="100" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&format=jpg&quality=50</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-quality="50" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&format=jpg&quality=1</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-quality="1" />
+            </p>
+        </div>
+    </section>
+    <hr />
+    <section>
+        <h2>Webp Quality</h2>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&format=webp&quality=100</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-format="Format.WebP" asp-quality="100" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&format=webp&quality=50</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-format="Format.WebP" asp-quality="50" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&format=webp&quality=1</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-format="Format.WebP" asp-quality="1" />
+            </p>
+        </div>
+    </section>
+    <hr />
+    <section>
+        <h2>Background Color</h2>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&bgcolor=red</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-bgcolor="Color.Red" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&bgcolor=FFFF00</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-bgcolor='Color.ParseHex("FFFF00")' />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&bgcolor=128,28,32</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-bgcolor="Color.FromRgb(128, 28, 32)" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&bgcolor=C1FF0080</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-bgcolor='Color.ParseHex("C1FF0080")' />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=300&bgcolor=128,28,32,128</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="300" asp-bgcolor="Color.FromRgba(128, 28, 32, 128)" />
+            </p>
+        </div>
+    </section>
+    <hr />
+    <section>
+        <h2>Identical Queries</h2>
+        <p>Demonstrates that the middleware handles identical queries without file contention.</p>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=123</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="123" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=123</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width="123" />
+            </p>
+        </div>
+        <div>
+            <p>
+                <code>sixlabors.imagesharp.web.png?width=123</code>
+            </p>
+            <p>
+                <img src="sixlabors.imagesharp.web.png" width=123" />
+            </p>
+        </div>
+    </section>
+        @*TODO: Convert the rest of these queries to use the tag helper.*@
+    <section>
+        <h2>EXIF Handling Portrait</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for portrait images.</p>
+        <div>
+            <p>
+                <code>Portrait_0.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Portrait_0.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_1.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Portrait_1.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_2.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Portrait_2.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_3.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Portrait_3.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_4.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Portrait_4.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_5.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Portrait_5.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_6.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Portrait_6.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_7.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Portrait_7.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_8.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Portrait_8.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>EXIF Handling Portrait</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for portrait images.</p>
+        <div>
+            <p>
+                <code>Portrait_0.jpg?width=60&height=50&ranchor=bottomleft</code>
+            </p>
+            <p><img src="Portrait_0.jpg?width=60&height=50&ranchor=bottomleft" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_1.jpg?width=60&height=50&ranchor=bottomleft</code>
+            </p>
+            <p><img src="Portrait_1.jpg?width=60&height=50&ranchor=bottomleft" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_2.jpg?width=60&height=50&ranchor=bottomleft</code>
+            </p>
+            <p><img src="Portrait_2.jpg?width=60&height=50&ranchor=bottomleft" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_3.jpg?width=60&height=50&ranchor=bottomleft</code>
+            </p>
+            <p><img src="Portrait_3.jpg?width=60&height=50&ranchor=bottomleft" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_4.jpg?width=60&height=50&ranchor=bottomleft</code>
+            </p>
+            <p><img src="Portrait_4.jpg?width=60&height=50&ranchor=bottomleft" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_5.jpg?width=60&height=50&ranchor=bottomleft</code>
+            </p>
+            <p><img src="Portrait_5.jpg?width=60&height=50&ranchor=bottomleft" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_6.jpg?width=60&height=50&ranchor=bottomleft</code>
+            </p>
+            <p><img src="Portrait_6.jpg?width=60&height=50&ranchor=bottomleft" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_7.jpg?width=60&height=50&ranchor=bottomleft</code>
+            </p>
+            <p><img src="Portrait_7.jpg?width=60&height=50&ranchor=bottomleft" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_8.jpg?width=60&height=50&ranchor=bottomleft</code>
+            </p>
+            <p><img src="Portrait_8.jpg?width=60&height=50&ranchor=bottomleft" /></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>EXIF Handling Portrait</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for portrait images.</p>
+        <div>
+            <p>
+                <code>Portrait_0.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_0.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_1.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_1.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_2.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_2.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_3.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_3.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_4.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_4.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_5.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_5.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_6.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_6.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_7.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_7.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_8.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_8.jpg?width=60&height=50&ranchor=left&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>EXIF Handling Portrait</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for portrait images.</p>
+        <div>
+            <p>
+                <code>Portrait_0.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_0.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_1.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_1.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_2.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_2.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_3.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_3.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_4.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_4.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_5.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_5.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_6.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_6.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_7.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_7.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_8.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_8.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>EXIF Handling Portrait</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for portrait images.</p>
+        <div>
+            <p>
+                <code>Portrait_0.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_0.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_1.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_1.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_2.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_2.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_3.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_3.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_4.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_4.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_5.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_5.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_6.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_6.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_7.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_7.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_8.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_8.jpg?width=60&height=50&ranchor=right&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>EXIF Handling Portrait</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for portrait images.</p>
+        <div>
+            <p>
+                <code>Portrait_0.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_0.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_1.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_1.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_2.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_2.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_3.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_3.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_4.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_4.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_5.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_5.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Portrait_6.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_6.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_7.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_7.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Portrait_8.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Portrait_8.jpg?width=60&height=50&ranchor=bottomright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>EXIF Handling : Landscape</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for landscape images.</p>
+        <div>
+            <p>
+                <code>Landscape_0.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Landscape_0.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_1.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Landscape_1.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_2.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Landscape_2.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_3.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Landscape_3.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_4.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Landscape_4.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_5.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Landscape_5.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_6.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Landscape_6.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_7.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Landscape_7.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_8.jpg?width=60&height=50&rxy=0.69,0.37</code>
+            </p>
+            <p><img src="Landscape_8.jpg?width=60&height=50&rxy=0.69,0.37" /></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>EXIF Handling : Landscape</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for landscape images.</p>
+        <div>
+            <p>
+                <code>Landscape_0.jpg?width=60&height=50&ranchor=topright</code>
+            </p>
+            <p><img src="Landscape_0.jpg?width=60&height=50&ranchor=topright" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_1.jpg?width=60&height=50&ranchor=topright</code>
+            </p>
+            <p><img src="Landscape_1.jpg?width=60&height=50&ranchor=topright" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_2.jpg?width=60&height=50&ranchor=topright</code>
+            </p>
+            <p><img src="Landscape_2.jpg?width=60&height=50&ranchor=topright" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_3.jpg?width=60&height=50&ranchor=topright</code>
+            </p>
+            <p><img src="Landscape_3.jpg?width=60&height=50&ranchor=topright" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_4.jpg?width=60&height=50&ranchor=topright</code>
+            </p>
+            <p><img src="Landscape_4.jpg?width=60&height=50&ranchor=topright" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_5.jpg?width=60&height=50&ranchor=topright</code>
+            </p>
+            <p><img src="Landscape_5.jpg?width=60&height=50&ranchor=topright" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_6.jpg?width=60&height=50&ranchor=topright</code>
+            </p>
+            <p><img src="Landscape_6.jpg?width=60&height=50&ranchor=topright" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_7.jpg?width=60&height=50&ranchor=topright</code>
+            </p>
+            <p><img src="Landscape_7.jpg?width=60&height=50&ranchor=topright" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_8.jpg?width=60&height=50&ranchor=topright</code>
+            </p>
+            <p><img src="Landscape_8.jpg?width=60&height=50&ranchor=topright" /></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>EXIF Handling : Landscape</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for landscape images.</p>
+        <div>
+            <p>
+                <code>Landscape_0.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_0.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_1.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_1.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_2.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_2.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_3.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_3.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_4.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_4.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_5.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_5.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_6.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_6.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_7.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_7.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_8.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_8.jpg?width=60&height=50&ranchor=top&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>EXIF Handling : Landscape</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for landscape images.</p>
+        <div>
+            <p>
+                <code>Landscape_0.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_0.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_1.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_1.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_2.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_2.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_3.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_3.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_4.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_4.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_5.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_5.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_6.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_6.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_7.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_7.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_8.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_8.jpg?width=60&height=50&ranchor=topright&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>EXIF Handling : Landscape</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for landscape images.</p>
+        <div>
+            <p>
+                <code>Landscape_0.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_0.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_1.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_1.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_2.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_2.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_3.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_3.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_4.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_4.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_5.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_5.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_6.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_6.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_7.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_7.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_8.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_8.jpg?width=60&height=50&ranchor=bottom&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>EXIF Handling : Landscape</h2>
+        <p>Demonstrates that the middleware handles EXIF orientation correctly for landscape images.</p>
+        <div>
+            <p>
+                <code>Landscape_0.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_0.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_1.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_1.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_2.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_2.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_3.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_3.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_4.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_4.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_5.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_5.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+
+        <div>
+            <p>
+                <code>Landscape_6.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_6.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_7.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_7.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+        <div>
+            <p>
+                <code>Landscape_8.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen</code>
+            </p>
+            <p><img src="Landscape_8.jpg?width=60&height=50&ranchor=bottomleft&rmode=pad&rcolor=limegreen" /></p>
+        </div>
+    </section>
