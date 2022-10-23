@@ -115,7 +115,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Contains helpers that allow authorization of image requests.
         /// </summary>
-        private readonly ImageSharpRequestAuthorizationUtilities authorizationUtilities;
+        private readonly RequestAuthorizationUtilities authorizationUtilities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageSharpMiddleware"/> class.
@@ -146,7 +146,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             CommandParser commandParser,
             FormatUtilities formatUtilities,
             AsyncKeyReaderWriterLock<string> asyncKeyLock,
-            ImageSharpRequestAuthorizationUtilities requestAuthorizationUtilities)
+            RequestAuthorizationUtilities requestAuthorizationUtilities)
         {
             Guard.NotNull(next, nameof(next));
             Guard.NotNull(options, nameof(options));
@@ -217,7 +217,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             if (secret?.Length > 0)
             {
                 checkHMAC = true;
-                token = commands.GetValueOrDefault(ImageSharpRequestAuthorizationUtilities.TokenCommand);
+                token = commands.GetValueOrDefault(RequestAuthorizationUtilities.TokenCommand);
             }
 
             this.authorizationUtilities.StripUnknownCommands(commands);

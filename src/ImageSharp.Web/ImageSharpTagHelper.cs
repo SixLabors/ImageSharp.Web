@@ -53,7 +53,7 @@ namespace SixLabors.ImageSharp.Web
         private readonly ImageSharpMiddlewareOptions options;
         private readonly CultureInfo parserCulture;
         private readonly char separator;
-        private readonly ImageSharpRequestAuthorizationUtilities authorizationUtilities;
+        private readonly RequestAuthorizationUtilities authorizationUtilities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageSharpTagHelper"/> class.
@@ -64,7 +64,7 @@ namespace SixLabors.ImageSharp.Web
         /// <param name="htmlEncoder">The HTML encorder.</param>
         public ImageSharpTagHelper(
             IOptions<ImageSharpMiddlewareOptions> options,
-            ImageSharpRequestAuthorizationUtilities authorizationUtilities,
+            RequestAuthorizationUtilities authorizationUtilities,
             IUrlHelperFactory urlHelperFactory,
             HtmlEncoder htmlEncoder)
             : base(urlHelperFactory, htmlEncoder)
@@ -208,7 +208,7 @@ namespace SixLabors.ImageSharp.Web
                 if (secret?.Length > 0)
                 {
                     string hash = this.authorizationUtilities.ComputeHMAC(src, commands, secret);
-                    commands.Add(ImageSharpRequestAuthorizationUtilities.TokenCommand, hash);
+                    commands.Add(RequestAuthorizationUtilities.TokenCommand, hash);
                 }
 
                 src = AddQueryString(src, commands);

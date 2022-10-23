@@ -13,14 +13,14 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
     public abstract class AuthenticatedServerTestBase<TFixture> : ServerTestBase<TFixture>
          where TFixture : AuthenticatedTestServerFixture
     {
-        private readonly ImageSharpRequestAuthorizationUtilities authorizationUtilities;
+        private readonly RequestAuthorizationUtilities authorizationUtilities;
         private readonly string relativeImageSouce;
 
         protected AuthenticatedServerTestBase(TFixture fixture, ITestOutputHelper outputHelper, string imageSource)
             : base(fixture, outputHelper, imageSource)
         {
             this.authorizationUtilities =
-                       this.Fixture.Services.GetRequiredService<ImageSharpRequestAuthorizationUtilities>();
+                       this.Fixture.Services.GetRequiredService<RequestAuthorizationUtilities>();
 
             this.relativeImageSouce = this.ImageSource.Replace("http://localhost", string.Empty);
         }
@@ -37,7 +37,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
             // Now send an invalid token
-            response = await this.HttpClient.GetAsync(url + this.Fixture.Commands[0] + "&" + ImageSharpRequestAuthorizationUtilities.TokenCommand + "=INVALID");
+            response = await this.HttpClient.GetAsync(url + this.Fixture.Commands[0] + "&" + RequestAuthorizationUtilities.TokenCommand + "=INVALID");
             Assert.NotNull(response);
             Assert.False(response.IsSuccessStatusCode);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -47,7 +47,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities
         {
             string uri = this.relativeImageSouce + command;
             string token = await this.GetTokenAsync(uri);
-            return command + "&" + ImageSharpRequestAuthorizationUtilities.TokenCommand + "=" + token;
+            return command + "&" + RequestAuthorizationUtilities.TokenCommand + "=" + token;
         }
 
         private async Task<string> GetTokenAsync(string uri)
