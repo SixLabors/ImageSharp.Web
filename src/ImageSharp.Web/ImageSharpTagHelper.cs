@@ -37,7 +37,7 @@ namespace SixLabors.ImageSharp.Web
         private const string SrcAttributeName = "src";
         private const string WidthAttributeName = ResizeWebProcessor.Width;
         private const string HeightAttributeName = ResizeWebProcessor.Height;
-        private const string AttributePrefix = "asp-";
+        private const string AttributePrefix = "is-";
         private const string AnchorAttributeName = AttributePrefix + ResizeWebProcessor.Anchor;
         private const string RModeAttributeName = AttributePrefix + ResizeWebProcessor.Mode;
         private const string XyAttributeName = AttributePrefix + ResizeWebProcessor.Xy;
@@ -264,7 +264,7 @@ namespace SixLabors.ImageSharp.Web
 
             if (this.Center.HasValue)
             {
-                string xy = $"{this.Center.Value.Y.ToString(this.parserCulture)}{this.separator}{this.Center.Value.Y.ToString(this.parserCulture)}";
+                string xy = $"{this.Center.Value.X.ToString(this.parserCulture)}{this.separator}{this.Center.Value.Y.ToString(this.parserCulture)}";
                 commands.Add(ResizeWebProcessor.Xy, xy);
             }
 
