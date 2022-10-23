@@ -37,7 +37,7 @@ namespace SixLabors.ImageSharp.Web
         private const string SrcAttributeName = "src";
         private const string WidthAttributeName = ResizeWebProcessor.Width;
         private const string HeightAttributeName = ResizeWebProcessor.Height;
-        private const string AttributePrefix = "is-";
+        private const string AttributePrefix = "imagesharp-";
         private const string AnchorAttributeName = AttributePrefix + ResizeWebProcessor.Anchor;
         private const string RModeAttributeName = AttributePrefix + ResizeWebProcessor.Mode;
         private const string XyAttributeName = AttributePrefix + ResizeWebProcessor.Xy;
