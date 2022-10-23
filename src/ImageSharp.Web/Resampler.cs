@@ -1,96 +1,58 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using SixLabors.ImageSharp.Processing;
+
 namespace SixLabors.ImageSharp.Web
 {
     /// <summary>
-    /// Provides enumeration of known resampler algorithms.
+    /// Contains reusable static instances of known resampling algorithms.
     /// </summary>
-    public enum Resampler
+    public static class Resampler
     {
-        /// <summary>
-        /// Bicubic sampler that implements the bicubic kernel algorithm W(x).
-        /// </summary>
-        Bicubic,
+        /// <inheritdoc cref="KnownResamplers.Bicubic"/>
+        public static ResamplerCommand Bicubic { get; } = new(nameof(Bicubic));
 
-        /// <summary>
-        /// Similar to nearest neighbor when upscaling.
-        /// When downscaling the pixels will average, merging pixels together.
-        /// </summary>
-        Box,
+        /// <inheritdoc cref="KnownResamplers.Box"/>
+        public static ResamplerCommand Box { get; } = new(nameof(Box));
 
-        /// <summary>
-        /// A well known standard Cubic Filter often used as a interpolation function
-        /// </summary>
-        CatmullRom,
+        /// <inheritdoc cref="KnownResamplers.CatmullRom"/>
+        public static ResamplerCommand CatmullRom { get; } = new(nameof(CatmullRom));
 
-        /// <summary>
-        /// A type of smoothed triangular interpolation filter that rounds off strong edges while
-        /// preserving flat 'color levels' in the original image.
-        /// </summary>
-        Hermite,
+        /// <inheritdoc cref="KnownResamplers.Hermite"/>
+        public static ResamplerCommand Hermite { get; } = new(nameof(Hermite));
 
-        /// <summary>
-        /// Lanczos kernel sampler that implements smooth interpolation with a radius of 2 pixels.
-        /// This algorithm provides sharpened results when compared to others when downsampling.
-        /// </summary>
-        Lanczos2,
+        /// <inheritdoc cref="KnownResamplers.Lanczos2"/>
+        public static ResamplerCommand Lanczos2 { get; } = new(nameof(Lanczos2));
 
-        /// <summary>
-        /// Lanczos kernel sampler that implements smooth interpolation with a radius of 3 pixels.
-        /// This algorithm provides sharpened results when compared to others when downsampling.
-        /// </summary>
-        Lanczos3,
+        /// <inheritdoc cref="KnownResamplers.Lanczos3"/>
+        public static ResamplerCommand Lanczos3 { get; } = new(nameof(Lanczos3));
 
-        /// <summary>
-        /// Lanczos kernel sampler that implements smooth interpolation with a radius of 5 pixels.
-        /// This algorithm provides sharpened results when compared to others when downsampling.
-        /// </summary>
-        Lanczos5,
+        /// <inheritdoc cref="KnownResamplers.Lanczos5"/>
+        public static ResamplerCommand Lanczos5 { get; } = new(nameof(Lanczos5));
 
-        /// <summary>
-        /// Lanczos kernel sampler that implements smooth interpolation with a radius of 8 pixels.
-        /// This algorithm provides sharpened results when compared to others when downsampling.
-        /// </summary>
-        Lanczos8,
+        /// <inheritdoc cref="KnownResamplers.Lanczos8"/>
+        public static ResamplerCommand Lanczos8 { get; } = new(nameof(Lanczos8));
 
-        /// <summary>
-        /// This seperable cubic algorithm yields a very good equilibrium between
-        /// detail preservation (sharpness) and smoothness.
-        /// </summary>
-        MitchellNetravali,
+        /// <inheritdoc cref="KnownResamplers.MitchellNetravali"/>
+        public static ResamplerCommand MitchellNetravali { get; } = new(nameof(MitchellNetravali));
 
-        /// <summary>
-        /// This uses a very fast, unscaled filter
-        /// which will select the closest pixel to the new pixels position.
-        /// </summary>
-        NearestNeighbor,
+        /// <inheritdoc cref="KnownResamplers.NearestNeighbor"/>
+        public static ResamplerCommand NearestNeighbor { get; } = new(nameof(NearestNeighbor));
 
-        /// <summary>
-        /// This algorithm developed by Nicolas Robidoux providing a very good equilibrium between
-        /// detail preservation (sharpness) and smoothness comparable to <see cref="MitchellNetravali"/>.
-        /// </summary>
-        Robidoux,
+        /// <inheritdoc cref="KnownResamplers.Robidoux"/>
+        public static ResamplerCommand Robidoux { get; } = new(nameof(Robidoux));
 
-        /// <summary>
-        /// A sharpened form of the <see cref="Robidoux"/> sampler.
-        /// </summary>
-        RobidouxSharp,
+        /// <inheritdoc cref="KnownResamplers.RobidouxSharp"/>
+        public static ResamplerCommand RobidouxSharp { get; } = new(nameof(RobidouxSharp));
 
-        /// <summary>
-        /// A separable cubic algorithm similar to <see cref="MitchellNetravali"/> but yielding smoother results.
-        /// </summary>
-        Spline,
+        /// <inheritdoc cref="KnownResamplers.Spline"/>
+        public static ResamplerCommand Spline { get; } = new(nameof(Spline));
 
-        /// <summary>
-        /// This interpolation algorithm can be used where perfect image transformation
-        /// with pixel matching is impossible, so that one can calculate and assign appropriate intensity values to pixels.
-        /// </summary>
-        Triangle,
+        /// <inheritdoc cref="KnownResamplers.Triangle"/>
+        public static ResamplerCommand Triangle { get; } = new(nameof(Triangle));
 
-        /// <summary>
-        /// A high speed algorithm that delivers very sharpened results.
-        /// </summary>
-        Welch,
+        /// <inheritdoc cref="KnownResamplers.Welch"/>
+        public static ResamplerCommand Welch { get; } = new(nameof(Welch));
     }
 }

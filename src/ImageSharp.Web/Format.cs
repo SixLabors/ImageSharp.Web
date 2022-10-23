@@ -4,38 +4,38 @@
 namespace SixLabors.ImageSharp.Web
 {
     /// <summary>
-    /// Provides enumeration of possible image formats.
+    /// Contains reusable static instances of known image formats.
     /// </summary>
-    public enum Format
+    public static class Format
     {
         /// <summary>
-        /// Bmp.
+        /// Gets the Bmp encoding format.
         /// </summary>
-        Bmp,
+        public static FormatCommand Bmp { get; } = new(nameof(Bmp));
 
         /// <summary>
-        /// Gif.
+        /// Gets the Gif encoding format.
         /// </summary>
-        Gif,
+        public static FormatCommand Gif { get; } = new(nameof(Gif));
 
         /// <summary>
-        /// Jpg.
+        /// Gets the Jpg encoding format.
         /// </summary>
-        Jpg,
+        public static FormatCommand Jpg { get; } = new(nameof(Jpg));
 
         /// <summary>
-        /// Png.
+        /// Gets the Gif encoding format.
         /// </summary>
-        Png,
+        public static FormatCommand Png { get; } = new(nameof(Png));
 
         /// <summary>
-        /// Tga.
+        /// Gets the Bmp encoding format.
         /// </summary>
-        Tga,
+        public static FormatCommand Tga { get; } = new(nameof(Tga));
 
         /// <summary>
-        /// WebP.
+        /// Gets the Gif encoding format.
         /// </summary>
-        WebP
+        public static FormatCommand WebP { get; } = new(nameof(WebP));
     }
 }

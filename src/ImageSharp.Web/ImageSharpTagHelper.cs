@@ -151,7 +151,7 @@ namespace SixLabors.ImageSharp.Web
         /// Gets or sets the sampling algorithm to use when resizing images.
         /// </summary>
         [HtmlAttributeName(SamplerAttributeName)]
-        public Resampler? Sampler { get; set; }
+        public ResamplerCommand? Sampler { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to automatically
@@ -165,7 +165,7 @@ namespace SixLabors.ImageSharp.Web
         /// Gets or sets the image format to convert to.
         /// </summary>
         [HtmlAttributeName(FormatAttributeName)]
-        public Format? Format { get; set; }
+        public FormatCommand? Format { get; set; }
 
         /// <summary>
         /// Gets or sets the background color of the image.
@@ -285,7 +285,7 @@ namespace SixLabors.ImageSharp.Web
 
             if (this.Sampler.HasValue)
             {
-                commands.Add(ResizeWebProcessor.Sampler, this.Sampler.Value.ToString());
+                commands.Add(ResizeWebProcessor.Sampler, this.Sampler.Value.Name);
             }
         }
 
@@ -301,7 +301,7 @@ namespace SixLabors.ImageSharp.Web
         {
             if (this.Format.HasValue)
             {
-                commands.Add(FormatWebProcessor.Format, this.Format.Value.ToString());
+                commands.Add(FormatWebProcessor.Format, this.Format.Value.Name);
             }
         }
 
