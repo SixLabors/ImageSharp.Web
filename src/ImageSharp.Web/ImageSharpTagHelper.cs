@@ -118,7 +118,7 @@ namespace SixLabors.ImageSharp.Web
         /// Gets or sets the anchor position.
         /// </summary>
         [HtmlAttributeName(AnchorAttributeName)]
-        public AnchorPositionMode? Position { get; set; }
+        public AnchorPositionMode? AnchorPosition { get; set; }
 
         /// <summary>
         /// Gets or sets the center coordinates.
@@ -259,9 +259,9 @@ namespace SixLabors.ImageSharp.Web
                 commands.Add(ResizeWebProcessor.Mode, this.ResizeMode.Value.ToString());
             }
 
-            if (this.Position.HasValue)
+            if (this.AnchorPosition.HasValue)
             {
-                commands.Add(ResizeWebProcessor.Anchor, this.Position.Value.ToString());
+                commands.Add(ResizeWebProcessor.Anchor, this.AnchorPosition.Value.ToString());
             }
 
             if (this.Center.HasValue)

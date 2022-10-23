@@ -26,8 +26,10 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Extensions.WebEncoders.Testing;
+using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
+using SixLabors.ImageSharp.Web.Processors;
 using Xunit;
 
 namespace SixLabors.ImageSharp.Web.Tests.Commands
@@ -177,6 +179,521 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             Assert.Equal(4, output.Attributes.Count);
             TagHelperAttribute srcAttribute = Assert.Single(output.Attributes, attr => attr.Name.Equals("src"));
             Assert.Equal("/bar/images/image.jpg?width=100&height=200", srcAttribute.Value);
+        }
+
+        [Fact]
+        public void RendersImageTag_SrcIncludes_ResizeMode()
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Mode}={nameof(ResizeMode.Stretch)}" },
+                    { "width", 50 }
+                });
+
+            ImageSharpTagHelper helper = this.GetHelper();
+            helper.Src = "testimage.png";
+            helper.ResizeMode = ResizeMode.Stretch;
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
+        }
+
+        [Fact]
+        public void RendersImageTag_SrcIncludes_ResizePosition()
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Xy}=20,50" },
+                    { "width", 50 }
+                });
+
+            ImageSharpTagHelper helper = this.GetHelper();
+            helper.Src = "testimage.png";
+            helper.Center = new(20, 50);
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
+        }
+
+        [Fact]
+        public void RendersImageTag_SrcIncludes_ResizeAnchor()
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Anchor}={nameof(AnchorPositionMode.Top)}" },
+                    { "width", 50 }
+                });
+
+            ImageSharpTagHelper helper = this.GetHelper();
+            helper.Src = "testimage.png";
+            helper.AnchorPosition = AnchorPositionMode.Top;
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
+        }
+
+        [Fact]
+        public void RendersImageTag_SrcIncludes_ResizePadColor()
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Color}={Color.LimeGreen.ToHex()}" },
+                    { "width", 50 }
+                });
+
+            ImageSharpTagHelper helper = this.GetHelper();
+            helper.Src = "testimage.png";
+            helper.PadColor = Color.LimeGreen;
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
+        }
+
+        [Fact]
+        public void RendersImageTag_SrcIncludes_ResizeCompand()
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Compand}={bool.TrueString}" },
+                    { "width", 50 }
+                });
+
+            ImageSharpTagHelper helper = this.GetHelper();
+            helper.Src = "testimage.png";
+            helper.Compand = true;
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
+        }
+
+        [Fact]
+        public void RendersImageTag_SrcIncludes_ResizeOrient()
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Orient}={bool.TrueString}" },
+                    { "width", 50 }
+                });
+
+            ImageSharpTagHelper helper = this.GetHelper();
+            helper.Src = "testimage.png";
+            helper.Orient = true;
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
+        }
+
+        public static TheoryData<ResamplerCommand> ResamplerCommands { get; } = new()
+        {
+            { Resampler.Bicubic },
+            { Resampler.Box },
+            { Resampler.CatmullRom },
+            { Resampler.Hermite },
+            { Resampler.Lanczos2 },
+            { Resampler.Lanczos3 },
+            { Resampler.Lanczos5 },
+            { Resampler.Lanczos8 },
+            { Resampler.MitchellNetravali },
+            { Resampler.NearestNeighbor },
+            { Resampler.Robidoux },
+            { Resampler.RobidouxSharp },
+            { Resampler.Spline },
+            { Resampler.Triangle },
+            { Resampler.Welch }
+        };
+
+        [Theory]
+        [MemberData(nameof(ResamplerCommands))]
+        public void RendersImageTag_SrcIncludes_Resampler(ResamplerCommand resampler)
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Sampler}={resampler.Name}" },
+                    { "width", 50 }
+                });
+
+            ImageSharpTagHelper helper = this.GetHelper();
+            helper.Src = "testimage.png";
+            helper.Sampler = resampler;
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
+        }
+
+        [Fact]
+        public void RendersImageTag_SrcIncludes_AutoOrient()
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", $"testimage.png?width=50&{AutoOrientWebProcessor.AutoOrient}={bool.TrueString}" },
+                    { "width", 50 }
+                });
+
+            ImageSharpTagHelper helper = this.GetHelper();
+            helper.Src = "testimage.png";
+            helper.AutoOrient = true;
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
+        }
+
+        public static TheoryData<FormatCommand> FormatCommands { get; } = new()
+        {
+            { Format.Bmp },
+            { Format.Gif },
+            { Format.Jpg },
+            { Format.Png },
+            { Format.Tga },
+            { Format.WebP }
+        };
+
+        [Theory]
+        [MemberData(nameof(FormatCommands))]
+        public void RendersImageTag_SrcIncludes_Format(FormatCommand format)
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", $"testimage.png?width=50&{FormatWebProcessor.Format}={format.Name}" },
+                    { "width", 50 }
+                });
+
+            ImageSharpTagHelper helper = this.GetHelper();
+            helper.Src = "testimage.png";
+            helper.Format = format;
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
+        }
+
+        [Fact]
+        public void RendersImageTag_SrcIncludes_BackgroundColor()
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", $"testimage.png?width=50&{BackgroundColorWebProcessor.Color}={Color.Red.ToHex()}" },
+                    { "width", 50 }
+                });
+
+            ImageSharpTagHelper helper = this.GetHelper();
+            helper.Src = "testimage.png";
+            helper.BackgroundColor = Color.Red;
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
+        }
+
+        [Fact]
+        public void RendersImageTag_SrcIncludes_Quality()
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", $"testimage.png?width=50&{QualityWebProcessor.Quality}={42}" },
+                    { "width", 50 }
+                });
+
+            ImageSharpTagHelper helper = this.GetHelper();
+            helper.Src = "testimage.png";
+            helper.Quality = 42;
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
         }
 
         private ImageSharpTagHelper GetHelper(
