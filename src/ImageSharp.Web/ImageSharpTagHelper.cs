@@ -240,16 +240,18 @@ namespace SixLabors.ImageSharp.Web
 
         private void AddResizeCommands(TagHelperOutput output, CommandCollection commands)
         {
-            if (this.Width.HasValue)
+            int? width = this.Width ?? output.Attributes[WidthAttributeName]?.Value as int?;
+            if (width.HasValue)
             {
-                commands.Add(ResizeWebProcessor.Width, this.Width.Value.ToString(this.parserCulture));
-                output.Attributes.SetAttribute(WidthAttributeName, this.Width);
+                commands.Add(ResizeWebProcessor.Width, width.Value.ToString(this.parserCulture));
+                output.Attributes.SetAttribute(WidthAttributeName, width);
             }
 
-            if (this.Height.HasValue)
+            int? height = this.Height ?? output.Attributes[HeightAttributeName]?.Value as int?;
+            if (height.HasValue)
             {
-                commands.Add(ResizeWebProcessor.Height, this.Height.Value.ToString(this.parserCulture));
-                output.Attributes.SetAttribute(HeightAttributeName, this.Height);
+                commands.Add(ResizeWebProcessor.Height, height.Value.ToString(this.parserCulture));
+                output.Attributes.SetAttribute(HeightAttributeName, height);
             }
 
             if (this.ResizeMode.HasValue)
