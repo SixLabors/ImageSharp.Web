@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -324,18 +325,18 @@ namespace SixLabors.ImageSharp.Web
         }
 
         private static string AddQueryString(
-            string uri,
+            ReadOnlySpan<char> uri,
             CommandCollection commands)
         {
-            int anchorIndex = uri.IndexOf('#');
-            string uriToBeAppended = uri;
-            string anchorText = string.Empty;
+            ReadOnlySpan<char> uriToBeAppended = uri;
+            ReadOnlySpan<char> anchorText = default;
 
             // If there is an anchor, then the query string must be inserted before its first occurrence.
+            int anchorIndex = uri.IndexOf('#');
             if (anchorIndex != -1)
             {
-                anchorText = uri.Substring(anchorIndex);
-                uriToBeAppended = uri.Substring(0, anchorIndex);
+                anchorText = uri.Slice(anchorIndex);
+                uriToBeAppended = uri.Slice(0, anchorIndex);
             }
 
             int queryIndex = uriToBeAppended.IndexOf('?');
@@ -346,7 +347,7 @@ namespace SixLabors.ImageSharp.Web
 
             foreach (KeyValuePair<string, string> parameter in commands)
             {
-                if (parameter.Value == null)
+                if (parameter.Value is null)
                 {
                     continue;
                 }
