@@ -24,7 +24,7 @@ namespace SixLabors.ImageSharp.Web
         public static FormatCommand Jpg { get; } = new(nameof(Jpg));
 
         /// <summary>
-        /// Gets the Gif encoding format.
+        /// Gets the Png encoding format.
         /// </summary>
         public static FormatCommand Png { get; } = new(nameof(Png));
 
