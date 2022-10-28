@@ -29,7 +29,7 @@ namespace SixLabors.ImageSharp.Web
         public static FormatCommand Png { get; } = new(nameof(Png));
 
         /// <summary>
-        /// Gets the Bmp encoding format.
+        /// Gets the Tga encoding format.
         /// </summary>
         public static FormatCommand Tga { get; } = new(nameof(Tga));
 
