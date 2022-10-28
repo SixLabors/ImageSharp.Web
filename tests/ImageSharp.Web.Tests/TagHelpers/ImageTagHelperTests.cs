@@ -706,15 +706,60 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
             }
         }
 
+        [Fact]
+        public void RendersImageTag_SrcIncludes_HMAC()
+        {
+            // Arrange
+            TagHelperContext context = MakeTagHelperContext(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png" },
+                    { "width", 50 },
+                    { "imagesharp-hmac", true }
+                });
+
+            TagHelperOutput output = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "width", 50 }
+                });
+
+            TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
+                attributes: new TagHelperAttributeList
+                {
+                    { "src", "testimage.png?hmac=ef09cd10210025e6d588fc2c12b91bf609c3e45f6d5d05dd650b8e6746cba288" },
+                    { "width", 50 }
+                });
+
+            ImageTagHelper helper = this.GetHelper(hmac: true);
+            helper.Src = "testimage.png";
+
+            // Act
+            helper.Process(context, output);
+
+            // Assert
+            Assert.Equal(expectedOutput.TagName, output.TagName);
+            Assert.Equal(2, output.Attributes.Count);
+
+            for (int i = 0; i < expectedOutput.Attributes.Count; i++)
+            {
+                TagHelperAttribute expectedAttribute = expectedOutput.Attributes[i];
+                TagHelperAttribute actualAttribute = output.Attributes[i];
+                Assert.Equal(expectedAttribute.Name, actualAttribute.Name);
+                Assert.Equal(expectedAttribute.Value.ToString(), actualAttribute.Value.ToString(), ignoreCase: true);
+            }
+        }
+
         private ImageTagHelper GetHelper(
             IUrlHelperFactory urlHelperFactory = null,
-            ViewContext viewContext = null)
+            ViewContext viewContext = null,
+            bool hmac = false)
         {
             urlHelperFactory ??= new FakeUrlHelperFactory();
             viewContext ??= MakeViewContext();
 
             return new ImageTagHelper(
-                Options.Create<ImageSharpMiddlewareOptions>(new()),
+                Options.Create<ImageSharpMiddlewareOptions>(new() { HMACSecretKey = hmac ? new byte[] { 1, 2, 3, 4, 5 } : null }),
                 this.Provider.GetRequiredService<RequestAuthorizationUtilities>(),
                 urlHelperFactory,
                 new HtmlTestEncoder())

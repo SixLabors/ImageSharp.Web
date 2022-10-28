@@ -189,7 +189,7 @@ namespace SixLabors.ImageSharp.Web.TagHelpers
         /// <see cref="ImageSharpMiddlewareOptions.HMACSecretKey"/> property.
         /// </summary>
         [HtmlAttributeName(HMACAttributeName)]
-        public bool AppendHMac { get => true; set => _ = true; }
+        public bool AppendHMAC { get => true; set => _ = true; }
 
         /// <inheritdoc />
         public override void Process(TagHelperContext context, TagHelperOutput output)
