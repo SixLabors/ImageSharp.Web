@@ -34,7 +34,7 @@ namespace SixLabors.ImageSharp.Web
         public static FormatCommand Tga { get; } = new(nameof(Tga));
 
         /// <summary>
-        /// Gets the Gif encoding format.
+        /// Gets the WebP encoding format.
         /// </summary>
         public static FormatCommand WebP { get; } = new(nameof(WebP));
     }
