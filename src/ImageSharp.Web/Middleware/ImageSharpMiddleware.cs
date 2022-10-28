@@ -7,12 +7,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IO;
@@ -121,21 +118,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private readonly RequestAuthorizationUtilities authorizationUtilities;
 
         /// <summary>
-        /// Provides programmatic configuration for CORS.
-        /// </summary>
-        private readonly CorsOptions corsOptions;
-
-        /// <summary>
-        /// The CORS service which is used to apply CORS headers to the HTTP response.
-        /// </summary>
-        private readonly ICorsService corsService;
-
-        /// <summary>
-        /// Provides CORS policies for a given HTTP context.
-        /// </summary>
-        private readonly ICorsPolicyProvider corsPolicyProvider;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ImageSharpMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next middleware in the pipeline.</param>
@@ -151,7 +133,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         /// <param name="asyncKeyLock">The async key lock.</param>
         /// <param name="requestAuthorizationUtilities">Contains helpers that allow authorization of image requests.</param>
-        /// <param name="serviceProvider">The service provider.</param>
         public ImageSharpMiddleware(
             RequestDelegate next,
             IOptions<ImageSharpMiddlewareOptions> options,
@@ -165,8 +146,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             CommandParser commandParser,
             FormatUtilities formatUtilities,
             AsyncKeyReaderWriterLock<string> asyncKeyLock,
-            RequestAuthorizationUtilities requestAuthorizationUtilities,
-            IServiceProvider serviceProvider)
+            RequestAuthorizationUtilities requestAuthorizationUtilities)
         {
             Guard.NotNull(next, nameof(next));
             Guard.NotNull(options, nameof(options));
@@ -199,16 +179,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.formatUtilities = formatUtilities;
             this.asyncKeyLock = asyncKeyLock;
             this.authorizationUtilities = requestAuthorizationUtilities;
-
-            // We cannot create a constructor containing these injected types since the CorsMiddleware
-            // might not be registered. We have to use the service provider to get them.
-            using IServiceScope scope = serviceProvider.CreateScope();
-            this.corsPolicyProvider = scope.ServiceProvider.GetService<ICorsPolicyProvider>();
-            if (this.corsPolicyProvider is not null)
-            {
-                this.corsOptions = scope.ServiceProvider.GetRequiredService<IOptions<CorsOptions>>().Value;
-                this.corsService = scope.ServiceProvider.GetRequiredService<ICorsService>();
-            }
         }
 
         /// <summary>
@@ -303,7 +273,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             await this.ProcessRequestAsync(
                 httpContext,
                 sourceImageResolver,
-                new ImageContext(httpContext, this.options, this.corsOptions, this.corsService, this.corsPolicyProvider),
+                new ImageContext(httpContext, this.options),
                 commands,
                 retry);
         }
