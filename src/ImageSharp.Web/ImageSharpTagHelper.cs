@@ -16,7 +16,7 @@ using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 
-namespace SixLabors.ImageSharp.Web
+namespace SixLabors.ImageSharp.Web.TagHelpers
 {
     /// <summary>
     /// A TagHelper implementation targeting &lt;img&gt; element that allows the automatic generation of HMAC protected processing commands.
