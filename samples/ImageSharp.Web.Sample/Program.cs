@@ -63,8 +63,6 @@ namespace ImageSharp.Web.Sample
 
             app.UseStaticFiles();
 
-            app.UseCors();
-
             app.UseRouting();
 
             app.UseAuthorization();
