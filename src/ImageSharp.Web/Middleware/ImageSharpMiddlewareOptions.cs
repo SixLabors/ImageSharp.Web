@@ -85,12 +85,6 @@ namespace SixLabors.ImageSharp.Web.Middleware
         public byte[] HMACSecretKey { get; set; } = Array.Empty<byte>();
 
         /// <summary>
-        /// Gets or sets the optionsal CORS policy name to use when CORS middleware is registered against the service collection.
-        /// If not set, <see cref="CorsOptions.DefaultPolicyName"/> will be used.
-        /// </summary>
-        public string CorsPolicyName { get; set; }
-
-        /// <summary>
         /// Gets or sets the method used to compute a Hash-based Message Authentication Code (HMAC) for request authentication.
         /// Defaults to <see cref="HMACUtilities.ComputeHMACSHA256(string, byte[])"/> using an invariant lowercase relative Uri
         /// generated using <see cref="CaseHandlingUriBuilder.BuildRelative(CaseHandlingUriBuilder.CaseHandling, PathString, PathString, QueryString)"/>.
