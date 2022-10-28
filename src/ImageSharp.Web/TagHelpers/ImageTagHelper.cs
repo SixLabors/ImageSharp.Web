@@ -33,6 +33,7 @@ namespace SixLabors.ImageSharp.Web.TagHelpers
     [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + FormatAttributeName, TagStructure = TagStructure.WithoutEndTag)]
     [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + BgColorAttributeName, TagStructure = TagStructure.WithoutEndTag)]
     [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + QualityAttributeName, TagStructure = TagStructure.WithoutEndTag)]
+    [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + HMACAttributeName, TagStructure = TagStructure.WithoutEndTag)]
     public class ImageTagHelper : UrlResolutionTagHelper
     {
         private const string SrcAttributeName = "src";
@@ -50,6 +51,7 @@ namespace SixLabors.ImageSharp.Web.TagHelpers
         private const string FormatAttributeName = AttributePrefix + FormatWebProcessor.Format;
         private const string BgColorAttributeName = AttributePrefix + BackgroundColorWebProcessor.Color;
         private const string QualityAttributeName = AttributePrefix + QualityWebProcessor.Quality;
+        private const string HMACAttributeName = AttributePrefix + RequestAuthorizationUtilities.TokenCommand;
 
         private readonly ImageSharpMiddlewareOptions options;
         private readonly CultureInfo parserCulture;
@@ -181,6 +183,14 @@ namespace SixLabors.ImageSharp.Web.TagHelpers
         [HtmlAttributeName(QualityAttributeName)]
         public int? Quality { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to append a HMAC token to the request.
+        /// This value is always <see langword="true"/>. HMAC token usage is controlled by populating the
+        /// <see cref="ImageSharpMiddlewareOptions.HMACSecretKey"/> property.
+        /// </summary>
+        [HtmlAttributeName(HMACAttributeName)]
+        public bool AppendHMac { get => true; set => _ = true; }
+
         /// <inheritdoc />
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
@@ -199,13 +209,13 @@ namespace SixLabors.ImageSharp.Web.TagHelpers
             CommandCollection commands = new();
             this.AddProcessingCommands(context, output, commands, this.parserCulture);
 
-            if (commands.Count > 0)
+            byte[] secret = this.options.HMACSecretKey;
+            if (commands.Count > 0 || secret?.Length > 0)
             {
                 // Retrieve the TagHelperOutput variation of the "src" attribute in case other TagHelpers in the
                 // pipeline have touched the value. If the value is already encoded this helper may
                 // not function properly.
                 src = output.Attributes[SrcAttributeName].Value as string;
-                byte[] secret = this.options.HMACSecretKey;
                 if (secret?.Length > 0)
                 {
                     string hash = this.authorizationUtilities.ComputeHMAC(src, commands, secret);

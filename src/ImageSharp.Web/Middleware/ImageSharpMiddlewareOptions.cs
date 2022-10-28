@@ -4,7 +4,6 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
 using SixLabors.ImageSharp.Web.Commands;
