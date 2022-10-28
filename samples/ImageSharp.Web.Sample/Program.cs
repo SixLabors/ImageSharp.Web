@@ -46,7 +46,13 @@ namespace ImageSharp.Web.Sample
                 .AddProcessor<QualityWebProcessor>()
                 .AddProcessor<AutoOrientWebProcessor>();
 
+            services.AddCors(options => options.AddDefaultPolicy(
+                    builder => builder.WithOrigins("https://localhost:8080").AllowAnyHeader().AllowAnyMethod()));
+
             WebApplication app = builder.Build();
+
+           // app.Urls.Clear();
+           // app.Urls.Add("https://*:7227");
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -62,6 +68,8 @@ namespace ImageSharp.Web.Sample
             app.UseImageSharp();
 
             app.UseStaticFiles();
+
+            app.UseCors();
 
             app.UseRouting();
 

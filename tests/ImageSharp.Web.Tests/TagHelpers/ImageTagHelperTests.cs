@@ -30,13 +30,14 @@ using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
+using SixLabors.ImageSharp.Web.TagHelpers;
 using Xunit;
 
-namespace SixLabors.ImageSharp.Web.Tests.Commands
+namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
 {
-    public sealed class ImageSharpTagHelperTests : IDisposable
+    public sealed class ImageTagHelperTests : IDisposable
     {
-        public ImageSharpTagHelperTests()
+        public ImageTagHelperTests()
         {
             ServiceCollection services = new();
             services.AddSingleton<IWebHostEnvironment, FakeWebHostEnvironment>();
@@ -77,7 +78,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
 
             var urlHelperFactory = new FakeUrlHelperFactory();
 
-            ImageSharpTagHelper helper = this.GetHelper(urlHelperFactory: urlHelperFactory);
+            ImageTagHelper helper = this.GetHelper(urlHelperFactory: urlHelperFactory);
             helper.Src = src;
             helper.Width = 100;
 
@@ -122,13 +123,15 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
                     { "alt", new HtmlString("alt text") },
                     { "data-extra", new HtmlString("something") },
                     { "title", new HtmlString("Image title") },
-                    { "src", "testimage.png?width=50&height=60" },
+                    { "src", "testimage.png?width=100&height=120" },
                     { "width", 50 },
                     { "height", 60 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
+            helper.Width = 100;
+            helper.Height = 120;
 
             // Act
             helper.Process(context, output);
@@ -165,7 +168,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
 
             ViewContext viewContext = MakeViewContext("/bar");
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "/bar/images/image.jpg";
             helper.Width = 100;
             helper.Height = 200;
@@ -201,12 +204,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Mode}={nameof(ResizeMode.Stretch)}" },
+                    { "src", $"testimage.png?width=100&{ResizeWebProcessor.Mode}={nameof(ResizeMode.Stretch)}" },
                     { "width", 50 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
+            helper.Width = 100;
             helper.ResizeMode = ResizeMode.Stretch;
 
             // Act
@@ -245,12 +249,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Xy}=20,50" },
+                    { "src", $"testimage.png?width=100&{ResizeWebProcessor.Xy}=20,50" },
                     { "width", 50 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
+            helper.Width = 100;
             helper.Center = new(20, 50);
 
             // Act
@@ -289,12 +294,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Anchor}={nameof(AnchorPositionMode.Top)}" },
+                    { "src", $"testimage.png?width=100&{ResizeWebProcessor.Anchor}={nameof(AnchorPositionMode.Top)}" },
                     { "width", 50 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
+            helper.Width = 100;
             helper.AnchorPosition = AnchorPositionMode.Top;
 
             // Act
@@ -333,12 +339,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Color}={Color.LimeGreen.ToHex()}" },
+                    { "src", $"testimage.png?width=100&{ResizeWebProcessor.Color}={Color.LimeGreen.ToHex()}" },
                     { "width", 50 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
+            helper.Width = 100;
             helper.PadColor = Color.LimeGreen;
 
             // Act
@@ -377,12 +384,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Compand}={bool.TrueString}" },
+                    { "src", $"testimage.png?width=100&{ResizeWebProcessor.Compand}={bool.TrueString}" },
                     { "width", 50 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
+            helper.Width = 100;
             helper.Compand = true;
 
             // Act
@@ -421,12 +429,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Orient}={bool.TrueString}" },
+                    { "src", $"testimage.png?width=100&{ResizeWebProcessor.Orient}={bool.TrueString}" },
                     { "width", 50 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
+            helper.Width = 100;
             helper.Orient = true;
 
             // Act
@@ -485,12 +494,13 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "src", $"testimage.png?width=50&{ResizeWebProcessor.Sampler}={resampler.Name}" },
+                    { "src", $"testimage.png?width=100&{ResizeWebProcessor.Sampler}={resampler.Name}" },
                     { "width", 50 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
+            helper.Width = 100;
             helper.Sampler = resampler;
 
             // Act
@@ -529,11 +539,11 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "src", $"testimage.png?width=50&{AutoOrientWebProcessor.AutoOrient}={bool.TrueString}" },
+                    { "src", $"testimage.png?{AutoOrientWebProcessor.AutoOrient}={bool.TrueString}" },
                     { "width", 50 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
             helper.AutoOrient = true;
 
@@ -584,11 +594,11 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "src", $"testimage.png?width=50&{FormatWebProcessor.Format}={format.Name}" },
+                    { "src", $"testimage.png?{FormatWebProcessor.Format}={format.Name}" },
                     { "width", 50 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
             helper.Format = format;
 
@@ -628,11 +638,11 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "src", $"testimage.png?width=50&{BackgroundColorWebProcessor.Color}={Color.Red.ToHex()}" },
+                    { "src", $"testimage.png?{BackgroundColorWebProcessor.Color}={Color.Red.ToHex()}" },
                     { "width", 50 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
             helper.BackgroundColor = Color.Red;
 
@@ -672,11 +682,11 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "src", $"testimage.png?width=50&{QualityWebProcessor.Quality}={42}" },
+                    { "src", $"testimage.png?{QualityWebProcessor.Quality}={42}" },
                     { "width", 50 }
                 });
 
-            ImageSharpTagHelper helper = this.GetHelper();
+            ImageTagHelper helper = this.GetHelper();
             helper.Src = "testimage.png";
             helper.Quality = 42;
 
@@ -696,14 +706,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands
             }
         }
 
-        private ImageSharpTagHelper GetHelper(
+        private ImageTagHelper GetHelper(
             IUrlHelperFactory urlHelperFactory = null,
             ViewContext viewContext = null)
         {
             urlHelperFactory ??= new FakeUrlHelperFactory();
             viewContext ??= MakeViewContext();
 
-            return new ImageSharpTagHelper(
+            return new ImageTagHelper(
                 Options.Create<ImageSharpMiddlewareOptions>(new()),
                 this.Provider.GetRequiredService<RequestAuthorizationUtilities>(),
                 urlHelperFactory,

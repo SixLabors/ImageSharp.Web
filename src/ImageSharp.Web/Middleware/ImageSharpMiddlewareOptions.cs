@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
 using SixLabors.ImageSharp.Web.Commands;
@@ -82,6 +83,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// The key can be any length. However, the recommended size is at least 64 bytes. If the length is zero then no authentication is performed.
         /// </remarks>
         public byte[] HMACSecretKey { get; set; } = Array.Empty<byte>();
+
+        /// <summary>
+        /// Gets or sets the optionsal CORS policy name to use when CORS middleware is registered against the service collection.
+        /// If not set, <see cref="CorsOptions.DefaultPolicyName"/> will be used.
+        /// </summary>
+        public string CorsPolicyName { get; set; }
 
         /// <summary>
         /// Gets or sets the method used to compute a Hash-based Message Authentication Code (HMAC) for request authentication.

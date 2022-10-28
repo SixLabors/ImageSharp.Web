@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Headers;
@@ -33,12 +34,24 @@ namespace SixLabors.ImageSharp.Web.Middleware
         private PreconditionState ifModifiedSinceState;
         private PreconditionState ifUnmodifiedSinceState;
 
+        private readonly CorsOptions corsOptions;
+        private readonly ICorsService corsService;
+        private readonly ICorsPolicyProvider corsPolicyProvider;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageContext"/> struct.
         /// </summary>
         /// <param name="context">The current HTTP request context.</param>
         /// <param name="options">The middleware options.</param>
-        public ImageContext(HttpContext context, ImageSharpMiddlewareOptions options)
+        /// <param name="corsOptions">Provides programmatic configuration for CORS.</param>
+        /// <param name="corsService">The CORS service which is used to apply CORS headers to the HTTP response.</param>
+        /// <param name="corsProvider">Provides CORS policies for a given HTTP context.</param>
+        public ImageContext(
+            HttpContext context,
+            ImageSharpMiddlewareOptions options,
+            CorsOptions corsOptions,
+            ICorsService corsService,
+            ICorsPolicyProvider corsProvider)
         {
             this.context = context;
             this.request = context.Request;
@@ -57,6 +70,10 @@ namespace SixLabors.ImageSharp.Web.Middleware
             this.ifNoneMatchState = PreconditionState.Unspecified;
             this.ifModifiedSinceState = PreconditionState.Unspecified;
             this.ifUnmodifiedSinceState = PreconditionState.Unspecified;
+
+            this.corsOptions = corsOptions;
+            this.corsService = corsService;
+            this.corsPolicyProvider = corsProvider;
         }
 
         /// <summary>
@@ -186,6 +203,15 @@ namespace SixLabors.ImageSharp.Web.Middleware
             TimeSpan maxAge)
         {
             this.response.StatusCode = statusCode;
+
+            if (this.corsPolicyProvider is not null)
+            {
+                string name = this.options.CorsPolicyName ?? this.corsOptions.DefaultPolicyName;
+                CorsPolicy policy = await this.corsPolicyProvider.GetPolicyAsync(this.context, name);
+                CorsResult result = this.corsService.EvaluatePolicy(this.context, policy);
+                this.corsService.ApplyResult(result, this.response);
+            }
+
             if (statusCode < 400)
             {
                 // These headers are returned for 200 and 304

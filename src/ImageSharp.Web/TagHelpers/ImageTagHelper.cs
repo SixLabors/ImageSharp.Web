@@ -33,12 +33,12 @@ namespace SixLabors.ImageSharp.Web.TagHelpers
     [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + FormatAttributeName, TagStructure = TagStructure.WithoutEndTag)]
     [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + BgColorAttributeName, TagStructure = TagStructure.WithoutEndTag)]
     [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + QualityAttributeName, TagStructure = TagStructure.WithoutEndTag)]
-    public class ImageSharpTagHelper : UrlResolutionTagHelper
+    public class ImageTagHelper : UrlResolutionTagHelper
     {
         private const string SrcAttributeName = "src";
-        private const string WidthAttributeName = ResizeWebProcessor.Width;
-        private const string HeightAttributeName = ResizeWebProcessor.Height;
         private const string AttributePrefix = "imagesharp-";
+        private const string WidthAttributeName = AttributePrefix + ResizeWebProcessor.Width;
+        private const string HeightAttributeName = AttributePrefix + ResizeWebProcessor.Height;
         private const string AnchorAttributeName = AttributePrefix + ResizeWebProcessor.Anchor;
         private const string RModeAttributeName = AttributePrefix + ResizeWebProcessor.Mode;
         private const string XyAttributeName = AttributePrefix + ResizeWebProcessor.Xy;
@@ -57,13 +57,13 @@ namespace SixLabors.ImageSharp.Web.TagHelpers
         private readonly RequestAuthorizationUtilities authorizationUtilities;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ImageSharpTagHelper"/> class.
+        /// Initializes a new instance of the <see cref="ImageTagHelper"/> class.
         /// </summary>
         /// <param name="options">The middleware configuration options.</param>
         /// <param name="authorizationUtilities">Contains helpers that allow authorization of image requests.</param>
         /// <param name="urlHelperFactory">The URL helper factory.</param>
         /// <param name="htmlEncoder">The HTML encorder.</param>
-        public ImageSharpTagHelper(
+        public ImageTagHelper(
             IOptions<ImageSharpMiddlewareOptions> options,
             RequestAuthorizationUtilities authorizationUtilities,
             IUrlHelperFactory urlHelperFactory,
@@ -241,18 +241,20 @@ namespace SixLabors.ImageSharp.Web.TagHelpers
 
         private void AddResizeCommands(TagHelperOutput output, CommandCollection commands)
         {
-            int? width = this.Width ?? output.Attributes[WidthAttributeName]?.Value as int?;
-            if (width.HasValue)
+            // If no explicit width/height has been set on the image, set the attributes to match the
+            // width/height from the process commands if present.
+            int? width = output.Attributes[ResizeWebProcessor.Width]?.Value as int?;
+            if (this.Width.HasValue)
             {
-                commands.Add(ResizeWebProcessor.Width, width.Value.ToString(this.parserCulture));
-                output.Attributes.SetAttribute(WidthAttributeName, width);
+                commands.Add(ResizeWebProcessor.Width, this.Width.Value.ToString(this.parserCulture));
+                output.Attributes.SetAttribute(ResizeWebProcessor.Width, width ?? this.Width);
             }
 
-            int? height = this.Height ?? output.Attributes[HeightAttributeName]?.Value as int?;
-            if (height.HasValue)
+            int? height = output.Attributes[ResizeWebProcessor.Height]?.Value as int?;
+            if (this.Height.HasValue)
             {
-                commands.Add(ResizeWebProcessor.Height, height.Value.ToString(this.parserCulture));
-                output.Attributes.SetAttribute(HeightAttributeName, height);
+                commands.Add(ResizeWebProcessor.Height, this.Height.Value.ToString(this.parserCulture));
+                output.Attributes.SetAttribute(ResizeWebProcessor.Height, height ?? this.Height);
             }
 
             if (this.ResizeMode.HasValue)
