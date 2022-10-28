@@ -11,4 +11,6 @@
     <ProjectReference Include="..\..\src\ImageSharp.Web\ImageSharp.Web.csproj" />
   </ItemGroup>
 
+  <Import Project="..\..\SixLabors.ImageSharp.Web.props" />
+
 </Project>
