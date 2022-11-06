@@ -253,14 +253,20 @@ namespace SixLabors.ImageSharp.Web.TagHelpers
         {
             // If no explicit width/height has been set on the image, set the attributes to match the
             // width/height from the process commands if present.
-            int? width = output.Attributes[ResizeWebProcessor.Width]?.Value as int?;
+            int? width = output.Attributes.ContainsName(ResizeWebProcessor.Width)
+                ? int.Parse(output.Attributes[ResizeWebProcessor.Width].Value.ToString(), this.parserCulture)
+                : null;
+
             if (this.Width.HasValue)
             {
                 commands.Add(ResizeWebProcessor.Width, this.Width.Value.ToString(this.parserCulture));
                 output.Attributes.SetAttribute(ResizeWebProcessor.Width, width ?? this.Width);
             }
 
-            int? height = output.Attributes[ResizeWebProcessor.Height]?.Value as int?;
+            int? height = output.Attributes.ContainsName(ResizeWebProcessor.Height)
+                ? int.Parse(output.Attributes[ResizeWebProcessor.Height].Value.ToString(), this.parserCulture)
+                : null;
+
             if (this.Height.HasValue)
             {
                 commands.Add(ResizeWebProcessor.Height, this.Height.Value.ToString(this.parserCulture));

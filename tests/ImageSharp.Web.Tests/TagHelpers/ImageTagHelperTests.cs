@@ -103,7 +103,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                     { "data-extra", new HtmlString("something") },
                     { "title", new HtmlString("Image title") },
                     { "src", "testimage.png" },
-                    { "width", 50 },
+                    { "width", "50" },
                     { "height", 60 }
                 });
 
@@ -113,7 +113,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                     { "alt", new HtmlString("alt text") },
                     { "data-extra", new HtmlString("something") },
                     { "title", new HtmlString("Image title") },
-                    { "width", 50 },
+                    { "width", "50" },
                     { "height", 60 }
                 });
 
@@ -124,7 +124,7 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                     { "data-extra", new HtmlString("something") },
                     { "title", new HtmlString("Image title") },
                     { "src", "testimage.png?width=100&height=120" },
-                    { "width", 50 },
+                    { "width", "50" },
                     { "height", 60 }
                 });
 
@@ -192,20 +192,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", $"testimage.png?width=100&{ResizeWebProcessor.Mode}={nameof(ResizeMode.Stretch)}" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper();
@@ -237,20 +237,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", $"testimage.png?width=100&{ResizeWebProcessor.Xy}=20,50" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper();
@@ -282,20 +282,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", $"testimage.png?width=100&{ResizeWebProcessor.Anchor}={nameof(AnchorPositionMode.Top)}" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper();
@@ -327,20 +327,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", $"testimage.png?width=100&{ResizeWebProcessor.Color}={Color.LimeGreen.ToHex()}" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper();
@@ -372,20 +372,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", $"testimage.png?width=100&{ResizeWebProcessor.Compand}={bool.TrueString}" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper();
@@ -417,20 +417,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", $"testimage.png?width=100&{ResizeWebProcessor.Orient}={bool.TrueString}" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper();
@@ -482,20 +482,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", $"testimage.png?width=100&{ResizeWebProcessor.Sampler}={resampler.Name}" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper();
@@ -527,20 +527,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", $"testimage.png?{AutoOrientWebProcessor.AutoOrient}={bool.TrueString}" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper();
@@ -582,20 +582,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", $"testimage.png?{FormatWebProcessor.Format}={format.Name}" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper();
@@ -626,20 +626,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", $"testimage.png?{BackgroundColorWebProcessor.Color}={Color.Red.ToHex()}" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper();
@@ -670,20 +670,20 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", $"testimage.png?{QualityWebProcessor.Quality}={42}" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper();
@@ -714,21 +714,21 @@ namespace SixLabors.ImageSharp.Web.Tests.TagHelpers
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png" },
-                    { "width", 50 },
+                    { "width", "50" },
                     { "imagesharp-hmac", true }
                 });
 
             TagHelperOutput output = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             TagHelperOutput expectedOutput = MakeImageTagHelperOutput(
                 attributes: new TagHelperAttributeList
                 {
                     { "src", "testimage.png?hmac=ef09cd10210025e6d588fc2c12b91bf609c3e45f6d5d05dd650b8e6746cba288" },
-                    { "width", 50 }
+                    { "width", "50" }
                 });
 
             ImageTagHelper helper = this.GetHelper(hmac: true);
