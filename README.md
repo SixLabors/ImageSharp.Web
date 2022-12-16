@@ -6,6 +6,7 @@ SixLabors.ImageSharp.Web
 </h1>
 
 <div align="center">
+
 [![Build Status](https://img.shields.io/github/actions/workflow/status/SixLabors/ImageSharp.Web/build-and-test.yml?branch=main)](https://github.com/SixLabors/ImageSharp.Web/actions)
 [![Code coverage](https://codecov.io/gh/SixLabors/ImageSharp.Web/branch/main/graph/badge.svg)](https://codecov.io/gh/SixLabors/ImageSharp.Web)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
