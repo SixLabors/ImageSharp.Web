@@ -20,18 +20,7 @@
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp2.1'">
+  <ItemGroup>
     <FrameworkReference Update="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <PackageReference Update="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.2.0" />
-    <PackageReference Update="Microsoft.AspNetCore.Http" Version="2.2.0"/>
-    <PackageReference Update="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Update="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
-    <PackageReference Update="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
-    <PackageReference Update="Microsoft.Extensions.Caching.Abstractions" Version="2.2.0" />
-    <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
-    <PackageReference Update="Microsoft.Extensions.FileProviders.Physical" Version="2.2.0"/>
   </ItemGroup>
 </Project>

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <AssemblyName>ImageSharp.Web.Benchmarks</AssemblyName>
     <RootNamespace>SixLabors.ImageSharp.Web.Benchmarks</RootNamespace>
     <GenerateProgramFile>false</GenerateProgramFile>
@@ -13,5 +13,5 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet"/>
   </ItemGroup>
-  
+
 </Project>

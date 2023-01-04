@@ -28,15 +28,15 @@ jobs:
             runtime: -x64
             codecov: true
           - os: ubuntu-latest
-            framework: netcoreapp3.1
+            framework: net7.0
             runtime: -x64
             codecov: false
           - os: macos-latest
-            framework: netcoreapp3.1
+            framework: net7.0
             runtime: -x64
             codecov: false
           - os: windows-latest
-            framework: netcoreapp3.1
+            framework: net7.0
             runtime: -x64
             codecov: false
 
@@ -113,19 +113,16 @@ jobs:
         with:
           dotnet-version: |
             6.0.x
-            3.1.x
+            7.0.x
 
       - name: DotNet Build
         shell: pwsh
         run: ./ci-build.ps1 "${{matrix.options.framework}}"
-        env:
-          SIXLABORS_TESTING: True
 
       - name: DotNet Test
         shell: pwsh
         run: ./ci-test.ps1 "${{matrix.options.os}}" "${{matrix.options.framework}}" "${{matrix.options.runtime}}" "${{matrix.options.codecov}}"
         env:
-          SIXLABORS_TESTING: True
           XUNIT_PATH: .\tests\ImageSharp.Web.Tests # Required for xunit
 
       - name: Codecov Update

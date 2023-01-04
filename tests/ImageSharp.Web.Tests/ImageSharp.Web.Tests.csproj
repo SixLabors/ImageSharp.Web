@@ -3,7 +3,7 @@
   <PropertyGroup>
     <RootNamespace>SixLabors.ImageSharp.Web.Tests</RootNamespace>
     <AssemblyName>SixLabors.ImageSharp.Web.Tests</AssemblyName>
-    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
