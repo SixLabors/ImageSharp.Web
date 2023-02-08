@@ -132,6 +132,7 @@ jobs:
           SIXLABORS_TESTING_PREVIEW: True
 
       - name: DotNet Test
+        if: ${{ matrix.options.sdk-preview != true }}
         shell: pwsh
         run: ./ci-test.ps1 "${{matrix.options.os}}" "${{matrix.options.framework}}" "${{matrix.options.runtime}}" "${{matrix.options.codecov}}"
         env:
