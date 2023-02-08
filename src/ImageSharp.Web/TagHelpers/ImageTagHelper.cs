@@ -198,8 +198,9 @@ namespace SixLabors.ImageSharp.Web.TagHelpers
             Guard.NotNull(output, nameof(output));
 
             string src = output.Attributes[SrcAttributeName]?.Value as string ?? this.Src;
-            if (string.IsNullOrWhiteSpace(src))
+            if (string.IsNullOrWhiteSpace(src) || src.StartsWith("data", StringComparison.OrdinalIgnoreCase))
             {
+                base.Process(context, output);
                 return;
             }
 
