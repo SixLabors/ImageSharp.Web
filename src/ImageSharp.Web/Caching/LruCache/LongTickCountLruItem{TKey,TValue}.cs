@@ -1,38 +1,38 @@
 // Copyright (c) Six Labors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Six Labors Split License.
+#nullable disable
 
-namespace SixLabors.ImageSharp.Web.Caching
+namespace SixLabors.ImageSharp.Web.Caching;
+
+internal class LongTickCountLruItem<TKey, TValue>
 {
-    internal class LongTickCountLruItem<TKey, TValue>
-    {
-        private volatile bool wasAccessed;
-        private volatile bool wasRemoved;
+    private volatile bool wasAccessed;
+    private volatile bool wasRemoved;
 
 #pragma warning disable SA1401 // Fields should be private
-        public readonly TKey Key;
+    public readonly TKey Key;
 
-        public readonly TValue Value;
+    public readonly TValue Value;
 #pragma warning restore SA1401 // Fields should be private
 
-        public LongTickCountLruItem(TKey k, TValue v, long tickCount)
-        {
-            this.Key = k;
-            this.Value = v;
-            this.TickCount = tickCount;
-        }
+    public LongTickCountLruItem(TKey k, TValue v, long tickCount)
+    {
+        this.Key = k;
+        this.Value = v;
+        this.TickCount = tickCount;
+    }
 
-        public long TickCount { get; set; }
+    public long TickCount { get; set; }
 
-        public bool WasAccessed
-        {
-            get => this.wasAccessed;
-            set => this.wasAccessed = value;
-        }
+    public bool WasAccessed
+    {
+        get => this.wasAccessed;
+        set => this.wasAccessed = value;
+    }
 
-        public bool WasRemoved
-        {
-            get => this.wasRemoved;
-            set => this.wasRemoved = value;
-        }
+    public bool WasRemoved
+    {
+        get => this.wasRemoved;
+        set => this.wasRemoved = value;
     }
 }

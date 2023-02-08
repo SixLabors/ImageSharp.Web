@@ -1,8 +1,6 @@
 // Copyright (c) Six Labors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Six Labors Split License.
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Formats.Bmp;
@@ -15,57 +13,55 @@ using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Commands.Converters;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
-using Xunit;
 
-namespace SixLabors.ImageSharp.Web.Tests.Processors
+namespace SixLabors.ImageSharp.Web.Tests.Processors;
+
+public class FormatWebProcessorTests
 {
-    public class FormatWebProcessorTests
+    public static TheoryData<string> FormatNameData { get; }
+        = new TheoryData<string>
+        {
+            { BmpFormat.Instance.Name },
+            { GifFormat.Instance.Name },
+            { PngFormat.Instance.Name },
+            { JpegFormat.Instance.Name },
+            { WebpFormat.Instance.Name },
+        };
+
+    [Fact]
+    public void FormatWebProcessor_UpdatesFormat()
     {
-        public static TheoryData<string> FormatNameData { get; }
-            = new TheoryData<string>
-            {
-                { BmpFormat.Instance.Name },
-                { GifFormat.Instance.Name },
-                { PngFormat.Instance.Name },
-                { JpegFormat.Instance.Name },
-                { WebpFormat.Instance.Name },
-            };
+        CommandParser parser = new(Array.Empty<ICommandConverter>());
+        CultureInfo culture = CultureInfo.InvariantCulture;
 
-        [Fact]
-        public void FormatWebProcessor_UpdatesFormat()
+        CommandCollection commands = new()
         {
-            CommandParser parser = new(Array.Empty<ICommandConverter>());
-            CultureInfo culture = CultureInfo.InvariantCulture;
+            { new(FormatWebProcessor.Format, GifFormat.Instance.Name) },
+        };
 
-            CommandCollection commands = new()
-            {
-                { new(FormatWebProcessor.Format, GifFormat.Instance.Name) },
-            };
+        using var image = new Image<Rgba32>(1, 1);
+        using var formatted = new FormattedImage(image, PngFormat.Instance);
+        Assert.Equal(formatted.Format, PngFormat.Instance);
 
-            using var image = new Image<Rgba32>(1, 1);
-            using var formatted = new FormattedImage(image, PngFormat.Instance);
-            Assert.Equal(formatted.Format, PngFormat.Instance);
+        new FormatWebProcessor(Options.Create(new ImageSharpMiddlewareOptions()))
+            .Process(formatted, null, commands, parser, culture);
 
-            new FormatWebProcessor(Options.Create(new ImageSharpMiddlewareOptions()))
-                .Process(formatted, null, commands, parser, culture);
+        Assert.Equal(formatted.Format, GifFormat.Instance);
+    }
 
-            Assert.Equal(formatted.Format, GifFormat.Instance);
-        }
+    [Theory]
+    [MemberData(nameof(FormatNameData))]
+    public void FormatWebProcessor_CanReportAlphaRequirements(string format)
+    {
+        CommandParser parser = new(Array.Empty<ICommandConverter>());
+        CultureInfo culture = CultureInfo.InvariantCulture;
 
-        [Theory]
-        [MemberData(nameof(FormatNameData))]
-        public void FormatWebProcessor_CanReportAlphaRequirements(string format)
+        CommandCollection commands = new()
         {
-            CommandParser parser = new(Array.Empty<ICommandConverter>());
-            CultureInfo culture = CultureInfo.InvariantCulture;
+            { new(FormatWebProcessor.Format, format) },
+        };
 
-            CommandCollection commands = new()
-            {
-                { new(FormatWebProcessor.Format, format) },
-            };
-
-            FormatWebProcessor processor = new(Options.Create(new ImageSharpMiddlewareOptions()));
-            Assert.False(processor.RequiresTrueColorPixelFormat(commands, parser, culture));
-        }
+        FormatWebProcessor processor = new(Options.Create(new ImageSharpMiddlewareOptions()));
+        Assert.False(processor.RequiresTrueColorPixelFormat(commands, parser, culture));
     }
 }

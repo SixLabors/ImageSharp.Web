@@ -1,13 +1,12 @@
 // Copyright (c) Six Labors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Six Labors Split License.
 
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Commands;
 
-namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection
+namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection;
+
+public class MockRequestParser : IRequestParser
 {
-    public class MockRequestParser : IRequestParser
-    {
-        public CommandCollection ParseRequestCommands(HttpContext context) => null;
-    }
+    public CommandCollection ParseRequestCommands(HttpContext context) => null;
 }
