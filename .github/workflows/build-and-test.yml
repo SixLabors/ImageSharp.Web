@@ -17,14 +17,17 @@ jobs:
         options:
           - os: ubuntu-latest
             framework: net7.0
+            sdk-preview: true
             runtime: -x64
             codecov: false
           - os: macos-latest
             framework: net7.0
+            sdk-preview: true
             runtime: -x64
             codecov: false
           - os: windows-latest
             framework: net7.0
+            sdk-preview: true
             runtime: -x64
             codecov: true
           - os: ubuntu-latest
@@ -121,11 +124,26 @@ jobs:
         env:
           SIXLABORS_TESTING: True
 
+      - name: DotNet Build Preview
+        if: ${{ matrix.options.sdk-preview == true }}
+        shell: pwsh
+        run: ./ci-build.ps1 "${{matrix.options.framework}}"
+        env:
+          SIXLABORS_TESTING_PREVIEW: True
+
       - name: DotNet Test
         shell: pwsh
         run: ./ci-test.ps1 "${{matrix.options.os}}" "${{matrix.options.framework}}" "${{matrix.options.runtime}}" "${{matrix.options.codecov}}"
         env:
           SIXLABORS_TESTING: True
+          XUNIT_PATH: .\tests\ImageSharp.Web.Tests # Required for xunit
+
+      - name: DotNet Test Preview
+        if: ${{ matrix.options.sdk-preview == true }}
+        shell: pwsh
+        run: ./ci-test.ps1 "${{matrix.options.os}}" "${{matrix.options.framework}}" "${{matrix.options.runtime}}" "${{matrix.options.codecov}}"
+        env:
+          SIXLABORS_TESTING_PREVIEW: True
           XUNIT_PATH: .\tests\ImageSharp.Web.Tests # Required for xunit
 
       - name: Codecov Update
