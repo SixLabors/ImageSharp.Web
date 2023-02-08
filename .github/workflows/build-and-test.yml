@@ -119,6 +119,7 @@ jobs:
             6.0.x
 
       - name: DotNet Build
+        if: ${{ matrix.options.sdk-preview != true }}
         shell: pwsh
         run: ./ci-build.ps1 "${{matrix.options.framework}}"
         env:
