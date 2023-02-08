@@ -79,7 +79,7 @@ public sealed class ColorConverter : ICommandConverter<Color>
 
         // Named colors
         IDictionary<string, Color> table = ColorConstantsTable.Value;
-        return table.ContainsKey(value) ? table[value] : default;
+        return table.TryGetValue(value, out Color color) ? color : default;
     }
 
     private static IDictionary<string, Color> InitializeColorConstantsTable()
