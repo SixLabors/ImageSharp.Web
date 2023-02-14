@@ -4,7 +4,6 @@
 
 using System.Globalization;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Web.Commands;
 
 namespace SixLabors.ImageSharp.Web.Processors;

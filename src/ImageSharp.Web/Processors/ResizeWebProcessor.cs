@@ -6,7 +6,6 @@ using System.Globalization;
 using System.Numerics;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
-using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using SixLabors.ImageSharp.Web.Commands;
 
