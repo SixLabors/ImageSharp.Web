@@ -1,28 +1,26 @@
 // Copyright (c) Six Labors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Six Labors Split License.
+#nullable disable
 
-using System.IO;
+namespace SixLabors.ImageSharp.Web;
 
-namespace SixLabors.ImageSharp.Web
+internal static class PathUtilities
 {
-    internal static class PathUtilities
+    /// <summary>
+    /// Ensures the path ends with a trailing slash (directory separator).
+    /// </summary>
+    /// <param name="path">The path.</param>
+    /// <returns>
+    /// The path with a trailing slash.
+    /// </returns>
+    internal static string EnsureTrailingSlash(string path)
     {
-        /// <summary>
-        /// Ensures the path ends with a trailing slash (directory separator).
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <returns>
-        /// The path with a trailing slash.
-        /// </returns>
-        internal static string EnsureTrailingSlash(string path)
+        if (!string.IsNullOrEmpty(path) &&
+            path[path.Length - 1] != Path.DirectorySeparatorChar)
         {
-            if (!string.IsNullOrEmpty(path) &&
-                path[path.Length - 1] != Path.DirectorySeparatorChar)
-            {
-                return path + Path.DirectorySeparatorChar;
-            }
-
-            return path;
+            return path + Path.DirectorySeparatorChar;
         }
+
+        return path;
     }
 }

@@ -1,54 +1,51 @@
 // Copyright (c) Six Labors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Six Labors Split License.
 
-using System.Collections.Generic;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Tests.DependencyInjection;
-using Xunit;
 
-namespace SixLabors.ImageSharp.Web.Tests.Processors
+namespace SixLabors.ImageSharp.Web.Tests.Processors;
+
+public class WebProcessingExtensionsTests
 {
-    public class WebProcessingExtensionsTests
+    [Fact]
+    public void WebProcessingExtensions_GetBySupportedCommands()
     {
-        [Fact]
-        public void WebProcessingExtensions_GetBySupportedCommands()
+        var processors = new IImageWebProcessor[]
         {
-            var processors = new IImageWebProcessor[]
-            {
-                new QualityWebProcessor(),
-                new ResizeWebProcessor(),
-                new BackgroundColorWebProcessor(),
-                new MockWebProcessor()
-            };
+            new QualityWebProcessor(),
+            new ResizeWebProcessor(),
+            new BackgroundColorWebProcessor(),
+            new MockWebProcessor()
+        };
 
-            CommandCollection commands = new()
-            {
-                new(ResizeWebProcessor.Width, null),
-                new(QualityWebProcessor.Quality, null),
-                new(ResizeWebProcessor.Height, null)
-            };
-
-            IReadOnlyList<(int Index, IImageWebProcessor Processor)> supportedProcessors = processors.OrderBySupportedCommands(commands);
-
-            Assert.Equal(2, supportedProcessors.Count);
-            Assert.IsType<ResizeWebProcessor>(supportedProcessors[0].Processor);
-            Assert.IsType<QualityWebProcessor>(supportedProcessors[1].Processor);
-        }
-
-        [Fact]
-        public void WebProcessingExtensions_GetBySupportedCommands_Empty()
+        CommandCollection commands = new()
         {
-            var processors = new IImageWebProcessor[]
-            {
-                new MockWebProcessor()
-            };
+            new(ResizeWebProcessor.Width, null),
+            new(QualityWebProcessor.Quality, null),
+            new(ResizeWebProcessor.Height, null)
+        };
 
-            CommandCollection commands = new();
+        IReadOnlyList<(int Index, IImageWebProcessor Processor)> supportedProcessors = processors.OrderBySupportedCommands(commands);
 
-            IReadOnlyList<(int Index, IImageWebProcessor Processor)> supportedProcessors = processors.OrderBySupportedCommands(commands);
+        Assert.Equal(2, supportedProcessors.Count);
+        Assert.IsType<ResizeWebProcessor>(supportedProcessors[0].Processor);
+        Assert.IsType<QualityWebProcessor>(supportedProcessors[1].Processor);
+    }
 
-            Assert.Empty(supportedProcessors);
-        }
+    [Fact]
+    public void WebProcessingExtensions_GetBySupportedCommands_Empty()
+    {
+        var processors = new IImageWebProcessor[]
+        {
+            new MockWebProcessor()
+        };
+
+        CommandCollection commands = new();
+
+        IReadOnlyList<(int Index, IImageWebProcessor Processor)> supportedProcessors = processors.OrderBySupportedCommands(commands);
+
+        Assert.Empty(supportedProcessors);
     }
 }

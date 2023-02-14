@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
     <AssemblyName>ImageSharp.Web.Benchmarks</AssemblyName>
     <RootNamespace>SixLabors.ImageSharp.Web.Benchmarks</RootNamespace>
     <GenerateProgramFile>false</GenerateProgramFile>
@@ -10,6 +9,19 @@
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
+  <Choose>
+    <When Condition="$(SIXLABORS_TESTING_PREVIEW) == true">
+      <PropertyGroup>
+        <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <TargetFrameworks>net6.0</TargetFrameworks>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet"/>
   </ItemGroup>
