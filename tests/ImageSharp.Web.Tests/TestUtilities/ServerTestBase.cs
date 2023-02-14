@@ -42,7 +42,7 @@ public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
         string url = this.ImageSource;
 
         string ext = Path.GetExtension(url);
-        IImageFormat format = Configuration.Default.ImageFormatsManager.FindFormatByFileExtension(ext);
+        Assert.True(Configuration.Default.ImageFormatsManager.TryFindFormatByFileExtension(ext, out IImageFormat format));
 
         // First response
         HttpResponseMessage response = await this.HttpClient.GetAsync(url + await this.AugmentCommandAsync(this.Fixture.Commands[0]));
@@ -52,11 +52,10 @@ public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
         Assert.True(response.Content.Headers.ContentLength > 0);
         Assert.Equal(format.DefaultMimeType, response.Content.Headers.ContentType.MediaType);
 
-        (Image Image, IImageFormat Format) actual = await Image.LoadWithFormatAsync(await response.Content.ReadAsStreamAsync());
-        using Image image = actual.Image;
+        using Image image = await Image.LoadAsync(await response.Content.ReadAsStreamAsync());
 
         Assert.Equal(Width, image.Width);
-        Assert.Equal(format, actual.Format);
+        Assert.Equal(format, image.Metadata.DecodedImageFormat);
 
         response.Dispose();
 
@@ -68,16 +67,15 @@ public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
         Assert.True(response.Content.Headers.ContentLength > 0);
         Assert.Equal(format.DefaultMimeType, response.Content.Headers.ContentType.MediaType);
 
-        (Image Image, IImageFormat Format) cachedActual = await Image.LoadWithFormatAsync(await response.Content.ReadAsStreamAsync());
-        using Image cached = cachedActual.Image;
+        using Image cached = await Image.LoadAsync(await response.Content.ReadAsStreamAsync());
 
         Assert.Equal(Width, cached.Width);
-        Assert.Equal(format, actual.Format);
+        Assert.Equal(format, image.Metadata.DecodedImageFormat);
 
         response.Dispose();
 
         // 304 response
-        var request = new HttpRequestMessage
+        HttpRequestMessage request = new()
         {
             RequestUri = new Uri(url + await this.AugmentCommandAsync(this.Fixture.Commands[0])),
             Method = HttpMethod.Get,
@@ -133,7 +131,7 @@ public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
             Assert.True(response.Content.Headers.ContentLength > 0);
         })).ToArray();
 
-        var all = Task.WhenAll(tasks);
+        Task all = Task.WhenAll(tasks);
         await all;
         Assert.True(all.IsCompletedSuccessfully);
     }

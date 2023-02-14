@@ -28,7 +28,7 @@ public sealed class FormatUtilities
     {
         Guard.NotNull(options, nameof(options));
 
-        foreach (IImageFormat imageFormat in options.Value.Configuration.ImageFormats)
+        foreach (IImageFormat imageFormat in options.Value.DecoderOptions.Configuration.ImageFormats)
         {
             string[] extensions = imageFormat.FileExtensions.ToArray();
 
@@ -60,7 +60,7 @@ public sealed class FormatUtilities
         if (query > -1)
         {
             if (uri.Contains(FormatWebProcessor.Format, StringComparison.OrdinalIgnoreCase)
-                && QueryHelpers.ParseQuery(uri.Substring(query)).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
+                && QueryHelpers.ParseQuery(uri[query..]).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
             {
                 // We have a query but is it a valid one?
                 ReadOnlySpan<char> extSpan = ext[0].AsSpan();
@@ -86,7 +86,7 @@ public sealed class FormatUtilities
         int extensionIndex;
         if ((extensionIndex = path.LastIndexOf('.')) != -1)
         {
-            ReadOnlySpan<char> pathExtension = path.Slice(extensionIndex + 1);
+            ReadOnlySpan<char> pathExtension = path[(extensionIndex + 1)..];
 
             foreach (string e in this.extensions)
             {

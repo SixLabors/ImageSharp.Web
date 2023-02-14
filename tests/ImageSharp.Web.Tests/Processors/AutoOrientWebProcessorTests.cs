@@ -26,17 +26,17 @@ public class AutoOrientWebProcessorTests
 
         const ushort tl = 1;
         const ushort br = 3;
-        using var image = new Image<Rgba32>(1, 1);
+        using Image<Rgba32> image = new(1, 1);
         image.Metadata.ExifProfile = new();
         image.Metadata.ExifProfile.SetValue(ExifTag.Orientation, br);
 
-        IExifValue<ushort> orientation = image.Metadata.ExifProfile.GetValue(ExifTag.Orientation);
+        Assert.True(image.Metadata.ExifProfile.TryGetValue(ExifTag.Orientation, out IExifValue<ushort> orientation));
         Assert.Equal(br, orientation.Value);
 
-        using var formatted = new FormattedImage(image, PngFormat.Instance);
+        using FormattedImage formatted = new(image, PngFormat.Instance);
         new AutoOrientWebProcessor().Process(formatted, null, commands, parser, culture);
 
-        orientation = image.Metadata.ExifProfile.GetValue(ExifTag.Orientation);
+        Assert.True(image.Metadata.ExifProfile.TryGetValue(ExifTag.Orientation, out orientation));
         Assert.Equal(tl, orientation.Value);
     }
 }

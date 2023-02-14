@@ -45,11 +45,11 @@ public class QualityWebProcessor : IImageWebProcessor
 
             if (image.Format is JpegFormat)
             {
-                var reference =
+                JpegEncoder reference =
                     (JpegEncoder)image.Image
                     .GetConfiguration()
                     .ImageFormatsManager
-                    .FindEncoder(image.Format);
+                    .GetEncoder(image.Format);
 
                 if (quality != reference.Quality)
                 {
@@ -58,11 +58,11 @@ public class QualityWebProcessor : IImageWebProcessor
             }
             else if (image.Format is WebpFormat)
             {
-                var reference =
+                WebpEncoder reference =
                     (WebpEncoder)image.Image
                     .GetConfiguration()
                     .ImageFormatsManager
-                    .FindEncoder(image.Format);
+                    .GetEncoder(image.Format);
 
                 image.Encoder = new WebpEncoder()
                 {

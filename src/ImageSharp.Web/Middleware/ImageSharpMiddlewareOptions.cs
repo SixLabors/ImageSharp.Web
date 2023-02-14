@@ -5,6 +5,7 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
+using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Providers;
 
@@ -32,9 +33,9 @@ public class ImageSharpMiddlewareOptions
     private Func<HttpContext, Task> onPrepareResponseAsync = _ => Task.CompletedTask;
 
     /// <summary>
-    /// Gets or sets the base library configuration.
+    /// Gets or sets the default decoder options.
     /// </summary>
-    public Configuration Configuration { get; set; } = Configuration.Default;
+    public DecoderOptions DecoderOptions { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the recyclable memorystream manager used for managing pooled stream

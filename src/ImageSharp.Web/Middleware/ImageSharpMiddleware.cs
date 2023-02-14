@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IO;
 using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Processors;
@@ -352,7 +351,7 @@ public class ImageSharpMiddleware
                             {
                                 await inStream.CopyToAsync(outStream);
                                 outStream.Position = 0;
-                                format = await Image.DetectFormatAsync(this.options.Configuration, outStream);
+                                format = await Image.DetectFormatAsync(this.options.DecoderOptions, outStream);
                             }
                             else
                             {
@@ -370,11 +369,11 @@ public class ImageSharpMiddleware
 
                                     if (requiresAlpha)
                                     {
-                                        image = await FormattedImage.LoadAsync<Rgba32>(this.options.Configuration, inStream);
+                                        image = await FormattedImage.LoadAsync<Rgba32>(this.options.DecoderOptions, inStream);
                                     }
                                     else
                                     {
-                                        image = await FormattedImage.LoadAsync(this.options.Configuration, inStream);
+                                        image = await FormattedImage.LoadAsync(this.options.DecoderOptions, inStream);
                                     }
 
                                     image.Process(
