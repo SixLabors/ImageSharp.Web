@@ -53,7 +53,7 @@ public class FormatWebProcessor : IImageWebProcessor
         string extension = commands.GetValueOrDefault(Format);
 
         if (!string.IsNullOrWhiteSpace(extension)
-            && this.options.DecoderOptions.Configuration.ImageFormatsManager.TryFindFormatByFileExtension(extension, out IImageFormat format))
+            && this.options.Configuration.ImageFormatsManager.TryFindFormatByFileExtension(extension, out IImageFormat format))
         {
             image.Format = format;
         }

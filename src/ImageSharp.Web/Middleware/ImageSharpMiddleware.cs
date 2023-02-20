@@ -346,12 +346,17 @@ public class ImageSharpMiddleware
 
                         using (Stream inStream = await sourceImageResolver.OpenReadAsync())
                         {
+                            DecoderOptions decoderOptions = new() { Configuration = this.options.Configuration };
+
+                            // TODO: We need some way to set options based upon processors.
+                            await this.options.OnBeforeLoadAsync.Invoke(httpContext, decoderOptions);
+
                             // No commands? We simply copy the stream across.
                             if (commands.Count == 0)
                             {
                                 await inStream.CopyToAsync(outStream);
                                 outStream.Position = 0;
-                                format = await Image.DetectFormatAsync(this.options.DecoderOptions, outStream);
+                                format = await Image.DetectFormatAsync(decoderOptions, outStream);
                             }
                             else
                             {
@@ -369,11 +374,11 @@ public class ImageSharpMiddleware
 
                                     if (requiresAlpha)
                                     {
-                                        image = await FormattedImage.LoadAsync<Rgba32>(this.options.DecoderOptions, inStream);
+                                        image = await FormattedImage.LoadAsync<Rgba32>(decoderOptions, inStream);
                                     }
                                     else
                                     {
-                                        image = await FormattedImage.LoadAsync(this.options.DecoderOptions, inStream);
+                                        image = await FormattedImage.LoadAsync(decoderOptions, inStream);
                                     }
 
                                     image.Process(

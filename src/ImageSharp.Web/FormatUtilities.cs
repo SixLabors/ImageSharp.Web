@@ -28,7 +28,7 @@ public sealed class FormatUtilities
     {
         Guard.NotNull(options, nameof(options));
 
-        foreach (IImageFormat imageFormat in options.Value.DecoderOptions.Configuration.ImageFormats)
+        foreach (IImageFormat imageFormat in options.Value.Configuration.ImageFormats)
         {
             string[] extensions = imageFormat.FileExtensions.ToArray();
 

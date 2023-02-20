@@ -28,14 +28,15 @@ public class ImageSharpMiddlewareOptions
     };
 
     private Func<ImageCommandContext, Task> onParseCommandsAsync = _ => Task.CompletedTask;
+    private Func<HttpContext, DecoderOptions, Task> onBeforeLoadAsync = (_, _) => Task.CompletedTask;
     private Func<FormattedImage, Task> onBeforeSaveAsync = _ => Task.CompletedTask;
     private Func<ImageProcessingContext, Task> onProcessedAsync = _ => Task.CompletedTask;
     private Func<HttpContext, Task> onPrepareResponseAsync = _ => Task.CompletedTask;
 
     /// <summary>
-    /// Gets or sets the default decoder options.
+    /// Gets or sets the base library configuration.
     /// </summary>
-    public DecoderOptions DecoderOptions { get; set; } = new();
+    public Configuration Configuration { get; set; } = Configuration.Default;
 
     /// <summary>
     /// Gets or sets the recyclable memorystream manager used for managing pooled stream
@@ -111,6 +112,21 @@ public class ImageSharpMiddlewareOptions
         {
             Guard.NotNull(value, nameof(this.OnParseCommandsAsync));
             this.onParseCommandsAsync = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the method that can be used to used to augment decoder options.
+    /// This is called before the image is decoded and loaded for processing.
+    /// </summary>
+    public Func<HttpContext, DecoderOptions, Task> OnBeforeLoadAsync
+    {
+        get => this.onBeforeLoadAsync;
+
+        set
+        {
+            Guard.NotNull(value, nameof(this.OnBeforeLoadAsync));
+            this.onBeforeLoadAsync = value;
         }
     }
 

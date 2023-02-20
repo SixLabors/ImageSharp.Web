@@ -69,7 +69,7 @@ public class Startup
     private void ConfigureDefaultServicesAndCustomOptions(IServiceCollection services)
         => services.AddImageSharp(options =>
         {
-            options.DecoderOptions = new();
+            options.Configuration = Configuration.Default;
             options.BrowserMaxAge = TimeSpan.FromDays(7);
             options.CacheMaxAge = TimeSpan.FromDays(365);
             options.CacheHashLength = 8;
@@ -87,7 +87,7 @@ public class Startup
     private void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
         => services.AddImageSharp(options =>
         {
-            options.DecoderOptions = new();
+            options.Configuration = Configuration.Default;
             options.BrowserMaxAge = TimeSpan.FromDays(7);
             options.CacheMaxAge = TimeSpan.FromDays(365);
             options.CacheHashLength = 8;
