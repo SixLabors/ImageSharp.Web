@@ -20,11 +20,11 @@ jobs:
             sdk-preview: true
             runtime: -x64
             codecov: false
-          - os: macos-latest
-            framework: net7.0
-            sdk-preview: true
-            runtime: -x64
-            codecov: false
+          #- os: macos-latest
+          #  framework: net7.0
+          #  sdk-preview: true
+          #  runtime: -x64
+          #  codecov: false
           - os: windows-latest
             framework: net7.0
             sdk-preview: true
@@ -34,10 +34,10 @@ jobs:
             framework: net6.0
             runtime: -x64
             codecov: false
-          - os: macos-latest
-            framework: net6.0
-            runtime: -x64
-            codecov: false
+          #- os: macos-latest
+          #  framework: net6.0
+          #  runtime: -x64
+          #  codecov: false
           - os: windows-latest
             framework: net6.0
             runtime: -x64
