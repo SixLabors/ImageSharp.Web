@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 
@@ -65,6 +66,16 @@ public abstract class TestServerFixture : IDisposable
                 Assert.NotNull(context.Parser);
 
                 return onParseCommandsAsync.Invoke(context);
+            };
+
+            Func<HttpContext, DecoderOptions, Task> onBeforeLoadAsync = options.OnBeforeLoadAsync;
+
+            options.OnBeforeLoadAsync = (context, decoderOptions) =>
+            {
+                Assert.NotNull(context);
+                Assert.NotNull(decoderOptions);
+
+                return onBeforeLoadAsync.Invoke(context, decoderOptions);
             };
 
             Func<ImageProcessingContext, Task> onProcessedAsync = options.OnProcessedAsync;
