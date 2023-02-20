@@ -8,7 +8,7 @@ public static class TestConstants
     public const string AzureConnectionString = "UseDevelopmentStorage=true";
     public const string AzureContainerName = "azure";
     public const string AzureCacheContainerName = "is-cache";
-    public const string AWSEndpoint = "http://127.0.0.1:10003/";
+    public const string AWSEndpoint = "http://localhost:10003/";
     public const string AWSRegion = "eu-west-2";
     public const string AWSBucketName = "aws";
     public const string AWSCacheBucketName = "aws-cache";
