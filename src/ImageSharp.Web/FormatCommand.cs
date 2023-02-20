@@ -1,22 +1,21 @@
 // Copyright (c) Six Labors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Six Labors Split License.
 
-namespace SixLabors.ImageSharp.Web
+namespace SixLabors.ImageSharp.Web;
+
+/// <summary>
+/// Represents a command for setting the type of format with which to encode processed images.
+/// </summary>
+public readonly struct FormatCommand
 {
     /// <summary>
-    /// Represents a command for setting the type of format with which to encode processed images.
+    /// Initializes a new instance of the <see cref="FormatCommand"/> struct.
     /// </summary>
-    public readonly struct FormatCommand
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FormatCommand"/> struct.
-        /// </summary>
-        /// <param name="name">The name of the resampler command.</param>
-        public FormatCommand(string name) => this.Name = name;
+    /// <param name="name">The name of the resampler command.</param>
+    public FormatCommand(string name) => this.Name = name;
 
-        /// <summary>
-        /// Gets the name of the resampler command.
-        /// </summary>
-        public string Name { get; }
-    }
+    /// <summary>
+    /// Gets the name of the resampler command.
+    /// </summary>
+    public string Name { get; }
 }
