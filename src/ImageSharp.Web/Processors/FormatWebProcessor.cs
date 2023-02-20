@@ -1,7 +1,7 @@
 // Copyright (c) Six Labors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Six Labors Split License.
+#nullable disable
 
-using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -9,63 +9,62 @@ using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Middleware;
 
-namespace SixLabors.ImageSharp.Web.Processors
+namespace SixLabors.ImageSharp.Web.Processors;
+
+/// <summary>
+/// Allows the changing of image formats.
+/// </summary>
+public class FormatWebProcessor : IImageWebProcessor
 {
     /// <summary>
-    /// Allows the changing of image formats.
+    /// The command constant for format.
     /// </summary>
-    public class FormatWebProcessor : IImageWebProcessor
+    public const string Format = "format";
+
+    /// <summary>
+    /// The reusable collection of commands.
+    /// </summary>
+    private static readonly IEnumerable<string> FormatCommands
+        = new[] { Format };
+
+    /// <summary>
+    /// The middleware configuration options.
+    /// </summary>
+    private readonly ImageSharpMiddlewareOptions options;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FormatWebProcessor"/> class.
+    /// </summary>
+    /// <param name="options">The middleware configuration options.</param>
+    public FormatWebProcessor(IOptions<ImageSharpMiddlewareOptions> options)
+        => this.options = options.Value;
+
+    /// <inheritdoc/>
+    public IEnumerable<string> Commands { get; } = FormatCommands;
+
+    /// <inheritdoc/>
+    public FormattedImage Process(
+        FormattedImage image,
+        ILogger logger,
+        CommandCollection commands,
+        CommandParser parser,
+        CultureInfo culture)
     {
-        /// <summary>
-        /// The command constant for format.
-        /// </summary>
-        public const string Format = "format";
+        string extension = commands.GetValueOrDefault(Format);
 
-        /// <summary>
-        /// The reusable collection of commands.
-        /// </summary>
-        private static readonly IEnumerable<string> FormatCommands
-            = new[] { Format };
-
-        /// <summary>
-        /// The middleware configuration options.
-        /// </summary>
-        private readonly ImageSharpMiddlewareOptions options;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FormatWebProcessor"/> class.
-        /// </summary>
-        /// <param name="options">The middleware configuration options.</param>
-        public FormatWebProcessor(IOptions<ImageSharpMiddlewareOptions> options)
-            => this.options = options.Value;
-
-        /// <inheritdoc/>
-        public IEnumerable<string> Commands { get; } = FormatCommands;
-
-        /// <inheritdoc/>
-        public FormattedImage Process(
-            FormattedImage image,
-            ILogger logger,
-            CommandCollection commands,
-            CommandParser parser,
-            CultureInfo culture)
+        if (!string.IsNullOrWhiteSpace(extension))
         {
-            string extension = commands.GetValueOrDefault(Format);
+            IImageFormat format = this.options.Configuration.ImageFormatsManager.FindFormatByFileExtension(extension);
 
-            if (!string.IsNullOrWhiteSpace(extension))
+            if (format != null)
             {
-                IImageFormat format = this.options.Configuration.ImageFormatsManager.FindFormatByFileExtension(extension);
-
-                if (format != null)
-                {
-                    image.Format = format;
-                }
+                image.Format = format;
             }
-
-            return image;
         }
 
-        /// <inheritdoc/>
-        public bool RequiresTrueColorPixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture) => false;
+        return image;
     }
+
+    /// <inheritdoc/>
+    public bool RequiresTrueColorPixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture) => false;
 }

@@ -1,12 +1,11 @@
 // Copyright (c) Six Labors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Six Labors Split License.
 
-namespace SixLabors.ImageSharp.Web.Caching
+namespace SixLabors.ImageSharp.Web.Caching;
+
+internal enum ItemDestination
 {
-    internal enum ItemDestination
-    {
-        Warm,
-        Cold,
-        Remove
-    }
+    Warm,
+    Cold,
+    Remove
 }

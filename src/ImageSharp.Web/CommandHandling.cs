@@ -1,24 +1,24 @@
 // Copyright (c) Six Labors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Six Labors Split License.
+#nullable disable
 
 using SixLabors.ImageSharp.Web.Commands;
 
-namespace SixLabors.ImageSharp.Web
+namespace SixLabors.ImageSharp.Web;
+
+/// <summary>
+/// Provides enumeration for handling <see cref="CommandCollection"/> instances
+/// when processing a request.
+/// </summary>
+public enum CommandHandling
 {
     /// <summary>
-    /// Provides enumeration for handling <see cref="CommandCollection"/> instances
-    /// when processing a request.
+    /// The command collection will be stripped of any unknown commands.
     /// </summary>
-    public enum CommandHandling
-    {
-        /// <summary>
-        /// The command collection will be stripped of any unknown commands.
-        /// </summary>
-        Sanitize,
+    Sanitize,
 
-        /// <summary>
-        /// The command collection will be processed unaltered.
-        /// </summary>
-        None
-    }
+    /// <summary>
+    /// The command collection will be processed unaltered.
+    /// </summary>
+    None
 }

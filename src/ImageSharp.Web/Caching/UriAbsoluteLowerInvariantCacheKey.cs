@@ -1,23 +1,23 @@
 // Copyright (c) Six Labors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Six Labors Split License.
+#nullable disable
 
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Commands;
 
-namespace SixLabors.ImageSharp.Web.Caching
+namespace SixLabors.ImageSharp.Web.Caching;
+
+/// <summary>
+/// Creates a case insensitive cache key based on the request host, path and commands.
+/// </summary>
+public class UriAbsoluteLowerInvariantCacheKey : ICacheKey
 {
-    /// <summary>
-    /// Creates a case insensitive cache key based on the request host, path and commands.
-    /// </summary>
-    public class UriAbsoluteLowerInvariantCacheKey : ICacheKey
-    {
-        /// <inheritdoc/>
-        public string Create(HttpContext context, CommandCollection commands)
-            => CaseHandlingUriBuilder.BuildAbsolute(
-                CaseHandlingUriBuilder.CaseHandling.LowerInvariant,
-                context.Request.Host,
-                context.Request.PathBase,
-                context.Request.Path,
-                QueryString.Create(commands));
-    }
+    /// <inheritdoc/>
+    public string Create(HttpContext context, CommandCollection commands)
+        => CaseHandlingUriBuilder.BuildAbsolute(
+            CaseHandlingUriBuilder.CaseHandling.LowerInvariant,
+            context.Request.Host,
+            context.Request.PathBase,
+            context.Request.Path,
+            QueryString.Create(commands));
 }

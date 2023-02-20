@@ -1,18 +1,18 @@
 ﻿// Copyright (c) Six Labors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Six Labors Split License.
+#nullable disable
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace SixLabors.ImageSharp.Web.DependencyInjection
+namespace SixLabors.ImageSharp.Web.DependencyInjection;
+
+/// <summary>
+/// Defines a contract for adding ImageSharp services.
+/// </summary>
+public interface IImageSharpBuilder
 {
     /// <summary>
-    /// Defines a contract for adding ImageSharp services.
+    /// Gets the <see cref="IServiceCollection"/> where ImageSharp services are configured.
     /// </summary>
-    public interface IImageSharpBuilder
-    {
-        /// <summary>
-        /// Gets the <see cref="IServiceCollection"/> where ImageSharp services are configured.
-        /// </summary>
-        IServiceCollection Services { get; }
-    }
+    IServiceCollection Services { get; }
 }

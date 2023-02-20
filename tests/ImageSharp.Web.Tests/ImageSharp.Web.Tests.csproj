@@ -3,8 +3,20 @@
   <PropertyGroup>
     <RootNamespace>SixLabors.ImageSharp.Web.Tests</RootNamespace>
     <AssemblyName>SixLabors.ImageSharp.Web.Tests</AssemblyName>
-    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
+
+  <Choose>
+    <When Condition="$(SIXLABORS_TESTING_PREVIEW) == true">
+      <PropertyGroup>
+        <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <TargetFrameworks>net6.0</TargetFrameworks>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />

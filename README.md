@@ -9,7 +9,7 @@ SixLabors.ImageSharp.Web
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/SixLabors/ImageSharp.Web/build-and-test.yml?branch=main)](https://github.com/SixLabors/ImageSharp.Web/actions)
 [![Code coverage](https://codecov.io/gh/SixLabors/ImageSharp.Web/branch/main/graph/badge.svg)](https://codecov.io/gh/SixLabors/ImageSharp.Web)
-[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License: Six Labors Split](https://img.shields.io/badge/license-Six%20Labors%20Split-%23e30183)](https://github.com/SixLabors/ImageSharp/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/SixLabors/ImageSharp.Web.svg)](https://github.com/SixLabors/ImageSharp.Web/issues)
 
 [![GitHub stars](https://img.shields.io/github/stars/SixLabors/ImageSharp.Web.svg)](https://github.com/SixLabors/ImageSharp.Web/stargazers)
@@ -17,13 +17,11 @@ SixLabors.ImageSharp.Web
 [![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=flat&logo=twitter)](https://twitter.com/intent/tweet?hashtags=imagesharp,dotnet,oss&text=ImageSharp.+A+new+cross-platform+2D+graphics+API+in+C%23&url=https%3a%2f%2fgithub.com%2fSixLabors%2fImageSharp&via=sixlabors)
 </div>
 
-### **ImageSharp.Web** is a new high-performance ASP.NET Core middleware leveraging the ImageSharp graphics library to allow on-the-fly image manipulation via URL based commands.
+### **ImageSharp.Web** is a high-performance ASP.NET Core middleware leveraging the ImageSharp graphics library to allow on-the-fly image manipulation via URL based commands.
 
 ## License
   
-- ImageSharp.Web is licensed under the [Apache License, Version 2.0](https://opensource.org/licenses/Apache-2.0)  
-- An alternative Commercial Support License can be purchased **for projects and applications requiring support**.
-Please visit https://sixlabors.com/pricing for details.
+- ImageSharp.Web is licensed under the [Six Labors Split License, Version 1.0](https://github.com/SixLabors/ImageSharp/blob/main/LICEN
 
 ## Support Six Labors
 
@@ -57,9 +55,9 @@ Install stable releases via Nuget; development releases are available via MyGet.
 
 If you prefer, you can compile ImageSharp.Web yourself (please do and help!)
 
-- Using [Visual Studio 2019](https://visualstudio.microsoft.com/vs/)
+- Using [Visual Studio 2022](https://visualstudio.microsoft.com/vs/)
   - Make sure you have the latest version installed
-  - Make sure you have [the .NET Core 3.1 SDK](https://www.microsoft.com/net/core#windows) installed
+  - Make sure you have [the .NET 6 SDK](https://www.microsoft.com/net/core#windows) installed
 
 Alternatively, you can work from command line and/or with a lightweight editor on **both Linux/Unix and Windows**:
 
