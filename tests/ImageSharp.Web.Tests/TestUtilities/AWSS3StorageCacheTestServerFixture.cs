@@ -12,33 +12,29 @@ namespace SixLabors.ImageSharp.Web.Tests.TestUtilities;
 public class AWSS3StorageCacheTestServerFixture : TestServerFixture
 {
     protected override void ConfigureCustomServices(IServiceCollection services, IImageSharpBuilder builder)
-    {
-        return;
-
-        builder
-            .Configure<AWSS3StorageImageProviderOptions>(o =>
-                o.S3Buckets.Add(
-                new AWSS3BucketClientOptions
-                {
-                    Endpoint = TestConstants.AWSEndpoint,
-                    BucketName = TestConstants.AWSBucketName,
-                    AccessKey = TestConstants.AWSAccessKey,
-                    AccessSecret = TestConstants.AWSAccessSecret,
-                    Region = TestConstants.AWSRegion,
-                    Timeout = TestConstants.AWSTimeout,
-                }))
-            .AddProvider(AWSS3StorageImageProviderFactory.Create)
-            .Configure<AWSS3StorageCacheOptions>(o =>
+        => builder
+        .Configure<AWSS3StorageImageProviderOptions>(o =>
+            o.S3Buckets.Add(
+            new AWSS3BucketClientOptions
             {
-                o.Endpoint = TestConstants.AWSEndpoint;
-                o.BucketName = TestConstants.AWSCacheBucketName;
-                o.AccessKey = TestConstants.AWSAccessKey;
-                o.AccessSecret = TestConstants.AWSAccessSecret;
-                o.Region = TestConstants.AWSRegion;
-                o.Timeout = TestConstants.AWSTimeout;
+                Endpoint = TestConstants.AWSEndpoint,
+                BucketName = TestConstants.AWSBucketName,
+                AccessKey = TestConstants.AWSAccessKey,
+                AccessSecret = TestConstants.AWSAccessSecret,
+                Region = TestConstants.AWSRegion,
+                Timeout = TestConstants.AWSTimeout,
+            }))
+        .AddProvider(AWSS3StorageImageProviderFactory.Create)
+        .Configure<AWSS3StorageCacheOptions>(o =>
+        {
+            o.Endpoint = TestConstants.AWSEndpoint;
+            o.BucketName = TestConstants.AWSCacheBucketName;
+            o.AccessKey = TestConstants.AWSAccessKey;
+            o.AccessSecret = TestConstants.AWSAccessSecret;
+            o.Region = TestConstants.AWSRegion;
+            o.Timeout = TestConstants.AWSTimeout;
 
-                AWSS3StorageCache.CreateIfNotExists(o, S3CannedACL.Private);
-            })
-            .SetCache<AWSS3StorageCache>();
-    }
+            AWSS3StorageCache.CreateIfNotExists(o, S3CannedACL.Private);
+        })
+        .SetCache<AWSS3StorageCache>();
 }
