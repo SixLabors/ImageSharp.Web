@@ -101,15 +101,15 @@ jobs:
         if: matrix.options.os != 'windows-latest'
         shell: bash
         run: |
-          sudo npm install -g s3rver
-          sudo s3rver -d . &
+          sudo npm install s3rver
+          sudo npx s3rver -d . &
 
       - name: S3rver Setup Windows
         if: matrix.options.os == 'windows-latest'
         shell: bash
         run: |
-          npm install -g s3rver
-          s3rver -d . &
+          npm install s3rver
+          npx s3rver -d . &
 
       - name: DotNet Setup
         uses: actions/setup-dotnet@v3
