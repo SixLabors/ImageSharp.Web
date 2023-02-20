@@ -21,7 +21,9 @@ public abstract class TestServerFixture : IDisposable
     private TestServer server;
     private bool isDisposed;
 
-    protected TestServerFixture()
+#pragma warning disable RCS1160 // Abstract type should not have public constructors.
+    public TestServerFixture()
+#pragma warning restore RCS1160 // Abstract type should not have public constructors.
     {
         IConfigurationRoot configuration = new ConfigurationBuilder()
         .AddInMemoryCollection(new[]
