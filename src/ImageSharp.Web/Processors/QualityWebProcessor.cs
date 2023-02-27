@@ -53,7 +53,13 @@ public class QualityWebProcessor : IImageWebProcessor
 
                 if (quality != reference.Quality)
                 {
-                    image.Encoder = new JpegEncoder() { Quality = quality, ColorType = reference.ColorType };
+                    image.Encoder = new JpegEncoder()
+                    {
+                        Quality = quality,
+                        Interleaved = reference.Interleaved,
+                        ColorType = reference.ColorType,
+                        SkipMetadata = reference.SkipMetadata
+                    };
                 }
             }
             else if (image.Format is WebpFormat)
@@ -76,6 +82,7 @@ public class QualityWebProcessor : IImageWebProcessor
                     TransparentColorMode = reference.TransparentColorMode,
                     NearLossless = reference.NearLossless,
                     NearLosslessQuality = reference.NearLosslessQuality,
+                    SkipMetadata = reference.SkipMetadata
                 };
             }
         }
