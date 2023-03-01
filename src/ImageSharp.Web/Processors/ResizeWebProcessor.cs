@@ -1,5 +1,6 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
+
 #nullable disable
 
 using System.Globalization;
@@ -60,6 +61,26 @@ public class ResizeWebProcessor : IImageWebProcessor
     /// The command constant for the resize compand mode.
     /// </summary>
     public const string Compand = "compand";
+
+    /// <summary>
+    /// The command constant for the resize TargetRectangle X
+    /// </summary>
+    public const string TargetRectangleX = "targetrectanglex";
+
+    /// <summary>
+    /// The command constant for the resize TargetRectangle X
+    /// </summary>
+    public const string TargetRectangleY = "targetrectangley";
+
+    /// <summary>
+    /// The command constant for the resize TargetRectangle X
+    /// </summary>
+    public const string TargetRectangleWidth = "targetrectanglewidth";
+
+    /// <summary>
+    /// The command constant for the resize TargetRectangle X
+    /// </summary>
+    public const string TargetRectangleHeight = "targetrectangleheight";
 
     private static readonly IEnumerable<string> ResizeCommands
         = new[]
@@ -126,6 +147,8 @@ public class ResizeWebProcessor : IImageWebProcessor
             return null;
         }
 
+        Rectangle? targetRectangle = ParseRectangle(commands, parser, culture);
+
         return new()
         {
             Size = size,
@@ -134,7 +157,8 @@ public class ResizeWebProcessor : IImageWebProcessor
             Mode = GetMode(commands, parser, culture),
             Compand = GetCompandMode(commands, parser, culture),
             Sampler = GetSampler(commands),
-            PadColor = parser.ParseValue<Color>(commands.GetValueOrDefault(Color), culture)
+            PadColor = parser.ParseValue<Color>(commands.GetValueOrDefault(Color), culture),
+            TargetRectangle = targetRectangle
         };
     }
 
@@ -156,6 +180,31 @@ public class ResizeWebProcessor : IImageWebProcessor
         int height = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(Height), culture);
 
         return ExifOrientationUtilities.Transform(new Size(width, height), orientation);
+    }
+
+    private static Rectangle? ParseRectangle(
+        CommandCollection commands,
+        CommandParser parser,
+        CultureInfo culture)
+    {
+        if (!commands.Contains(TargetRectangleWidth) || !commands.Contains(TargetRectangleHeight))
+        {
+            return null;
+        }
+
+        // The command parser will reject negative numbers as it clamps values to ranges.
+        int width = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(TargetRectangleWidth), culture);
+        int height = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(TargetRectangleHeight), culture);
+
+        if (!commands.Contains(TargetRectangleX) || !commands.Contains(TargetRectangleY))
+        {
+            return new Rectangle(0, 0, width, height);
+        }
+
+        int x = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(TargetRectangleX), culture);
+        int y = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(TargetRectangleY), culture);
+
+        return new Rectangle(x, y, width, height);
     }
 
     private static PointF? GetCenter(
