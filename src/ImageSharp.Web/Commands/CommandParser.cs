@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using System.Net;
@@ -36,12 +35,12 @@ public sealed class CommandParser
     /// </typeparam>
     /// <returns>The converted instance or the default.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T ParseValue<T>(string value, CultureInfo culture)
+    public T? ParseValue<T>(string value, CultureInfo culture)
     {
         DebugGuard.NotNull(culture, nameof(culture));
 
         Type type = typeof(T);
-        ICommandConverter converter = Array.Find(this.converters, x => x.Type.Equals(type));
+        ICommandConverter? converter = Array.Find(this.converters, x => x.Type.Equals(type));
 
         if (converter != null)
         {

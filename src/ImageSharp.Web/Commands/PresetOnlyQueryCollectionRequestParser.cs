@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
@@ -42,7 +41,7 @@ public class PresetOnlyQueryCollectionRequestParser : IRequestParser
 
         StringValues query = queryCollection[QueryKey];
         string requestedPreset = query[query.Count - 1];
-        if (this.presets.TryGetValue(requestedPreset, out CommandCollection collection))
+        if (this.presets.TryGetValue(requestedPreset, out CommandCollection? collection))
         {
             return collection;
         }

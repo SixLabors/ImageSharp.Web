@@ -1,8 +1,8 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace SixLabors.ImageSharp.Web.Commands;
@@ -54,7 +54,7 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
     {
         get
         {
-            if (!this.TryGetValue(key, out string value))
+            if (!this.TryGetValue(key, out string? value))
             {
                 ThrowKeyNotFound();
             }
@@ -107,7 +107,7 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
     /// an element with the specified key; otherwise, <see langword="false"/>.
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
-    public bool TryGetValue(string key, out string value)
+    public bool TryGetValue(string key, [NotNullWhen(true)] out string? value)
     {
         if (this.TryGetValue(key, out KeyValuePair<string, string> keyValue))
         {
@@ -175,5 +175,6 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
     protected override string GetKeyForItem(KeyValuePair<string, string> item) => item.Key;
 
     [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
     private static void ThrowKeyNotFound() => throw new KeyNotFoundException();
 }
