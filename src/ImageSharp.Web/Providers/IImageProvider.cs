@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Resolvers;
@@ -36,5 +35,5 @@ public interface IImageProvider
     /// </summary>
     /// <param name="context">The current HTTP request context.</param>
     /// <returns>The <see cref="IImageResolver"/>.</returns>
-    Task<IImageResolver> GetAsync(HttpContext context);
+    Task<IImageResolver?> GetAsync(HttpContext context);
 }

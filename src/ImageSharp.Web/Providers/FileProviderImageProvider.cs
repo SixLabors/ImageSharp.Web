@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -51,14 +50,14 @@ public abstract class FileProviderImageProvider : IImageProvider
         => this.formatUtilities.TryGetExtensionFromUri(context.Request.GetDisplayUrl(), out _);
 
     /// <inheritdoc/>
-    public Task<IImageResolver> GetAsync(HttpContext context)
+    public Task<IImageResolver?> GetAsync(HttpContext context)
     {
         IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
         if (!fileInfo.Exists)
         {
-            return Task.FromResult<IImageResolver>(null);
+            return Task.FromResult<IImageResolver?>(null);
         }
 
-        return Task.FromResult<IImageResolver>(new FileProviderImageResolver(fileInfo));
+        return Task.FromResult<IImageResolver?>(new FileProviderImageResolver(fileInfo));
     }
 }
