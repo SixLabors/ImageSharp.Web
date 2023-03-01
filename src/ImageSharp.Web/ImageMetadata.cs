@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Runtime.CompilerServices;
 
@@ -90,7 +89,7 @@ public readonly struct ImageMetadata : IEquatable<ImageMetadata>
         && this.ContentLength == other.ContentLength;
 
     /// <inheritdoc/>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
         => obj is ImageMetadata data && this.Equals(data);
 
     /// <inheritdoc/>
