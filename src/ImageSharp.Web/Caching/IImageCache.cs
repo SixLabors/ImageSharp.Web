@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -17,7 +16,7 @@ public interface IImageCache
     /// </summary>
     /// <param name="key">The cache key.</param>
     /// <returns>The <see cref="IImageResolver"/>.</returns>
-    Task<IImageCacheResolver> GetAsync(string key);
+    Task<IImageCacheResolver?> GetAsync(string key);
 
     /// <summary>
     /// Sets the value associated with the specified key.

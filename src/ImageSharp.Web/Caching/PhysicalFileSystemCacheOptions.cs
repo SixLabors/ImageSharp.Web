@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 namespace SixLabors.ImageSharp.Web.Caching;
 
@@ -21,7 +20,7 @@ public class PhysicalFileSystemCacheOptions
     /// application content files; commonly 'wwwroot'.
     /// </para>
     /// </summary>
-    public string CacheRootPath { get; set; }
+    public string? CacheRootPath { get; set; }
 
     /// <summary>
     /// Gets or sets the cache folder name.
