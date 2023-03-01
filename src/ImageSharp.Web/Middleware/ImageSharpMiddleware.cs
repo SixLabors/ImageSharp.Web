@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Diagnostics;
 using System.Globalization;
@@ -33,7 +32,7 @@ public class ImageSharpMiddleware
     /// <summary>
     /// Used to temporarily store cache resolver reads to reduce the overhead of cache lookups.
     /// </summary>
-    private static readonly ConcurrentTLruCache<string, (IImageCacheResolver, ImageCacheMetadata)> CacheResolverLru
+    private static readonly ConcurrentTLruCache<string, (IImageCacheResolver?, ImageCacheMetadata)> CacheResolverLru
         = new(1024, TimeSpan.FromSeconds(30));
 
     /// <summary>
@@ -186,7 +185,7 @@ public class ImageSharpMiddleware
     private async Task Invoke(HttpContext httpContext, bool retry)
     {
         // Get the correct provider for the request
-        IImageProvider provider = null;
+        IImageProvider? provider = null;
         foreach (IImageProvider resolver in this.providers)
         {
             if (resolver.Match(httpContext))
@@ -208,7 +207,7 @@ public class ImageSharpMiddleware
         // First check for a HMAC token and capture before the command is stripped out.
         byte[] secret = this.options.HMACSecretKey;
         bool checkHMAC = false;
-        string token = null;
+        string? token = null;
         if (secret?.Length > 0)
         {
             checkHMAC = true;
@@ -219,7 +218,7 @@ public class ImageSharpMiddleware
         ImageCommandContext imageCommandContext = new(httpContext, commands, this.commandParser, this.parserCulture);
 
         // At this point we know that this is an image request so should attempt to compute a validating HMAC.
-        string hmac = null;
+        string? hmac = null;
         if (checkHMAC && token != null)
         {
             // Generate and cache a HMAC to validate against based upon the current valid commands from the request.
@@ -254,7 +253,7 @@ public class ImageSharpMiddleware
             }
         }
 
-        IImageResolver sourceImageResolver = await provider.GetAsync(httpContext);
+        IImageResolver? sourceImageResolver = await provider.GetAsync(httpContext);
 
         if (sourceImageResolver is null)
         {
@@ -312,7 +311,7 @@ public class ImageSharpMiddleware
 
         // Enter an asynchronous write worker which prevents multiple writes and delays any reads for the same request.
         // This reduces the overheads of unnecessary processing.
-        RecyclableMemoryStream outStream = null;
+        RecyclableMemoryStream? outStream = null;
         try
         {
             Task<IDisposable> takeLockTask = this.asyncKeyLock.WriterLockAsync(key);
@@ -360,7 +359,7 @@ public class ImageSharpMiddleware
                             }
                             else
                             {
-                                FormattedImage image = null;
+                                FormattedImage? image = null;
                                 try
                                 {
                                     // Now we can finally process the image.
@@ -442,7 +441,7 @@ public class ImageSharpMiddleware
         }
     }
 
-    private static ValueTask StreamDisposeAsync(Stream stream)
+    private static ValueTask StreamDisposeAsync(Stream? stream)
     {
         if (stream is null)
         {
@@ -464,12 +463,12 @@ public class ImageSharpMiddleware
 
         // Check to see if the cache contains this image.
         // If not, we return early. No further checks necessary.
-        (IImageCacheResolver ImageCacheResolver, ImageCacheMetadata ImageCacheMetadata) cachedImage = await
+        (IImageCacheResolver? ImageCacheResolver, ImageCacheMetadata ImageCacheMetadata) cachedImage = await
             CacheResolverLru.GetOrAddAsync(
                 key,
                 async k =>
                 {
-                    IImageCacheResolver resolver = await this.cache.GetAsync(k);
+                    IImageCacheResolver? resolver = await this.cache.GetAsync(k);
                     ImageCacheMetadata metadata = default;
                     if (resolver != null)
                     {
@@ -507,8 +506,8 @@ public class ImageSharpMiddleware
         ImageContext imageContext,
         string key,
         ImageCacheMetadata metadata,
-        IImageCacheResolver cacheResolver,
-        Stream stream,
+        IImageCacheResolver? cacheResolver,
+        Stream? stream,
         bool retry)
     {
         imageContext.ComprehendRequestHeaders(metadata.CacheLastWriteTimeUtc, metadata.ContentLength);
@@ -535,6 +534,8 @@ public class ImageSharpMiddleware
                 {
                     try
                     {
+                        Guard.NotNull(cacheResolver);
+
                         using Stream cacheStream = await cacheResolver.OpenReadAsync();
                         await imageContext.SendAsync(cacheStream, metadata);
                     }
