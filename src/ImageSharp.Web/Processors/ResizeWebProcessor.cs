@@ -163,7 +163,12 @@ public class ResizeWebProcessor : IImageWebProcessor
         CommandParser parser,
         CultureInfo culture)
     {
-        float[] coordinates = parser.ParseValue<float[]>(commands.GetValueOrDefault(Xy), culture);
+        float[]? coordinates = parser.ParseValue<float[]>(commands.GetValueOrDefault(Xy), culture);
+
+        if (coordinates is null)
+        {
+            return null;
+        }
 
         if (coordinates.Length != 2)
         {
@@ -198,7 +203,7 @@ public class ResizeWebProcessor : IImageWebProcessor
 
     private static IResampler GetSampler(CommandCollection commands)
     {
-        string sampler = commands.GetValueOrDefault(Sampler);
+        string? sampler = commands.GetValueOrDefault(Sampler);
 
         if (sampler != null)
         {

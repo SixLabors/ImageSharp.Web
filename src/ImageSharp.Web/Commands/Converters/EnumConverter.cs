@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -22,10 +21,10 @@ public sealed class EnumConverter : ICommandConverter<object>
     /// This allows us to reuse the same converter for infinite enum types.
     /// </remarks>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public object ConvertFrom(
+    public object? ConvertFrom(
         CommandParser parser,
         CultureInfo culture,
-        string value,
+        string? value,
         Type propertyType)
     {
         if (string.IsNullOrWhiteSpace(value))

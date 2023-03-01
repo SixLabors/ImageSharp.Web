@@ -49,7 +49,7 @@ public class FormatWebProcessor : IImageWebProcessor
         CommandParser parser,
         CultureInfo culture)
     {
-        string extension = commands.GetValueOrDefault(Format);
+        string? extension = commands.GetValueOrDefault(Format);
 
         if (!string.IsNullOrWhiteSpace(extension)
             && this.options.Configuration.ImageFormatsManager.TryFindFormatByFileExtension(extension, out IImageFormat? format))

@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -21,7 +20,7 @@ public sealed class ArrayConverter<T> : ICommandConverter<T[]>
     public T[] ConvertFrom(
         CommandParser parser,
         CultureInfo culture,
-        string value,
+        string? value,
         Type propertyType)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -32,7 +31,7 @@ public sealed class ArrayConverter<T> : ICommandConverter<T[]>
         var result = new List<T>();
         foreach (string pill in GetStringArray(value, culture))
         {
-            T item = parser.ParseValue<T>(pill, culture);
+            T? item = parser.ParseValue<T>(pill, culture);
             if (item != null)
             {
                 result.Add(item);

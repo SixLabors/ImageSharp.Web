@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using System.Reflection;
@@ -35,7 +34,7 @@ public sealed class ColorConverter : ICommandConverter<Color>
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Color ConvertFrom(CommandParser parser, CultureInfo culture, string value, Type propertyType)
+    public Color ConvertFrom(CommandParser parser, CultureInfo culture, string? value, Type propertyType)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -60,9 +59,9 @@ public sealed class ColorConverter : ICommandConverter<Color>
 
             if (convert)
             {
-                List<byte> rgba = parser.ParseValue<List<byte>>(value, culture);
+                List<byte>? rgba = parser.ParseValue<List<byte>>(value, culture);
 
-                return rgba.Count switch
+                return rgba?.Count switch
                 {
                     4 => Color.FromRgba(rgba[0], rgba[1], rgba[2], rgba[3]),
                     3 => Color.FromRgb(rgba[0], rgba[1], rgba[2]),
@@ -90,7 +89,7 @@ public sealed class ColorConverter : ICommandConverter<Color>
         {
             if (field.FieldType == typeof(Color))
             {
-                table[field.Name] = (Color)field.GetValue(null);
+                table[field.Name] = (Color)field.GetValue(null)!;
             }
         }
 

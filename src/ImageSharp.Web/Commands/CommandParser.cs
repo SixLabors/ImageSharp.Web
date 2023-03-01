@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net;
 using System.Runtime.CompilerServices;
@@ -35,7 +36,7 @@ public sealed class CommandParser
     /// </typeparam>
     /// <returns>The converted instance or the default.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T? ParseValue<T>(string value, CultureInfo culture)
+    public T? ParseValue<T>(string? value, CultureInfo culture)
     {
         DebugGuard.NotNull(culture, nameof(culture));
 
@@ -58,7 +59,7 @@ public sealed class CommandParser
             converter = Array.Find(this.converters, x => x.Type.Equals(typeof(Enum)));
             if (converter != null)
             {
-                return (T)((ICommandConverter<object>)converter).ConvertFrom(
+                return (T?)((ICommandConverter<object>)converter).ConvertFrom(
                     this,
                     culture,
                     WebUtility.UrlDecode(value),
@@ -73,6 +74,7 @@ public sealed class CommandParser
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
     private static void ThrowNotSupported(Type type)
         => throw new NotSupportedException($"Cannot convert to {type.FullName}.");
 }

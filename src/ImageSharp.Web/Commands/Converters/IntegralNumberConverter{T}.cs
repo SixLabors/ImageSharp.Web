@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 
@@ -20,7 +19,7 @@ public sealed class IntegralNumberConverter<T> : ICommandConverter<T>
     public T ConvertFrom(
         CommandParser parser,
         CultureInfo culture,
-        string value,
+        string? value,
         Type propertyType)
     {
         if (string.IsNullOrWhiteSpace(value)

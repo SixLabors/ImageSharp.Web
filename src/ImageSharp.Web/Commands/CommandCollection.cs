@@ -10,7 +10,7 @@ namespace SixLabors.ImageSharp.Web.Commands;
 /// <summary>
 /// Represents an ordered collection of processing commands.
 /// </summary>
-public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<string, string>>
+public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<string, string?>>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CommandCollection"/> class.
@@ -32,7 +32,7 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
     {
         get
         {
-            foreach (KeyValuePair<string, string> item in this)
+            foreach (KeyValuePair<string, string?> item in this)
             {
                 yield return this.GetKeyForItem(item);
             }
@@ -64,7 +64,7 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
 
         set
         {
-            if (this.TryGetValue(key, out KeyValuePair<string, string> item))
+            if (this.TryGetValue(key, out KeyValuePair<string, string?> item))
             {
                 this.SetItem(this.IndexOf(item), new(key, value));
             }
@@ -109,10 +109,10 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
     /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
     public bool TryGetValue(string key, [NotNullWhen(true)] out string? value)
     {
-        if (this.TryGetValue(key, out KeyValuePair<string, string> keyValue))
+        if (this.TryGetValue(key, out KeyValuePair<string, string?> keyValue))
         {
             value = keyValue.Value;
-            return true;
+            return value is not null;
         }
 
         value = default;
@@ -138,7 +138,7 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
         Guard.NotNull(match, nameof(match));
 
         int index = 0;
-        foreach (KeyValuePair<string, string> item in this)
+        foreach (KeyValuePair<string, string?> item in this)
         {
             if (match(item.Key))
             {
@@ -162,7 +162,7 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
     /// </returns>
     public int IndexOf(string key)
     {
-        if (this.TryGetValue(key, out KeyValuePair<string, string> item))
+        if (this.TryGetValue(key, out KeyValuePair<string, string?> item))
         {
             return this.IndexOf(item);
         }
@@ -172,7 +172,7 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected override string GetKeyForItem(KeyValuePair<string, string> item) => item.Key;
+    protected override string GetKeyForItem(KeyValuePair<string, string?> item) => item.Key;
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     [DoesNotReturn]
