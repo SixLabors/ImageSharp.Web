@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using Microsoft.Extensions.Logging;
@@ -53,7 +52,7 @@ public class FormatWebProcessor : IImageWebProcessor
         string extension = commands.GetValueOrDefault(Format);
 
         if (!string.IsNullOrWhiteSpace(extension)
-            && this.options.Configuration.ImageFormatsManager.TryFindFormatByFileExtension(extension, out IImageFormat format))
+            && this.options.Configuration.ImageFormatsManager.TryFindFormatByFileExtension(extension, out IImageFormat? format))
         {
             image.Format = format;
         }

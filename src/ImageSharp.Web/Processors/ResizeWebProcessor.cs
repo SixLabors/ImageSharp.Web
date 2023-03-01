@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using System.Numerics;
@@ -86,7 +85,7 @@ public class ResizeWebProcessor : IImageWebProcessor
         CommandParser parser,
         CultureInfo culture)
     {
-        ResizeOptions options = GetResizeOptions(image, commands, parser, culture);
+        ResizeOptions? options = GetResizeOptions(image, commands, parser, culture);
 
         if (options != null)
         {
@@ -106,7 +105,7 @@ public class ResizeWebProcessor : IImageWebProcessor
     /// The <see cref="CultureInfo"/> to use as the current parsing culture.
     /// </param>
     /// <returns>The <see cref="ResizeOptions"/>.</returns>
-    internal static ResizeOptions GetResizeOptions(
+    internal static ResizeOptions? GetResizeOptions(
         FormattedImage image,
         CommandCollection commands,
         CommandParser parser,
