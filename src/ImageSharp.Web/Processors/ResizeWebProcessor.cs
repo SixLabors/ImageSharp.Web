@@ -65,16 +65,6 @@ public class ResizeWebProcessor : IImageWebProcessor
     /// <summary>
     /// The command constant for the resize TargetRectangle X
     /// </summary>
-    public const string TargetRectangleX = "targetrectanglex";
-
-    /// <summary>
-    /// The command constant for the resize TargetRectangle X
-    /// </summary>
-    public const string TargetRectangleY = "targetrectangley";
-
-    /// <summary>
-    /// The command constant for the resize TargetRectangle X
-    /// </summary>
     public const string TargetRectangleWidth = "targetrectanglewidth";
 
     /// <summary>
@@ -196,15 +186,7 @@ public class ResizeWebProcessor : IImageWebProcessor
         int width = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(TargetRectangleWidth), culture);
         int height = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(TargetRectangleHeight), culture);
 
-        if (!commands.Contains(TargetRectangleX) || !commands.Contains(TargetRectangleY))
-        {
-            return new Rectangle(0, 0, width, height);
-        }
-
-        int x = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(TargetRectangleX), culture);
-        int y = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(TargetRectangleY), culture);
-
-        return new Rectangle(x, y, width, height);
+        return new Rectangle(0, 0, width, height);
     }
 
     private static PointF? GetCenter(
