@@ -62,16 +62,6 @@ public class ResizeWebProcessor : IImageWebProcessor
     /// </summary>
     public const string Compand = "compand";
 
-    /// <summary>
-    /// The command constant for the resize TargetRectangle X
-    /// </summary>
-    public const string TargetRectangleWidth = "targetrectanglewidth";
-
-    /// <summary>
-    /// The command constant for the resize TargetRectangle X
-    /// </summary>
-    public const string TargetRectangleHeight = "targetrectangleheight";
-
     private static readonly IEnumerable<string> ResizeCommands
         = new[]
         {
@@ -137,18 +127,18 @@ public class ResizeWebProcessor : IImageWebProcessor
             return null;
         }
 
-        Rectangle? targetRectangle = ParseRectangle(commands, parser, culture);
+        ResizeMode mode = GetMode(commands, parser, culture);
 
         return new()
         {
             Size = size,
             CenterCoordinates = GetCenter(orientation, commands, parser, culture),
             Position = GetAnchor(orientation, commands, parser, culture),
-            Mode = GetMode(commands, parser, culture),
+            Mode = mode,
             Compand = GetCompandMode(commands, parser, culture),
             Sampler = GetSampler(commands),
             PadColor = parser.ParseValue<Color>(commands.GetValueOrDefault(Color), culture),
-            TargetRectangle = targetRectangle
+            TargetRectangle = mode is ResizeMode.Manual ? new Rectangle(0, 0, size.Width, size.Height) : null
         };
     }
 
@@ -170,23 +160,6 @@ public class ResizeWebProcessor : IImageWebProcessor
         int height = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(Height), culture);
 
         return ExifOrientationUtilities.Transform(new Size(width, height), orientation);
-    }
-
-    private static Rectangle? ParseRectangle(
-        CommandCollection commands,
-        CommandParser parser,
-        CultureInfo culture)
-    {
-        if (!commands.Contains(TargetRectangleWidth) || !commands.Contains(TargetRectangleHeight))
-        {
-            return null;
-        }
-
-        // The command parser will reject negative numbers as it clamps values to ranges.
-        int width = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(TargetRectangleWidth), culture);
-        int height = (int)parser.ParseValue<uint>(commands.GetValueOrDefault(TargetRectangleHeight), culture);
-
-        return new Rectangle(0, 0, width, height);
     }
 
     private static PointF? GetCenter(
