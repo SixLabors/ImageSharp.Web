@@ -40,8 +40,8 @@ public class PresetOnlyQueryCollectionRequestParser : IRequestParser
         }
 
         StringValues query = queryCollection[QueryKey];
-        string requestedPreset = query[query.Count - 1];
-        if (this.presets.TryGetValue(requestedPreset, out CommandCollection? collection))
+        string? requestedPreset = query[^1];
+        if (requestedPreset is not null && this.presets.TryGetValue(requestedPreset, out CommandCollection? collection))
         {
             return collection;
         }
@@ -65,7 +65,11 @@ public class PresetOnlyQueryCollectionRequestParser : IRequestParser
         foreach (KeyValuePair<string, StringValues> pair in parsed)
         {
             // Use the indexer for both set and query. This replaces any previously parsed values.
-            transformed[pair.Key] = pair.Value[pair.Value.Count - 1];
+            string? value = pair.Value[^1];
+            if (value is not null)
+            {
+                transformed[pair.Key] = value;
+            }
         }
 
         return transformed;

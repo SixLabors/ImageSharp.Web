@@ -25,7 +25,11 @@ public sealed class QueryCollectionRequestParser : IRequestParser
         foreach (KeyValuePair<string, StringValues> pair in query)
         {
             // Use the indexer for both set and query. This replaces any previously parsed values.
-            transformed[pair.Key] = pair.Value[pair.Value.Count - 1];
+            string? value = pair.Value[^1];
+            if (value is not null)
+            {
+                transformed[pair.Key] = value;
+            }
         }
 
         return transformed;
