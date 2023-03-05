@@ -67,14 +67,10 @@ public sealed class CommandParser
             }
         }
 
-        // We don't actually return here.
-        // The compiler just cannot see our exception.
-        ThrowNotSupported(type);
-        return default;
+        return ThrowNotSupported<T>(type);
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     [DoesNotReturn]
-    private static void ThrowNotSupported(Type type)
+    private static T ThrowNotSupported<T>(Type type)
         => throw new NotSupportedException($"Cannot convert to {type.FullName}.");
 }
