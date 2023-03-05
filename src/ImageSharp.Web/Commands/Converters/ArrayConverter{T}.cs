@@ -28,11 +28,11 @@ public sealed class ArrayConverter<T> : ICommandConverter<T[]>
             return Array.Empty<T>();
         }
 
-        var result = new List<T>();
+        List<T> result = new();
         foreach (string pill in GetStringArray(value, culture))
         {
             T? item = parser.ParseValue<T>(pill, culture);
-            if (item != null)
+            if (item is not null)
             {
                 result.Add(item);
             }

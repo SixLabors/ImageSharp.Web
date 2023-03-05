@@ -23,7 +23,7 @@ public sealed class ListConverter<T> : ICommandConverter<List<T>>
         string? value,
         Type propertyType)
     {
-        var result = new List<T>();
+        List<T> result = new();
         if (string.IsNullOrWhiteSpace(value))
         {
             return result;
@@ -32,7 +32,7 @@ public sealed class ListConverter<T> : ICommandConverter<List<T>>
         foreach (string pill in GetStringArray(value, culture))
         {
             T? item = parser.ParseValue<T>(pill, culture);
-            if (item != null)
+            if (item is not null)
             {
                 result.Add(item);
             }
