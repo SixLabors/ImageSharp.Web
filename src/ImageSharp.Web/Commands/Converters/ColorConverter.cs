@@ -41,9 +41,21 @@ public sealed class ColorConverter : ICommandConverter<Color>
             return default;
         }
 
+        // Hex colors rgb, rrggbb, rrggbbaa
+        if (HexColorRegex.IsMatch(value))
+        {
+            return Color.ParseHex(value);
+        }
+
+        // Named colors
+        IDictionary<string, Color> table = ColorConstantsTable.Value;
+        if (table.TryGetValue(value, out Color color))
+        {
+            return color;
+        }
+
         // Numeric r,g,b - r,g,b,a
         char separator = culture.TextInfo.ListSeparator[0];
-
         if (value.IndexOf(separator) != -1)
         {
             string[] components = value.Split(separator);
@@ -70,15 +82,7 @@ public sealed class ColorConverter : ICommandConverter<Color>
             }
         }
 
-        // Hex colors rgb, rrggbb, rrggbbaa
-        if (HexColorRegex.IsMatch(value))
-        {
-            return Color.ParseHex(value);
-        }
-
-        // Named colors
-        IDictionary<string, Color> table = ColorConstantsTable.Value;
-        return table.TryGetValue(value, out Color color) ? color : default;
+        return default;
     }
 
     private static IDictionary<string, Color> InitializeColorConstantsTable()
