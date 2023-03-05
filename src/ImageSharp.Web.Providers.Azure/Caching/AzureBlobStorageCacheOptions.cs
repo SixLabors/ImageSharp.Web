@@ -1,17 +1,16 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 namespace SixLabors.ImageSharp.Web.Caching.Azure;
 
 /// <summary>
 /// Configuration options for the <see cref="AzureBlobStorageCache"/>.
 /// </summary>
-public class AzureBlobStorageCacheOptions : IAzureBlobContainerClientOptions
+public class AzureBlobStorageCacheOptions
 {
     /// <inheritdoc/>
-    public string ConnectionString { get; set; }
+    public string ConnectionString { get; set; } = null!;
 
     /// <inheritdoc/>
-    public string ContainerName { get; set; }
+    public string ContainerName { get; set; } = null!;
 }
