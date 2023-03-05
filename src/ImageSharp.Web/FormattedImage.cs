@@ -1,12 +1,10 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
-using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace SixLabors.ImageSharp.Web;
 
@@ -41,14 +39,15 @@ public sealed class FormattedImage : IDisposable
     {
         this.Image = image;
         this.imageFormatsManager = image.GetConfiguration().ImageFormatsManager;
-        this.Format = format;
+        this.format = format;
+        this.encoder = this.imageFormatsManager.GetEncoder(format);
         this.keepOpen = keepOpen;
     }
 
     /// <summary>
     /// Gets the decoded image.
     /// </summary>
-    public Image Image { get; private set; }
+    public Image Image { get; }
 
     /// <summary>
     /// Gets or sets the format.
@@ -64,7 +63,7 @@ public sealed class FormattedImage : IDisposable
             }
 
             this.format = value;
-            this.encoder = this.imageFormatsManager.FindEncoder(value);
+            this.encoder = this.imageFormatsManager.GetEncoder(value);
         }
     }
 
@@ -82,7 +81,7 @@ public sealed class FormattedImage : IDisposable
             }
 
             // The given type should match the format encoder.
-            IImageEncoder reference = this.imageFormatsManager.FindEncoder(this.Format);
+            IImageEncoder reference = this.imageFormatsManager.GetEncoder(this.Format);
             if (reference.GetType() != value.GetType())
             {
                 ThrowInvalid(nameof(value));
@@ -96,26 +95,29 @@ public sealed class FormattedImage : IDisposable
     /// Create a new instance of the <see cref="FormattedImage"/> class from the given stream.
     /// </summary>
     /// <typeparam name="TPixel">The pixel format.</typeparam>
-    /// <param name="configuration">The configuration.</param>
+    /// <param name="options">The general decoder options.</param>
     /// <param name="source">The source.</param>
     /// <returns>A <see cref="Task{FormattedImage}"/> representing the asynchronous operation.</returns>
-    internal static async Task<FormattedImage> LoadAsync<TPixel>(Configuration configuration, Stream source)
+    internal static async Task<FormattedImage> LoadAsync<TPixel>(DecoderOptions options, Stream source)
         where TPixel : unmanaged, IPixel<TPixel>
     {
-        (Image<TPixel> image, IImageFormat format) = await Image.LoadWithFormatAsync<TPixel>(configuration, source);
-        return new FormattedImage(image, format, false);
+        // TODO: We want to be able to apply decoder options per request.
+        // For example. If a resize command has been passed with no extra resampling options
+        // then we should apply those changes on decode. This will allow memory savings and performance improvements.
+        Image<TPixel> image = await Image.LoadAsync<TPixel>(options, source);
+        return new FormattedImage(image, image.Metadata.DecodedImageFormat!, false);
     }
 
     /// <summary>
     /// Create a new instance of the <see cref="FormattedImage"/> class from the given stream.
     /// </summary>
-    /// <param name="configuration">The configuration.</param>
+    /// <param name="options">The general decoder options.</param>
     /// <param name="source">The source.</param>
     /// <returns>A <see cref="Task{FormattedImage}"/> representing the asynchronous operation.</returns>
-    internal static async Task<FormattedImage> LoadAsync(Configuration configuration, Stream source)
+    internal static async Task<FormattedImage> LoadAsync(DecoderOptions options, Stream source)
     {
-        (Image image, IImageFormat format) = await Image.LoadWithFormatAsync(configuration, source);
-        return new FormattedImage(image, format, false);
+        Image image = await Image.LoadAsync(options, source);
+        return new FormattedImage(image, image.Metadata.DecodedImageFormat!, false);
     }
 
     /// <summary>
@@ -141,8 +143,7 @@ public sealed class FormattedImage : IDisposable
         value = ExifOrientationMode.Unknown;
         if (this.Image.Metadata.ExifProfile != null)
         {
-            IExifValue<ushort> orientation = this.Image.Metadata.ExifProfile.GetValue(ExifTag.Orientation);
-            if (orientation is null)
+            if (!this.Image.Metadata.ExifProfile.TryGetValue(ExifTag.Orientation, out IExifValue<ushort>? orientation))
             {
                 return false;
             }
@@ -171,13 +172,12 @@ public sealed class FormattedImage : IDisposable
         if (!this.keepOpen)
         {
             this.Image?.Dispose();
-            this.Image = null;
         }
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
     private static void ThrowNull(string name) => throw new ArgumentNullException(name);
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn]
     private static void ThrowInvalid(string name) => throw new ArgumentException(name);
 }

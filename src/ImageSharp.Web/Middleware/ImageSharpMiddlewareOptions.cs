@@ -1,10 +1,10 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
+using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Providers;
 
@@ -27,6 +27,7 @@ public class ImageSharpMiddlewareOptions
     };
 
     private Func<ImageCommandContext, Task> onParseCommandsAsync = _ => Task.CompletedTask;
+    private Func<HttpContext, DecoderOptions, Task> onBeforeLoadAsync = (_, _) => Task.CompletedTask;
     private Func<FormattedImage, Task> onBeforeSaveAsync = _ => Task.CompletedTask;
     private Func<ImageProcessingContext, Task> onProcessedAsync = _ => Task.CompletedTask;
     private Func<HttpContext, Task> onPrepareResponseAsync = _ => Task.CompletedTask;
@@ -110,6 +111,21 @@ public class ImageSharpMiddlewareOptions
         {
             Guard.NotNull(value, nameof(this.OnParseCommandsAsync));
             this.onParseCommandsAsync = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the method that can be used to used to augment decoder options.
+    /// This is called before the image is decoded and loaded for processing.
+    /// </summary>
+    public Func<HttpContext, DecoderOptions, Task> OnBeforeLoadAsync
+    {
+        get => this.onBeforeLoadAsync;
+
+        set
+        {
+            Guard.NotNull(value, nameof(this.OnBeforeLoadAsync));
+            this.onBeforeLoadAsync = value;
         }
     }
 

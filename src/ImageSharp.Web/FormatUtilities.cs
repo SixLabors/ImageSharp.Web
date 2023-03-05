@@ -1,7 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
@@ -51,7 +51,7 @@ public sealed class FormatUtilities
     /// <see langword="true" /> if the uri contains an extension; otherwise, <see langword="false" />.
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool TryGetExtensionFromUri(string uri, out string extension)
+    public bool TryGetExtensionFromUri(string uri, [NotNullWhen(true)] out string? extension)
     {
         extension = null;
         int query = uri.IndexOf('?');
@@ -60,7 +60,7 @@ public sealed class FormatUtilities
         if (query > -1)
         {
             if (uri.Contains(FormatWebProcessor.Format, StringComparison.OrdinalIgnoreCase)
-                && QueryHelpers.ParseQuery(uri.Substring(query)).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
+                && QueryHelpers.ParseQuery(uri[query..]).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
             {
                 // We have a query but is it a valid one?
                 ReadOnlySpan<char> extSpan = ext[0].AsSpan();
@@ -86,7 +86,7 @@ public sealed class FormatUtilities
         int extensionIndex;
         if ((extensionIndex = path.LastIndexOf('.')) != -1)
         {
-            ReadOnlySpan<char> pathExtension = path.Slice(extensionIndex + 1);
+            ReadOnlySpan<char> pathExtension = path[(extensionIndex + 1)..];
 
             foreach (string e in this.extensions)
             {

@@ -44,7 +44,7 @@ public static class AWSS3StorageImageProviderFactory
         {
             try
             {
-                var putBucketRequest = new PutBucketRequest
+                PutBucketRequest putBucketRequest = new()
                 {
                     BucketName = bucketOptions.BucketName,
                     BucketRegion = bucketOptions.Region,
@@ -57,7 +57,7 @@ public static class AWSS3StorageImageProviderFactory
             {
                 // CI tests are run in parallel and can sometimes return a
                 // false negative for the existance of a bucket.
-                if (string.Equals(e.ErrorCode, "BucketAlreadyExists"))
+                if (string.Equals(e.ErrorCode, "BucketAlreadyExists", StringComparison.Ordinal))
                 {
                     return;
                 }
@@ -84,14 +84,14 @@ public static class AWSS3StorageImageProviderFactory
             using Stream stream = file.CreateReadStream();
 
             // Set the max-age property so we get coverage for testing in our AWS provider.
-            var cacheControl = new CacheControlHeaderValue
+            CacheControlHeaderValue cacheControl = new()
             {
                 Public = true,
                 MaxAge = TimeSpan.FromDays(7),
                 MustRevalidate = true
             };
 
-            var putRequest = new PutObjectRequest()
+            PutObjectRequest putRequest = new()
             {
                 BucketName = bucketOptions.BucketName,
                 Key = TestConstants.ImagePath,

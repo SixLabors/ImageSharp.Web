@@ -30,50 +30,44 @@ public class Startup
     /// </summary>
     /// <param name="services">The collection of service descriptors.</param>
     public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddImageSharp()
-            .SetRequestParser<QueryCollectionRequestParser>()
-            .Configure<PhysicalFileSystemCacheOptions>(options =>
-            {
-                options.CacheRootPath = null;
-                options.CacheFolder = "is-cache";
-                options.CacheFolderDepth = 8;
-            })
-            .SetCache<PhysicalFileSystemCache>()
-            .SetCacheKey<UriRelativeLowerInvariantCacheKey>()
-            .SetCacheHash<SHA256CacheHash>()
-            .Configure<PhysicalFileSystemProviderOptions>(options =>
-            {
-                options.ProviderRootPath = null;
-            })
-            .AddProvider<PhysicalFileSystemProvider>()
-            .AddProcessor<ResizeWebProcessor>()
-            .AddProcessor<FormatWebProcessor>()
-            .AddProcessor<BackgroundColorWebProcessor>()
-            .AddProcessor<QualityWebProcessor>()
-            .AddProcessor<AutoOrientWebProcessor>();
+        => services.AddImageSharp()
+        .SetRequestParser<QueryCollectionRequestParser>()
+        .Configure<PhysicalFileSystemCacheOptions>(options =>
+        {
+            options.CacheRootPath = null;
+            options.CacheFolder = "is-cache";
+            options.CacheFolderDepth = 8;
+        })
+        .SetCache<PhysicalFileSystemCache>()
+        .SetCacheKey<UriRelativeLowerInvariantCacheKey>()
+        .SetCacheHash<SHA256CacheHash>()
+        .Configure<PhysicalFileSystemProviderOptions>(options => options.ProviderRootPath = null)
+        .AddProvider<PhysicalFileSystemProvider>()
+        .AddProcessor<ResizeWebProcessor>()
+        .AddProcessor<FormatWebProcessor>()
+        .AddProcessor<BackgroundColorWebProcessor>()
+        .AddProcessor<QualityWebProcessor>()
+        .AddProcessor<AutoOrientWebProcessor>();
 
-        // Add the default service and options.
-        //
-        // services.AddImageSharp();
+    // Add the default service and options.
+    //
+    // services.AddImageSharp();
 
-        // Or add the default service and custom options.
-        //
-        // this.ConfigureDefaultServicesAndCustomOptions(services);
+    // Or add the default service and custom options.
+    //
+    // this.ConfigureDefaultServicesAndCustomOptions(services);
 
-        // Or we can fine-grain control adding the default options and configure all other services.
-        //
-        // this.ConfigureCustomServicesAndDefaultOptions(services);
+    // Or we can fine-grain control adding the default options and configure all other services.
+    //
+    // this.ConfigureCustomServicesAndDefaultOptions(services);
 
-        // Or we can fine-grain control adding custom options and configure all other services
-        // There are also factory methods for each builder that will allow building from configuration files.
-        //
-        // this.ConfigureCustomServicesAndCustomOptions(services);
-    }
+    // Or we can fine-grain control adding custom options and configure all other services
+    // There are also factory methods for each builder that will allow building from configuration files.
+    //
+    // this.ConfigureCustomServicesAndCustomOptions(services);
 
     private void ConfigureDefaultServicesAndCustomOptions(IServiceCollection services)
-    {
-        services.AddImageSharp(options =>
+        => services.AddImageSharp(options =>
         {
             options.Configuration = Configuration.Default;
             options.BrowserMaxAge = TimeSpan.FromDays(7);
@@ -84,18 +78,14 @@ public class Startup
             options.OnProcessedAsync = _ => Task.CompletedTask;
             options.OnPrepareResponseAsync = _ => Task.CompletedTask;
         });
-    }
 
     private void ConfigureCustomServicesAndDefaultOptions(IServiceCollection services)
-    {
-        services.AddImageSharp()
-                .RemoveProcessor<FormatWebProcessor>()
-                .RemoveProcessor<BackgroundColorWebProcessor>();
-    }
+        => services.AddImageSharp()
+        .RemoveProcessor<FormatWebProcessor>()
+        .RemoveProcessor<BackgroundColorWebProcessor>();
 
     private void ConfigureCustomServicesAndCustomOptions(IServiceCollection services)
-    {
-        services.AddImageSharp(options =>
+        => services.AddImageSharp(options =>
         {
             options.Configuration = Configuration.Default;
             options.BrowserMaxAge = TimeSpan.FromDays(7);
@@ -107,10 +97,7 @@ public class Startup
             options.OnPrepareResponseAsync = _ => Task.CompletedTask;
         })
             .SetRequestParser<QueryCollectionRequestParser>()
-            .Configure<PhysicalFileSystemCacheOptions>(options =>
-            {
-                options.CacheFolder = "different-cache";
-            })
+            .Configure<PhysicalFileSystemCacheOptions>(options => options.CacheFolder = "different-cache")
             .SetCache<PhysicalFileSystemCache>()
             .SetCacheKey<UriRelativeLowerInvariantCacheKey>()
             .SetCacheHash<SHA256CacheHash>()
@@ -121,7 +108,6 @@ public class Startup
             .AddProcessor<FormatWebProcessor>()
             .AddProcessor<BackgroundColorWebProcessor>()
             .AddProcessor<QualityWebProcessor>();
-    }
 
     /// <summary>
     /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

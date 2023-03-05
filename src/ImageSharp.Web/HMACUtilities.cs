@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Buffers;
 using System.Runtime.CompilerServices;
@@ -70,7 +69,7 @@ public static class HMACUtilities
     private static unsafe string CreateHMAC(string value, HMAC hmac)
     {
         int byteCount = Encoding.ASCII.GetByteCount(value);
-        byte[] buffer = null;
+        byte[]? buffer = null;
 
         try
         {
