@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using System.Text;
@@ -10,7 +9,6 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
@@ -90,7 +88,7 @@ public class ImageTagHelper : UrlResolutionTagHelper
     /// Passed through to the generated HTML in all cases.
     /// </remarks>
     [HtmlAttributeName(SrcAttributeName)]
-    public string Src { get; set; }
+    public string? Src { get; set; }
 
     /// <summary>
     /// Gets or sets the width in pixel units.
@@ -198,7 +196,7 @@ public class ImageTagHelper : UrlResolutionTagHelper
         Guard.NotNull(context, nameof(context));
         Guard.NotNull(output, nameof(output));
 
-        string src = output.Attributes[SrcAttributeName]?.Value as string ?? this.Src;
+        string? src = output.Attributes[SrcAttributeName]?.Value as string ?? this.Src;
         if (string.IsNullOrWhiteSpace(src) || src.StartsWith("data", StringComparison.OrdinalIgnoreCase))
         {
             base.Process(context, output);
@@ -220,7 +218,7 @@ public class ImageTagHelper : UrlResolutionTagHelper
             src = output.Attributes[SrcAttributeName].Value as string;
             if (secret?.Length > 0)
             {
-                string hash = this.authorizationUtilities.ComputeHMAC(src, commands, secret);
+                string hash = this.authorizationUtilities.ComputeHMAC(src!, commands, secret);
                 commands.Add(RequestAuthorizationUtilities.TokenCommand, hash);
             }
 
@@ -256,7 +254,7 @@ public class ImageTagHelper : UrlResolutionTagHelper
         // If no explicit width/height has been set on the image, set the attributes to match the
         // width/height from the process commands if present.
         int? width = output.Attributes.ContainsName(ResizeWebProcessor.Width)
-            ? int.Parse(output.Attributes[ResizeWebProcessor.Width].Value.ToString(), this.parserCulture)
+            ? int.Parse(output.Attributes[ResizeWebProcessor.Width].Value.ToString()!, this.parserCulture)
             : null;
 
         if (this.Width.HasValue)
@@ -266,7 +264,7 @@ public class ImageTagHelper : UrlResolutionTagHelper
         }
 
         int? height = output.Attributes.ContainsName(ResizeWebProcessor.Height)
-            ? int.Parse(output.Attributes[ResizeWebProcessor.Height].Value.ToString(), this.parserCulture)
+            ? int.Parse(output.Attributes[ResizeWebProcessor.Height].Value.ToString()!, this.parserCulture)
             : null;
 
         if (this.Height.HasValue)
@@ -365,7 +363,7 @@ public class ImageTagHelper : UrlResolutionTagHelper
         StringBuilder sb = new();
         sb.Append(uriToBeAppended);
 
-        foreach (KeyValuePair<string, string> parameter in commands)
+        foreach (KeyValuePair<string, string?> parameter in commands)
         {
             if (parameter.Value is null)
             {
