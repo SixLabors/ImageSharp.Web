@@ -17,7 +17,7 @@ public sealed class ColorConverter : ICommandConverter<Color>
     /// The web color hexadecimal regex. Matches strings arranged
     /// in rgb, rgba, rrggbb, or rrggbbaa format to match web syntax.
     /// </summary>
-    private static readonly Regex HexColorRegex = new("([0-9a-fA-F]{3}){1,2}", RegexOptions.Compiled);
+    private static readonly Regex HexColorRegex = new("([0-9a-fA-F][^,;.-]\\B{3}){1,2}", RegexOptions.Compiled);
 
     /// <summary>
     /// The number color regex.
@@ -41,12 +41,6 @@ public sealed class ColorConverter : ICommandConverter<Color>
             return default;
         }
 
-        // Hex colors rgb, rrggbb, rrggbbaa
-        if (HexColorRegex.IsMatch(value))
-        {
-            return Color.ParseHex(value);
-        }
-
         // Named colors
         IDictionary<string, Color> table = ColorConstantsTable.Value;
         if (table.TryGetValue(value, out Color color))
@@ -55,7 +49,7 @@ public sealed class ColorConverter : ICommandConverter<Color>
         }
 
         // Numeric r,g,b - r,g,b,a
-        char separator = culture.TextInfo.ListSeparator[0];
+        char separator = ConverterUtility.GetListSeparator(culture);
         if (value.IndexOf(separator) != -1)
         {
             string[] components = value.Split(separator);
@@ -80,6 +74,12 @@ public sealed class ColorConverter : ICommandConverter<Color>
                     _ => default,
                 };
             }
+        }
+
+        // Hex colors rgb, rrggbb, rrggbbaa
+        if (HexColorRegex.IsMatch(value))
+        {
+            return Color.ParseHex(value);
         }
 
         return default;

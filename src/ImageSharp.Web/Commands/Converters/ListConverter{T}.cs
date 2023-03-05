@@ -44,7 +44,10 @@ public sealed class ListConverter<T> : ICommandConverter<List<T>>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string[] GetStringArray(string input, CultureInfo culture)
     {
-        char separator = culture.TextInfo.ListSeparator[0];
+        char separator = ConverterUtility.GetListSeparator(culture);
+
+        // TODO: Can we use StringSplit Enumerator here?
+        // https://github.com/dotnet/runtime/issues/934
         return input.Split(separator).Select(s => s.Trim()).ToArray();
     }
 }
