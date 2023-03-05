@@ -125,15 +125,18 @@ public class ResizeWebProcessor : IImageWebProcessor
             return null;
         }
 
+        ResizeMode mode = GetMode(commands, parser, culture);
+
         return new()
         {
             Size = size,
             CenterCoordinates = GetCenter(orientation, commands, parser, culture),
             Position = GetAnchor(orientation, commands, parser, culture),
-            Mode = GetMode(commands, parser, culture),
+            Mode = mode,
             Compand = GetCompandMode(commands, parser, culture),
             Sampler = GetSampler(commands),
-            PadColor = parser.ParseValue<Color>(commands.GetValueOrDefault(Color), culture)
+            PadColor = parser.ParseValue<Color>(commands.GetValueOrDefault(Color), culture),
+            TargetRectangle = mode is ResizeMode.Manual ? new Rectangle(0, 0, size.Width, size.Height) : null
         };
     }
 
