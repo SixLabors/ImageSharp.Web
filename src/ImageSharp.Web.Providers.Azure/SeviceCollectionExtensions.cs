@@ -8,6 +8,9 @@ using SixLabors.ImageSharp.Web.Providers.Azure;
 
 namespace SixLabors.ImageSharp.Web;
 
+/// <summary>
+/// Extension methods for <see cref="IServiceCollection"/> to simplify middleware service registration.
+/// </summary>
 public static class SeviceCollectionExtensions
 {
     /// <summary>
