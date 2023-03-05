@@ -52,12 +52,16 @@ public abstract class FileProviderImageProvider : IImageProvider
     /// <inheritdoc/>
     public Task<IImageResolver?> GetAsync(HttpContext context)
     {
-        IFileInfo fileInfo = this.fileProvider.GetFileInfo(context.Request.Path.Value);
-        if (!fileInfo.Exists)
+        string? path = context.Request.Path.Value;
+        if (path is not null)
         {
-            return Task.FromResult<IImageResolver?>(null);
+            IFileInfo fileInfo = this.fileProvider.GetFileInfo(path);
+            if (fileInfo.Exists)
+            {
+                return Task.FromResult<IImageResolver?>(new FileProviderImageResolver(fileInfo));
+            }
         }
 
-        return Task.FromResult<IImageResolver?>(new FileProviderImageResolver(fileInfo));
+        return Task.FromResult<IImageResolver?>(null);
     }
 }
