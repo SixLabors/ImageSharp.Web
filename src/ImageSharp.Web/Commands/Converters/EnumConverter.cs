@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -22,10 +21,10 @@ public sealed class EnumConverter : ICommandConverter<object>
     /// This allows us to reuse the same converter for infinite enum types.
     /// </remarks>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public object ConvertFrom(
+    public object? ConvertFrom(
         CommandParser parser,
         CultureInfo culture,
-        string value,
+        string? value,
         Type propertyType)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -35,7 +34,7 @@ public sealed class EnumConverter : ICommandConverter<object>
 
         try
         {
-            char separator = culture.TextInfo.ListSeparator[0];
+            char separator = ConverterUtility.GetListSeparator(culture);
             if (value.IndexOf(separator) != -1)
             {
                 long convertedValue = 0;
@@ -64,5 +63,8 @@ public sealed class EnumConverter : ICommandConverter<object>
     /// <returns>The <see cref="T:String[]"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string[] GetStringArray(string input, char separator)
+
+        // TODO: Can we use StringSplit Enumerator here?
+        // https://github.com/dotnet/runtime/issues/934
         => input.Split(separator).Select(s => s.Trim()).ToArray();
 }

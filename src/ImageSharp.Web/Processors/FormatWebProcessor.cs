@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using Microsoft.Extensions.Logging;
@@ -50,16 +49,12 @@ public class FormatWebProcessor : IImageWebProcessor
         CommandParser parser,
         CultureInfo culture)
     {
-        string extension = commands.GetValueOrDefault(Format);
+        string? extension = commands.GetValueOrDefault(Format);
 
-        if (!string.IsNullOrWhiteSpace(extension))
+        if (!string.IsNullOrWhiteSpace(extension)
+            && this.options.Configuration.ImageFormatsManager.TryFindFormatByFileExtension(extension, out IImageFormat? format))
         {
-            IImageFormat format = this.options.Configuration.ImageFormatsManager.FindFormatByFileExtension(extension);
-
-            if (format != null)
-            {
-                image.Format = format;
-            }
+            image.Format = format;
         }
 
         return image;

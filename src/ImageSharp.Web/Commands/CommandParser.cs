@@ -1,7 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net;
 using System.Runtime.CompilerServices;
@@ -36,12 +36,12 @@ public sealed class CommandParser
     /// </typeparam>
     /// <returns>The converted instance or the default.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T ParseValue<T>(string value, CultureInfo culture)
+    public T? ParseValue<T>(string? value, CultureInfo culture)
     {
         DebugGuard.NotNull(culture, nameof(culture));
 
         Type type = typeof(T);
-        ICommandConverter converter = Array.Find(this.converters, x => x.Type.Equals(type));
+        ICommandConverter? converter = Array.Find(this.converters, x => x.Type.Equals(type));
 
         if (converter != null)
         {
@@ -59,7 +59,7 @@ public sealed class CommandParser
             converter = Array.Find(this.converters, x => x.Type.Equals(typeof(Enum)));
             if (converter != null)
             {
-                return (T)((ICommandConverter<object>)converter).ConvertFrom(
+                return (T?)((ICommandConverter<object>)converter).ConvertFrom(
                     this,
                     culture,
                     WebUtility.UrlDecode(value),
@@ -67,13 +67,10 @@ public sealed class CommandParser
             }
         }
 
-        // We don't actually return here.
-        // The compiler just cannot see our exception.
-        ThrowNotSupported(type);
-        return default;
+        return ThrowNotSupported<T>(type);
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void ThrowNotSupported(Type type)
+    [DoesNotReturn]
+    private static T ThrowNotSupported<T>(Type type)
         => throw new NotSupportedException($"Cannot convert to {type.FullName}.");
 }

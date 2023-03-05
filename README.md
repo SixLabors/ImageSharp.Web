@@ -45,11 +45,11 @@ For more information, see the [.NET Foundation Code of Conduct](https://dotnetfo
 
 ### Installation
 
-Install stable releases via Nuget; development releases are available via MyGet.
+Install stable releases via Nuget; development releases are available via Feedz.io.
 
-| Package Name                   | Release (NuGet) | Nightly (MyGet) |
+| Package Name                   | Release (NuGet) | Nightly (Feedz.io) |
 |--------------------------------|-----------------|-----------------|
-| `SixLabors.ImageSharp.Web`         | [![NuGet](https://img.shields.io/nuget/v/SixLabors.ImageSharp.Web.svg)](https://www.nuget.org/packages/SixLabors.ImageSharp.Web/) | [![MyGet](https://img.shields.io/myget/sixlabors/vpre/SixLabors.ImageSharp.Web.svg)](https://www.myget.org/feed/sixlabors/package/nuget/SixLabors.ImageSharp.Web) |
+| `SixLabors.ImageSharp.Web`         | [![NuGet](https://img.shields.io/nuget/v/SixLabors.ImageSharp.Web.svg)](https://www.nuget.org/packages/SixLabors.ImageSharp.Web/) | [![feedz.io](https://img.shields.io/badge/endpoint.svg?url=https%3A%2F%2Ff.feedz.io%2Fsixlabors%2Fsixlabors%2Fshield%2FSixLabors.ImageSharp.Web%2Flatest)](https://f.feedz.io/sixlabors/sixlabors/nuget/index.json) |
 
 ## Manual build
 

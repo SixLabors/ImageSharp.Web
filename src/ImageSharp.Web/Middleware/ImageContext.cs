@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -23,7 +22,7 @@ internal struct ImageContext
 
     private DateTimeOffset fileLastModified;
     private long fileLength;
-    private EntityTagHeaderValue fileEtag;
+    private EntityTagHeaderValue? fileEtag;
 
     private PreconditionState ifMatchState;
     private PreconditionState ifNoneMatchState;

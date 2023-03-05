@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 
@@ -35,5 +34,5 @@ public interface ICommandConverter<T> : ICommandConverter
     /// <param name="value">The <see cref="string"/> to convert. </param>
     /// <param name="propertyType">The property type that the converter will convert to.</param>
     /// <exception cref="NotSupportedException">The conversion cannot be performed.</exception>
-    T ConvertFrom(CommandParser parser, CultureInfo culture, string value, Type propertyType);
+    T? ConvertFrom(CommandParser parser, CultureInfo culture, string? value, Type propertyType);
 }

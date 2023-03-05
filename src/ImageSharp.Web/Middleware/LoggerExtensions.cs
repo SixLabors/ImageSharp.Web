@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using Microsoft.Extensions.Logging;
 
@@ -12,10 +11,10 @@ namespace SixLabors.ImageSharp.Web.Middleware;
 internal static class LoggerExtensions
 {
     private static readonly Action<ILogger, string, Exception> LogProcessingErrorAction;
-    private static readonly Action<ILogger, string, Exception> LogResolveFailedAction;
-    private static readonly Action<ILogger, string, string, Exception> LogServedAction;
-    private static readonly Action<ILogger, string, Exception> LogPathNotModifiedAction;
-    private static readonly Action<ILogger, string, Exception> LogPreconditionFailedAction;
+    private static readonly Action<ILogger, string, Exception?> LogResolveFailedAction;
+    private static readonly Action<ILogger, string, string, Exception?> LogServedAction;
+    private static readonly Action<ILogger, string, Exception?> LogPathNotModifiedAction;
+    private static readonly Action<ILogger, string, Exception?> LogPreconditionFailedAction;
 
     /// <summary>
     /// Initializes static members of the <see cref="LoggerExtensions"/> class.

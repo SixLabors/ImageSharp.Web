@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using Microsoft.Extensions.Logging;
@@ -45,24 +44,30 @@ public class QualityWebProcessor : IImageWebProcessor
 
             if (image.Format is JpegFormat)
             {
-                var reference =
+                JpegEncoder reference =
                     (JpegEncoder)image.Image
                     .GetConfiguration()
                     .ImageFormatsManager
-                    .FindEncoder(image.Format);
+                    .GetEncoder(image.Format);
 
                 if (quality != reference.Quality)
                 {
-                    image.Encoder = new JpegEncoder() { Quality = quality, ColorType = reference.ColorType };
+                    image.Encoder = new JpegEncoder()
+                    {
+                        Quality = quality,
+                        Interleaved = reference.Interleaved,
+                        ColorType = reference.ColorType,
+                        SkipMetadata = reference.SkipMetadata
+                    };
                 }
             }
             else if (image.Format is WebpFormat)
             {
-                var reference =
+                WebpEncoder reference =
                     (WebpEncoder)image.Image
                     .GetConfiguration()
                     .ImageFormatsManager
-                    .FindEncoder(image.Format);
+                    .GetEncoder(image.Format);
 
                 image.Encoder = new WebpEncoder()
                 {
@@ -76,6 +81,7 @@ public class QualityWebProcessor : IImageWebProcessor
                     TransparentColorMode = reference.TransparentColorMode,
                     NearLossless = reference.NearLossless,
                     NearLosslessQuality = reference.NearLosslessQuality,
+                    SkipMetadata = reference.SkipMetadata
                 };
             }
         }

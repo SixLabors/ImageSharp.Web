@@ -18,6 +18,7 @@ internal static class AmazonS3ClientFactory
     /// <returns>
     /// A new <see cref="AmazonS3Client"/>.
     /// </returns>
+    /// <exception cref="ArgumentException">Invalid configuration.</exception>
     public static AmazonS3Client CreateClient(IAWSS3BucketClientOptions options)
     {
         if (!string.IsNullOrWhiteSpace(options.Endpoint))
@@ -33,14 +34,14 @@ internal static class AmazonS3ClientFactory
         {
             // AccessSecret can be empty.
             Guard.NotNullOrWhiteSpace(options.Region, nameof(options.Region));
-            var region = RegionEndpoint.GetBySystemName(options.Region);
+            RegionEndpoint region = RegionEndpoint.GetBySystemName(options.Region);
             AmazonS3Config config = new() { RegionEndpoint = region, UseAccelerateEndpoint = options.UseAccelerateEndpoint };
             SetTimeout(config, options.Timeout);
             return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
         }
         else if (!string.IsNullOrWhiteSpace(options.Region))
         {
-            var region = RegionEndpoint.GetBySystemName(options.Region);
+            RegionEndpoint region = RegionEndpoint.GetBySystemName(options.Region);
             AmazonS3Config config = new() { RegionEndpoint = region, UseAccelerateEndpoint = options.UseAccelerateEndpoint };
             SetTimeout(config, options.Timeout);
             return new AmazonS3Client(config);

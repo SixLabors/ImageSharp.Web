@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -98,23 +97,24 @@ public readonly struct ImageCacheMetadata : IEquatable<ImageCacheMetadata>
     public static ImageCacheMetadata FromDictionary(IDictionary<string, string> dictionary)
     {
         // DateTime.TryParse(null) ==  DateTime.MinValue so no need for conditional;
-        dictionary.TryGetValue(SourceLastModifiedKey, out string sourceLastWriteTimeUtcString);
+        dictionary.TryGetValue(SourceLastModifiedKey, out string? sourceLastWriteTimeUtcString);
         DateTime.TryParse(sourceLastWriteTimeUtcString, null, DateTimeStyles.RoundtripKind, out DateTime sourceLastWriteTimeUtc);
 
-        dictionary.TryGetValue(CacheLastModifiedKey, out string cacheLastWriteTimeUtcString);
+        dictionary.TryGetValue(CacheLastModifiedKey, out string? cacheLastWriteTimeUtcString);
         DateTime.TryParse(cacheLastWriteTimeUtcString, null, DateTimeStyles.RoundtripKind, out DateTime cacheLastWriteTimeUtc);
 
-        dictionary.TryGetValue(ContentTypeKey, out string contentType);
+        dictionary.TryGetValue(ContentTypeKey, out string? contentType);
+        Guard.NotNull(contentType);
 
         // int.TryParse(null) == 0 and we want to return TimeSpan.MinValue not TimeSpan.Zero
         TimeSpan cacheControlMaxAge = TimeSpan.MinValue;
-        if (dictionary.TryGetValue(CacheControlKey, out string cacheControlMaxAgeString))
+        if (dictionary.TryGetValue(CacheControlKey, out string? cacheControlMaxAgeString))
         {
             _ = int.TryParse(cacheControlMaxAgeString, out int maxAge);
             cacheControlMaxAge = TimeSpan.FromSeconds(maxAge);
         }
 
-        dictionary.TryGetValue(ContentLengthKey, out string contentLengthString);
+        dictionary.TryGetValue(ContentLengthKey, out string? contentLengthString);
         _ = long.TryParse(contentLengthString, out long contentLength);
 
         return new ImageCacheMetadata(
@@ -135,7 +135,7 @@ public readonly struct ImageCacheMetadata : IEquatable<ImageCacheMetadata>
         Dictionary<string, string> dictionary = new();
         using (StreamReader reader = new(stream, Encoding.UTF8))
         {
-            string line;
+            string? line;
             while ((line = await reader.ReadLineAsync()) != null)
             {
                 int idx = line.IndexOf(':');
@@ -160,7 +160,7 @@ public readonly struct ImageCacheMetadata : IEquatable<ImageCacheMetadata>
         && this.ContentLength == other.ContentLength;
 
     /// <inheritdoc/>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
         => obj is ImageCacheMetadata data && this.Equals(data);
 
     /// <inheritdoc/>

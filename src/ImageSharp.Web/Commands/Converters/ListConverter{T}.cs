@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -21,10 +20,10 @@ public sealed class ListConverter<T> : ICommandConverter<List<T>>
     public List<T> ConvertFrom(
         CommandParser parser,
         CultureInfo culture,
-        string value,
+        string? value,
         Type propertyType)
     {
-        var result = new List<T>();
+        List<T> result = new();
         if (string.IsNullOrWhiteSpace(value))
         {
             return result;
@@ -32,8 +31,8 @@ public sealed class ListConverter<T> : ICommandConverter<List<T>>
 
         foreach (string pill in GetStringArray(value, culture))
         {
-            T item = parser.ParseValue<T>(pill, culture);
-            if (item != null)
+            T? item = parser.ParseValue<T>(pill, culture);
+            if (item is not null)
             {
                 result.Add(item);
             }
@@ -45,7 +44,10 @@ public sealed class ListConverter<T> : ICommandConverter<List<T>>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string[] GetStringArray(string input, CultureInfo culture)
     {
-        char separator = culture.TextInfo.ListSeparator[0];
+        char separator = ConverterUtility.GetListSeparator(culture);
+
+        // TODO: Can we use StringSplit Enumerator here?
+        // https://github.com/dotnet/runtime/issues/934
         return input.Split(separator).Select(s => s.Trim()).ToArray();
     }
 }
