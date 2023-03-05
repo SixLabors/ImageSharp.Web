@@ -1,8 +1,8 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace SixLabors.ImageSharp.Web.Caching;
@@ -26,6 +26,7 @@ namespace SixLabors.ImageSharp.Web.Caching;
 /// 6. When cold is full, cold tail is moved to warm head or removed from dictionary on depending on WasAccessed.
 /// </remarks>
 internal class ConcurrentTLruCache<TKey, TValue>
+    where TKey : notnull
 {
     private readonly ConcurrentDictionary<TKey, LongTickCountLruItem<TKey, TValue>> dictionary;
 
@@ -97,9 +98,9 @@ internal class ConcurrentTLruCache<TKey, TValue>
     /// <param name="key">The key of the value to get.</param>
     /// <param name="value">When this method returns, contains the object from the cache that has the specified key, or the default value of the type if the operation failed.</param>
     /// <returns><see langword="true"/> if the key was found in the cache; otherwise, <see langword="false"/>.</returns>
-    public bool TryGet(TKey key, out TValue value)
+    public bool TryGet(TKey key, [NotNullWhen(true)] out TValue? value)
     {
-        if (this.dictionary.TryGetValue(key, out LongTickCountLruItem<TKey, TValue> item))
+        if (this.dictionary.TryGetValue(key, out LongTickCountLruItem<TKey, TValue>? item))
         {
             return this.GetOrDiscard(item, out value);
         }
@@ -111,7 +112,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
     // AggressiveInlining forces the JIT to inline policy.ShouldDiscard(). For LRU policy
     // the first branch is completely eliminated due to JIT time constant propogation.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool GetOrDiscard(LongTickCountLruItem<TKey, TValue> item, out TValue value)
+    private bool GetOrDiscard(LongTickCountLruItem<TKey, TValue> item, out TValue? value)
     {
         if (this.policy.ShouldDiscard(item))
         {
@@ -135,7 +136,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
     /// in the cache, or the new value if the key was not in the dictionary.</returns>
     public TValue GetOrAdd(TKey key, Func<TKey, TValue> valueFactory)
     {
-        if (this.TryGet(key, out TValue value))
+        if (this.TryGet(key, out TValue? value))
         {
             return value;
         }
@@ -164,7 +165,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
     /// <returns>A task that represents the asynchronous <see cref="GetOrAdd(TKey, Func{TKey, TValue})"/> operation.</returns>
     public async Task<TValue> GetOrAddAsync(TKey key, Func<TKey, Task<TValue>> valueFactory)
     {
-        if (this.TryGet(key, out TValue value))
+        if (this.TryGet(key, out TValue? value))
         {
             return value;
         }
@@ -202,7 +203,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
         // and it will not be marked as removed. If key 1 is fetched while LruItem1* is still in the queue, there will
         // be two queue entries for key 1, and neither is marked as removed. Thus when LruItem1 * ages out, it will
         // incorrectly remove 1 from the dictionary, and this cycle can repeat.
-        if (this.dictionary.TryGetValue(key, out LongTickCountLruItem<TKey, TValue> existing))
+        if (this.dictionary.TryGetValue(key, out LongTickCountLruItem<TKey, TValue>? existing))
         {
             if (existing.WasRemoved)
             {
@@ -219,7 +220,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
                 existing.WasRemoved = true;
             }
 
-            if (this.dictionary.TryRemove(key, out LongTickCountLruItem<TKey, TValue> removedItem))
+            if (this.dictionary.TryRemove(key, out LongTickCountLruItem<TKey, TValue>? removedItem))
             {
                 // Mark as not accessed, it will later be cycled out of the queues because it can never be fetched
                 // from the dictionary. Note: Hot/Warm/Cold count will reflect the removed item until it is cycled
@@ -261,7 +262,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
         {
             Interlocked.Decrement(ref this.hotCount);
 
-            if (this.hotQueue.TryDequeue(out LongTickCountLruItem<TKey, TValue> item))
+            if (this.hotQueue.TryDequeue(out LongTickCountLruItem<TKey, TValue>? item))
             {
                 ItemDestination where = this.policy.RouteHot(item);
                 this.Move(item, where);
@@ -279,7 +280,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
         {
             Interlocked.Decrement(ref this.warmCount);
 
-            if (this.warmQueue.TryDequeue(out LongTickCountLruItem<TKey, TValue> item))
+            if (this.warmQueue.TryDequeue(out LongTickCountLruItem<TKey, TValue>? item))
             {
                 ItemDestination where = this.policy.RouteWarm(item);
 
@@ -308,7 +309,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
         {
             Interlocked.Decrement(ref this.coldCount);
 
-            if (this.coldQueue.TryDequeue(out LongTickCountLruItem<TKey, TValue> item))
+            if (this.coldQueue.TryDequeue(out LongTickCountLruItem<TKey, TValue>? item))
             {
                 ItemDestination where = this.policy.RouteCold(item);
 
@@ -354,7 +355,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
                             break;
                         }
 
-                        if (this.dictionary.TryRemove(item.Key, out LongTickCountLruItem<TKey, TValue> removedItem))
+                        if (this.dictionary.TryRemove(item.Key, out LongTickCountLruItem<TKey, TValue>? removedItem))
                         {
                             item.WasRemoved = true;
                             if (removedItem.Value is IDisposable d)

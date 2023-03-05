@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Buffers;
 using System.Runtime.CompilerServices;
@@ -33,7 +32,7 @@ public sealed class SHA256CacheHash : ICacheHash
     public string Create(string value, uint length)
     {
         int byteCount = Encoding.ASCII.GetByteCount(value);
-        byte[] buffer = null;
+        byte[]? buffer = null;
 
         try
         {

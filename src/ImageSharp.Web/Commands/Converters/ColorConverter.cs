@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using System.Reflection;
@@ -35,16 +34,28 @@ public sealed class ColorConverter : ICommandConverter<Color>
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Color ConvertFrom(CommandParser parser, CultureInfo culture, string value, Type propertyType)
+    public Color ConvertFrom(CommandParser parser, CultureInfo culture, string? value, Type propertyType)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
             return default;
         }
 
+        // Hex colors rgb, rrggbb, rrggbbaa
+        if (HexColorRegex.IsMatch(value))
+        {
+            return Color.ParseHex(value);
+        }
+
+        // Named colors
+        IDictionary<string, Color> table = ColorConstantsTable.Value;
+        if (table.TryGetValue(value, out Color color))
+        {
+            return color;
+        }
+
         // Numeric r,g,b - r,g,b,a
         char separator = culture.TextInfo.ListSeparator[0];
-
         if (value.IndexOf(separator) != -1)
         {
             string[] components = value.Split(separator);
@@ -60,9 +71,9 @@ public sealed class ColorConverter : ICommandConverter<Color>
 
             if (convert)
             {
-                List<byte> rgba = parser.ParseValue<List<byte>>(value, culture);
+                List<byte>? rgba = parser.ParseValue<List<byte>>(value, culture);
 
-                return rgba.Count switch
+                return rgba?.Count switch
                 {
                     4 => Color.FromRgba(rgba[0], rgba[1], rgba[2], rgba[3]),
                     3 => Color.FromRgb(rgba[0], rgba[1], rgba[2]),
@@ -71,15 +82,7 @@ public sealed class ColorConverter : ICommandConverter<Color>
             }
         }
 
-        // Hex colors rgb, rrggbb, rrggbbaa
-        if (HexColorRegex.IsMatch(value))
-        {
-            return Color.ParseHex(value);
-        }
-
-        // Named colors
-        IDictionary<string, Color> table = ColorConstantsTable.Value;
-        return table.TryGetValue(value, out Color color) ? color : default;
+        return default;
     }
 
     private static IDictionary<string, Color> InitializeColorConstantsTable()
@@ -90,7 +93,7 @@ public sealed class ColorConverter : ICommandConverter<Color>
         {
             if (field.FieldType == typeof(Color))
             {
-                table[field.Name] = (Color)field.GetValue(null);
+                table[field.Name] = (Color)field.GetValue(null)!;
             }
         }
 

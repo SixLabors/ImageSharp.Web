@@ -1,8 +1,6 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
-#nullable disable
-
 using System.Globalization;
 using System.Numerics;
 using Microsoft.Extensions.Logging;
@@ -87,7 +85,7 @@ public class ResizeWebProcessor : IImageWebProcessor
         CommandParser parser,
         CultureInfo culture)
     {
-        ResizeOptions options = GetResizeOptions(image, commands, parser, culture);
+        ResizeOptions? options = GetResizeOptions(image, commands, parser, culture);
 
         if (options != null)
         {
@@ -107,7 +105,7 @@ public class ResizeWebProcessor : IImageWebProcessor
     /// The <see cref="CultureInfo"/> to use as the current parsing culture.
     /// </param>
     /// <returns>The <see cref="ResizeOptions"/>.</returns>
-    internal static ResizeOptions GetResizeOptions(
+    internal static ResizeOptions? GetResizeOptions(
         FormattedImage image,
         CommandCollection commands,
         CommandParser parser,
@@ -168,7 +166,12 @@ public class ResizeWebProcessor : IImageWebProcessor
         CommandParser parser,
         CultureInfo culture)
     {
-        float[] coordinates = parser.ParseValue<float[]>(commands.GetValueOrDefault(Xy), culture);
+        float[]? coordinates = parser.ParseValue<float[]>(commands.GetValueOrDefault(Xy), culture);
+
+        if (coordinates is null)
+        {
+            return null;
+        }
 
         if (coordinates.Length != 2)
         {
@@ -203,7 +206,7 @@ public class ResizeWebProcessor : IImageWebProcessor
 
     private static IResampler GetSampler(CommandCollection commands)
     {
-        string sampler = commands.GetValueOrDefault(Sampler);
+        string? sampler = commands.GetValueOrDefault(Sampler);
 
         if (sampler != null)
         {

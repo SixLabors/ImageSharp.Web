@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -77,17 +76,17 @@ public class PhysicalFileSystemCache : IImageCache
     }
 
     /// <inheritdoc/>
-    public Task<IImageCacheResolver> GetAsync(string key)
+    public Task<IImageCacheResolver?> GetAsync(string key)
     {
         string path = Path.Combine(this.cacheRootPath, ToFilePath(key, this.cacheFolderDepth));
 
         FileInfo metaFileInfo = new(ToMetaDataFilePath(path));
         if (!metaFileInfo.Exists)
         {
-            return Task.FromResult<IImageCacheResolver>(null);
+            return Task.FromResult<IImageCacheResolver?>(null);
         }
 
-        return Task.FromResult<IImageCacheResolver>(new PhysicalFileSystemCacheResolver(metaFileInfo, this.formatUtilities));
+        return Task.FromResult<IImageCacheResolver?>(new PhysicalFileSystemCacheResolver(metaFileInfo, this.formatUtilities));
     }
 
     /// <inheritdoc/>
@@ -96,10 +95,10 @@ public class PhysicalFileSystemCache : IImageCache
         string path = Path.Combine(this.cacheRootPath, ToFilePath(key, this.cacheFolderDepth));
         string imagePath = this.ToImageFilePath(path, metadata);
         string metaPath = ToMetaDataFilePath(path);
-        string directory = Path.GetDirectoryName(path);
+        string? directory = Path.GetDirectoryName(path);
 
         // Ensure cache directory is created before creating files
-        if (!Directory.Exists(directory))
+        if (!Directory.Exists(directory) && directory is not null)
         {
             Directory.CreateDirectory(directory);
         }

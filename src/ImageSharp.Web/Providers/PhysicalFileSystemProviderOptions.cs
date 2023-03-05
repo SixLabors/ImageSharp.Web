@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 namespace SixLabors.ImageSharp.Web.Providers;
 
@@ -21,7 +20,7 @@ public class PhysicalFileSystemProviderOptions
     /// application content files; commonly 'wwwroot'.
     /// </para>
     /// </summary>
-    public string ProviderRootPath { get; set; }
+    public string? ProviderRootPath { get; set; }
 
     /// <summary>
     /// Gets or sets the processing behavior. Defaults to <see cref="ProcessingBehavior.CommandOnly"/>.

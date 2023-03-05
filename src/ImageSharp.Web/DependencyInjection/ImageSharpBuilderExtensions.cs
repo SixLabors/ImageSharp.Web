@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -205,7 +204,7 @@ public static class ImageSharpBuilderExtensions
     public static IImageSharpBuilder RemoveProvider<TProvider>(this IImageSharpBuilder builder)
         where TProvider : class, IImageProvider
     {
-        ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(IImageProvider) && x.GetImplementationType() == typeof(TProvider));
+        ServiceDescriptor? descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(IImageProvider) && x.GetImplementationType() == typeof(TProvider));
         if (descriptor != null)
         {
             builder.Services.Remove(descriptor);
@@ -264,7 +263,7 @@ public static class ImageSharpBuilderExtensions
     public static IImageSharpBuilder RemoveProcessor<TProcessor>(this IImageSharpBuilder builder)
         where TProcessor : class, IImageWebProcessor
     {
-        ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(IImageWebProcessor) && x.GetImplementationType() == typeof(TProcessor));
+        ServiceDescriptor? descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(IImageWebProcessor) && x.GetImplementationType() == typeof(TProcessor));
         if (descriptor != null)
         {
             builder.Services.Remove(descriptor);
@@ -323,7 +322,7 @@ public static class ImageSharpBuilderExtensions
     public static IImageSharpBuilder RemoveConverter<TConverter>(this IImageSharpBuilder builder)
         where TConverter : class, ICommandConverter
     {
-        ServiceDescriptor descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(ICommandConverter) && x.GetImplementationType() == typeof(TConverter));
+        ServiceDescriptor? descriptor = builder.Services.FirstOrDefault(x => x.ServiceType == typeof(ICommandConverter) && x.GetImplementationType() == typeof(TConverter));
         if (descriptor != null)
         {
             builder.Services.Remove(descriptor);
@@ -374,7 +373,7 @@ public static class ImageSharpBuilderExtensions
         return builder;
     }
 
-    private static Type GetImplementationType(this ServiceDescriptor descriptor)
+    private static Type? GetImplementationType(this ServiceDescriptor descriptor)
         => descriptor.ImplementationType
         ?? descriptor.ImplementationInstance?.GetType()
         ?? descriptor.ImplementationFactory?.GetType().GenericTypeArguments[1];

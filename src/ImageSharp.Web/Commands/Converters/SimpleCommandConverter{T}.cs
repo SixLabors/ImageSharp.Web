@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -19,10 +18,10 @@ public sealed class SimpleCommandConverter<T> : ICommandConverter<T>
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T ConvertFrom(
+    public T? ConvertFrom(
         CommandParser parser,
         CultureInfo culture,
-        string value,
+        string? value,
         Type propertyType)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -31,7 +30,7 @@ public sealed class SimpleCommandConverter<T> : ICommandConverter<T>
         }
 
         Type t = typeof(T);
-        Type u = Nullable.GetUnderlyingType(t);
+        Type? u = Nullable.GetUnderlyingType(t);
 
         if (u != null)
         {

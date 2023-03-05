@@ -1,7 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
@@ -51,7 +51,7 @@ public sealed class FormatUtilities
     /// <see langword="true" /> if the uri contains an extension; otherwise, <see langword="false" />.
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool TryGetExtensionFromUri(string uri, out string extension)
+    public bool TryGetExtensionFromUri(string uri, [NotNullWhen(true)] out string? extension)
     {
         extension = null;
         int query = uri.IndexOf('?');

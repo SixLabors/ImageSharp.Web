@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using SixLabors.ImageSharp.Web.Resolvers;
 
@@ -27,7 +26,7 @@ internal readonly struct ImageWorkerResult
         this.Resolver = resolver;
     }
 
-    public ImageWorkerResult(ImageCacheMetadata cacheImageMetadata, IImageCacheResolver resolver)
+    public ImageWorkerResult(ImageCacheMetadata cacheImageMetadata, IImageCacheResolver? resolver)
     {
         this.IsNewOrUpdated = false;
         this.SourceImageMetadata = default;
@@ -41,5 +40,5 @@ internal readonly struct ImageWorkerResult
 
     public ImageCacheMetadata CacheImageMetadata { get; }
 
-    public IImageCacheResolver Resolver { get; }
+    public IImageCacheResolver? Resolver { get; }
 }
