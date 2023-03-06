@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Globalization;
 using Amazon.S3;
@@ -17,7 +16,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS;
 public class AWSS3StorageCache : IImageCache
 {
     private readonly IAmazonS3 amazonS3Client;
-    private readonly string bucket;
+    private readonly string? bucket;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AWSS3StorageCache"/> class.
@@ -32,14 +31,14 @@ public class AWSS3StorageCache : IImageCache
     }
 
     /// <inheritdoc/>
-    public async Task<IImageCacheResolver> GetAsync(string key)
+    public async Task<IImageCacheResolver?> GetAsync(string key)
     {
         GetObjectMetadataRequest request = new() { BucketName = this.bucket, Key = key };
         try
         {
             // HEAD request throws a 404 if not found.
             MetadataCollection metadata = (await this.amazonS3Client.GetObjectMetadataAsync(request)).Metadata;
-            return new AWSS3StorageCacheResolver(this.amazonS3Client, this.bucket, key, metadata);
+            return new AWSS3StorageCacheResolver(this.amazonS3Client, this.bucket!, key, metadata);
         }
         catch
         {
@@ -82,12 +81,12 @@ public class AWSS3StorageCache : IImageCache
     /// If the bucket does not already exist, a <see cref="PutBucketResponse"/> describing the newly
     /// created bucket. If the container already exists, <see langword="null"/>.
     /// </returns>
-    public static PutBucketResponse CreateIfNotExists(
+    public static PutBucketResponse? CreateIfNotExists(
         AWSS3StorageCacheOptions options,
         S3CannedACL acl)
         => AsyncHelper.RunSync(() => CreateIfNotExistsAsync(options, acl));
 
-    private static async Task<PutBucketResponse> CreateIfNotExistsAsync(
+    private static async Task<PutBucketResponse?> CreateIfNotExistsAsync(
         AWSS3StorageCacheOptions options,
         S3CannedACL acl)
     {

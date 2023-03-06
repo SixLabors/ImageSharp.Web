@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using Amazon;
 using Amazon.Runtime;
@@ -33,7 +32,7 @@ internal static class AmazonS3ClientFactory
         else if (!string.IsNullOrWhiteSpace(options.AccessKey))
         {
             // AccessSecret can be empty.
-            Guard.NotNullOrWhiteSpace(options.Region, nameof(options.Region));
+            Guard.NotNullOrWhiteSpace(options.Region!, nameof(options.Region));
             RegionEndpoint region = RegionEndpoint.GetBySystemName(options.Region);
             AmazonS3Config config = new() { RegionEndpoint = region, UseAccelerateEndpoint = options.UseAccelerateEndpoint };
             SetTimeout(config, options.Timeout);

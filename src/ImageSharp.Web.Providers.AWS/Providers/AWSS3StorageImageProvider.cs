@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using Amazon.S3;
 using Amazon.S3.Model;
@@ -29,7 +28,7 @@ public class AWSS3StorageImageProvider : IImageProvider
         = new();
 
     private readonly AWSS3StorageImageProviderOptions storageOptions;
-    private Func<HttpContext, bool> match;
+    private Func<HttpContext, bool>? match;
 
     /// <summary>
     /// Contains various helper methods based on the current configuration.
@@ -70,17 +69,23 @@ public class AWSS3StorageImageProvider : IImageProvider
         => this.formatUtilities.TryGetExtensionFromUri(context.Request.GetDisplayUrl(), out _);
 
     /// <inheritdoc />
-    public async Task<IImageResolver> GetAsync(HttpContext context)
+    public async Task<IImageResolver?> GetAsync(HttpContext context)
     {
         // Strip the leading slash and bucket name from the HTTP request path and treat
         // the remaining path string as the key.
         // Path has already been correctly parsed before here.
         string bucketName = string.Empty;
-        IAmazonS3 s3Client = null;
+        IAmazonS3? s3Client = null;
 
         // We want an exact match here to ensure that bucket names starting with
         // the same prefix are not mixed up.
-        string path = context.Request.Path.Value.TrimStart(SlashChars);
+        string? path = context.Request.Path.Value?.TrimStart(SlashChars);
+
+        if (path is null)
+        {
+            return null;
+        }
+
         int index = path.IndexOfAny(SlashChars);
         string nameToMatch = index != -1 ? path.Substring(0, index) : path;
 
@@ -120,7 +125,13 @@ public class AWSS3StorageImageProvider : IImageProvider
     {
         // Only match loosly here for performance.
         // Path matching conflicts should be dealt with by configuration.
-        string path = context.Request.Path.Value.TrimStart(SlashChars);
+        string? path = context.Request.Path.Value?.TrimStart(SlashChars);
+
+        if (path is null)
+        {
+            return false;
+        }
+
         foreach (string bucket in this.buckets.Keys)
         {
             if (path.StartsWith(bucket, StringComparison.OrdinalIgnoreCase))
