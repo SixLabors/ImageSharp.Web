@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using Azure;
 using Azure.Storage.Blobs;
@@ -31,7 +30,7 @@ public class AzureBlobStorageCache : IImageCache
     }
 
     /// <inheritdoc/>
-    public async Task<IImageCacheResolver> GetAsync(string key)
+    public async Task<IImageCacheResolver?> GetAsync(string key)
     {
         BlobClient blob = this.container.GetBlobClient(key);
 

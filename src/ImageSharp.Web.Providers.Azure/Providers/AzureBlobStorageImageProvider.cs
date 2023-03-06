@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Http;
@@ -28,11 +27,6 @@ public class AzureBlobStorageImageProvider : IImageProvider
         = new();
 
     /// <summary>
-    /// The blob storage options.
-    /// </summary>
-    private readonly AzureBlobStorageImageProviderOptions storageOptions;
-
-    /// <summary>
     /// Contains various helper methods based on the current configuration.
     /// </summary>
     private readonly FormatUtilities formatUtilities;
@@ -40,7 +34,7 @@ public class AzureBlobStorageImageProvider : IImageProvider
     /// <summary>
     /// A match function used by the resolver to identify itself as the correct resolver to use.
     /// </summary>
-    private Func<HttpContext, bool> match;
+    private Func<HttpContext, bool>? match;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AzureBlobStorageImageProvider"/> class.
@@ -53,13 +47,12 @@ public class AzureBlobStorageImageProvider : IImageProvider
     {
         Guard.NotNull(storageOptions, nameof(storageOptions));
 
-        this.storageOptions = storageOptions.Value;
         this.formatUtilities = formatUtilities;
 
-        foreach (AzureBlobContainerClientOptions container in this.storageOptions.BlobContainers)
+        foreach (AzureBlobContainerClientOptions container in storageOptions.Value.BlobContainers)
         {
             this.containers.Add(
-                container.ContainerName,
+                container.ContainerName!,
                 new BlobContainerClient(container.ConnectionString, container.ContainerName));
         }
     }
@@ -75,19 +68,25 @@ public class AzureBlobStorageImageProvider : IImageProvider
     }
 
     /// <inheritdoc/>
-    public async Task<IImageResolver> GetAsync(HttpContext context)
+    public async Task<IImageResolver?> GetAsync(HttpContext context)
     {
         // Strip the leading slash and container name from the HTTP request path and treat
         // the remaining path string as the blob name.
         // Path has already been correctly parsed before here.
         string containerName = string.Empty;
-        BlobContainerClient container = null;
+        BlobContainerClient? container = null;
 
         // We want an exact match here to ensure that container names starting with
         // the same prefix are not mixed up.
-        string path = context.Request.Path.Value.TrimStart(SlashChars);
+        string? path = context.Request.Path.Value?.TrimStart(SlashChars);
+
+        if (path is null)
+        {
+            return null;
+        }
+
         int index = path.IndexOfAny(SlashChars);
-        string nameToMatch = index != -1 ? path.Substring(0, index) : path;
+        string nameToMatch = index != -1 ? path[..index] : path;
 
         foreach (string key in this.containers.Keys)
         {
@@ -131,7 +130,13 @@ public class AzureBlobStorageImageProvider : IImageProvider
     {
         // Only match loosly here for performance.
         // Path matching conflicts should be dealt with by configuration.
-        string path = context.Request.Path.Value.TrimStart(SlashChars);
+        string? path = context.Request.Path.Value?.TrimStart(SlashChars);
+
+        if (path is null)
+        {
+            return false;
+        }
+
         foreach (string container in this.containers.Keys)
         {
             if (path.StartsWith(container, StringComparison.OrdinalIgnoreCase))
