@@ -71,7 +71,8 @@ public static class ServiceCollectionExtensions
                .AddProcessor<FormatWebProcessor>()
                .AddProcessor<BackgroundColorWebProcessor>()
                .AddProcessor<QualityWebProcessor>()
-               .AddProcessor<AutoOrientWebProcessor>();
+               .AddProcessor<AutoOrientWebProcessor>()
+               .AddProcessor<GrayscaleWebProcessor>();
 
         builder.AddConverter<IntegralNumberConverter<sbyte>>();
         builder.AddConverter<IntegralNumberConverter<byte>>();
