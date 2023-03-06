@@ -38,7 +38,7 @@ public class ImageSharpMiddleware
     /// <summary>
     /// Used to temporarily store cached HMAC-s to reduce the overhead of HMAC token generation.
     /// </summary>
-    private static readonly ConcurrentTLruCache<string, string> HMACTokenLru
+    private static readonly ConcurrentTLruCache<string, string?> HMACTokenLru
         = new(1024, TimeSpan.FromSeconds(30));
 
     /// <summary>
@@ -244,7 +244,7 @@ public class ImageSharpMiddleware
 
         // At this point we know that this is an image request designed for processing via this middleware.
         // Check for a token if required and reject if invalid.
-        if (checkHMAC && hmac != token)
+        if (checkHMAC && (hmac != token || (hmac is null && commands.Count > 0)))
         {
             SetBadRequest(httpContext);
             return;
