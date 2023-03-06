@@ -21,7 +21,7 @@ SixLabors.ImageSharp.Web
 
 ## License
   
-- ImageSharp.Web is licensed under the [Six Labors Split License, Version 1.0](https://github.com/SixLabors/ImageSharp/blob/main/LICEN
+- ImageSharp.Web is licensed under the [Six Labors Split License, Version 1.0](https://github.com/SixLabors/ImageSharp.Web/blob/main/LICENSE)
 
 ## Support Six Labors
 
