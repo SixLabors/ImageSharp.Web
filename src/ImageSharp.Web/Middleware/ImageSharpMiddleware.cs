@@ -244,13 +244,10 @@ public class ImageSharpMiddleware
 
         // At this point we know that this is an image request designed for processing via this middleware.
         // Check for a token if required and reject if invalid.
-        if (checkHMAC)
+        if (checkHMAC && hmac != token)
         {
-            if (token == null || hmac != token)
-            {
-                SetBadRequest(httpContext);
-                return;
-            }
+            SetBadRequest(httpContext);
+            return;
         }
 
         IImageResolver? sourceImageResolver = await provider.GetAsync(httpContext);

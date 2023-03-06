@@ -16,21 +16,20 @@ using SixLabors.ImageSharp.Web.Processors;
 namespace SixLabors.ImageSharp.Web.TagHelpers;
 
 /// <summary>
-/// A TagHelper implementation targeting &lt;img&gt; element that allows the automatic generation of HMAC protected processing commands.
+/// A <see cref="TagHelper"/> implementation targeting &lt;img&gt; element that allows the automatic generation image processing commands.
 /// </summary>
 [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + WidthAttributeName, TagStructure = TagStructure.WithoutEndTag)]
 [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + HeightAttributeName, TagStructure = TagStructure.WithoutEndTag)]
 [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + AnchorAttributeName, TagStructure = TagStructure.WithoutEndTag)]
-[HtmlTargetElement("img", Attributes = SrcAttributeName + "," + RModeAttributeName, TagStructure = TagStructure.WithoutEndTag)]
+[HtmlTargetElement("img", Attributes = SrcAttributeName + "," + ModeAttributeName, TagStructure = TagStructure.WithoutEndTag)]
 [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + XyAttributeName, TagStructure = TagStructure.WithoutEndTag)]
-[HtmlTargetElement("img", Attributes = SrcAttributeName + "," + RColorAttributeName, TagStructure = TagStructure.WithoutEndTag)]
+[HtmlTargetElement("img", Attributes = SrcAttributeName + "," + ColorAttributeName, TagStructure = TagStructure.WithoutEndTag)]
 [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + CompandAttributeName, TagStructure = TagStructure.WithoutEndTag)]
 [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + OrientAttributeName, TagStructure = TagStructure.WithoutEndTag)]
 [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + AutoOrientAttributeName, TagStructure = TagStructure.WithoutEndTag)]
 [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + FormatAttributeName, TagStructure = TagStructure.WithoutEndTag)]
 [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + BgColorAttributeName, TagStructure = TagStructure.WithoutEndTag)]
 [HtmlTargetElement("img", Attributes = SrcAttributeName + "," + QualityAttributeName, TagStructure = TagStructure.WithoutEndTag)]
-[HtmlTargetElement("img", Attributes = SrcAttributeName + "," + HMACAttributeName, TagStructure = TagStructure.WithoutEndTag)]
 public class ImageTagHelper : UrlResolutionTagHelper
 {
     private const string SrcAttributeName = "src";
@@ -38,9 +37,9 @@ public class ImageTagHelper : UrlResolutionTagHelper
     private const string WidthAttributeName = AttributePrefix + ResizeWebProcessor.Width;
     private const string HeightAttributeName = AttributePrefix + ResizeWebProcessor.Height;
     private const string AnchorAttributeName = AttributePrefix + ResizeWebProcessor.Anchor;
-    private const string RModeAttributeName = AttributePrefix + ResizeWebProcessor.Mode;
+    private const string ModeAttributeName = AttributePrefix + ResizeWebProcessor.Mode;
     private const string XyAttributeName = AttributePrefix + ResizeWebProcessor.Xy;
-    private const string RColorAttributeName = AttributePrefix + ResizeWebProcessor.Color;
+    private const string ColorAttributeName = AttributePrefix + ResizeWebProcessor.Color;
     private const string CompandAttributeName = AttributePrefix + ResizeWebProcessor.Compand;
     private const string OrientAttributeName = AttributePrefix + ResizeWebProcessor.Orient;
     private const string SamplerAttributeName = AttributePrefix + ResizeWebProcessor.Sampler;
@@ -48,12 +47,10 @@ public class ImageTagHelper : UrlResolutionTagHelper
     private const string FormatAttributeName = AttributePrefix + FormatWebProcessor.Format;
     private const string BgColorAttributeName = AttributePrefix + BackgroundColorWebProcessor.Color;
     private const string QualityAttributeName = AttributePrefix + QualityWebProcessor.Quality;
-    private const string HMACAttributeName = AttributePrefix + RequestAuthorizationUtilities.TokenCommand;
 
     private readonly ImageSharpMiddlewareOptions options;
     private readonly CultureInfo parserCulture;
     private readonly char separator;
-    private readonly RequestAuthorizationUtilities authorizationUtilities;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImageTagHelper"/> class.
@@ -77,9 +74,10 @@ public class ImageTagHelper : UrlResolutionTagHelper
             ? CultureInfo.InvariantCulture
             : CultureInfo.CurrentCulture;
         this.separator = this.parserCulture.TextInfo.ListSeparator[0];
-
-        this.authorizationUtilities = authorizationUtilities;
     }
+
+    /// <inheritdoc/>
+    public override int Order => 1;
 
     /// <summary>
     /// Gets or sets the src.
@@ -111,7 +109,7 @@ public class ImageTagHelper : UrlResolutionTagHelper
     /// <summary>
     /// Gets or sets the resize mode.
     /// </summary>
-    [HtmlAttributeName(RModeAttributeName)]
+    [HtmlAttributeName(ModeAttributeName)]
     public ResizeMode? ResizeMode { get; set; }
 
     /// <summary>
@@ -129,7 +127,7 @@ public class ImageTagHelper : UrlResolutionTagHelper
     /// <summary>
     /// Gets or sets the color to use as a background when padding an image.
     /// </summary>
-    [HtmlAttributeName(RColorAttributeName)]
+    [HtmlAttributeName(ColorAttributeName)]
     public Color? PadColor { get; set; }
 
     /// <summary>
@@ -180,16 +178,6 @@ public class ImageTagHelper : UrlResolutionTagHelper
     [HtmlAttributeName(QualityAttributeName)]
     public int? Quality { get; set; }
 
-    /// <summary>
-    /// Gets or sets a value indicating whether to append a HMAC token to the request.
-    /// This value is always <see langword="true"/>. HMAC token usage is controlled by populating the
-    /// <see cref="ImageSharpMiddlewareOptions.HMACSecretKey"/> property.
-    /// </summary>
-    [HtmlAttributeName(HMACAttributeName)]
-#pragma warning disable CA1822 // Mark members as static
-    public bool AppendHMAC { get => true; set => _ = true; }
-#pragma warning restore CA1822 // Mark members as static
-
     /// <inheritdoc />
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
@@ -197,7 +185,10 @@ public class ImageTagHelper : UrlResolutionTagHelper
         Guard.NotNull(output, nameof(output));
 
         string? src = output.Attributes[SrcAttributeName]?.Value as string ?? this.Src;
-        if (string.IsNullOrWhiteSpace(src) || src.StartsWith("data", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(src)
+            || src.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+            || src.StartsWith("ftp", StringComparison.OrdinalIgnoreCase)
+            || src.StartsWith("data", StringComparison.OrdinalIgnoreCase))
         {
             base.Process(context, output);
             return;
@@ -209,24 +200,16 @@ public class ImageTagHelper : UrlResolutionTagHelper
         CommandCollection commands = new();
         this.AddProcessingCommands(context, output, commands, this.parserCulture);
 
-        byte[] secret = this.options.HMACSecretKey;
-        if (commands.Count > 0 || secret?.Length > 0)
+        if (commands.Count > 0)
         {
             // Retrieve the TagHelperOutput variation of the "src" attribute in case other TagHelpers in the
             // pipeline have touched the value. If the value is already encoded this helper may
             // not function properly.
-            src = output.Attributes[SrcAttributeName].Value as string;
-            if (secret?.Length > 0)
-            {
-                string hash = this.authorizationUtilities.ComputeHMAC(src!, commands, secret);
-                commands.Add(RequestAuthorizationUtilities.TokenCommand, hash);
-            }
-
+            src = output.Attributes[SrcAttributeName]?.Value as string;
             src = AddQueryString(src, commands);
+            output.Attributes.SetAttribute(SrcAttributeName, src);
+            this.Src = src;
         }
-
-        this.Src = src;
-        output.Attributes.SetAttribute(SrcAttributeName, src);
     }
 
     /// <summary>

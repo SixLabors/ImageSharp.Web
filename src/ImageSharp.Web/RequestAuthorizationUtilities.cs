@@ -216,22 +216,13 @@ public sealed class RequestAuthorizationUtilities
             this.StripUnknownCommands(commands);
         }
 
+        if (commands.Count == 0)
+        {
+            return null;
+        }
+
         ImageCommandContext imageCommandContext = new(context, commands, this.commandParser, this.parserCulture);
         return await this.options.OnComputeHMACAsync(imageCommandContext, secret);
-    }
-
-    internal string ComputeHMAC(string uri, CommandCollection commands, byte[] secret)
-    {
-        ToComponents(
-            new Uri(uri, UriKind.RelativeOrAbsolute),
-            out HostString host,
-            out PathString path,
-            out QueryString queryString);
-
-        HttpContext context = this.ToHttpContext(host, path, queryString, new(QueryHelpers.ParseQuery(queryString.Value)));
-        ImageCommandContext imageCommandContext = new(context, commands, this.commandParser, this.parserCulture);
-
-        return AsyncHelper.RunSync(() => this.options.OnComputeHMACAsync(imageCommandContext, secret));
     }
 
     /// <summary>
@@ -243,8 +234,15 @@ public sealed class RequestAuthorizationUtilities
     /// </remarks>
     /// <param name="context">Contains information about the current image request and parsed commands.</param>
     /// <returns>The computed HMAC.</returns>
-    internal Task<string> ComputeHMACAsync(ImageCommandContext context)
-        => this.options.OnComputeHMACAsync(context, this.options.HMACSecretKey);
+    internal async Task<string?> ComputeHMACAsync(ImageCommandContext context)
+    {
+        if (context.Commands.Count == 0)
+        {
+            return null;
+        }
+
+        return await this.options.OnComputeHMACAsync(context, this.options.HMACSecretKey);
+    }
 
     private static void ToComponents(
         Uri uri,
