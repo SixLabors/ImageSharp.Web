@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 using System.Net.Http.Headers;
 using Azure.Storage.Blobs;
@@ -32,7 +31,7 @@ public class AzureBlobStorageImageResolver : IImageResolver
         // Try to parse the max age from the source. If it's not zero then we pass it along
         // to set the cache control headers for the response.
         TimeSpan maxAge = TimeSpan.MinValue;
-        if (CacheControlHeaderValue.TryParse(properties.CacheControl, out CacheControlHeaderValue cacheControl))
+        if (CacheControlHeaderValue.TryParse(properties.CacheControl, out CacheControlHeaderValue? cacheControl))
         {
             // Weirdly passing null to TryParse returns true.
             if (cacheControl?.MaxAge.HasValue == true)
