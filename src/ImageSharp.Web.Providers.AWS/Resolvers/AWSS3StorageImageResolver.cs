@@ -1,5 +1,6 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
+#nullable disable
 
 using System.Net.Http.Headers;
 using Amazon.S3;
@@ -15,7 +16,7 @@ public class AWSS3StorageImageResolver : IImageResolver
     private readonly IAmazonS3 amazonS3;
     private readonly string bucketName;
     private readonly string imagePath;
-    private readonly GetObjectMetadataResponse? metadataResponse;
+    private readonly GetObjectMetadataResponse metadataResponse;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AWSS3StorageImageResolver"/> class.
@@ -24,7 +25,7 @@ public class AWSS3StorageImageResolver : IImageResolver
     /// <param name="bucketName">The bucket name.</param>
     /// <param name="imagePath">The image path.</param>
     /// <param name="metadataResponse">Optional metadata response.</param>
-    public AWSS3StorageImageResolver(IAmazonS3 amazonS3, string bucketName, string imagePath, GetObjectMetadataResponse? metadataResponse = null)
+    public AWSS3StorageImageResolver(IAmazonS3 amazonS3, string bucketName, string imagePath, GetObjectMetadataResponse metadataResponse = null)
     {
         this.amazonS3 = amazonS3;
         this.bucketName = bucketName;
@@ -40,7 +41,7 @@ public class AWSS3StorageImageResolver : IImageResolver
         // Try to parse the max age from the source. If it's not zero then we pass it along
         // to set the cache control headers for the response.
         TimeSpan maxAge = TimeSpan.MinValue;
-        if (CacheControlHeaderValue.TryParse(metadata.Headers.CacheControl, out CacheControlHeaderValue? cacheControl))
+        if (CacheControlHeaderValue.TryParse(metadata.Headers.CacheControl, out CacheControlHeaderValue cacheControl))
         {
             // Weirdly passing null to TryParse returns true.
             if (cacheControl?.MaxAge.HasValue == true)
