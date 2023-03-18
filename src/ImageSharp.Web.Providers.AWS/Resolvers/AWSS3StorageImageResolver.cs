@@ -16,6 +16,7 @@ public class AWSS3StorageImageResolver : IImageResolver
     private readonly IAmazonS3 amazonS3;
     private readonly string bucketName;
     private readonly string imagePath;
+    private readonly GetObjectMetadataResponse metadataResponse;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AWSS3StorageImageResolver"/> class.
@@ -23,17 +24,19 @@ public class AWSS3StorageImageResolver : IImageResolver
     /// <param name="amazonS3">The Amazon S3 Client</param>
     /// <param name="bucketName">The bucket name.</param>
     /// <param name="imagePath">The image path.</param>
-    public AWSS3StorageImageResolver(IAmazonS3 amazonS3, string bucketName, string imagePath)
+    /// <param name="metadataResponse">Optional metadata response.</param>
+    public AWSS3StorageImageResolver(IAmazonS3 amazonS3, string bucketName, string imagePath, GetObjectMetadataResponse metadataResponse = null)
     {
         this.amazonS3 = amazonS3;
         this.bucketName = bucketName;
         this.imagePath = imagePath;
+        this.metadataResponse = metadataResponse;
     }
 
     /// <inheritdoc />
     public async Task<ImageMetadata> GetMetaDataAsync()
     {
-        GetObjectMetadataResponse metadata = await this.amazonS3.GetObjectMetadataAsync(this.bucketName, this.imagePath);
+        GetObjectMetadataResponse metadata = this.metadataResponse ?? await this.amazonS3.GetObjectMetadataAsync(this.bucketName, this.imagePath);
 
         // Try to parse the max age from the source. If it's not zero then we pass it along
         // to set the cache control headers for the response.
