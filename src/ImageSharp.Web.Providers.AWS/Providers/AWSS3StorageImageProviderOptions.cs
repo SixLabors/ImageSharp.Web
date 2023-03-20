@@ -20,23 +20,23 @@ public class AWSS3StorageImageProviderOptions
 public class AWSS3BucketClientOptions : IAWSS3BucketClientOptions
 {
     /// <inheritdoc/>
-    public string? Region { get; set; }
+    public string? Region { get; init; }
 
     /// <inheritdoc/>
-    public string BucketName { get; set; } = null!;
+    public string BucketName { get; init; } = null!;
 
     /// <inheritdoc/>
-    public string? AccessKey { get; set; }
+    public string? AccessKey { get; init; }
 
     /// <inheritdoc/>
-    public string? AccessSecret { get; set; }
+    public string? AccessSecret { get; init; }
 
     /// <inheritdoc/>
-    public string? Endpoint { get; set; }
+    public string? Endpoint { get; init; }
 
     /// <inheritdoc/>
-    public bool UseAccelerateEndpoint { get; set; }
+    public bool UseAccelerateEndpoint { get; init; }
 
     /// <inheritdoc/>
-    public TimeSpan? Timeout { get; set; }
+    public TimeSpan? Timeout { get; init; }
 }
