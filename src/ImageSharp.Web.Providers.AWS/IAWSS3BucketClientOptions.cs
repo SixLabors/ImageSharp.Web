@@ -9,44 +9,44 @@ namespace SixLabors.ImageSharp.Web;
 internal interface IAWSS3BucketClientOptions
 {
     /// <summary>
-    /// Gets the AWS region endpoint (us-east-1/us-west-1/ap-southeast-2).
+    /// Gets or sets the AWS region endpoint (us-east-1/us-west-1/ap-southeast-2).
     /// </summary>
-    string? Region { get; init; }
+    string? Region { get; set; }
 
     /// <summary>
-    /// Gets the AWS bucket name.
+    /// Gets or sets the AWS bucket name.
     /// </summary>
-    string BucketName { get; init; }
+    string BucketName { get; set; }
 
     /// <summary>
-    /// Gets the AWS key - Can be used to override keys provided by the environment.
+    /// Gets or sets the AWS key - Can be used to override keys provided by the environment.
     /// If deploying inside an EC2 instance AWS keys will already be available via environment
     /// variables and don't need to be specified. Follow AWS best security practices on  <see href="https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html"/>.
     /// </summary>
-    string? AccessKey { get; init; }
+    string? AccessKey { get; set; }
 
     /// <summary>
-    /// Gets the AWS endpoint - used to override the default service endpoint.
+    /// Gets or sets the AWS endpoint - used to override the default service endpoint.
     /// If deploying inside an EC2 instance AWS keys will already be available via environment
     /// variables and don't need to be specified. Follow AWS best security practices on  <see href="https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html"/>.
     /// </summary>
-    string? AccessSecret { get; init; }
+    string? AccessSecret { get; set; }
 
     /// <summary>
-    /// Gets the AWS endpoint - used for testing to over region endpoint allowing it
+    /// Gets or sets the AWS endpoint - used for testing to over region endpoint allowing it
     /// to be set to localhost.
     /// </summary>
-    string? Endpoint { get; init; }
+    string? Endpoint { get; set; }
 
     /// <summary>
-    /// Gets a value indicating whether the S3 accelerate endpoint is used.
+    /// Gets or sets a value indicating whether the S3 accelerate endpoint is used.
     /// The feature must be enabled on the bucket. Follow AWS instruction on <see href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/transfer-acceleration.html"/>.
     /// </summary>
-    bool UseAccelerateEndpoint { get; init; }
+    bool UseAccelerateEndpoint { get; set; }
 
     /// <summary>
-    /// Gets a value indicating the timeout for the S3 client.
+    /// Gets or sets a value indicating the timeout for the S3 client.
     /// If the value is set, the value is assigned to the Timeout property of the HttpWebRequest/HttpClient object used to send requests.
     /// </summary>
-    TimeSpan? Timeout { get; init; }
+    TimeSpan? Timeout { get; set; }
 }

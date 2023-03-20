@@ -16,7 +16,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS;
 public class AWSS3StorageCache : IImageCache
 {
     private readonly IAmazonS3 amazonS3Client;
-    private readonly string? bucket;
+    private readonly string bucket;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AWSS3StorageCache"/> class.
