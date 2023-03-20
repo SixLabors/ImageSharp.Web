@@ -113,12 +113,13 @@ public class AWSS3StorageImageProvider : IImageProvider
             return null;
         }
 
-        if (!await KeyExists(s3Client, bucketName, key))
+        KeyExistsResult keyExists = await KeyExists(s3Client, bucketName, key);
+        if (!keyExists.Exists)
         {
             return null;
         }
 
-        return new AWSS3StorageImageResolver(s3Client, bucketName, key);
+        return new AWSS3StorageImageResolver(s3Client, bucketName, key, keyExists.Metadata);
     }
 
     private bool IsMatch(HttpContext context)
@@ -144,39 +145,40 @@ public class AWSS3StorageImageProvider : IImageProvider
     }
 
     // ref https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/S3/Custom/_bcl/IO/S3FileInfo.cs#L118
-    private static async Task<bool> KeyExists(IAmazonS3 s3Client, string bucketName, string key)
+    private static async Task<KeyExistsResult> KeyExists(IAmazonS3 s3Client, string bucketName, string key)
     {
         try
         {
-            GetObjectMetadataRequest request = new()
-            {
-                BucketName = bucketName,
-                Key = key
-            };
+            GetObjectMetadataRequest request = new() { BucketName = bucketName, Key = key };
 
             // If the object doesn't exist then a "NotFound" will be thrown
-            await s3Client.GetObjectMetadataAsync(request);
-            return true;
+            GetObjectMetadataResponse metadata = await s3Client.GetObjectMetadataAsync(request);
+            return new KeyExistsResult(metadata);
         }
         catch (AmazonS3Exception e)
         {
             if (string.Equals(e.ErrorCode, "NoSuchBucket", StringComparison.Ordinal))
             {
-                return false;
+                return default;
             }
 
             if (string.Equals(e.ErrorCode, "NotFound", StringComparison.Ordinal))
             {
-                return false;
+                return default;
             }
 
             // If the object exists but the client is not authorized to access it, then a "Forbidden" will be thrown.
             if (string.Equals(e.ErrorCode, "Forbidden", StringComparison.Ordinal))
             {
-                return false;
+                return default;
             }
 
             throw;
         }
+    }
+
+    private readonly record struct KeyExistsResult(GetObjectMetadataResponse Metadata)
+    {
+        public bool Exists => this.Metadata is not null;
     }
 }
