@@ -16,7 +16,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS;
 public class AWSS3StorageCache : IImageCache
 {
     private readonly IAmazonS3 amazonS3Client;
-    private readonly string bucket;
+    private readonly string bucketName;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AWSS3StorageCache"/> class.
@@ -26,19 +26,19 @@ public class AWSS3StorageCache : IImageCache
     {
         Guard.NotNull(cacheOptions, nameof(cacheOptions));
         AWSS3StorageCacheOptions options = cacheOptions.Value;
-        this.bucket = options.BucketName;
+        this.bucketName = options.BucketName;
         this.amazonS3Client = AmazonS3ClientFactory.CreateClient(options);
     }
 
     /// <inheritdoc/>
     public async Task<IImageCacheResolver?> GetAsync(string key)
     {
-        GetObjectMetadataRequest request = new() { BucketName = this.bucket, Key = key };
+        GetObjectMetadataRequest request = new() { BucketName = this.bucketName, Key = key };
         try
         {
             // HEAD request throws a 404 if not found.
             MetadataCollection metadata = (await this.amazonS3Client.GetObjectMetadataAsync(request)).Metadata;
-            return new AWSS3StorageCacheResolver(this.amazonS3Client, this.bucket!, key, metadata);
+            return new AWSS3StorageCacheResolver(this.amazonS3Client, this.bucketName, key, metadata);
         }
         catch
         {
@@ -51,7 +51,7 @@ public class AWSS3StorageCache : IImageCache
     {
         PutObjectRequest request = new()
         {
-            BucketName = this.bucket,
+            BucketName = this.bucketName,
             Key = key,
             ContentType = metadata.ContentType,
             InputStream = stream,
