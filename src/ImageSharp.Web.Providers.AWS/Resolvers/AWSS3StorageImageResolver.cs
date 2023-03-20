@@ -15,7 +15,7 @@ public class AWSS3StorageImageResolver : IImageResolver
     private readonly IAmazonS3 amazonS3;
     private readonly string bucketName;
     private readonly string imagePath;
-    private readonly GetObjectMetadataResponse metadataResponse;
+    private readonly GetObjectMetadataResponse? metadataResponse;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AWSS3StorageImageResolver"/> class.
@@ -24,7 +24,7 @@ public class AWSS3StorageImageResolver : IImageResolver
     /// <param name="bucketName">The bucket name.</param>
     /// <param name="imagePath">The image path.</param>
     /// <param name="metadataResponse">Optional metadata response.</param>
-    public AWSS3StorageImageResolver(IAmazonS3 amazonS3, string bucketName, string imagePath, GetObjectMetadataResponse metadataResponse = null)
+    public AWSS3StorageImageResolver(IAmazonS3 amazonS3, string bucketName, string imagePath, GetObjectMetadataResponse? metadataResponse = null)
     {
         this.amazonS3 = amazonS3;
         this.bucketName = bucketName;
