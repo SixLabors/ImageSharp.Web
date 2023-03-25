@@ -57,7 +57,7 @@ public static class ServiceCollectionExtensions
 
         builder.SetRequestParser<QueryCollectionRequestParser>();
 
-        builder.Services.AddSingleton<ImageSharpRequestAuthorizationUtilities>();
+        builder.Services.AddSingleton<RequestAuthorizationUtilities>();
 
         builder.SetCache<PhysicalFileSystemCache>();
 

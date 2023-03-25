@@ -30,8 +30,7 @@ public static class HMACUtilities
     /// <returns>The hashed <see cref="string"/>.</returns>
     public static unsafe string ComputeHMACSHA256(string value, byte[] secret)
     {
-        // TODO: In .NET 6 we can use single instance versions
-        using var hmac = new HMACSHA256(secret);
+        using HMACSHA256 hmac = new(secret);
         return CreateHMAC(value, hmac);
     }
 
@@ -46,7 +45,7 @@ public static class HMACUtilities
     /// <returns>The hashed <see cref="string"/>.</returns>
     public static unsafe string ComputeHMACSHA384(string value, byte[] secret)
     {
-        using var hmac = new HMACSHA384(secret);
+        using HMACSHA384 hmac = new(secret);
         return CreateHMAC(value, hmac);
     }
 
@@ -61,7 +60,7 @@ public static class HMACUtilities
     /// <returns>The hashed <see cref="string"/>.</returns>
     public static unsafe string ComputeHMACSHA512(string value, byte[] secret)
     {
-        using var hmac = new HMACSHA512(secret);
+        using HMACSHA512 hmac = new(secret);
         return CreateHMAC(value, hmac);
     }
 

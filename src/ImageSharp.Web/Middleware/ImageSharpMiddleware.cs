@@ -38,7 +38,7 @@ public class ImageSharpMiddleware
     /// <summary>
     /// Used to temporarily store cached HMAC-s to reduce the overhead of HMAC token generation.
     /// </summary>
-    private static readonly ConcurrentTLruCache<string, string> HMACTokenLru
+    private static readonly ConcurrentTLruCache<string, string?> HMACTokenLru
         = new(1024, TimeSpan.FromSeconds(30));
 
     /// <summary>
@@ -109,7 +109,7 @@ public class ImageSharpMiddleware
     /// <summary>
     /// Contains helpers that allow authorization of image requests.
     /// </summary>
-    private readonly ImageSharpRequestAuthorizationUtilities authorizationUtilities;
+    private readonly RequestAuthorizationUtilities authorizationUtilities;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImageSharpMiddleware"/> class.
@@ -140,7 +140,7 @@ public class ImageSharpMiddleware
         CommandParser commandParser,
         FormatUtilities formatUtilities,
         AsyncKeyReaderWriterLock<string> asyncKeyLock,
-        ImageSharpRequestAuthorizationUtilities requestAuthorizationUtilities)
+        RequestAuthorizationUtilities requestAuthorizationUtilities)
     {
         Guard.NotNull(next, nameof(next));
         Guard.NotNull(options, nameof(options));
@@ -211,7 +211,7 @@ public class ImageSharpMiddleware
         if (secret?.Length > 0)
         {
             checkHMAC = true;
-            token = commands.GetValueOrDefault(ImageSharpRequestAuthorizationUtilities.TokenCommand);
+            token = commands.GetValueOrDefault(RequestAuthorizationUtilities.TokenCommand);
         }
 
         this.authorizationUtilities.StripUnknownCommands(commands);
@@ -244,13 +244,10 @@ public class ImageSharpMiddleware
 
         // At this point we know that this is an image request designed for processing via this middleware.
         // Check for a token if required and reject if invalid.
-        if (checkHMAC)
+        if (checkHMAC && (hmac != token || (hmac is null && commands.Count > 0)))
         {
-            if (token == null || hmac != token)
-            {
-                SetBadRequest(httpContext);
-                return;
-            }
+            SetBadRequest(httpContext);
+            return;
         }
 
         IImageResolver? sourceImageResolver = await provider.GetAsync(httpContext);

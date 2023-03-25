@@ -1,7 +1,13 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
-namespace SixLabors.ImageSharp.Web.Sample;
+using SixLabors.ImageSharp.Web.Caching;
+using SixLabors.ImageSharp.Web.Commands;
+using SixLabors.ImageSharp.Web.DependencyInjection;
+using SixLabors.ImageSharp.Web.Processors;
+using SixLabors.ImageSharp.Web.Providers;
+
+namespace ImageSharp.Web.Sample;
 
 /// <summary>
 /// The running application.
@@ -9,17 +15,60 @@ namespace SixLabors.ImageSharp.Web.Sample;
 public static class Program
 {
     /// <summary>
-    /// The main entry point to the running application.
+    /// The main application entry point.
     /// </summary>
-    /// <param name="args">Any arguments to pass to the application.</param>
-    public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
+    /// <param name="args">Argument paramateres.</param>
+    public static void Main(string[] args)
+    {
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-    /// <summary>
-    /// Creates an <see cref="IHostBuilder"/> instance used to create a configured <see cref="IHost"/>.
-    /// </summary>
-    /// <param name="args">Any arguments to pass to the application.</param>
-    /// <returns>The <see cref="IHostBuilder"/>.</returns>
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
+        // Add services to the container.
+        IServiceCollection services = builder.Services;
+        services.AddRazorPages();
+
+        // TODO: Enable HMAC
+        services.AddImageSharp(options => options.HMACSecretKey = new byte[] { 1, 2, 3, 4, 5 })
+            .SetRequestParser<QueryCollectionRequestParser>()
+            .Configure<PhysicalFileSystemCacheOptions>(options =>
+            {
+                options.CacheRootPath = null;
+                options.CacheFolder = "is-cache";
+                options.CacheFolderDepth = 8;
+            })
+            .SetCache<PhysicalFileSystemCache>()
+            .SetCacheKey<UriRelativeLowerInvariantCacheKey>()
+            .SetCacheHash<SHA256CacheHash>()
+            .Configure<PhysicalFileSystemProviderOptions>(options => options.ProviderRootPath = null)
+            .AddProvider<PhysicalFileSystemProvider>()
+            .AddProcessor<ResizeWebProcessor>()
+            .AddProcessor<FormatWebProcessor>()
+            .AddProcessor<BackgroundColorWebProcessor>()
+            .AddProcessor<QualityWebProcessor>()
+            .AddProcessor<AutoOrientWebProcessor>();
+
+        WebApplication app = builder.Build();
+
+        // Configure the HTTP request pipeline.
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseExceptionHandler("/Error");
+
+            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+            app.UseHsts();
+        }
+
+        app.UseHttpsRedirection();
+
+        app.UseImageSharp();
+
+        app.UseStaticFiles();
+
+        app.UseRouting();
+
+        app.UseAuthorization();
+
+        app.MapRazorPages();
+
+        app.Run();
+    }
 }

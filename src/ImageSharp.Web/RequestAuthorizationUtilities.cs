@@ -14,7 +14,7 @@ namespace SixLabors.ImageSharp.Web;
 /// <summary>
 /// Contains various helper methods for authorizing image requests.
 /// </summary>
-public sealed class ImageSharpRequestAuthorizationUtilities
+public sealed class RequestAuthorizationUtilities
 {
     /// <summary>
     /// The command used by image requests for transporting Hash-based Message Authentication Code (HMAC) tokens.
@@ -29,14 +29,14 @@ public sealed class ImageSharpRequestAuthorizationUtilities
     private readonly IServiceProvider serviceProvider;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ImageSharpRequestAuthorizationUtilities"/> class.
+    /// Initializes a new instance of the <see cref="RequestAuthorizationUtilities"/> class.
     /// </summary>
     /// <param name="options">The middleware configuration options.</param>
     /// <param name="requestParser">An <see cref="IRequestParser"/> instance used to parse image requests for commands.</param>
     /// <param name="processors">A collection of <see cref="IImageWebProcessor"/> instances used to process images.</param>
     /// <param name="commandParser">The command parser.</param>
     /// <param name="serviceProvider">The service provider.</param>
-    public ImageSharpRequestAuthorizationUtilities(
+    public RequestAuthorizationUtilities(
         IOptions<ImageSharpMiddlewareOptions> options,
         IRequestParser requestParser,
         IEnumerable<IImageWebProcessor> processors,
@@ -78,7 +78,7 @@ public sealed class ImageSharpRequestAuthorizationUtilities
         if (commands?.Count > 0)
         {
             // Strip out any unknown commands, if needed.
-            var keys = new List<string>(commands.Keys);
+            List<string> keys = new(commands.Keys);
             for (int i = keys.Count - 1; i >= 0; i--)
             {
                 if (!this.knownCommands.Contains(keys[i]))
@@ -216,6 +216,11 @@ public sealed class ImageSharpRequestAuthorizationUtilities
             this.StripUnknownCommands(commands);
         }
 
+        if (commands.Count == 0)
+        {
+            return null;
+        }
+
         ImageCommandContext imageCommandContext = new(context, commands, this.commandParser, this.parserCulture);
         return await this.options.OnComputeHMACAsync(imageCommandContext, secret);
     }
@@ -229,8 +234,15 @@ public sealed class ImageSharpRequestAuthorizationUtilities
     /// </remarks>
     /// <param name="context">Contains information about the current image request and parsed commands.</param>
     /// <returns>The computed HMAC.</returns>
-    internal Task<string> ComputeHMACAsync(ImageCommandContext context)
-        => this.options.OnComputeHMACAsync(context, this.options.HMACSecretKey);
+    internal async Task<string?> ComputeHMACAsync(ImageCommandContext context)
+    {
+        if (context.Commands.Count == 0)
+        {
+            return null;
+        }
+
+        return await this.options.OnComputeHMACAsync(context, this.options.HMACSecretKey);
+    }
 
     private static void ToComponents(
         Uri uri,

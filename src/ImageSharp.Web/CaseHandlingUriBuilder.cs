@@ -156,14 +156,12 @@ public static class CaseHandlingUriBuilder
                 pathBase: PathString.FromUriComponent(uri),
                 query: QueryString.FromUriComponent(uri));
         }
-        else
-        {
-            Uri faux = new(FallbackBaseUri, uri);
-            return BuildRelative(
-                handling,
-                path: PathString.FromUriComponent(faux),
-                query: QueryString.FromUriComponent(faux));
-        }
+
+        Uri faux = new(FallbackBaseUri, uri);
+        return BuildRelative(
+            handling,
+            path: PathString.FromUriComponent(faux),
+            query: QueryString.FromUriComponent(faux));
     }
 
     /// <summary>
@@ -202,12 +200,12 @@ public static class CaseHandlingUriBuilder
         int index = 0;
         ReadOnlySpan<char> pathBaseSpan = uriParts.PathBase.AsSpan();
 
-        if (uriParts.Path.Length > 0 && pathBaseSpan.Length > 0 && pathBaseSpan[pathBaseSpan.Length - 1] == '/')
+        if (uriParts.Path.Length > 0 && pathBaseSpan.Length > 0 && pathBaseSpan[^1] == '/')
         {
             // If the path string has a trailing slash and the other string has a leading slash, we need
             // to trim one of them.
             // Trim the last slash from pathBase. The total length was decremented before the call to string.Create.
-            pathBaseSpan = pathBaseSpan.Slice(0, pathBaseSpan.Length - 1);
+            pathBaseSpan = pathBaseSpan[..^1];
         }
 
         if (uriParts.Scheme.Length > 0)

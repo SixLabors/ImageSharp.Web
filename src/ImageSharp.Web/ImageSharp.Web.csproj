@@ -40,6 +40,7 @@
   <ItemGroup>
     <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
     <None Include="..\..\shared-infrastructure\branding\icons\imagesharp.web\sixlabors.imagesharp.web.128.png" Pack="true" PackagePath="" />
+    <None Include="..\..\SixLabors.ImageSharp.Web.props" Pack="true" PackagePath="build" />
   </ItemGroup>
 
   <ItemGroup>

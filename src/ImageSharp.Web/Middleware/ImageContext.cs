@@ -182,6 +182,7 @@ internal struct ImageContext
         TimeSpan maxAge)
     {
         this.response.StatusCode = statusCode;
+
         if (statusCode < 400)
         {
             // These headers are returned for 200 and 304
