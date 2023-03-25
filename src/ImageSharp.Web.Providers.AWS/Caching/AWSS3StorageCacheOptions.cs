@@ -1,6 +1,5 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
-#nullable disable
 
 namespace SixLabors.ImageSharp.Web.Caching.AWS;
 
@@ -10,19 +9,19 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS;
 public class AWSS3StorageCacheOptions : IAWSS3BucketClientOptions
 {
     /// <inheritdoc/>
-    public string Region { get; set; }
+    public string? Region { get; set; }
 
     /// <inheritdoc/>
-    public string BucketName { get; set; }
+    public string BucketName { get; set; } = null!;
 
     /// <inheritdoc/>
-    public string AccessKey { get; set; }
+    public string? AccessKey { get; set; }
 
     /// <inheritdoc/>
-    public string AccessSecret { get; set; }
+    public string? AccessSecret { get; set; }
 
     /// <inheritdoc/>
-    public string Endpoint { get; set; }
+    public string? Endpoint { get; set; }
 
     /// <inheritdoc/>
     public bool UseAccelerateEndpoint { get; set; }
