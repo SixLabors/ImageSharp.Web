@@ -1,5 +1,5 @@
-name: "OSS : Bug Report"
-description: Create a report to help us improve the project. OSS Issues are not guaranteed to be triaged.
+name: "Bug Report"
+description: Create a report to help us improve the project. Issues are not guaranteed to be triaged.
 labels: ["needs triage"]
 body:
 - type: checkboxes
@@ -31,7 +31,7 @@ body:
     required: true
 - type: input
   attributes:
-    label: .NET Framework version
+    label: .NET version
   validations:
     required: true
 - type: textarea

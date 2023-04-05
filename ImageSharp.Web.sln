@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_root", "_root", "{C317F1B1
 		ci-build.ps1 = ci-build.ps1
 		ci-pack.ps1 = ci-pack.ps1
 		ci-test.ps1 = ci-test.ps1
-		.github\CONTRIBUTING.md = .github\CONTRIBUTING.md
+		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		LICENSE = LICENSE
@@ -44,14 +44,19 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Web.Providers.AWS", "src\ImageSharp.Web.Providers.AWS\ImageSharp.Web.Providers.AWS.csproj", "{E631D300-ACD5-40EA-A6BB-08E22092EC76}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{B8152C86-B657-4967-B297-42F89A10D23A}"
+	ProjectSection(SolutionItems) = preProject
+		.github\CONTRIBUTING.md = .github\CONTRIBUTING.md
+		.github\dependabot.yml = .github\dependabot.yml
+		.github\FUNDING.yml = .github\FUNDING.yml
+		.github\PULL_REQUEST_TEMPLATE.md = .github\PULL_REQUEST_TEMPLATE.md
+	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedInfrastructure", "shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.shproj", "{68A8CC40-6AED-4E96-B524-31B1158FDEEA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEMPLATE", "{04955CD1-F249-4899-9F61-6C7487BEECE1}"
 	ProjectSection(SolutionItems) = preProject
-		.github\ISSUE_TEMPLATE\commercial-bug-report.md = .github\ISSUE_TEMPLATE\commercial-bug-report.md
 		.github\ISSUE_TEMPLATE\config.yml = .github\ISSUE_TEMPLATE\config.yml
-		.github\ISSUE_TEMPLATE\oss-bug-report.md = .github\ISSUE_TEMPLATE\oss-bug-report.md
+		.github\ISSUE_TEMPLATE\oss-bug-report.yml = .github\ISSUE_TEMPLATE\oss-bug-report.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{2A5EF4AC-E228-42C1-970B-35630A9AF250}"
