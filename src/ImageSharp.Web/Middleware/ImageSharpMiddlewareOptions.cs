@@ -27,7 +27,7 @@ public class ImageSharpMiddlewareOptions
     };
 
     private Func<ImageCommandContext, Task> onParseCommandsAsync = _ => Task.CompletedTask;
-    private Func<HttpContext, DecoderOptions, Task> onBeforeLoadAsync = (_, _) => Task.CompletedTask;
+    private Func<ImageCommandContext, DecoderOptions, Task> onBeforeLoadAsync = (_, _) => Task.CompletedTask;
     private Func<FormattedImage, Task> onBeforeSaveAsync = _ => Task.CompletedTask;
     private Func<ImageProcessingContext, Task> onProcessedAsync = _ => Task.CompletedTask;
     private Func<HttpContext, Task> onPrepareResponseAsync = _ => Task.CompletedTask;
@@ -118,7 +118,7 @@ public class ImageSharpMiddlewareOptions
     /// Gets or sets the method that can be used to used to augment decoder options.
     /// This is called before the image is decoded and loaded for processing.
     /// </summary>
-    public Func<HttpContext, DecoderOptions, Task> OnBeforeLoadAsync
+    public Func<ImageCommandContext, DecoderOptions, Task> OnBeforeLoadAsync
     {
         get => this.onBeforeLoadAsync;
 

@@ -262,10 +262,9 @@ public class ImageSharpMiddleware
         }
 
         await this.ProcessRequestAsync(
-            httpContext,
+            imageCommandContext,
             sourceImageResolver,
             new ImageContext(httpContext, this.options),
-            commands,
             retry);
     }
 
@@ -278,12 +277,14 @@ public class ImageSharpMiddleware
     }
 
     private async Task ProcessRequestAsync(
-        HttpContext httpContext,
+        ImageCommandContext imageCommandContext,
         IImageResolver sourceImageResolver,
         ImageContext imageContext,
-        CommandCollection commands,
         bool retry)
     {
+        HttpContext httpContext = imageCommandContext.Context;
+        CommandCollection commands = imageCommandContext.Commands;
+
         // Create a hashed cache key
         string key = this.cacheHash.Create(
             this.cacheKey.Create(httpContext, commands),
@@ -344,55 +345,45 @@ public class ImageSharpMiddleware
                         {
                             DecoderOptions decoderOptions = new() { Configuration = this.options.Configuration };
 
-                            // TODO: We need some way to set options based upon processors.
-                            await this.options.OnBeforeLoadAsync.Invoke(httpContext, decoderOptions);
+                            // TODO: Do we need some way to set options based upon processors?
+                            await this.options.OnBeforeLoadAsync.Invoke(imageCommandContext, decoderOptions);
 
-                            // No commands? We simply copy the stream across.
-                            if (commands.Count == 0)
+                            FormattedImage? image = null;
+                            try
                             {
-                                await inStream.CopyToAsync(outStream);
-                                outStream.Position = 0;
-                                format = await Image.DetectFormatAsync(decoderOptions, outStream);
+                                // Now we can finally process the image.
+                                // We first sort the processor collection by command order then use that collection to determine whether the decoded image pixel format
+                                // explicitly requires an alpha component in order to allow correct processing.
+                                //
+                                // The non-generic variant will decode to the correct pixel format based upon the encoded image metadata which can yield
+                                // massive memory savings.
+                                IReadOnlyList<(int Index, IImageWebProcessor Processor)> sortedProcessors = this.processors.OrderBySupportedCommands(commands);
+                                bool requiresAlpha = sortedProcessors.RequiresTrueColorPixelFormat(commands, this.commandParser, this.parserCulture);
+
+                                if (requiresAlpha)
+                                {
+                                    image = await FormattedImage.LoadAsync<Rgba32>(decoderOptions, inStream);
+                                }
+                                else
+                                {
+                                    image = await FormattedImage.LoadAsync(decoderOptions, inStream);
+                                }
+
+                                image.Process(
+                                    this.logger,
+                                    sortedProcessors,
+                                    commands,
+                                    this.commandParser,
+                                    this.parserCulture);
+
+                                await this.options.OnBeforeSaveAsync.Invoke(image);
+
+                                image.Save(outStream);
+                                format = image.Format;
                             }
-                            else
+                            finally
                             {
-                                FormattedImage? image = null;
-                                try
-                                {
-                                    // Now we can finally process the image.
-                                    // We first sort the processor collection by command order then use that collection to determine whether the decoded image pixel format
-                                    // explicitly requires an alpha component in order to allow correct processing.
-                                    //
-                                    // The non-generic variant will decode to the correct pixel format based upon the encoded image metadata which can yield
-                                    // massive memory savings.
-                                    IReadOnlyList<(int Index, IImageWebProcessor Processor)> sortedProcessors = this.processors.OrderBySupportedCommands(commands);
-                                    bool requiresAlpha = sortedProcessors.RequiresTrueColorPixelFormat(commands, this.commandParser, this.parserCulture);
-
-                                    if (requiresAlpha)
-                                    {
-                                        image = await FormattedImage.LoadAsync<Rgba32>(decoderOptions, inStream);
-                                    }
-                                    else
-                                    {
-                                        image = await FormattedImage.LoadAsync(decoderOptions, inStream);
-                                    }
-
-                                    image.Process(
-                                        this.logger,
-                                        sortedProcessors,
-                                        commands,
-                                        this.commandParser,
-                                        this.parserCulture);
-
-                                    await this.options.OnBeforeSaveAsync.Invoke(image);
-
-                                    image.Save(outStream);
-                                    format = image.Format;
-                                }
-                                finally
-                                {
-                                    image?.Dispose();
-                                }
+                                image?.Dispose();
                             }
                         }
 

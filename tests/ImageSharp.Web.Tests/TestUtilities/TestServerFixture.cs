@@ -68,7 +68,7 @@ public abstract class TestServerFixture : IDisposable
                 return onParseCommandsAsync.Invoke(context);
             };
 
-            Func<HttpContext, DecoderOptions, Task> onBeforeLoadAsync = options.OnBeforeLoadAsync;
+            Func<ImageCommandContext, DecoderOptions, Task> onBeforeLoadAsync = options.OnBeforeLoadAsync;
 
             options.OnBeforeLoadAsync = (context, decoderOptions) =>
             {
