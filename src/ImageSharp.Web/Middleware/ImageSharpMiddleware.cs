@@ -343,10 +343,9 @@ public class ImageSharpMiddleware
 
                         using (Stream inStream = await sourceImageResolver.OpenReadAsync())
                         {
-                            DecoderOptions decoderOptions = new() { Configuration = this.options.Configuration };
-
                             // TODO: Do we need some way to set options based upon processors?
-                            await this.options.OnBeforeLoadAsync.Invoke(imageCommandContext, decoderOptions);
+                            DecoderOptions decoderOptions = await this.options.OnBeforeLoadAsync.Invoke(imageCommandContext, this.options.Configuration)
+                                ?? new() { Configuration = this.options.Configuration };
 
                             FormattedImage? image = null;
                             try
