@@ -228,9 +228,9 @@ public class ImageSharpMiddleware
             //
             // As a rule all image requests should contain valid commands only.
             // Key generation uses string.Create under the hood with very low allocation so should be good enough as a cache key.
-            hmac = await HMACTokenLru.GetOrAddAsync(
+            hmac = HMACTokenLru.GetOrAdd(
                 httpContext.Request.GetEncodedUrl(),
-                _ => this.authorizationUtilities.ComputeHMACAsync(imageCommandContext));
+                _ => this.authorizationUtilities.ComputeHMAC(imageCommandContext));
         }
 
         await this.options.OnParseCommandsAsync.Invoke(imageCommandContext);
