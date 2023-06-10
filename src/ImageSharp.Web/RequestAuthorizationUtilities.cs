@@ -104,15 +104,6 @@ public sealed class RequestAuthorizationUtilities
     /// <param name="uri">The uri to compute the code from.</param>
     /// <param name="handling">The command collection handling.</param>
     /// <returns>The computed HMAC.</returns>
-    public Task<string?> ComputeHMACAsync(string uri, CommandHandling handling)
-        => this.ComputeHMACAsync(new Uri(uri, UriKind.RelativeOrAbsolute), handling);
-
-    /// <summary>
-    /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
-    /// </summary>
-    /// <param name="uri">The uri to compute the code from.</param>
-    /// <param name="handling">The command collection handling.</param>
-    /// <returns>The computed HMAC.</returns>
     public string? ComputeHMAC(Uri uri, CommandHandling handling)
     {
         ToComponents(
@@ -122,23 +113,6 @@ public sealed class RequestAuthorizationUtilities
             out QueryString queryString);
 
         return this.ComputeHMAC(host, path, queryString, handling);
-    }
-
-    /// <summary>
-    /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
-    /// </summary>
-    /// <param name="uri">The uri to compute the code from.</param>
-    /// <param name="handling">The command collection handling.</param>
-    /// <returns>The computed HMAC.</returns>
-    public Task<string?> ComputeHMACAsync(Uri uri, CommandHandling handling)
-    {
-        ToComponents(
-            uri,
-            out HostString host,
-            out PathString path,
-            out QueryString queryString);
-
-        return this.ComputeHMACAsync(host, path, queryString, handling);
     }
 
     /// <summary>
@@ -158,17 +132,6 @@ public sealed class RequestAuthorizationUtilities
     /// <param name="host">The host header.</param>
     /// <param name="path">The path or pathbase.</param>
     /// <param name="queryString">The querystring.</param>
-    /// <param name="handling">The command collection handling.</param>
-    /// <returns>The computed HMAC.</returns>
-    public Task<string?> ComputeHMACAsync(HostString host, PathString path, QueryString queryString, CommandHandling handling)
-        => this.ComputeHMACAsync(host, path, queryString, new(QueryHelpers.ParseQuery(queryString.Value)), handling);
-
-    /// <summary>
-    /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
-    /// </summary>
-    /// <param name="host">The host header.</param>
-    /// <param name="path">The path or pathbase.</param>
-    /// <param name="queryString">The querystring.</param>
     /// <param name="query">The query collection.</param>
     /// <param name="handling">The command collection handling.</param>
     /// <returns>The computed HMAC.</returns>
@@ -178,31 +141,10 @@ public sealed class RequestAuthorizationUtilities
     /// <summary>
     /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
     /// </summary>
-    /// <param name="host">The host header.</param>
-    /// <param name="path">The path or pathbase.</param>
-    /// <param name="queryString">The querystring.</param>
-    /// <param name="query">The query collection.</param>
-    /// <param name="handling">The command collection handling.</param>
-    /// <returns>The computed HMAC.</returns>
-    public Task<string?> ComputeHMACAsync(HostString host, PathString path, QueryString queryString, QueryCollection query, CommandHandling handling)
-        => this.ComputeHMACAsync(this.ToHttpContext(host, path, queryString, query), handling);
-
-    /// <summary>
-    /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
-    /// </summary>
     /// <param name="context">The request HTTP context.</param>
     /// <param name="handling">The command collection handling.</param>
     /// <returns>The computed HMAC.</returns>
     public string? ComputeHMAC(HttpContext context, CommandHandling handling)
-        => AsyncHelper.RunSync(() => this.ComputeHMACAsync(context, handling));
-
-    /// <summary>
-    /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
-    /// </summary>
-    /// <param name="context">The request HTTP context.</param>
-    /// <param name="handling">The command collection handling.</param>
-    /// <returns>The computed HMAC.</returns>
-    public async Task<string?> ComputeHMACAsync(HttpContext context, CommandHandling handling)
     {
         byte[] secret = this.options.HMACSecretKey;
         if (secret is null || secret.Length == 0)
@@ -222,7 +164,7 @@ public sealed class RequestAuthorizationUtilities
         }
 
         ImageCommandContext imageCommandContext = new(context, commands, this.commandParser, this.parserCulture);
-        return await this.options.OnComputeHMACAsync(imageCommandContext, secret);
+        return this.options.OnComputeHMAC(imageCommandContext, secret);
     }
 
     /// <summary>
@@ -234,14 +176,14 @@ public sealed class RequestAuthorizationUtilities
     /// </remarks>
     /// <param name="context">Contains information about the current image request and parsed commands.</param>
     /// <returns>The computed HMAC.</returns>
-    internal async Task<string?> ComputeHMACAsync(ImageCommandContext context)
+    internal string? ComputeHMAC(ImageCommandContext context)
     {
         if (context.Commands.Count == 0)
         {
             return null;
         }
 
-        return await this.options.OnComputeHMACAsync(context, this.options.HMACSecretKey);
+        return this.options.OnComputeHMAC(context, this.options.HMACSecretKey);
     }
 
     private static void ToComponents(

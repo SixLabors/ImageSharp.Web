@@ -3,7 +3,7 @@
 
 using System.Globalization;
 
-namespace SixLabors.ImageSharp.Web;
+namespace SixLabors.ImageSharp.Web.Tests.TestUtilities;
 
 /// <summary>
 /// <see href="https://github.com/aspnet/AspNetIdentity/blob/b7826741279450c58b230ece98bd04b4815beabf/src/Microsoft.AspNet.Identity.Core/AsyncHelper.cs"/>
@@ -20,7 +20,7 @@ internal static class AsyncHelper
     /// <summary>
     /// Executes an async <see cref="Task"/> method synchronously.
     /// </summary>
-    /// <param name="task">The task to excecute.</param>
+    /// <param name="task">The task to execute.</param>
     public static void RunSync(Func<Task> task)
     {
         CultureInfo cultureUi = CultureInfo.CurrentUICulture;
@@ -38,7 +38,7 @@ internal static class AsyncHelper
     /// a <paramref name="task"/> return type synchronously.
     /// </summary>
     /// <typeparam name="TResult">The type of result to return.</typeparam>
-    /// <param name="task">The task to excecute.</param>
+    /// <param name="task">The task to execute.</param>
     /// <returns>The <typeparamref name="TResult"/>.</returns>
     public static TResult RunSync<TResult>(Func<Task<TResult>> task)
     {

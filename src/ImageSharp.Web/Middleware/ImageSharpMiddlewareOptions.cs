@@ -15,7 +15,7 @@ namespace SixLabors.ImageSharp.Web.Middleware;
 /// </summary>
 public class ImageSharpMiddlewareOptions
 {
-    private Func<ImageCommandContext, byte[], Task<string>> onComputeHMACAsync = (context, secret) =>
+    private Func<ImageCommandContext, byte[], string> onComputeHMAC = (context, secret) =>
     {
         string uri = CaseHandlingUriBuilder.BuildRelative(
              CaseHandlingUriBuilder.CaseHandling.LowerInvariant,
@@ -23,7 +23,7 @@ public class ImageSharpMiddlewareOptions
              context.Context.Request.Path,
              QueryString.Create(context.Commands));
 
-        return Task.FromResult(HMACUtilities.ComputeHMACSHA256(uri, secret));
+        return HMACUtilities.ComputeHMACSHA256(uri, secret);
     };
 
     private Func<ImageCommandContext, Task> onParseCommandsAsync = _ => Task.CompletedTask;
@@ -88,14 +88,14 @@ public class ImageSharpMiddlewareOptions
     /// Defaults to <see cref="HMACUtilities.ComputeHMACSHA256(string, byte[])"/> using an invariant lowercase relative Uri
     /// generated using <see cref="CaseHandlingUriBuilder.BuildRelative(CaseHandlingUriBuilder.CaseHandling, PathString, PathString, QueryString)"/>.
     /// </summary>
-    public Func<ImageCommandContext, byte[], Task<string>> OnComputeHMACAsync
+    public Func<ImageCommandContext, byte[], string> OnComputeHMAC
     {
-        get => this.onComputeHMACAsync;
+        get => this.onComputeHMAC;
 
         set
         {
-            Guard.NotNull(value, nameof(this.onComputeHMACAsync));
-            this.onComputeHMACAsync = value;
+            Guard.NotNull(value, nameof(this.onComputeHMAC));
+            this.onComputeHMAC = value;
         }
     }
 

@@ -11,7 +11,7 @@ public abstract class AuthenticatedServerTestBase<TFixture> : ServerTestBase<TFi
      where TFixture : AuthenticatedTestServerFixture
 {
     private readonly RequestAuthorizationUtilities authorizationUtilities;
-    private readonly string relativeImageSouce;
+    private readonly string relativeImageSource;
 
     protected AuthenticatedServerTestBase(TFixture fixture, ITestOutputHelper outputHelper, string imageSource)
         : base(fixture, outputHelper, imageSource)
@@ -19,7 +19,7 @@ public abstract class AuthenticatedServerTestBase<TFixture> : ServerTestBase<TFi
         this.authorizationUtilities =
                    this.Fixture.Services.GetRequiredService<RequestAuthorizationUtilities>();
 
-        this.relativeImageSouce = this.ImageSource.Replace("http://localhost", string.Empty);
+        this.relativeImageSource = this.ImageSource.Replace("http://localhost", string.Empty);
     }
 
     [Fact]
@@ -40,19 +40,17 @@ public abstract class AuthenticatedServerTestBase<TFixture> : ServerTestBase<TFi
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
-    protected override async Task<string> AugmentCommandAsync(string command)
+    protected override string AugmentCommand(string command)
     {
-        string uri = this.relativeImageSouce + command;
-        string token = await this.GetTokenAsync(uri);
+        string uri = this.relativeImageSource + command;
+        string token = this.GetToken(uri);
         return command + "&" + RequestAuthorizationUtilities.TokenCommand + "=" + token;
     }
 
-    private async Task<string> GetTokenAsync(string uri)
+    private string GetToken(string uri)
     {
         string tokenSync = this.authorizationUtilities.ComputeHMAC(uri, CommandHandling.Sanitize);
-        string tokenAsync = await this.authorizationUtilities.ComputeHMACAsync(uri, CommandHandling.Sanitize);
-
-        Assert.Equal(tokenSync, tokenAsync);
+        Assert.NotNull(tokenSync);
         return tokenSync;
     }
 }

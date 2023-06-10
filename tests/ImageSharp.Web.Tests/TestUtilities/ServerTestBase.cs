@@ -45,7 +45,7 @@ public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
         Assert.True(Configuration.Default.ImageFormatsManager.TryFindFormatByFileExtension(ext, out IImageFormat format));
 
         // First response
-        HttpResponseMessage response = await this.HttpClient.GetAsync(url + await this.AugmentCommandAsync(this.Fixture.Commands[0]));
+        HttpResponseMessage response = await this.HttpClient.GetAsync(url + this.AugmentCommand(this.Fixture.Commands[0]));
 
         Assert.NotNull(response);
         Assert.True(response.IsSuccessStatusCode);
@@ -60,7 +60,7 @@ public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
         response.Dispose();
 
         // Cached Response
-        response = await this.HttpClient.GetAsync(url + await this.AugmentCommandAsync(this.Fixture.Commands[0]));
+        response = await this.HttpClient.GetAsync(url + this.AugmentCommand(this.Fixture.Commands[0]));
 
         Assert.NotNull(response);
         Assert.True(response.IsSuccessStatusCode);
@@ -77,7 +77,7 @@ public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
         // 304 response
         HttpRequestMessage request = new()
         {
-            RequestUri = new Uri(url + await this.AugmentCommandAsync(this.Fixture.Commands[0])),
+            RequestUri = new Uri(url + this.AugmentCommand(this.Fixture.Commands[0])),
             Method = HttpMethod.Get,
         };
 
@@ -100,7 +100,7 @@ public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
         // 412 response
         request = new HttpRequestMessage
         {
-            RequestUri = new Uri(url + await this.AugmentCommandAsync(this.Fixture.Commands[0])),
+            RequestUri = new Uri(url + this.AugmentCommand(this.Fixture.Commands[0])),
             Method = HttpMethod.Get,
         };
 
@@ -119,8 +119,8 @@ public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
     public async Task CanProcessMultipleIdenticalQueriesAsync()
     {
         string url = this.ImageSource;
-        string command1 = await this.AugmentCommandAsync(this.Fixture.Commands[0]);
-        string command2 = await this.AugmentCommandAsync(this.Fixture.Commands[1]);
+        string command1 = this.AugmentCommand(this.Fixture.Commands[0]);
+        string command2 = this.AugmentCommand(this.Fixture.Commands[1]);
 
         Task[] tasks = Enumerable.Range(0, 100).Select(i => Task.Run(async () =>
         {
@@ -136,5 +136,5 @@ public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
         Assert.True(all.IsCompletedSuccessfully);
     }
 
-    protected virtual Task<string> AugmentCommandAsync(string command) => Task.FromResult(command);
+    protected virtual string AugmentCommand(string command) => command;
 }
