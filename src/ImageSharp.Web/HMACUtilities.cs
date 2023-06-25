@@ -20,6 +20,16 @@ public static class HMACUtilities
     public const string TokenCommand = "hmac";
 
     /// <summary>
+    /// HMAC hash algorithms and their respective hash sizes in bytes.
+    /// </summary>
+    private enum HashAlgorithmSizes
+    {
+        HMACSHA256 = 32,
+        HMACSHA384 = 48,
+        HMACSHA512 = 64
+    }
+
+    /// <summary>
     /// Computes a Hash-based Message Authentication Code (HMAC) by using the SHA256 hash function.
     /// </summary>
     /// <param name="value">The value to hash</param>
@@ -30,8 +40,7 @@ public static class HMACUtilities
     /// <returns>The hashed <see cref="string"/>.</returns>
     public static unsafe string ComputeHMACSHA256(string value, byte[] secret)
     {
-        using HMACSHA256 hmac = new(secret);
-        return CreateHMAC(value, hmac);
+        return CreateHMAC(value, secret, HashAlgorithmSizes.HMACSHA256);
     }
 
     /// <summary>
@@ -45,8 +54,7 @@ public static class HMACUtilities
     /// <returns>The hashed <see cref="string"/>.</returns>
     public static unsafe string ComputeHMACSHA384(string value, byte[] secret)
     {
-        using HMACSHA384 hmac = new(secret);
-        return CreateHMAC(value, hmac);
+        return CreateHMAC(value, secret, HashAlgorithmSizes.HMACSHA384);
     }
 
     /// <summary>
@@ -60,12 +68,11 @@ public static class HMACUtilities
     /// <returns>The hashed <see cref="string"/>.</returns>
     public static unsafe string ComputeHMACSHA512(string value, byte[] secret)
     {
-        using HMACSHA512 hmac = new(secret);
-        return CreateHMAC(value, hmac);
+        return CreateHMAC(value, secret, HashAlgorithmSizes.HMACSHA512);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static unsafe string CreateHMAC(string value, HMAC hmac)
+    private static unsafe string CreateHMAC(string value, ReadOnlySpan<byte> secret, HashAlgorithmSizes hashSize)
     {
         int byteCount = Encoding.ASCII.GetByteCount(value);
         byte[]? buffer = null;
@@ -80,8 +87,20 @@ public static class HMACUtilities
             Encoding.ASCII.GetBytes(value, bytes);
 
             // Safe to always stackalloc here. We max out at 64 bytes.
-            Span<byte> hash = stackalloc byte[hmac.HashSize / 8];
-            hmac.TryComputeHash(bytes, hash, out int _);
+            Span<byte> hash = stackalloc byte[(int)hashSize];
+            switch (hashSize)
+            {
+                default:
+                case HashAlgorithmSizes.HMACSHA256:
+                    HMACSHA256.TryHashData(secret, bytes, hash, out _);
+                    break;
+                case HashAlgorithmSizes.HMACSHA384:
+                    HMACSHA384.TryHashData(secret, bytes, hash, out _);
+                    break;
+                case HashAlgorithmSizes.HMACSHA512:
+                    HMACSHA512.TryHashData(secret, bytes, hash, out _);
+                    break;
+            }
 
             // Finally encode the hash to make it web safe.
             return HexEncoder.Encode(hash);
