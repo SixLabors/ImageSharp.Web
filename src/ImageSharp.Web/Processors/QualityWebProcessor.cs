@@ -3,7 +3,6 @@
 
 using System.Globalization;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Web.Commands;
@@ -46,7 +45,7 @@ public class QualityWebProcessor : IImageWebProcessor
             {
                 JpegEncoder reference =
                     (JpegEncoder)image.Image
-                    .GetConfiguration()
+                    .Configuration
                     .ImageFormatsManager
                     .GetEncoder(image.Format);
 
@@ -65,7 +64,7 @@ public class QualityWebProcessor : IImageWebProcessor
             {
                 WebpEncoder reference =
                     (WebpEncoder)image.Image
-                    .GetConfiguration()
+                    .Configuration
                     .ImageFormatsManager
                     .GetEncoder(image.Format);
 
