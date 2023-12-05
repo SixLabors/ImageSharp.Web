@@ -127,7 +127,7 @@ public sealed class FormattedImage : IDisposable
     internal void Save(Stream destination) => this.Image.Save(destination, this.encoder);
 
     /// <summary>
-    /// Gets the EXIF orientation metata for the <see cref="FormattedImage"/>.
+    /// Gets the EXIF orientation metadata for the <see cref="FormattedImage"/>.
     /// </summary>
     /// <param name="value">
     /// When this method returns, contains the value parsed from decoded EXIF metadata; otherwise,
