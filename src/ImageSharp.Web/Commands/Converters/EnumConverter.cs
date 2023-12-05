@@ -35,7 +35,7 @@ public sealed class EnumConverter : ICommandConverter<object>
         try
         {
             char separator = ConverterUtility.GetListSeparator(culture);
-            if (value.IndexOf(separator) != -1)
+            if (value.Contains(separator))
             {
                 long convertedValue = 0;
                 foreach (string pill in GetStringArray(value, separator))

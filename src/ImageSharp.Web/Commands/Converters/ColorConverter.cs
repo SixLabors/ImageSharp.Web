@@ -50,7 +50,7 @@ public sealed class ColorConverter : ICommandConverter<Color>
 
         // Numeric r,g,b - r,g,b,a
         char separator = ConverterUtility.GetListSeparator(culture);
-        if (value.IndexOf(separator) != -1)
+        if (value.Contains(separator))
         {
             string[] components = value.Split(separator);
 
