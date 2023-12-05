@@ -58,17 +58,13 @@ public class PresetOnlyQueryCollectionRequestParser : IRequestParser
 
     private static CommandCollection ParsePreset(string unparsedPresetValue)
     {
-        // TODO: Investigate skipping the double allocation here.
-        // In .NET 6 we can directly use the QueryStringEnumerable type and enumerate stright to our command collection
-        Dictionary<string, StringValues> parsed = QueryHelpers.ParseQuery(unparsedPresetValue);
         CommandCollection transformed = new();
-        foreach (KeyValuePair<string, StringValues> pair in parsed)
+        foreach (QueryStringEnumerable.EncodedNameValuePair pair in new QueryStringEnumerable(unparsedPresetValue))
         {
-            // Use the indexer for both set and query. This replaces any previously parsed values.
-            string? value = pair.Value[^1];
-            if (value is not null)
+            // Last value wins.
+            if (pair.DecodeValue().Length > 0)
             {
-                transformed[pair.Key] = value;
+                transformed[pair.DecodeName().ToString()] = pair.DecodeValue().ToString();
             }
         }
 
