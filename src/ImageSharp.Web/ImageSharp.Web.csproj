@@ -22,6 +22,8 @@
   <PropertyGroup>
     <!--Bump to V3 prior to tagged release.-->
     <MinVerMinimumMajorMinor>3.0</MinVerMinimumMajorMinor>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <Choose>
@@ -36,6 +38,12 @@
       </PropertyGroup>
     </Otherwise>
   </Choose>
+
+  <ItemGroup>
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
