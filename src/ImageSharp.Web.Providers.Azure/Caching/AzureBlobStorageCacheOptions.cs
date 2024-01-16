@@ -22,7 +22,7 @@ public class AzureBlobStorageCacheOptions
     public string ContainerName { get; set; } = null!;
 
     /// <summary>
-    /// Gets or sets the cache folder name that'll store cache files under the configured container.
+    /// Gets or sets the cache folder's name that'll store cache files under the configured container.
     /// Must conform to Azure Blob Storage directory naming guidelines.
     /// <see href="https://learn.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#directory-names"/>
     /// </summary>
