@@ -123,6 +123,9 @@ public class AWSS3StorageCache : IImageCache
         return null;
     }
 
+    private string GetKeyWithFolder(string key)
+        => this.cacheFolder + key;
+
     /// <summary>
     /// <see href="https://github.com/aspnet/AspNetIdentity/blob/b7826741279450c58b230ece98bd04b4815beabf/src/Microsoft.AspNet.Identity.Core/AsyncHelper.cs"/>
     /// </summary>
@@ -170,7 +173,4 @@ public class AWSS3StorageCache : IImageCache
             }).Unwrap().GetAwaiter().GetResult();
         }
     }
-
-    private string GetKeyWithFolder(string key)
-        => this.cacheFolder + key;
 }
