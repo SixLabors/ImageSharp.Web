@@ -36,7 +36,7 @@ public class AzureBlobStorageCache : IImageCache
     /// <inheritdoc/>
     public async Task<IImageCacheResolver?> GetAsync(string key)
     {
-        BlobClient blob = this.container.GetBlobClient(this.GetBlobName(key));
+        BlobClient blob = this.GetBlob(key);
 
         if (!await blob.ExistsAsync())
         {
@@ -49,7 +49,7 @@ public class AzureBlobStorageCache : IImageCache
     /// <inheritdoc/>
     public Task SetAsync(string key, Stream stream, ImageCacheMetadata metadata)
     {
-        BlobClient blob = this.container.GetBlobClient(this.GetBlobName(key));
+        BlobClient blob = this.GetBlob(key);
 
         BlobHttpHeaders headers = new()
         {
@@ -84,6 +84,6 @@ public class AzureBlobStorageCache : IImageCache
         PublicAccessType accessType)
         => new BlobContainerClient(options.ConnectionString, options.ContainerName).CreateIfNotExists(accessType);
 
-    private string GetBlobName(string key)
-        => this.cacheFolder + key;
+    private BlobClient GetBlob(string key)
+        => this.container.GetBlobClient(this.cacheFolder + key);
 }
