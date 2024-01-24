@@ -15,6 +15,7 @@ public static class TestConstants
     public const string AWSCacheBucketName = "aws-cache";
     public const string AWSAccessKey = "";
     public const string AWSAccessSecret = "";
+    public const string AWSCacheFolder = "cache/folder";
     public const string ImagePath = "SubFolder/sîxläbörs.îmägéshärp.wéb.png";
     public const string PhysicalTestImage = "http://localhost/" + ImagePath;
     public const string AzureTestImage = "http://localhost/" + AzureContainerName + "/" + ImagePath;
