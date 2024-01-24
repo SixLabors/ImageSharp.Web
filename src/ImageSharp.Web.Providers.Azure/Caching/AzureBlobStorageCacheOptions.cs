@@ -26,5 +26,5 @@ public class AzureBlobStorageCacheOptions
     /// Must conform to Azure Blob Storage directory naming guidelines.
     /// <see href="https://learn.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#directory-names"/>
     /// </summary>
-    public string CacheFolder { get; set; } = null!;
+    public string? CacheFolder { get; set; }
 }
