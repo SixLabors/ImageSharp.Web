@@ -17,6 +17,7 @@ public class AWSS3StorageCache : IImageCache
 {
     private readonly IAmazonS3 amazonS3Client;
     private readonly string bucketName;
+    private readonly string cacheFolder;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AWSS3StorageCache"/> class.
@@ -28,17 +29,21 @@ public class AWSS3StorageCache : IImageCache
         AWSS3StorageCacheOptions options = cacheOptions.Value;
         this.bucketName = options.BucketName;
         this.amazonS3Client = AmazonS3ClientFactory.CreateClient(options);
+        this.cacheFolder = string.IsNullOrEmpty(options.CacheFolder)
+            ? string.Empty
+            : options.CacheFolder.Trim().Trim('/') + '/';
     }
 
     /// <inheritdoc/>
     public async Task<IImageCacheResolver?> GetAsync(string key)
     {
-        GetObjectMetadataRequest request = new() { BucketName = this.bucketName, Key = key };
+        string keyWithFolder = this.GetKeyWithFolder(key);
+        GetObjectMetadataRequest request = new() { BucketName = this.bucketName, Key = keyWithFolder };
         try
         {
             // HEAD request throws a 404 if not found.
             MetadataCollection metadata = (await this.amazonS3Client.GetObjectMetadataAsync(request)).Metadata;
-            return new AWSS3StorageCacheResolver(this.amazonS3Client, this.bucketName, key, metadata);
+            return new AWSS3StorageCacheResolver(this.amazonS3Client, this.bucketName, keyWithFolder, metadata);
         }
         catch
         {
@@ -52,7 +57,7 @@ public class AWSS3StorageCache : IImageCache
         PutObjectRequest request = new()
         {
             BucketName = this.bucketName,
-            Key = key,
+            Key = this.GetKeyWithFolder(key),
             ContentType = metadata.ContentType,
             InputStream = stream,
             AutoCloseStream = false
@@ -117,6 +122,9 @@ public class AWSS3StorageCache : IImageCache
 
         return null;
     }
+
+    private string GetKeyWithFolder(string key)
+        => this.cacheFolder + key;
 
     /// <summary>
     /// <see href="https://github.com/aspnet/AspNetIdentity/blob/b7826741279450c58b230ece98bd04b4815beabf/src/Microsoft.AspNet.Identity.Core/AsyncHelper.cs"/>

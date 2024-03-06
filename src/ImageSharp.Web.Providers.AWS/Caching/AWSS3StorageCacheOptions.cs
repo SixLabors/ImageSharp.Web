@@ -14,6 +14,11 @@ public class AWSS3StorageCacheOptions : IAWSS3BucketClientOptions
     /// <inheritdoc/>
     public string BucketName { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the cache folder's name that'll store cache files under the configured bucket.
+    /// </summary>
+    public string? CacheFolder { get; set; }
+
     /// <inheritdoc/>
     public string? AccessKey { get; set; }
 

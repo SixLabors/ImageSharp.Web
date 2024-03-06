@@ -16,6 +16,7 @@ namespace SixLabors.ImageSharp.Web.Caching.Azure;
 public class AzureBlobStorageCache : IImageCache
 {
     private readonly BlobContainerClient container;
+    private readonly string cacheFolder;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AzureBlobStorageCache"/> class.
@@ -27,12 +28,15 @@ public class AzureBlobStorageCache : IImageCache
         AzureBlobStorageCacheOptions options = cacheOptions.Value;
 
         this.container = new BlobContainerClient(options.ConnectionString, options.ContainerName);
+        this.cacheFolder = string.IsNullOrEmpty(options.CacheFolder)
+            ? string.Empty
+            : options.CacheFolder.Trim().Trim('/') + '/';
     }
 
     /// <inheritdoc/>
     public async Task<IImageCacheResolver?> GetAsync(string key)
     {
-        BlobClient blob = this.container.GetBlobClient(key);
+        BlobClient blob = this.GetBlob(key);
 
         if (!await blob.ExistsAsync())
         {
@@ -45,7 +49,7 @@ public class AzureBlobStorageCache : IImageCache
     /// <inheritdoc/>
     public Task SetAsync(string key, Stream stream, ImageCacheMetadata metadata)
     {
-        BlobClient blob = this.container.GetBlobClient(key);
+        BlobClient blob = this.GetBlob(key);
 
         BlobHttpHeaders headers = new()
         {
@@ -79,4 +83,7 @@ public class AzureBlobStorageCache : IImageCache
         AzureBlobStorageCacheOptions options,
         PublicAccessType accessType)
         => new BlobContainerClient(options.ConnectionString, options.ContainerName).CreateIfNotExists(accessType);
+
+    private BlobClient GetBlob(string key)
+        => this.container.GetBlobClient(this.cacheFolder + key);
 }
