@@ -20,7 +20,7 @@ public static class AzureBlobStorageImageProviderFactory
         FormatUtilities utilities = services.GetRequiredService<FormatUtilities>();
         InitializeAzureStorage(services, options.Value);
 
-        return new AzureBlobStorageImageProvider(options, utilities);
+        return new AzureBlobStorageImageProvider(options, utilities, services);
     }
 
     private static void InitializeAzureStorage(IServiceProvider services, AzureBlobStorageImageProviderOptions options)
