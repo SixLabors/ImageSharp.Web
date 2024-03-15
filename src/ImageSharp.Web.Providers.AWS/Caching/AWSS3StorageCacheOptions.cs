@@ -1,6 +1,8 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
+using Amazon.S3;
+
 namespace SixLabors.ImageSharp.Web.Caching.AWS;
 
 /// <summary>
@@ -8,6 +10,9 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS;
 /// </summary>
 public class AWSS3StorageCacheOptions : IAWSS3BucketClientOptions
 {
+    /// <inheritdoc/>
+    public Func<IAWSS3BucketClientOptions, IServiceProvider, AmazonS3Client>? S3ClientProvider { get; set; } = null!;
+
     /// <inheritdoc/>
     public string? Region { get; set; }
 
