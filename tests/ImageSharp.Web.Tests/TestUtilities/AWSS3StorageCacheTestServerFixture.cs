@@ -34,7 +34,7 @@ public class AWSS3StorageCacheTestServerFixture : TestServerFixture
             o.Region = TestConstants.AWSRegion;
             o.Timeout = TestConstants.AWSTimeout;
 
-            AWSS3StorageCache.CreateIfNotExists(o, S3CannedACL.Private);
+            AWSS3StorageCache.CreateIfNotExists(o, S3CannedACL.Private, services.BuildServiceProvider());
         })
         .SetCache<AWSS3StorageCache>();
 }
