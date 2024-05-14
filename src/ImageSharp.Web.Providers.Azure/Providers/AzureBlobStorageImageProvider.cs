@@ -41,9 +41,11 @@ public class AzureBlobStorageImageProvider : IImageProvider
     /// </summary>
     /// <param name="storageOptions">The blob storage options.</param>
     /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
+    /// <param name="serviceProvider">The current service provider</param>
     public AzureBlobStorageImageProvider(
         IOptions<AzureBlobStorageImageProviderOptions> storageOptions,
-        FormatUtilities formatUtilities)
+        FormatUtilities formatUtilities,
+        IServiceProvider serviceProvider)
     {
         Guard.NotNull(storageOptions, nameof(storageOptions));
 
@@ -51,9 +53,11 @@ public class AzureBlobStorageImageProvider : IImageProvider
 
         foreach (AzureBlobContainerClientOptions container in storageOptions.Value.BlobContainers)
         {
-            this.containers.Add(
-                container.ContainerName!,
-                new BlobContainerClient(container.ConnectionString, container.ContainerName));
+            BlobContainerClient containerClient = container.BlobContainerClientProvider == null
+                ? new BlobContainerClient(container.ConnectionString, container.ContainerName)
+                : container.BlobContainerClientProvider(container, serviceProvider);
+
+            this.containers.Add(container.ContainerName!, containerClient);
         }
     }
 

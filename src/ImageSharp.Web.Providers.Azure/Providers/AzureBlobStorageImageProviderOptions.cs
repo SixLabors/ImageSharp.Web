@@ -1,6 +1,8 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
+using Azure.Storage.Blobs;
+
 namespace SixLabors.ImageSharp.Web.Providers.Azure;
 
 /// <summary>
@@ -19,6 +21,11 @@ public class AzureBlobStorageImageProviderOptions
 /// </summary>
 public class AzureBlobContainerClientOptions
 {
+    /// <summary>
+    /// Gets or sets a custom Azure BlobServiceClient provider
+    /// </summary>
+    public Func<AzureBlobContainerClientOptions, IServiceProvider, BlobContainerClient>? BlobContainerClientProvider { get; set; } = null!;
+
     /// <summary>
     /// Gets or sets the Azure Blob Storage connection string.
     /// <see href="https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string."/>
