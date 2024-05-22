@@ -1,13 +1,20 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
+using Amazon.S3;
+
 namespace SixLabors.ImageSharp.Web;
 
 /// <summary>
 /// Provides a common interface for AWS S3 Bucket Client Options.
 /// </summary>
-internal interface IAWSS3BucketClientOptions
+public interface IAWSS3BucketClientOptions
 {
+    /// <summary>
+    /// Gets or sets a custom Azure AmazonS3Client provider
+    /// </summary>
+    Func<IAWSS3BucketClientOptions, IServiceProvider, AmazonS3Client>? S3ClientProvider { get; set; }
+
     /// <summary>
     /// Gets or sets the AWS region endpoint (us-east-1/us-west-1/ap-southeast-2).
     /// </summary>
