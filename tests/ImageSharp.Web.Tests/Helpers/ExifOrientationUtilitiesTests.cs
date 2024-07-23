@@ -26,15 +26,15 @@ public class ExifOrientationUtilitiesTests
     public static TheoryData<Vector2, Vector2, Vector2, ushort, Vector2> TransformVectorData =
         new()
         {
-            { new Vector2(25F, 25F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.Unknown, new Vector2(25F, 25F) },
-            { new Vector2(25F, 25F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.TopLeft, new Vector2(25F, 25F) },
-            { new Vector2(25F, 25F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.TopRight, new Vector2(125F, 25F) },
-            { new Vector2(25F, 25F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.BottomRight, new Vector2(125F, 75F) },
-            { new Vector2(25F, 25F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.BottomLeft, new Vector2(25F, 75F) },
-            { new Vector2(25F, 25F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.LeftTop, new Vector2(25F, 25F) },
-            { new Vector2(25F, 25F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.RightTop, new Vector2(25F, 125F) },
-            { new Vector2(25F, 25F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.RightBottom, new Vector2(75F, 125F) },
-            { new Vector2(25F, 25F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.LeftBottom, new Vector2(75F, 25F) },
+            { new Vector2(24F, 26F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.Unknown, new Vector2(24F, 26F) },
+            { new Vector2(24F, 26F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.TopLeft, new Vector2(24F, 26F) },
+            { new Vector2(24F, 26F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.TopRight, new Vector2(126F, 26F) },
+            { new Vector2(24F, 26F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.BottomRight, new Vector2(126F, 74F) },
+            { new Vector2(24F, 26F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.BottomLeft, new Vector2(24F, 74F) },
+            { new Vector2(24F, 26F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.LeftTop, new Vector2(26F, 24F) },
+            { new Vector2(24F, 26F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.RightTop, new Vector2(26F, 126F) },
+            { new Vector2(24F, 26F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.RightBottom, new Vector2(74F, 126F) },
+            { new Vector2(24F, 26F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.LeftBottom, new Vector2(74F, 24F) },
         };
 
     [Theory]
