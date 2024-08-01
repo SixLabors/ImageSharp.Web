@@ -1,6 +1,8 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
+using Azure.Storage.Blobs;
+
 namespace SixLabors.ImageSharp.Web.Caching.Azure;
 
 /// <summary>
@@ -8,6 +10,11 @@ namespace SixLabors.ImageSharp.Web.Caching.Azure;
 /// </summary>
 public class AzureBlobStorageCacheOptions
 {
+    /// <summary>
+    /// Gets or sets a custom Azure BlobContainerClient provider
+    /// </summary>
+    public Func<AzureBlobStorageCacheOptions, IServiceProvider, BlobContainerClient>? BlobContainerClientProvider { get; set; } = null!;
+
     /// <summary>
     /// Gets or sets the Azure Blob Storage connection string.
     /// <see href="https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string."/>
