@@ -14,13 +14,18 @@ internal static class AmazonS3ClientFactory
     /// with the same name does not already exist.
     /// </summary>
     /// <param name="options">The AWS S3 Storage cache options.</param>
+    /// <param name="serviceProvider">The current service provider.</param>
     /// <returns>
     /// A new <see cref="AmazonS3Client"/>.
     /// </returns>
     /// <exception cref="ArgumentException">Invalid configuration.</exception>
-    public static AmazonS3Client CreateClient(IAWSS3BucketClientOptions options)
+    public static AmazonS3Client CreateClient(IAWSS3BucketClientOptions options, IServiceProvider serviceProvider)
     {
-        if (!string.IsNullOrWhiteSpace(options.Endpoint))
+        if (options.S3ClientProvider != null)
+        {
+            return options.S3ClientProvider(options, serviceProvider);
+        }
+        else if (!string.IsNullOrWhiteSpace(options.Endpoint))
         {
             // AccessKey can be empty.
             // AccessSecret can be empty.

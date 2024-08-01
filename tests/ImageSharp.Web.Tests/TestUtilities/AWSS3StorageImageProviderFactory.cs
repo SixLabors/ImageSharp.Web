@@ -20,14 +20,14 @@ public static class AWSS3StorageImageProviderFactory
         FormatUtilities utilities = services.GetRequiredService<FormatUtilities>();
         AsyncHelper.RunSync(() => InitializeAWSStorageAsync(services, options.Value));
 
-        return new AWSS3StorageImageProvider(options, utilities);
+        return new AWSS3StorageImageProvider(options, utilities, services);
     }
 
     private static async Task InitializeAWSStorageAsync(IServiceProvider services, AWSS3StorageImageProviderOptions options)
     {
         // Upload an image to the AWS Test Storage;
         AWSS3BucketClientOptions bucketOptions = options.S3Buckets.First();
-        AmazonS3Client amazonS3Client = AmazonS3ClientFactory.CreateClient(bucketOptions);
+        AmazonS3Client amazonS3Client = AmazonS3ClientFactory.CreateClient(bucketOptions, services);
         ListBucketsResponse listBucketsResponse = await amazonS3Client.ListBucketsAsync();
 
         bool foundBucket = false;
