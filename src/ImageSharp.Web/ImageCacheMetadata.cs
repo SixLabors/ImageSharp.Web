@@ -199,7 +199,7 @@ public readonly struct ImageCacheMetadata : IEquatable<ImageCacheMetadata>
     {
         Dictionary<string, string> dictionary = this.ToDictionary();
 
-        using StreamWriter writer = new(stream, Encoding.UTF8);
+        await using StreamWriter writer = new(stream, Encoding.UTF8);
         foreach (KeyValuePair<string, string> keyValuePair in dictionary)
         {
             // TODO: string.Create
