@@ -49,7 +49,7 @@ public class AWSS3StorageImageResolver : IImageResolver
             }
         }
 
-        return new ImageMetadata(metadata.LastModified, maxAge, metadata.ContentLength);
+        return new ImageMetadata(metadata.LastModified ?? DateTime.UtcNow, maxAge, metadata.ContentLength);
     }
 
     /// <inheritdoc />
