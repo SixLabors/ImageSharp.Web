@@ -9,6 +9,8 @@ namespace SixLabors.ImageSharp.Web;
 
 internal static class AmazonS3ClientFactory
 {
+    static AmazonS3ClientFactory() => AWSConfigs.InitializeCollections = true;
+
     /// <summary>
     /// Creates a new bucket under the specified account if a bucket
     /// with the same name does not already exist.
