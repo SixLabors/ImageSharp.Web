@@ -36,7 +36,7 @@ public class PresetOnlyQueryCollectionRequestParser : IRequestParser
             || !queryCollection.ContainsKey(QueryKey))
         {
             // We return new here and below to ensure the collection is still mutable via events.
-            return new();
+            return new CommandCollection();
         }
 
         StringValues query = queryCollection[QueryKey];
@@ -46,7 +46,7 @@ public class PresetOnlyQueryCollectionRequestParser : IRequestParser
             return collection;
         }
 
-        return new();
+        return new CommandCollection();
     }
 
     private static IDictionary<string, CommandCollection> ParsePresets(

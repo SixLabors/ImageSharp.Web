@@ -36,7 +36,7 @@ public class PhysicialFileSystemCacheTests
 #endif
     public void GetCacheRoot(string cacheFolder, string cacheRootPath, string webRootPath, string contentRootPath, string expected)
     {
-        var cacheOptions = new PhysicalFileSystemCacheOptions
+        PhysicalFileSystemCacheOptions cacheOptions = new()
         {
             CacheFolder = cacheFolder,
             CacheRootPath = cacheRootPath
@@ -53,7 +53,7 @@ public class PhysicialFileSystemCacheTests
     [InlineData("cacheFolder", null, "", "C:\\root\\")]
     public void GetCacheRootThrows(string cacheFolder, string cacheRootPath, string webRootPath, string contentRootPath)
     {
-        var cacheOptions = new PhysicalFileSystemCacheOptions
+        PhysicalFileSystemCacheOptions cacheOptions = new()
         {
             CacheFolder = cacheFolder,
             CacheRootPath = cacheRootPath

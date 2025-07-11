@@ -7,8 +7,8 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching;
 
 public class ImageCacheMetaDataTests
 {
-    private static readonly DateTime SourceLastWriteTimeUtc = new DateTime(1980, 11, 3);
-    private static readonly DateTime CacheLastWriteTimeUtc = new DateTime(1980, 11, 4);
+    private static readonly DateTime SourceLastWriteTimeUtc = new(1980, 11, 3);
+    private static readonly DateTime CacheLastWriteTimeUtc = new(1980, 11, 4);
     private static readonly TimeSpan MaxAge = TimeSpan.FromDays(7);
     private const string ContentType = "image/jpeg";
     private const long ContentLength = 1234;
@@ -20,7 +20,7 @@ public class ImageCacheMetaDataTests
     [Fact]
     public void ConstructorAssignsProperties()
     {
-        var meta = new ImageCacheMetadata(
+        ImageCacheMetadata meta = new(
             SourceLastWriteTimeUtc,
             CacheLastWriteTimeUtc,
             ContentType,
@@ -37,13 +37,13 @@ public class ImageCacheMetaDataTests
     [Fact]
     public void EqualityChecksAreCorrect()
     {
-        var meta = new ImageCacheMetadata(
+        ImageCacheMetadata meta = new(
             SourceLastWriteTimeUtc,
             CacheLastWriteTimeUtc,
             ContentType,
             MaxAge,
             ContentLength);
-        var meta2 = new ImageCacheMetadata(
+        ImageCacheMetadata meta2 = new(
             meta.SourceLastWriteTimeUtc,
             meta.CacheLastWriteTimeUtc,
             meta.ContentType,
@@ -52,7 +52,7 @@ public class ImageCacheMetaDataTests
 
         Assert.Equal(meta, meta2);
 
-        var meta3 = new ImageCacheMetadata(
+        ImageCacheMetadata meta3 = new(
             SourceLastWriteTimeUtc,
             CacheLastWriteTimeUtc,
             "image/png",

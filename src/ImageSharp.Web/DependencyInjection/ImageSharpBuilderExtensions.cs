@@ -164,7 +164,7 @@ public static class ImageSharpBuilderExtensions
     public static IImageSharpBuilder InsertProvider<TProvider>(this IImageSharpBuilder builder, int index)
         where TProvider : class, IImageProvider
     {
-        var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
+        List<ServiceDescriptor> descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
         descriptors.RemoveAll(x => x.GetImplementationType() == typeof(TProvider));
         descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider, TProvider>());
 
@@ -185,7 +185,7 @@ public static class ImageSharpBuilderExtensions
     public static IImageSharpBuilder InsertProvider<TProvider>(this IImageSharpBuilder builder, int index, Func<IServiceProvider, TProvider> implementationFactory)
         where TProvider : class, IImageProvider
     {
-        var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
+        List<ServiceDescriptor> descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
         descriptors.RemoveAll(x => x.GetImplementationType() == typeof(TProvider));
         descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider>(implementationFactory));
 

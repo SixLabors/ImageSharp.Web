@@ -12,7 +12,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands;
 public class CommandParserTests
 {
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
-    private static readonly CultureInfo Dk = new CultureInfo("da-DK");
+    private static readonly CultureInfo Dk = new("da-DK");
 
     private const double Pi = 3.14159265358979;
     private static readonly string PiStringInv = Pi.ToString(CultureInfo.InvariantCulture);
@@ -20,8 +20,8 @@ public class CommandParserTests
     private static readonly double RoundedPi = Math.Round(Pi, MidpointRounding.AwayFromZero);
 
     public static TheoryData<object, string, CultureInfo> IntegralValuesInv { get; }
-        = new TheoryData<object, string, CultureInfo>
-    {
+        = new()
+        {
         { (sbyte)1, "1", Inv },
         { (byte)1, "1", Inv },
         { (short)1, "1", Inv },
@@ -36,8 +36,8 @@ public class CommandParserTests
     };
 
     public static TheoryData<object, string, CultureInfo> IntegralValuesDk { get; }
-        = new TheoryData<object, string, CultureInfo>
-    {
+        = new()
+        {
                 { (sbyte)1, "1", Dk },
                 { (byte)1, "1", Dk },
                 { (short)1, "1", Dk },
@@ -52,8 +52,8 @@ public class CommandParserTests
     };
 
     public static TheoryData<object, string, CultureInfo> RealValuesInv { get; }
-        = new TheoryData<object, string, CultureInfo>
-    {
+        = new()
+        {
         { (sbyte)RoundedPi, PiStringInv, Inv },
         { (byte)RoundedPi, PiStringInv, Inv },
         { (short)RoundedPi, PiStringInv, Inv },
@@ -68,8 +68,8 @@ public class CommandParserTests
     };
 
     public static TheoryData<object, string, CultureInfo> RealValuesDanish { get; }
-        = new TheoryData<object, string, CultureInfo>
-    {
+        = new()
+        {
         { (sbyte)RoundedPi, PiStringDk, Dk },
         { (byte)RoundedPi, PiStringDk, Dk },
         { (short)RoundedPi, PiStringDk, Dk },
@@ -84,45 +84,45 @@ public class CommandParserTests
     };
 
     public static TheoryData<ResizeMode, string, CultureInfo> EnumValues { get; }
-        = new TheoryData<ResizeMode, string, CultureInfo>
-    {
+        = new()
+        {
         { ResizeMode.Max, "max", Inv },
         { ResizeMode.Crop, "this is not, an enum value", Inv }, // Unknown returns default
     };
 
     public static TheoryData<int[], string, CultureInfo> IntegralArrays { get; }
-        = new TheoryData<int[], string, CultureInfo>
-    {
+        = new()
+        {
         { new[] { 1, 2, 3, 4 }, ToNumericList(Inv, 1, 2, 3, 4), Inv },
     };
 
     public static TheoryData<float[], string, CultureInfo> RealArraysInv { get; }
-        = new TheoryData<float[], string, CultureInfo>
-    {
+        = new()
+        {
         { new[] { 1.667F, 2.667F, 3.667F, 4.667F }, ToNumericList(Inv, 1.667F, 2.667F, 3.667F, 4.667F), Inv },
     };
 
     public static TheoryData<float[], string, CultureInfo> RealArraysDk { get; }
-        = new TheoryData<float[], string, CultureInfo>
-    {
+        = new()
+        {
         { new[] { 1.667F, 2.667F, 3.667F, 4.667F }, ToNumericList(Dk, 1.667F, 2.667F, 3.667F, 4.667F), Dk },
     };
 
     public static TheoryData<object, string, CultureInfo> IntegralLists { get; }
-        = new TheoryData<object, string, CultureInfo>
-    {
+        = new()
+        {
         { new List<int> { 1, 2, 3, 4 }, ToNumericList(Inv, 1, 2, 3, 4), Inv },
     };
 
     public static TheoryData<List<float>, string, CultureInfo> RealLists { get; }
-        = new TheoryData<List<float>, string, CultureInfo>
-    {
+        = new()
+        {
         { new List<float> { 1.667F, 2.667F, 3.667F, 4.667F }, "1.667,2.667,3.667,4.667", Inv },
     };
 
     public static TheoryData<Color, string, CultureInfo> ColorValuesInv { get; }
-        = new TheoryData<Color, string, CultureInfo>
-    {
+        = new()
+        {
         { default, string.Empty, Inv },
         { Color.White, ToNumericList<byte>(Inv, 255, 255, 255), Inv },
         { Color.Transparent, ToNumericList<byte>(Inv, 0, 0, 0, 0),  Inv },
@@ -133,8 +133,8 @@ public class CommandParserTests
     };
 
     public static TheoryData<Color, string, CultureInfo> ColorValuesDk { get; }
-        = new TheoryData<Color, string, CultureInfo>
-    {
+        = new()
+        {
         { default, string.Empty, Dk },
         { Color.White, ToNumericList<byte>(Dk, 255, 255, 255), Dk },
         { Color.Transparent, ToNumericList<byte>(Dk, 0, 0, 0, 0), Dk },
@@ -169,7 +169,7 @@ public class CommandParserTests
     [Fact]
     public void CommandParseThrowsCorrectly()
     {
-        var emptyParser = new CommandParser(Array.Empty<ICommandConverter>());
+        CommandParser emptyParser = new(Array.Empty<ICommandConverter>());
 
         Assert.Throws<NotSupportedException>(
             () => emptyParser.ParseValue<bool>("true", CultureInfo.InvariantCulture));
@@ -177,7 +177,7 @@ public class CommandParserTests
 
     private static CommandParser GetCommandParser()
     {
-        var converters = new List<ICommandConverter>
+        List<ICommandConverter> converters = new()
         {
             new IntegralNumberConverter<sbyte>(),
             new IntegralNumberConverter<byte>(),
@@ -232,8 +232,8 @@ public class CommandParserTests
     private static string ToNumericList<T>(CultureInfo culture, params T[] values)
         where T : IConvertible
     {
-        var sb = new StringBuilder();
-        var ls = culture.TextInfo.ListSeparator[0];
+        StringBuilder sb = new();
+        char ls = culture.TextInfo.ListSeparator[0];
 
         for (int i = 0; i < values.Length; i++)
         {

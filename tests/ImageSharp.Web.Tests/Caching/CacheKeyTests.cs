@@ -19,7 +19,7 @@ public class CacheKeyTests
     public void UriRelativeCacheKey_Is_Relative()
     {
         HttpContext context = CreateHttpContext();
-        var commands = new CommandCollection()
+        CommandCollection commands = new()
         {
             { "Width", "400" }
         };
@@ -34,7 +34,7 @@ public class CacheKeyTests
     public void UriRelativeLowerInvariantCacheKey_Is_RelativeAndLowercase()
     {
         HttpContext context = CreateHttpContext();
-        var commands = new CommandCollection()
+        CommandCollection commands = new()
         {
             { "Width", "400" }
         };
@@ -49,7 +49,7 @@ public class CacheKeyTests
     public void UriAbsoluteCacheKey_Is_Absolute()
     {
         HttpContext context = CreateHttpContext();
-        var commands = new CommandCollection()
+        CommandCollection commands = new()
         {
             { "Width", "400" }
         };
@@ -64,7 +64,7 @@ public class CacheKeyTests
     public void UriAbsoluteLowerInvariantCacheKey_Is_AbsoluteAndLowercase()
     {
         HttpContext context = CreateHttpContext();
-        var commands = new CommandCollection()
+        CommandCollection commands = new()
         {
             { "Width", "400" }
         };
@@ -79,7 +79,7 @@ public class CacheKeyTests
     public void LegacyV1CacheKey_Matches_V1_Behavior()
     {
         HttpContext context = CreateHttpContext();
-        var commands = new CommandCollection()
+        CommandCollection commands = new()
         {
             { "Width", "400" }
         };
@@ -92,7 +92,7 @@ public class CacheKeyTests
 
     private static HttpContext CreateHttpContext()
     {
-        var httpContext = new DefaultHttpContext();
+        DefaultHttpContext httpContext = new();
         httpContext.Request.Scheme = Uri.UriSchemeHttp;
         httpContext.Request.Host = new HostString("Testwebsite.com");
         httpContext.Request.PathBase = "/Images";
