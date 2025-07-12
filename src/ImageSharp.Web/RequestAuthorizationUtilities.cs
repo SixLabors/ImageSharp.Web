@@ -207,7 +207,7 @@ public sealed class RequestAuthorizationUtilities
         }
     }
 
-    private HttpContext ToHttpContext(HostString host, PathString path, QueryString queryString, QueryCollection query)
+    private DefaultHttpContext ToHttpContext(HostString host, PathString path, QueryString queryString, QueryCollection query)
     {
         DefaultHttpContext context = new() { RequestServices = this.serviceProvider };
         HttpRequest request = context.Request;
