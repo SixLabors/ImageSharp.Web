@@ -55,7 +55,7 @@ public class CacheHashTests
     private static string CreateLongString()
     {
         const int Length = 2048;
-        var sb = new StringBuilder(Length);
+        StringBuilder sb = new(Length);
 
         for (int i = 0; i < Length; i++)
         {

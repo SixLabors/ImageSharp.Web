@@ -29,7 +29,7 @@ public class PhysicalFileSystemProviderTests
 #endif
     public void GetProviderRoot(string providerRootPath, string webRootPath, string contentRootPath, string expected)
     {
-        var providerOptions = new PhysicalFileSystemProviderOptions
+        PhysicalFileSystemProviderOptions providerOptions = new()
         {
             ProviderRootPath = providerRootPath
         };
@@ -45,7 +45,7 @@ public class PhysicalFileSystemProviderTests
     [InlineData(null, "", "C:\\root\\")]
     public void GetProviderRootThrows(string providerRootPath, string webRootPath, string contentRootPath)
     {
-        var providerOptions = new PhysicalFileSystemProviderOptions
+        PhysicalFileSystemProviderOptions providerOptions = new()
         {
             ProviderRootPath = providerRootPath
         };

@@ -81,7 +81,7 @@ public class RefCountedConcurrentDictionaryTests
 
         async Task Worker(int workerIndex)
         {
-            var random = new Random(workerIndex);
+            Random random = new(workerIndex);
             for (int i = 0; i < 1000; i++)
             {
                 string key = keys[random.Next(0, keys.Length)];

@@ -20,13 +20,13 @@ public class BackgroundColorWebProcessorTests
 
         CommandCollection commands = new()
         {
-            { new(BackgroundColorWebProcessor.Color, nameof(Color.Orange)) }
+            { new KeyValuePair<string, string>(BackgroundColorWebProcessor.Color, nameof(Color.Orange)) }
         };
 
-        using var image = new Image<Rgba32>(1, 1);
+        using Image<Rgba32> image = new(1, 1);
         Assert.True(Color.Transparent.Equals(image[0, 0]));
 
-        using var formatted = new FormattedImage(image, PngFormat.Instance);
+        using FormattedImage formatted = new(image, PngFormat.Instance);
         new BackgroundColorWebProcessor().Process(formatted, null, commands, parser, culture);
 
         Assert.True(Color.Orange.Equals(image[0, 0]));
@@ -44,7 +44,7 @@ public class BackgroundColorWebProcessorTests
 
         CommandCollection commands = new()
         {
-            { new(BackgroundColorWebProcessor.Color, color) }
+            { new KeyValuePair<string, string>(BackgroundColorWebProcessor.Color, color) }
         };
 
         Assert.True(new BackgroundColorWebProcessor().RequiresTrueColorPixelFormat(commands, parser, culture));

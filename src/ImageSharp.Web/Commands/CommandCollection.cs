@@ -66,7 +66,7 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
         {
             if (this.TryGetValue(key, out KeyValuePair<string, string?> item))
             {
-                this.SetItem(this.IndexOf(item), new(key, value));
+                this.SetItem(this.IndexOf(item), new KeyValuePair<string, string?>(key, value));
             }
             else
             {
@@ -81,7 +81,7 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
     /// <param name="key">The <see cref="string"/> to use as the key of the element to add.</param>
     /// <param name="value">The <see cref="string"/> to use as the value of the element to add.</param>
     /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
-    public void Add(string key, string value) => this.Add(new(key, value));
+    public void Add(string key, string value) => this.Add(new KeyValuePair<string, string?>(key, value));
 
     /// <summary>
     /// Inserts an element into the <see cref="CommandCollection"/> at the
@@ -91,7 +91,7 @@ public sealed class CommandCollection : KeyedCollection<string, KeyValuePair<str
     /// <param name="key">The <see cref="string"/> to use as the key of the element to insert.</param>
     /// <param name="value">The <see cref="string"/> to use as the value of the element to insert.</param>
     /// <exception cref="ArgumentOutOfRangeException">index is less than zero. -or- index is greater than <see cref="P:CommandCollection.Count"/>.</exception>
-    public void Insert(int index, string key, string value) => this.Insert(index, new(key, value));
+    public void Insert(int index, string key, string value) => this.Insert(index, new KeyValuePair<string, string?>(key, value));
 
     /// <summary>
     /// Gets the value associated with the specified key.

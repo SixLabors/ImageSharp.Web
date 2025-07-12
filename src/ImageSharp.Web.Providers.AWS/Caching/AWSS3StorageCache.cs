@@ -15,7 +15,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS;
 /// </summary>
 public class AWSS3StorageCache : IImageCache
 {
-    private readonly IAmazonS3 amazonS3Client;
+    private readonly AmazonS3Client amazonS3Client;
     private readonly string bucketName;
     private readonly string cacheFolder;
 

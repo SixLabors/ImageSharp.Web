@@ -44,7 +44,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void DefaultServicesAreRegistered()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         services.AddImageSharp();
 
         Assert.Single(services, IsService<FormatUtilities>);
@@ -104,7 +104,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanSetRequestParser()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.SetRequestParser<MockRequestParser>();
@@ -119,7 +119,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanSetCache()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.SetCache<MockImageCache>();
@@ -134,7 +134,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanSetCacheKey()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.SetCacheKey<MockCacheKey>();
@@ -149,7 +149,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanSetCacheHash()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.SetCacheHash<MockCacheHash>();
@@ -164,7 +164,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddProvider<MockImageProvider>();
@@ -178,7 +178,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanInsertRemoveImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.InsertProvider<MockImageProvider>(0);
@@ -197,7 +197,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanInsertIdempotentImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.InsertProvider<MockImageProvider>(0);
@@ -217,7 +217,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveFactoryImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddProvider(_ => new MockImageProvider());
@@ -231,7 +231,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanInsertIdempotentFactoryImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.InsertProvider(0, _ => new MockImageProvider());
@@ -251,7 +251,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanInsertRemoveFactoryImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.InsertProvider(0, _ => new MockImageProvider());
@@ -270,7 +270,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveAllImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddProvider<MockImageProvider>();
@@ -284,7 +284,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveAllFactoryImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddProvider(_ => new MockImageProvider());
@@ -298,7 +298,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveImageProcessors()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddProcessor<MockWebProcessor>();
@@ -312,7 +312,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveFactoryImageProcessors()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddProcessor(_ => new MockWebProcessor());
@@ -326,7 +326,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveAllImageProcessors()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddProcessor<MockWebProcessor>();
@@ -340,7 +340,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveAllFactoryImageProcessors()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddProcessor(_ => new MockWebProcessor());
@@ -354,7 +354,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveCommandConverters()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddConverter<MockCommandConverter>();
@@ -368,7 +368,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveFactoryCommandConverters()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddConverter(_ => new MockCommandConverter());
@@ -382,7 +382,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveAllCommandConverters()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddConverter<MockCommandConverter>();
@@ -396,7 +396,7 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveAllFactoryCommandConverters()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
         builder.AddConverter(_ => new MockCommandConverter());

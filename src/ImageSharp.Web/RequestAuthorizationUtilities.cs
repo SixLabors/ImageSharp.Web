@@ -124,7 +124,7 @@ public sealed class RequestAuthorizationUtilities
     /// <param name="handling">The command collection handling.</param>
     /// <returns>The computed HMAC.</returns>
     public string? ComputeHMAC(HostString host, PathString path, QueryString queryString, CommandHandling handling)
-        => this.ComputeHMAC(host, path, queryString, new(QueryHelpers.ParseQuery(queryString.Value)), handling);
+        => this.ComputeHMAC(host, path, queryString, new QueryCollection(QueryHelpers.ParseQuery(queryString.Value)), handling);
 
     /// <summary>
     /// Compute a Hash-based Message Authentication Code (HMAC) for request authentication.
@@ -207,7 +207,7 @@ public sealed class RequestAuthorizationUtilities
         }
     }
 
-    private HttpContext ToHttpContext(HostString host, PathString path, QueryString queryString, QueryCollection query)
+    private DefaultHttpContext ToHttpContext(HostString host, PathString path, QueryString queryString, QueryCollection query)
     {
         DefaultHttpContext context = new() { RequestServices = this.serviceProvider };
         HttpRequest request = context.Request;

@@ -13,7 +13,7 @@ public class HexEncoderTests
     public void HexEncoderOutputIsCorrect()
     {
         byte[] hash = Hash();
-        var sb = new StringBuilder(hash.Length * 2);
+        StringBuilder sb = new(hash.Length * 2);
         for (int i = 0; i < hash.Length; i++)
         {
             sb.Append(hash[i].ToString("x2"));
@@ -27,7 +27,7 @@ public class HexEncoderTests
 
     private static byte[] Hash()
     {
-        using (var hashAlgorithm = SHA256.Create())
+        using (SHA256 hashAlgorithm = SHA256.Create())
         {
             // Concatenate the hash bytes into one long string.
             const string Value = "http://testwebsite.com/image-12345.jpeg?width=400";

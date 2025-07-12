@@ -7,7 +7,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching;
 
 public class ImageMetaDataTests
 {
-    private static readonly DateTime LastWriteTimeUtc = new DateTime(1980, 11, 4);
+    private static readonly DateTime LastWriteTimeUtc = new(1980, 11, 4);
     private static readonly TimeSpan MaxAge = TimeSpan.FromDays(7);
     private const long ContentLength = 1234;
 
@@ -18,7 +18,7 @@ public class ImageMetaDataTests
     [Fact]
     public void ConstructorAssignsProperties()
     {
-        var meta = new ImageMetadata(LastWriteTimeUtc, MaxAge, ContentLength);
+        ImageMetadata meta = new(LastWriteTimeUtc, MaxAge, ContentLength);
         Assert.Equal(LastWriteTimeUtc, meta.LastWriteTimeUtc);
         Assert.Equal(MaxAge, meta.CacheControlMaxAge);
         Assert.Equal(ContentLength, meta.ContentLength);
@@ -27,11 +27,11 @@ public class ImageMetaDataTests
     [Fact]
     public void EqualityChecksAreCorrect()
     {
-        var meta = new ImageMetadata(LastWriteTimeUtc, MaxAge, ContentLength);
-        var meta2 = new ImageMetadata(meta.LastWriteTimeUtc, meta.CacheControlMaxAge, meta.ContentLength);
+        ImageMetadata meta = new(LastWriteTimeUtc, MaxAge, ContentLength);
+        ImageMetadata meta2 = new(meta.LastWriteTimeUtc, meta.CacheControlMaxAge, meta.ContentLength);
         Assert.Equal(meta, meta2);
 
-        var meta3 = new ImageMetadata(meta.LastWriteTimeUtc, TimeSpan.FromDays(1), 4321);
+        ImageMetadata meta3 = new(meta.LastWriteTimeUtc, TimeSpan.FromDays(1), 4321);
         Assert.NotEqual(meta, meta3);
     }
 }

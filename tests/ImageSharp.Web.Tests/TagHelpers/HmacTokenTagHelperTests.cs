@@ -115,7 +115,7 @@ public sealed class HmacTokenTagHelperTests : IDisposable
             attributes,
             getChildContentAsync: (useCachedResult, encoder) =>
             {
-                var tagHelperContent = new DefaultTagHelperContent();
+                DefaultTagHelperContent tagHelperContent = new();
                 tagHelperContent.SetContent(default);
                 return Task.FromResult<TagHelperContent>(tagHelperContent);
             });
@@ -123,14 +123,14 @@ public sealed class HmacTokenTagHelperTests : IDisposable
 
     private static ViewContext MakeViewContext(string requestPathBase = null)
     {
-        var actionContext = new ActionContext(new DefaultHttpContext(), new RouteData(), new ActionDescriptor());
+        ActionContext actionContext = new(new DefaultHttpContext(), new RouteData(), new ActionDescriptor());
         if (requestPathBase != null)
         {
             actionContext.HttpContext.Request.PathBase = new PathString(requestPathBase);
         }
 
-        var metadataProvider = new EmptyModelMetadataProvider();
-        var viewData = new ViewDataDictionary(metadataProvider, new ModelStateDictionary());
+        EmptyModelMetadataProvider metadataProvider = new();
+        ViewDataDictionary viewData = new(metadataProvider, new ModelStateDictionary());
         return new ViewContext(
             actionContext,
             new FakeView(),

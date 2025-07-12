@@ -19,7 +19,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Processors;
 public class FormatWebProcessorTests
 {
     public static TheoryData<string> FormatNameData { get; }
-        = new TheoryData<string>
+        = new()
         {
             { BmpFormat.Instance.Name },
             { GifFormat.Instance.Name },
@@ -36,11 +36,11 @@ public class FormatWebProcessorTests
 
         CommandCollection commands = new()
         {
-            { new(FormatWebProcessor.Format, GifFormat.Instance.Name) },
+            { new KeyValuePair<string, string>(FormatWebProcessor.Format, GifFormat.Instance.Name) },
         };
 
-        using var image = new Image<Rgba32>(1, 1);
-        using var formatted = new FormattedImage(image, PngFormat.Instance);
+        using Image<Rgba32> image = new(1, 1);
+        using FormattedImage formatted = new(image, PngFormat.Instance);
         Assert.Equal(formatted.Format, PngFormat.Instance);
 
         new FormatWebProcessor(Options.Create(new ImageSharpMiddlewareOptions()))
@@ -58,7 +58,7 @@ public class FormatWebProcessorTests
 
         CommandCollection commands = new()
         {
-            { new(FormatWebProcessor.Format, format) },
+            { new KeyValuePair<string, string>(FormatWebProcessor.Format, format) },
         };
 
         FormatWebProcessor processor = new(Options.Create(new ImageSharpMiddlewareOptions()));

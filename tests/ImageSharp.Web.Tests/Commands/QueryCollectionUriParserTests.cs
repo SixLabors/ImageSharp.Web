@@ -13,8 +13,8 @@ public class QueryCollectionUriParserTests
     {
         CommandCollection expected = new()
         {
-            { new("width", "400") },
-            { new("height", "200") }
+            { new KeyValuePair<string, string>("width", "400") },
+            { new KeyValuePair<string, string>("height", "200") }
         };
 
         HttpContext context = CreateHttpContext();
@@ -25,7 +25,7 @@ public class QueryCollectionUriParserTests
 
     private static HttpContext CreateHttpContext()
     {
-        var httpContext = new DefaultHttpContext();
+        DefaultHttpContext httpContext = new();
         httpContext.Request.Path = "/testwebsite.com/image-12345.jpeg";
 
         // Duplicate height param to test replacements

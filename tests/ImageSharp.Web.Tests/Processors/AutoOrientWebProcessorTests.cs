@@ -21,13 +21,13 @@ public class AutoOrientWebProcessorTests
 
         CommandCollection commands = new()
         {
-            { new(AutoOrientWebProcessor.AutoOrient, bool.TrueString) }
+            { new KeyValuePair<string, string>(AutoOrientWebProcessor.AutoOrient, bool.TrueString) }
         };
 
         const ushort tl = 1;
         const ushort br = 3;
         using Image<Rgba32> image = new(1, 1);
-        image.Metadata.ExifProfile = new();
+        image.Metadata.ExifProfile = new ExifProfile();
         image.Metadata.ExifProfile.SetValue(ExifTag.Orientation, br);
 
         Assert.True(image.Metadata.ExifProfile.TryGetValue(ExifTag.Orientation, out IExifValue<ushort> orientation));

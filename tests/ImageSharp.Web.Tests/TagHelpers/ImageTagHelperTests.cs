@@ -250,7 +250,7 @@ public sealed class ImageTagHelperTests : IDisposable
         ImageTagHelper helper = this.GetHelper();
         helper.Src = "testimage.png";
         helper.Width = 100;
-        helper.Center = new(20, 50);
+        helper.Center = new PointF(20, 50);
 
         // Act
         helper.Process(context, output);

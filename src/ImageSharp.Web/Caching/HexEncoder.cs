@@ -32,7 +32,7 @@ internal static class HexEncoder
         {
             return string.Create(bytes.Length * 2, (Ptr: (IntPtr)bytesPtr, bytes.Length), (chars, args) =>
             {
-                var ros = new ReadOnlySpan<byte>((byte*)args.Ptr, args.Length);
+                ReadOnlySpan<byte> ros = new((byte*)args.Ptr, args.Length);
                 EncodeToUtf16(ros, chars);
             });
         }

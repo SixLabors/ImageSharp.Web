@@ -26,7 +26,7 @@ public class StringJoinBenchmarks
         const char separator = '/';
 
         // Each key substring char + separator + key
-        var sb = new StringBuilder((this.CacheFolderDepth * 2) + Key.Length);
+        StringBuilder sb = new((this.CacheFolderDepth * 2) + Key.Length);
         ReadOnlySpan<char> paths = keySpan.Slice(0, this.CacheFolderDepth);
         for (int i = 0; i < paths.Length; i++)
         {

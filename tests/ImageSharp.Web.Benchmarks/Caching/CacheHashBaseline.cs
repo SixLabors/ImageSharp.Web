@@ -20,12 +20,12 @@ public class CacheHashBaseline : ICacheHash
         // {
         //    throw new ArgumentOutOfRangeException(nameof(length), $"Value must be greater than or equal to {2} and less than or equal to {64}.");
         // }
-        using (var hashAlgorithm = SHA256.Create())
+        using (SHA256 hashAlgorithm = SHA256.Create())
         {
             // Concatenate the hash bytes into one long string.
             int len = (int)length;
             byte[] hash = hashAlgorithm.ComputeHash(Encoding.ASCII.GetBytes(value));
-            var sb = new StringBuilder(len);
+            StringBuilder sb = new(len);
             for (int i = 0; i < len / 2; i++)
             {
                 sb.Append(hash[i].ToString("X2"));

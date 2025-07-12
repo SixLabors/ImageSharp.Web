@@ -18,7 +18,7 @@ public sealed class QueryCollectionRequestParser : IRequestParser
         if (query is null || query.Count == 0)
         {
             // We return new to ensure the collection is still mutable via events.
-            return new();
+            return new CommandCollection();
         }
 
         CommandCollection transformed = new();

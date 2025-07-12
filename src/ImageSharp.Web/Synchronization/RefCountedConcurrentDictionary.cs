@@ -222,12 +222,7 @@ public class RefCountedConcurrentDictionary<TKey, TValue>
             this.RefCount = refCount;
         }
 
-        public bool Equals(
-#if NET5_0_OR_GREATER
-            RefCountedValue? other)
-#else
-            [System.Diagnostics.CodeAnalysis.AllowNull] RefCountedValue other)
-#endif
+        public bool Equals(RefCountedValue? other)
             => (other != null) && (this.RefCount == other.RefCount) && EqualityComparer<TValue>.Default.Equals(this.Value, other.Value);
 
         public override bool Equals(object? obj)
