@@ -88,21 +88,25 @@ public sealed class FormatUtilities
             path = uri;
         }
 
-        int extensionIndex;
-        if ((extensionIndex = path.LastIndexOf('.')) != -1)
+        // We don't need this if the query string has already provided a valid extension.
+        if (extension == null)
         {
-            ReadOnlySpan<char> pathExtension = path[(extensionIndex + 1)..];
-
-            foreach (string e in this.extensions)
+            int extensionIndex;
+            if ((extensionIndex = path.LastIndexOf('.')) != -1)
             {
-                if (pathExtension.Equals(e, StringComparison.OrdinalIgnoreCase))
-                {
-                    extension = e;
-                    return true;
-                }
-            }
+                ReadOnlySpan<char> pathExtension = path[(extensionIndex + 1)..];
 
-            return false;
+                foreach (string e in this.extensions)
+                {
+                    if (pathExtension.Equals(e, StringComparison.OrdinalIgnoreCase))
+                    {
+                        extension = e;
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
 
         return extension != null;
