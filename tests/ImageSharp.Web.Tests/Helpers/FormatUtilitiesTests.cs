@@ -46,10 +46,10 @@ public class FormatUtilitiesTests
     }
 
     [Fact]
-    public void GetExtensionShouldRejectInvalidQueryStringFormatParameter()
+    public void GetExtensionShouldAllowInvalidQueryStringFormatParameterWithValidExtension()
     {
         const string uri = "http://www.example.org/some/path/to/image.bmp?width=300&format=invalid";
-        Assert.False(FormatUtilities.TryGetExtensionFromUri(uri, out _));
+        Assert.True(FormatUtilities.TryGetExtensionFromUri(uri, out _));
     }
 
     [Fact]
