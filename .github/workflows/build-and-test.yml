@@ -88,14 +88,14 @@ jobs:
         shell: bash
         run: |
           sudo npm install -g azurite
-          sudo azurite --loose &
+          sudo azurite --loose --skipApiVersionCheck &
 
       - name: Azurite Setup Windows
         if: matrix.options.os == 'windows-latest'
         shell: bash
         run: |
           npm install -g azurite
-          azurite --loose &
+          azurite --loose --skipApiVersionCheck &
 
       - name: S3rver Setup
         if: matrix.options.os != 'windows-latest'

@@ -90,7 +90,7 @@ On Windows to install and run the server as a background process run the followi
 
 ```bash
 npm install -g azurite
-start /B azurite --loose
+start /B azurite --loose --skipApiVersionCheck
 
 npm install -g s3rver
 start /B s3rver -d .
@@ -100,7 +100,7 @@ On Linux
 
 ```bash
 sudo npm install -g azurite
-sudo azurite --loose &
+sudo azurite --loose --skipApiVersionCheck &
 
 sudo npm install -g s3rver
 sudo s3rver -d . &
