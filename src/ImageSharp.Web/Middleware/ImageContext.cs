@@ -61,7 +61,7 @@ internal struct ImageContext
     internal enum PreconditionState
     {
         /// <summary>
-        /// Unspeciified
+        /// Unspecified
         /// </summary>
         Unspecified,
 
@@ -88,7 +88,7 @@ internal struct ImageContext
     /// The combined components of the image request URL in a fully un-escaped form (except
     /// for the QueryString) suitable only for display.
     /// </returns>
-    public string GetDisplayUrl() => this.request.GetDisplayUrl();
+    public readonly string GetDisplayUrl() => this.request.GetDisplayUrl();
 
     /// <summary>
     /// Analyzes the headers for the current request.
@@ -110,7 +110,7 @@ internal struct ImageContext
     /// Gets the preconditioned state of the request.
     /// </summary>
     /// <returns>The <see cref="PreconditionState"/>.</returns>
-    public PreconditionState GetPreconditionState()
+    public readonly PreconditionState GetPreconditionState()
         => GetMaxPreconditionState(
             this.ifMatchState,
             this.ifNoneMatchState,
@@ -121,7 +121,7 @@ internal struct ImageContext
     /// Gets a value indicating whether this request is a head request.
     /// </summary>
     /// <returns>THe <see cref="bool"/>.</returns>
-    public bool IsHeadRequest()
+    public readonly bool IsHeadRequest()
         => string.Equals("HEAD", this.request.Method, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
@@ -130,7 +130,7 @@ internal struct ImageContext
     /// <param name="statusCode">The status code.</param>
     /// <param name="metaData">The image metadata.</param>
     /// <returns>The <see cref="Task"/>.</returns>
-    public Task SendStatusAsync(int statusCode, in ImageCacheMetadata metaData)
+    public readonly Task SendStatusAsync(int statusCode, in ImageCacheMetadata metaData)
         => this.ApplyResponseHeadersAsync(
             statusCode,
             metaData.ContentType,
@@ -142,7 +142,7 @@ internal struct ImageContext
     /// <param name="stream">The output stream.</param>
     /// <param name="metaData">The image metadata.</param>
     /// <returns>The <see cref="Task"/>.</returns>
-    public async Task SendAsync(Stream stream, ImageCacheMetadata metaData)
+    public readonly async Task SendAsync(Stream stream, ImageCacheMetadata metaData)
     {
         await this.ApplyResponseHeadersAsync(
             ResponseConstants.Status200Ok,
@@ -176,7 +176,7 @@ internal struct ImageContext
         return max;
     }
 
-    private async Task ApplyResponseHeadersAsync(
+    private readonly async Task ApplyResponseHeadersAsync(
         int statusCode,
         string contentType,
         TimeSpan maxAge)
