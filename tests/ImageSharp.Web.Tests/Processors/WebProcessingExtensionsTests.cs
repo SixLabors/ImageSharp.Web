@@ -12,7 +12,7 @@ public class WebProcessingExtensionsTests
     [Fact]
     public void WebProcessingExtensions_GetBySupportedCommands()
     {
-        var processors = new IImageWebProcessor[]
+        IImageWebProcessor[] processors = new IImageWebProcessor[]
         {
             new QualityWebProcessor(),
             new ResizeWebProcessor(),
@@ -22,9 +22,9 @@ public class WebProcessingExtensionsTests
 
         CommandCollection commands = new()
         {
-            new(ResizeWebProcessor.Width, null),
-            new(QualityWebProcessor.Quality, null),
-            new(ResizeWebProcessor.Height, null)
+            new KeyValuePair<string, string>(ResizeWebProcessor.Width, null),
+            new KeyValuePair<string, string>(QualityWebProcessor.Quality, null),
+            new KeyValuePair<string, string>(ResizeWebProcessor.Height, null)
         };
 
         IReadOnlyList<(int Index, IImageWebProcessor Processor)> supportedProcessors = processors.OrderBySupportedCommands(commands);
@@ -37,7 +37,7 @@ public class WebProcessingExtensionsTests
     [Fact]
     public void WebProcessingExtensions_GetBySupportedCommands_Empty()
     {
-        var processors = new IImageWebProcessor[]
+        IImageWebProcessor[] processors = new IImageWebProcessor[]
         {
             new MockWebProcessor()
         };

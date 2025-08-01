@@ -129,7 +129,7 @@ public class ResizeWebProcessor : IImageWebProcessor
 
         ResizeMode mode = GetMode(commands, parser, culture);
 
-        return new()
+        return new ResizeOptions
         {
             Size = size,
             CenterCoordinates = GetCenter(image, orientation, commands, parser, culture),

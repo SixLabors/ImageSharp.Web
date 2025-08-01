@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -23,7 +24,7 @@ public static class ImageSharpBuilderExtensions
     /// <typeparam name="TParser">The type of class implementing <see cref="IRequestParser"/> to add.</typeparam>
     /// <param name="builder">The core builder.</param>
     /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-    public static IImageSharpBuilder SetRequestParser<TParser>(this IImageSharpBuilder builder)
+    public static IImageSharpBuilder SetRequestParser<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TParser>(this IImageSharpBuilder builder)
         where TParser : class, IRequestParser
     {
         builder.Services.Replace(ServiceDescriptor.Singleton<IRequestParser, TParser>());
@@ -50,7 +51,7 @@ public static class ImageSharpBuilderExtensions
     /// <typeparam name="TCache">The type of class implementing <see cref="IImageCache"/> to add.</typeparam>
     /// <param name="builder">The core builder.</param>
     /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-    public static IImageSharpBuilder SetCache<TCache>(this IImageSharpBuilder builder)
+    public static IImageSharpBuilder SetCache<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TCache>(this IImageSharpBuilder builder)
         where TCache : class, IImageCache
     {
         builder.Services.Replace(ServiceDescriptor.Singleton<IImageCache, TCache>());
@@ -77,7 +78,7 @@ public static class ImageSharpBuilderExtensions
     /// <typeparam name="TCacheKey">The type of class implementing <see cref="ICacheKey"/> to add.</typeparam>
     /// <param name="builder">The core builder.</param>
     /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-    public static IImageSharpBuilder SetCacheKey<TCacheKey>(this IImageSharpBuilder builder)
+    public static IImageSharpBuilder SetCacheKey<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TCacheKey>(this IImageSharpBuilder builder)
         where TCacheKey : class, ICacheKey
     {
         builder.Services.Replace(ServiceDescriptor.Singleton<ICacheKey, TCacheKey>());
@@ -104,7 +105,7 @@ public static class ImageSharpBuilderExtensions
     /// <typeparam name="TCacheHash">The type of class implementing <see cref="ICacheHash"/> to add.</typeparam>
     /// <param name="builder">The core builder.</param>
     /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-    public static IImageSharpBuilder SetCacheHash<TCacheHash>(this IImageSharpBuilder builder)
+    public static IImageSharpBuilder SetCacheHash<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TCacheHash>(this IImageSharpBuilder builder)
         where TCacheHash : class, ICacheHash
     {
         builder.Services.Replace(ServiceDescriptor.Singleton<ICacheHash, TCacheHash>());
@@ -131,7 +132,7 @@ public static class ImageSharpBuilderExtensions
     /// <typeparam name="TProvider">The type of class implementing <see cref="IImageProvider"/> to add.</typeparam>
     /// <param name="builder">The core builder.</param>
     /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-    public static IImageSharpBuilder AddProvider<TProvider>(this IImageSharpBuilder builder)
+    public static IImageSharpBuilder AddProvider<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TProvider>(this IImageSharpBuilder builder)
         where TProvider : class, IImageProvider
     {
         builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageProvider, TProvider>());
@@ -161,10 +162,10 @@ public static class ImageSharpBuilderExtensions
     /// <param name="builder">The core builder.</param>
     /// <param name="index">The zero-based index at which the provider should be inserted.</param>
     /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-    public static IImageSharpBuilder InsertProvider<TProvider>(this IImageSharpBuilder builder, int index)
+    public static IImageSharpBuilder InsertProvider<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TProvider>(this IImageSharpBuilder builder, int index)
         where TProvider : class, IImageProvider
     {
-        var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
+        List<ServiceDescriptor> descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
         descriptors.RemoveAll(x => x.GetImplementationType() == typeof(TProvider));
         descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider, TProvider>());
 
@@ -185,7 +186,7 @@ public static class ImageSharpBuilderExtensions
     public static IImageSharpBuilder InsertProvider<TProvider>(this IImageSharpBuilder builder, int index, Func<IServiceProvider, TProvider> implementationFactory)
         where TProvider : class, IImageProvider
     {
-        var descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
+        List<ServiceDescriptor> descriptors = builder.Services.Where(x => x.ServiceType == typeof(IImageProvider)).ToList();
         descriptors.RemoveAll(x => x.GetImplementationType() == typeof(TProvider));
         descriptors.Insert(index, ServiceDescriptor.Singleton<IImageProvider>(implementationFactory));
 
@@ -231,7 +232,7 @@ public static class ImageSharpBuilderExtensions
     /// <typeparam name="T">The type of class implementing <see cref="IImageWebProcessor"/> to add.</typeparam>
     /// <param name="builder">The core builder.</param>
     /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-    public static IImageSharpBuilder AddProcessor<T>(this IImageSharpBuilder builder)
+    public static IImageSharpBuilder AddProcessor<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(this IImageSharpBuilder builder)
         where T : class, IImageWebProcessor
     {
         builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IImageWebProcessor, T>());
@@ -290,7 +291,7 @@ public static class ImageSharpBuilderExtensions
     /// <typeparam name="TConverter">The type of class implementing <see cref="ICommandConverter"/> to add.</typeparam>
     /// <param name="builder">The core builder.</param>
     /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-    public static IImageSharpBuilder AddConverter<TConverter>(this IImageSharpBuilder builder)
+    public static IImageSharpBuilder AddConverter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TConverter>(this IImageSharpBuilder builder)
         where TConverter : class, ICommandConverter
     {
         builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ICommandConverter, TConverter>());
@@ -339,21 +340,6 @@ public static class ImageSharpBuilderExtensions
     public static IImageSharpBuilder ClearConverters(this IImageSharpBuilder builder)
     {
         builder.Services.RemoveAll<ICommandConverter>();
-
-        return builder;
-    }
-
-    /// <summary>
-    /// Registers an action used to configure a particular type of options.
-    /// </summary>
-    /// <typeparam name="TOptions">The options type to be configured.</typeparam>
-    /// <param name="builder">The core builder.</param>
-    /// <param name="config">The configuration being bound.</param>
-    /// <returns>The <see cref="IImageSharpBuilder"/>.</returns>
-    public static IImageSharpBuilder Configure<TOptions>(this IImageSharpBuilder builder, IConfiguration config)
-         where TOptions : class
-    {
-        builder.Services.Configure<TOptions>(config);
 
         return builder;
     }

@@ -23,11 +23,11 @@ public class QualityWebProcessorTests
 
         CommandCollection commands = new()
         {
-            { new(QualityWebProcessor.Quality, "42") },
+            { new KeyValuePair<string, string>(QualityWebProcessor.Quality, "42") },
         };
 
-        using var image = new Image<Rgba32>(1, 1);
-        using var formatted = new FormattedImage(image, JpegFormat.Instance);
+        using Image<Rgba32> image = new(1, 1);
+        using FormattedImage formatted = new(image, JpegFormat.Instance);
         Assert.Equal(JpegFormat.Instance, formatted.Format);
         Assert.Equal(typeof(JpegEncoder), formatted.Encoder.GetType());
 
@@ -47,12 +47,12 @@ public class QualityWebProcessorTests
         CommandCollection commands = new()
         {
             {
-                new(QualityWebProcessor.Quality, "42")
+                new KeyValuePair<string, string>(QualityWebProcessor.Quality, "42")
             },
         };
 
-        using var image = new Image<Rgba32>(1, 1);
-        using var formatted = new FormattedImage(image, WebpFormat.Instance);
+        using Image<Rgba32> image = new(1, 1);
+        using FormattedImage formatted = new(image, WebpFormat.Instance);
         Assert.Equal(WebpFormat.Instance, formatted.Format);
         Assert.Equal(typeof(WebpEncoder), formatted.Encoder.GetType());
 
@@ -67,17 +67,17 @@ public class QualityWebProcessorTests
     [Fact]
     public void QualityWebProcessor_CanReportAlphaRequirements()
     {
-        var converters = new List<ICommandConverter>
+        List<ICommandConverter> converters = new()
         {
             new IntegralNumberConverter<int>(),
         };
 
-        var parser = new CommandParser(converters);
+        CommandParser parser = new(converters);
         CultureInfo culture = CultureInfo.InvariantCulture;
 
         CommandCollection commands = new()
         {
-            { new(QualityWebProcessor.Quality, this.random.Next(1, 100).ToString()) },
+            { new KeyValuePair<string, string>(QualityWebProcessor.Quality, this.random.Next(1, 100).ToString()) },
         };
 
         Assert.False(new QualityWebProcessor().RequiresTrueColorPixelFormat(commands, parser, culture));

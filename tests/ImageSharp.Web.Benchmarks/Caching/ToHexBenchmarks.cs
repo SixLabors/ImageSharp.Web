@@ -18,7 +18,7 @@ public class ToHexBenchmarks
     public string StringBuilderToHex()
     {
         const int len = 12;
-        var sb = new StringBuilder(len);
+        StringBuilder sb = new(len);
         for (int i = 0; i < len / 2; i++)
         {
             sb.Append(Bytes[i].ToString("x2"));
@@ -56,7 +56,7 @@ public class ToHexBenchmarks
 
     private static byte[] Hash()
     {
-        using (var hashAlgorithm = SHA256.Create())
+        using (SHA256 hashAlgorithm = SHA256.Create())
         {
             // Concatenate the hash bytes into one long string.
             string value = "http://testwebsite.com/image-12345.jpeg?width=400";

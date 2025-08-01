@@ -59,6 +59,6 @@ public sealed class PhysicalFileSystemProvider : FileProviderImageProvider
     {
         Guard.NotNull(options, nameof(options));
         Guard.NotNull(environment, nameof(environment));
-        return new(GetProviderRoot(options.Value, environment.WebRootPath, environment.ContentRootPath));
+        return new PhysicalFileProvider(GetProviderRoot(options.Value, environment.WebRootPath, environment.ContentRootPath));
     }
 }

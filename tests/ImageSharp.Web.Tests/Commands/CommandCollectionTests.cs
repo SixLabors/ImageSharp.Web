@@ -11,7 +11,7 @@ public class CommandCollectionTests
     public void CanAddCommands()
     {
         CommandCollection collection = new();
-        collection.Add(new("a", "b"));
+        collection.Add(new KeyValuePair<string, string>("a", "b"));
         Assert.Single(collection);
     }
 
@@ -19,8 +19,8 @@ public class CommandCollectionTests
     public void CannotAddDuplicateCommands()
     {
         CommandCollection collection = new();
-        collection.Add(new("a", "b"));
-        Assert.Throws<ArgumentException>(() => collection.Add(new("a", "b")));
+        collection.Add(new KeyValuePair<string, string>("a", "b"));
+        Assert.Throws<ArgumentException>(() => collection.Add(new KeyValuePair<string, string>("a", "b")));
         Assert.Single(collection);
     }
 
@@ -30,7 +30,7 @@ public class CommandCollectionTests
         const string key = "a";
         const string value = "b";
         CommandCollection collection = new();
-        collection.Add(new(key, value));
+        collection.Add(new KeyValuePair<string, string>(key, value));
 
         Assert.Equal(value, collection[key]);
     }
@@ -59,8 +59,8 @@ public class CommandCollectionTests
     public void CannotInsertDuplicateCommands()
     {
         CommandCollection collection = new();
-        collection.Add(new("a", "b"));
-        Assert.Throws<ArgumentException>(() => collection.Insert(0, new("a", "b")));
+        collection.Add(new KeyValuePair<string, string>("a", "b"));
+        Assert.Throws<ArgumentException>(() => collection.Insert(0, new KeyValuePair<string, string>("a", "b")));
         Assert.Single(collection);
     }
 
@@ -88,7 +88,7 @@ public class CommandCollectionTests
     public void CannotInsertDuplicateCommandsViaKey()
     {
         CommandCollection collection = new();
-        collection.Add(new("a", "b"));
+        collection.Add(new KeyValuePair<string, string>("a", "b"));
         Assert.Throws<ArgumentException>(() => collection.Insert(0, "a", "b"));
         Assert.Single(collection);
     }
@@ -190,7 +190,7 @@ public class CommandCollectionTests
         CommandCollection collection = new();
         foreach (string key in keys)
         {
-            collection.Insert(0, new(key, null));
+            collection.Insert(0, new KeyValuePair<string, string>(key, null));
         }
 
         int index = 0;

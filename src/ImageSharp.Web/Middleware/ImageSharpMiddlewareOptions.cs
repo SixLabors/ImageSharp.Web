@@ -41,7 +41,7 @@ public class ImageSharpMiddlewareOptions
     /// Gets or sets the recyclable memorystream manager used for managing pooled stream
     /// buffers independently from image buffer pooling.
     /// </summary>
-    public RecyclableMemoryStreamManager MemoryStreamManager { get; set; } = new RecyclableMemoryStreamManager();
+    public RecyclableMemoryStreamManager MemoryStreamManager { get; set; } = new();
 
     /// <summary>
     /// Gets or sets a value indicating whether to use culture-independent (invariant)

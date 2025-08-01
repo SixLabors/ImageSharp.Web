@@ -57,7 +57,7 @@ public class CacheKeyBenchmarks
 
     private static HttpContext CreateContext()
     {
-        var httpContext = new DefaultHttpContext();
+        DefaultHttpContext httpContext = new();
         httpContext.Request.Scheme = Uri.UriSchemeHttp;
         httpContext.Request.Host = new HostString("testwebsite.com");
         httpContext.Request.PathBase = "/images";
