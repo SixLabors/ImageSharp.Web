@@ -24,7 +24,7 @@ public class AWSS3StorageImageProvider : IImageProvider, IDisposable
     /// <summary>
     /// The containers for the blob services.
     /// </summary>
-    private readonly Dictionary<string, AmazonS3Client> buckets
+    private readonly Dictionary<string, AmazonS3BucketClient> buckets
         = new();
 
     private readonly AWSS3StorageImageProviderOptions storageOptions;
@@ -55,11 +55,11 @@ public class AWSS3StorageImageProvider : IImageProvider, IDisposable
 
         foreach (AWSS3BucketClientOptions bucket in this.storageOptions.S3Buckets)
         {
-            AmazonS3Client s3Client =
+            AmazonS3BucketClient s3Client =
                 bucket.S3ClientFactory?.Invoke(bucket, serviceProvider)
                 ?? AmazonS3ClientFactory.CreateClient(bucket);
 
-            this.buckets.Add(bucket.BucketName, s3Client);
+            this.buckets.Add(s3Client.BucketName, s3Client);
         }
     }
 
@@ -84,7 +84,7 @@ public class AWSS3StorageImageProvider : IImageProvider, IDisposable
         // the remaining path string as the key.
         // Path has already been correctly parsed before here.
         string bucketName = string.Empty;
-        IAmazonS3? s3Client = null;
+        AmazonS3Client? s3Client = null;
 
         // We want an exact match here to ensure that bucket names starting with
         // the same prefix are not mixed up.
@@ -103,7 +103,7 @@ public class AWSS3StorageImageProvider : IImageProvider, IDisposable
             if (nameToMatch.Equals(k, StringComparison.OrdinalIgnoreCase))
             {
                 bucketName = k;
-                s3Client = this.buckets[k];
+                s3Client = this.buckets[k].Client;
                 break;
             }
         }
@@ -190,14 +190,13 @@ public class AWSS3StorageImageProvider : IImageProvider, IDisposable
     /// Releases the unmanaged resources used by the <see cref="AWSS3StorageImageProvider"/> and optionally releases the managed resources.
     /// </summary>
     /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-
     protected virtual void Dispose(bool disposing)
     {
         if (!this.isDisposed)
         {
             if (disposing)
             {
-                foreach (AmazonS3Client client in this.buckets.Values)
+                foreach (AmazonS3BucketClient client in this.buckets.Values)
                 {
                     client?.Dispose();
                 }

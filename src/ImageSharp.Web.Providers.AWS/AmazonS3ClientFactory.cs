@@ -18,7 +18,7 @@ internal static class AmazonS3ClientFactory
     /// A new <see cref="AmazonS3Client"/>.
     /// </returns>
     /// <exception cref="ArgumentException">Invalid configuration.</exception>
-    public static AmazonS3Client CreateClient(IAWSS3BucketClientOptions options)
+    public static AmazonS3BucketClient CreateClient(IAWSS3BucketClientOptions options)
     {
         if (!string.IsNullOrWhiteSpace(options.Endpoint))
         {
@@ -27,7 +27,7 @@ internal static class AmazonS3ClientFactory
             // PathStyle endpoint doesn't support AccelerateEndpoint.
             AmazonS3Config config = new() { ServiceURL = options.Endpoint, ForcePathStyle = true, AuthenticationRegion = options.Region };
             SetTimeout(config, options.Timeout);
-            return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
+            return new(options.BucketName, new AmazonS3Client(options.AccessKey, options.AccessSecret, config));
         }
         else if (!string.IsNullOrWhiteSpace(options.AccessKey))
         {
@@ -36,14 +36,14 @@ internal static class AmazonS3ClientFactory
             RegionEndpoint region = RegionEndpoint.GetBySystemName(options.Region);
             AmazonS3Config config = new() { RegionEndpoint = region, UseAccelerateEndpoint = options.UseAccelerateEndpoint };
             SetTimeout(config, options.Timeout);
-            return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
+            return new(options.BucketName, new AmazonS3Client(options.AccessKey, options.AccessSecret, config));
         }
         else if (!string.IsNullOrWhiteSpace(options.Region))
         {
             RegionEndpoint region = RegionEndpoint.GetBySystemName(options.Region);
             AmazonS3Config config = new() { RegionEndpoint = region, UseAccelerateEndpoint = options.UseAccelerateEndpoint };
             SetTimeout(config, options.Timeout);
-            return new AmazonS3Client(config);
+            return new(options.BucketName, new AmazonS3Client(config));
         }
         else
         {

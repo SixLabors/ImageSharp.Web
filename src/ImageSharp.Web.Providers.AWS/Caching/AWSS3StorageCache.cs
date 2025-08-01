@@ -15,7 +15,7 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS;
 /// </summary>
 public class AWSS3StorageCache : IImageCache, IDisposable
 {
-    private readonly IAmazonS3 amazonS3Client;
+    private readonly AmazonS3BucketClient amazonS3Client;
     private readonly string bucketName;
     private readonly string cacheFolder;
     private bool isDisposed;
@@ -29,11 +29,12 @@ public class AWSS3StorageCache : IImageCache, IDisposable
     {
         Guard.NotNull(cacheOptions, nameof(cacheOptions));
         AWSS3StorageCacheOptions options = cacheOptions.Value;
-        this.bucketName = options.BucketName;
 
         this.amazonS3Client =
             options.S3ClientFactory?.Invoke(options, serviceProvider)
             ?? AmazonS3ClientFactory.CreateClient(options);
+
+        this.bucketName = this.amazonS3Client.BucketName;
 
         this.cacheFolder = string.IsNullOrEmpty(options.CacheFolder)
             ? string.Empty
@@ -48,8 +49,8 @@ public class AWSS3StorageCache : IImageCache, IDisposable
         try
         {
             // HEAD request throws a 404 if not found.
-            MetadataCollection metadata = (await this.amazonS3Client.GetObjectMetadataAsync(request)).Metadata;
-            return new AWSS3StorageCacheResolver(this.amazonS3Client, this.bucketName, keyWithFolder, metadata);
+            MetadataCollection metadata = (await this.amazonS3Client.Client.GetObjectMetadataAsync(request)).Metadata;
+            return new AWSS3StorageCacheResolver(this.amazonS3Client.Client, this.bucketName, keyWithFolder, metadata);
         }
         catch
         {
@@ -75,7 +76,7 @@ public class AWSS3StorageCache : IImageCache, IDisposable
             request.Metadata.Add(d.Key, d.Value);
         }
 
-        return this.amazonS3Client.PutObjectAsync(request);
+        return this.amazonS3Client.Client.PutObjectAsync(request);
     }
 
     /// <summary>
@@ -123,7 +124,8 @@ public class AWSS3StorageCache : IImageCache, IDisposable
 
     private static async Task<PutBucketResponse?> CreateIfNotExistsAsync(AWSS3StorageCacheOptions options, S3CannedACL acl)
     {
-        AmazonS3Client client = AmazonS3ClientFactory.CreateClient(options);
+        using AmazonS3BucketClient bucketClient = AmazonS3ClientFactory.CreateClient(options);
+        AmazonS3Client client = bucketClient.Client;
 
         bool foundBucket = false;
         ListBucketsResponse listBucketsResponse = await client.ListBucketsAsync();

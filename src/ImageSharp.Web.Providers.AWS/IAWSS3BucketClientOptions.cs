@@ -13,7 +13,7 @@ public interface IAWSS3BucketClientOptions
     /// <summary>
     /// Gets or sets a custom a factory method to create an <see cref="AmazonS3Client"/>.
     /// </summary>
-    public Func<IAWSS3BucketClientOptions, IServiceProvider, AmazonS3Client>? S3ClientFactory { get; set; }
+    public Func<IAWSS3BucketClientOptions, IServiceProvider, AmazonS3BucketClient>? S3ClientFactory { get; set; }
 
     /// <summary>
     /// Gets or sets the AWS region endpoint (us-east-1/us-west-1/ap-southeast-2).
@@ -21,7 +21,8 @@ public interface IAWSS3BucketClientOptions
     public string? Region { get; set; }
 
     /// <summary>
-    /// Gets or sets the AWS bucket name. Cannot be <see langword="null"/>.
+    /// Gets or sets the AWS bucket name.
+    /// Cannot be <see langword="null"/> when <see cref="S3ClientFactory"/> is not set.
     /// </summary>
     public string BucketName { get; set; }
 
