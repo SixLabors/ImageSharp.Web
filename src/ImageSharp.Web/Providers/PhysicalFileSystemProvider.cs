@@ -33,6 +33,9 @@ public sealed class PhysicalFileSystemProvider : FileProviderImageProvider
     /// <param name="webRootPath">The web root path.</param>
     /// <param name="contentRootPath">The content root path.</param>
     /// <returns><see cref="string"/> representing the fully qualified provider root path.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the provider root path cannot be determined.
+    /// </exception>
     internal static string GetProviderRoot(PhysicalFileSystemProviderOptions options, string webRootPath, string contentRootPath)
     {
         string providerRootPath = options.ProviderRootPath ?? webRootPath;

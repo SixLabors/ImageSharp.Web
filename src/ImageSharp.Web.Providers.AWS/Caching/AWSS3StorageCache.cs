@@ -61,7 +61,8 @@ public class AWSS3StorageCache : IImageCache
             Key = this.GetKeyWithFolder(key),
             ContentType = metadata.ContentType,
             InputStream = stream,
-            AutoCloseStream = false
+            AutoCloseStream = false,
+            UseChunkEncoding = false
         };
 
         foreach (KeyValuePair<string, string> d in metadata.ToDictionary())
@@ -145,7 +146,7 @@ public class AWSS3StorageCache : IImageCache
         /// <summary>
         /// Executes an async <see cref="Task"/> method synchronously.
         /// </summary>
-        /// <param name="task">The task to excecute.</param>
+        /// <param name="task">The task to execute.</param>
         public static void RunSync(Func<Task> task)
         {
             CultureInfo cultureUi = CultureInfo.CurrentUICulture;
@@ -163,7 +164,7 @@ public class AWSS3StorageCache : IImageCache
         /// a <paramref name="task"/> return type synchronously.
         /// </summary>
         /// <typeparam name="TResult">The type of result to return.</typeparam>
-        /// <param name="task">The task to excecute.</param>
+        /// <param name="task">The task to execute.</param>
         /// <returns>The <typeparamref name="TResult"/>.</returns>
         public static TResult RunSync<TResult>(Func<Task<TResult>> task)
         {

@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp.Processing;
@@ -131,7 +132,7 @@ public class ResizeWebProcessor : IImageWebProcessor
         return new()
         {
             Size = size,
-            CenterCoordinates = GetCenter(orientation, commands, parser, culture),
+            CenterCoordinates = GetCenter(image, orientation, commands, parser, culture),
             Position = GetAnchor(orientation, commands, parser, culture),
             Mode = mode,
             Compand = GetCompandMode(commands, parser, culture),
@@ -162,6 +163,7 @@ public class ResizeWebProcessor : IImageWebProcessor
     }
 
     private static PointF? GetCenter(
+        FormattedImage image,
         ushort orientation,
         CommandCollection commands,
         CommandParser parser,
@@ -179,8 +181,21 @@ public class ResizeWebProcessor : IImageWebProcessor
             return null;
         }
 
-        Vector2 center = new(coordinates[0], coordinates[1]);
-        return ExifOrientationUtilities.Transform(center, Vector2.Zero, Vector2.One, orientation);
+        // Coordinates for the center point are given as a percentage.
+        // We must convert these to pixel values for transformation then convert back.
+        //
+        // Get the display size of the image after orientation is applied.
+        Size size = ExifOrientationUtilities.Transform(new Size(image.Image.Width, image.Image.Height), orientation);
+        Vector2 min = Vector2.Zero;
+        Vector2 max = new(size.Width, size.Height);
+
+        // Scale pixel values up to image height and transform.
+        Vector2 center = DeScale(new Vector2(coordinates[0], coordinates[1]), min, max);
+        Vector2 transformed = ExifOrientationUtilities.Transform(center, min, max, orientation);
+
+        // Now scale pixel values down as percentage of real image height.
+        max = new Vector2(image.Image.Width, image.Image.Height);
+        return Scale(transformed, min, max);
     }
 
     private static ResizeMode GetMode(
@@ -252,4 +267,10 @@ public class ResizeWebProcessor : IImageWebProcessor
         image.TryGetExifOrientation(out ushort orientation);
         return orientation;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static Vector2 Scale(Vector2 x, Vector2 min, Vector2 max) => (x - min) / (max - min);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static Vector2 DeScale(Vector2 x, Vector2 min, Vector2 max) => min + (x * (max - min));
 }

@@ -81,7 +81,7 @@ public static class AWSS3StorageImageProviderFactory
         catch
         {
             IFileInfo file = environment.WebRootFileProvider.GetFileInfo(TestConstants.ImagePath);
-            using Stream stream = file.CreateReadStream();
+            await using Stream stream = file.CreateReadStream();
 
             // Set the max-age property so we get coverage for testing in our AWS provider.
             CacheControlHeaderValue cacheControl = new()
@@ -100,7 +100,9 @@ public static class AWSS3StorageImageProviderFactory
                     CacheControl = cacheControl.ToString()
                 },
                 ContentType = "	image/png",
-                InputStream = stream
+                InputStream = stream,
+                AutoCloseStream = false,
+                UseChunkEncoding = false,
             };
 
             await amazonS3Client.PutObjectAsync(putRequest);

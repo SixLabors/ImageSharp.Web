@@ -154,7 +154,7 @@ public class ImageTagHelper : UrlResolutionTagHelper
 
     /// <summary>
     /// Gets or sets a value indicating whether to automatically
-    /// rotate/flip the iput image based on embedded EXIF orientation property values
+    /// rotate/flip the input image based on embedded EXIF orientation property values
     /// before processing.
     /// </summary>
     [HtmlAttributeName(AutoOrientAttributeName)]

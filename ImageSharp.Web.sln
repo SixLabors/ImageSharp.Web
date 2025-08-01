@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_root", "_root", "{C317F1B1
 		Directory.Build.targets = Directory.Build.targets
 		LICENSE = LICENSE
 		README.md = README.md
+		SixLabors.ImageSharp.Web.props = SixLabors.ImageSharp.Web.props
 		shared-infrastructure\SixLabors.ruleset = shared-infrastructure\SixLabors.ruleset
 		shared-infrastructure\SixLabors.Tests.ruleset = shared-infrastructure\SixLabors.Tests.ruleset
 		shared-infrastructure\stylecop.json = shared-infrastructure\stylecop.json

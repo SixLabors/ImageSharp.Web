@@ -25,50 +25,34 @@ public static class ExifOrientationUtilities
     /// </returns>
     public static Vector2 Transform(Vector2 position, Vector2 min, Vector2 max, ushort orientation)
     {
-        if (orientation is <= ExifOrientationMode.TopLeft or > ExifOrientationMode.LeftBottom)
-        {
-            // Short circuit orientations that are not transformed below
-            return position;
-        }
-
         // New XY is calculated based on flipping and rotating the input XY.
-        // Coordinate ranges are normalized to a range of 0-1 so we can pass a
-        // constant integer size to the transform builder.
-        Vector2 scaled = Scale(position, min, max);
-        AffineTransformBuilder builder = new();
-        Size size = new(1, 1);
-        switch (orientation)
+        Vector2 bounds = max - min;
+        return orientation switch
         {
-            case ExifOrientationMode.TopRight:
-                builder.AppendTranslation(new Vector2(FlipScaled(scaled.X), 0));
-                break;
-            case ExifOrientationMode.BottomRight:
-                builder.AppendRotationDegrees(180);
-                break;
-            case ExifOrientationMode.BottomLeft:
-                builder.AppendTranslation(new Vector2(0, FlipScaled(scaled.Y)));
-                break;
-            case ExifOrientationMode.LeftTop:
-                builder.AppendTranslation(new Vector2(FlipScaled(scaled.X), 0));
-                builder.AppendRotationDegrees(270);
-                break;
-            case ExifOrientationMode.RightTop:
-                builder.AppendRotationDegrees(270);
-                break;
-            case ExifOrientationMode.RightBottom:
-                builder.AppendTranslation(new Vector2(FlipScaled(scaled.X), 0));
-                builder.AppendRotationDegrees(90);
-                break;
-            case ExifOrientationMode.LeftBottom:
-                builder.AppendRotationDegrees(90);
-                break;
-            default:
-                // Use identity matrix.
-                break;
-        }
+            // 0 degrees, mirrored: image has been flipped back-to-front.
+            ExifOrientationMode.TopRight => new Vector2(Flip(position.X, bounds.X), position.Y),
 
-        Matrix3x2 matrix = builder.BuildMatrix(size);
-        return DeScale(Vector2.Transform(scaled, matrix), SwapXY(min, orientation), SwapXY(max, orientation));
+            // 180 degrees: image is upside down.
+            ExifOrientationMode.BottomRight => new Vector2(Flip(position.X, bounds.X), Flip(position.Y, bounds.Y)),
+
+            // 180 degrees, mirrored: image has been flipped back-to-front and is upside down.
+            ExifOrientationMode.BottomLeft => new Vector2(position.X, Flip(position.Y, bounds.Y)),
+
+            // 90 degrees: image has been flipped back-to-front and is on its side.
+            ExifOrientationMode.LeftTop => new Vector2(position.Y, position.X),
+
+            // 90 degrees, mirrored: image is on its side.
+            ExifOrientationMode.RightTop => new Vector2(position.Y, Flip(position.X, bounds.X)),
+
+            // 270 degrees: image has been flipped back-to-front and is on its far side.
+            ExifOrientationMode.RightBottom => new Vector2(Flip(position.Y, bounds.Y), Flip(position.X, bounds.X)),
+
+            // 270 degrees, mirrored: image is on its far side.
+            ExifOrientationMode.LeftBottom => new Vector2(Flip(position.Y, bounds.Y), position.X),
+
+            // 0 degrees: the correct orientation, no adjustment is required.
+            _ => position,
+        };
     }
 
     /// <summary>
@@ -223,17 +207,5 @@ public static class ExifOrientationUtilities
         };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static Vector2 Scale(Vector2 x, Vector2 min, Vector2 max) => (x - min) / (max - min);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static Vector2 DeScale(Vector2 x, Vector2 min, Vector2 max) => min + (x * (max - min));
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static float FlipScaled(float origin) => (2F * -origin) + 1F;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static Vector2 SwapXY(Vector2 position, ushort orientation)
-        => IsExifOrientationRotated(orientation)
-        ? new Vector2(position.Y, position.X)
-        : position;
+    private static float Flip(float offset, float max) => max - offset;
 }

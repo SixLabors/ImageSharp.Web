@@ -4,7 +4,7 @@
 namespace SixLabors.ImageSharp.Web.Middleware;
 
 /// <summary>
-/// Contains constants related to HTTP respose codes.
+/// Contains constants related to HTTP response codes.
 /// </summary>
 internal static class ResponseConstants
 {

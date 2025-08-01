@@ -38,7 +38,7 @@ public class AWSS3StorageCacheResolver : IImageCacheResolver
         foreach (string key in this.metadata.Keys)
         {
             // Trim automatically added x-amz-meta-
-            dict.Add(key.Substring(11).ToUpperInvariant(), this.metadata[key]);
+            dict.Add(key[11..].ToUpperInvariant(), this.metadata[key]);
         }
 
         return Task.FromResult(ImageCacheMetadata.FromDictionary(dict));
