@@ -23,11 +23,11 @@ public abstract class ServerTestBase<TFixture> : IClassFixture<TFixture>
 
         this.OutputHelper.WriteLine(typeof(TFixture).Name);
 
-        //this.OutputHelper.WriteLine("EnvironmentalVariables");
-        //foreach (DictionaryEntry item in Environment.GetEnvironmentVariables())
-        //{
+        // this.OutputHelper.WriteLine("EnvironmentalVariables");
+        // foreach (DictionaryEntry item in Environment.GetEnvironmentVariables())
+        // {
         //    this.OutputHelper.WriteLine($"Key = {item.Key}, Value = {item.Value}");
-        //}
+        // }
     }
 
     public TFixture Fixture { get; }

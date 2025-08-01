@@ -14,25 +14,20 @@ internal static class AmazonS3ClientFactory
     /// with the same name does not already exist.
     /// </summary>
     /// <param name="options">The AWS S3 Storage cache options.</param>
-    /// <param name="serviceProvider">The current service provider.</param>
     /// <returns>
     /// A new <see cref="AmazonS3Client"/>.
     /// </returns>
     /// <exception cref="ArgumentException">Invalid configuration.</exception>
-    public static AmazonS3Client CreateClient(IAWSS3BucketClientOptions options, IServiceProvider serviceProvider)
+    public static AmazonS3BucketClient CreateClient(IAWSS3BucketClientOptions options)
     {
-        if (options.S3ClientProvider != null)
-        {
-            return options.S3ClientProvider(options, serviceProvider);
-        }
-        else if (!string.IsNullOrWhiteSpace(options.Endpoint))
+        if (!string.IsNullOrWhiteSpace(options.Endpoint))
         {
             // AccessKey can be empty.
             // AccessSecret can be empty.
             // PathStyle endpoint doesn't support AccelerateEndpoint.
             AmazonS3Config config = new() { ServiceURL = options.Endpoint, ForcePathStyle = true, AuthenticationRegion = options.Region };
             SetTimeout(config, options.Timeout);
-            return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
+            return new(options.BucketName, new AmazonS3Client(options.AccessKey, options.AccessSecret, config));
         }
         else if (!string.IsNullOrWhiteSpace(options.AccessKey))
         {
@@ -41,14 +36,14 @@ internal static class AmazonS3ClientFactory
             RegionEndpoint region = RegionEndpoint.GetBySystemName(options.Region);
             AmazonS3Config config = new() { RegionEndpoint = region, UseAccelerateEndpoint = options.UseAccelerateEndpoint };
             SetTimeout(config, options.Timeout);
-            return new AmazonS3Client(options.AccessKey, options.AccessSecret, config);
+            return new(options.BucketName, new AmazonS3Client(options.AccessKey, options.AccessSecret, config));
         }
         else if (!string.IsNullOrWhiteSpace(options.Region))
         {
             RegionEndpoint region = RegionEndpoint.GetBySystemName(options.Region);
             AmazonS3Config config = new() { RegionEndpoint = region, UseAccelerateEndpoint = options.UseAccelerateEndpoint };
             SetTimeout(config, options.Timeout);
-            return new AmazonS3Client(config);
+            return new(options.BucketName, new AmazonS3Client(config));
         }
         else
         {
