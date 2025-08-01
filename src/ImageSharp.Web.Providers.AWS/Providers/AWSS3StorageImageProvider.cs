@@ -40,7 +40,8 @@ public class AWSS3StorageImageProvider : IImageProvider
     /// </summary>
     /// <param name="storageOptions">The S3 storage options</param>
     /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
-    public AWSS3StorageImageProvider(IOptions<AWSS3StorageImageProviderOptions> storageOptions, FormatUtilities formatUtilities)
+    /// <param name="serviceProvider">The current service provider.</param>
+    public AWSS3StorageImageProvider(IOptions<AWSS3StorageImageProviderOptions> storageOptions, FormatUtilities formatUtilities, IServiceProvider serviceProvider)
     {
         Guard.NotNull(storageOptions, nameof(storageOptions));
 
@@ -50,7 +51,7 @@ public class AWSS3StorageImageProvider : IImageProvider
 
         foreach (AWSS3BucketClientOptions bucket in this.storageOptions.S3Buckets)
         {
-            this.buckets.Add(bucket.BucketName, AmazonS3ClientFactory.CreateClient(bucket));
+            this.buckets.Add(bucket.BucketName, AmazonS3ClientFactory.CreateClient(bucket, serviceProvider));
         }
     }
 

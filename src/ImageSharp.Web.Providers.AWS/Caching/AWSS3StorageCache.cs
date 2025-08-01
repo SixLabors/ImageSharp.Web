@@ -23,12 +23,13 @@ public class AWSS3StorageCache : IImageCache
     /// Initializes a new instance of the <see cref="AWSS3StorageCache"/> class.
     /// </summary>
     /// <param name="cacheOptions">The cache options.</param>
-    public AWSS3StorageCache(IOptions<AWSS3StorageCacheOptions> cacheOptions)
+    /// <param name="serviceProvider">The current service provider.</param>
+    public AWSS3StorageCache(IOptions<AWSS3StorageCacheOptions> cacheOptions, IServiceProvider serviceProvider)
     {
         Guard.NotNull(cacheOptions, nameof(cacheOptions));
         AWSS3StorageCacheOptions options = cacheOptions.Value;
         this.bucketName = options.BucketName;
-        this.amazonS3Client = AmazonS3ClientFactory.CreateClient(options);
+        this.amazonS3Client = AmazonS3ClientFactory.CreateClient(options, serviceProvider);
         this.cacheFolder = string.IsNullOrEmpty(options.CacheFolder)
             ? string.Empty
             : options.CacheFolder.Trim().Trim('/') + '/';
@@ -83,20 +84,23 @@ public class AWSS3StorageCache : IImageCache
     /// and object data. <see cref="S3CannedACL.Private"/> specifies that the bucket
     /// data is private to the account owner.
     /// </param>
+    /// <param name="serviceProvider">The current service provider.</param>
     /// <returns>
     /// If the bucket does not already exist, a <see cref="PutBucketResponse"/> describing the newly
     /// created bucket. If the container already exists, <see langword="null"/>.
     /// </returns>
     public static PutBucketResponse? CreateIfNotExists(
         AWSS3StorageCacheOptions options,
-        S3CannedACL acl)
-        => AsyncHelper.RunSync(() => CreateIfNotExistsAsync(options, acl));
+        S3CannedACL acl,
+        IServiceProvider serviceProvider)
+        => AsyncHelper.RunSync(() => CreateIfNotExistsAsync(options, acl, serviceProvider));
 
     private static async Task<PutBucketResponse?> CreateIfNotExistsAsync(
         AWSS3StorageCacheOptions options,
-        S3CannedACL acl)
+        S3CannedACL acl,
+        IServiceProvider serviceProvider)
     {
-        AmazonS3Client client = AmazonS3ClientFactory.CreateClient(options);
+        AmazonS3Client client = AmazonS3ClientFactory.CreateClient(options, serviceProvider);
 
         bool foundBucket = false;
         ListBucketsResponse listBucketsResponse = await client.ListBucketsAsync();
