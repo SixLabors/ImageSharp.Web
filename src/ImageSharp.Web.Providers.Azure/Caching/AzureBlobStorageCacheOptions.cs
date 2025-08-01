@@ -11,9 +11,9 @@ namespace SixLabors.ImageSharp.Web.Caching.Azure;
 public class AzureBlobStorageCacheOptions
 {
     /// <summary>
-    /// Gets or sets a custom Azure BlobContainerClient provider
+    /// Gets or sets a factory method to create an <see cref="BlobContainerClient"/>.
     /// </summary>
-    public Func<AzureBlobStorageCacheOptions, IServiceProvider, BlobContainerClient>? BlobContainerClientProvider { get; set; } = null!;
+    public Func<AzureBlobStorageCacheOptions, IServiceProvider, BlobContainerClient>? BlobContainerClientFactory { get; set; }
 
     /// <summary>
     /// Gets or sets the Azure Blob Storage connection string.

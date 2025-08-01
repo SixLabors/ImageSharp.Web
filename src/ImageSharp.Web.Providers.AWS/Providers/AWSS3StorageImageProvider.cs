@@ -14,7 +14,7 @@ namespace SixLabors.ImageSharp.Web.Providers.AWS;
 /// <summary>
 /// Returns images stored in AWS S3.
 /// </summary>
-public class AWSS3StorageImageProvider : IImageProvider
+public class AWSS3StorageImageProvider : IImageProvider, IDisposable
 {
     /// <summary>
     /// Character array to remove from paths.
@@ -29,6 +29,7 @@ public class AWSS3StorageImageProvider : IImageProvider
 
     private readonly AWSS3StorageImageProviderOptions storageOptions;
     private Func<HttpContext, bool>? match;
+    private bool isDisposed;
 
     /// <summary>
     /// Contains various helper methods based on the current configuration.
@@ -41,7 +42,10 @@ public class AWSS3StorageImageProvider : IImageProvider
     /// <param name="storageOptions">The S3 storage options</param>
     /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
     /// <param name="serviceProvider">The current service provider.</param>
-    public AWSS3StorageImageProvider(IOptions<AWSS3StorageImageProviderOptions> storageOptions, FormatUtilities formatUtilities, IServiceProvider serviceProvider)
+    public AWSS3StorageImageProvider(
+        IOptions<AWSS3StorageImageProviderOptions> storageOptions,
+        FormatUtilities formatUtilities,
+        IServiceProvider serviceProvider)
     {
         Guard.NotNull(storageOptions, nameof(storageOptions));
 
@@ -51,7 +55,11 @@ public class AWSS3StorageImageProvider : IImageProvider
 
         foreach (AWSS3BucketClientOptions bucket in this.storageOptions.S3Buckets)
         {
-            this.buckets.Add(bucket.BucketName, AmazonS3ClientFactory.CreateClient(bucket, serviceProvider));
+            AmazonS3Client s3Client =
+                bucket.S3ClientFactory?.Invoke(bucket, serviceProvider)
+                ?? AmazonS3ClientFactory.CreateClient(bucket);
+
+            this.buckets.Add(bucket.BucketName, s3Client);
         }
     }
 
@@ -88,7 +96,7 @@ public class AWSS3StorageImageProvider : IImageProvider
         }
 
         int index = path.IndexOfAny(SlashChars);
-        string nameToMatch = index != -1 ? path.Substring(0, index) : path;
+        string nameToMatch = index != -1 ? path[..index] : path;
 
         foreach (string k in this.buckets.Keys)
         {
@@ -107,7 +115,7 @@ public class AWSS3StorageImageProvider : IImageProvider
         }
 
         // Key should be the remaining path string.
-        string key = path.Substring(bucketName.Length).TrimStart(SlashChars);
+        string key = path[bucketName.Length..].TrimStart(SlashChars);
 
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -125,7 +133,7 @@ public class AWSS3StorageImageProvider : IImageProvider
 
     private bool IsMatch(HttpContext context)
     {
-        // Only match loosly here for performance.
+        // Only match loosely here for performance.
         // Path matching conflicts should be dealt with by configuration.
         string? path = context.Request.Path.Value?.TrimStart(SlashChars);
 
@@ -176,6 +184,37 @@ public class AWSS3StorageImageProvider : IImageProvider
 
             throw;
         }
+    }
+
+    /// <summary>
+    /// Releases the unmanaged resources used by the <see cref="AWSS3StorageImageProvider"/> and optionally releases the managed resources.
+    /// </summary>
+    /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!this.isDisposed)
+        {
+            if (disposing)
+            {
+                foreach (AmazonS3Client client in this.buckets.Values)
+                {
+                    client?.Dispose();
+                }
+
+                this.buckets.Clear();
+            }
+
+            this.isDisposed = true;
+        }
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.Dispose(true);
+
+        GC.SuppressFinalize(this);
     }
 
     private readonly record struct KeyExistsResult(GetObjectMetadataResponse Metadata)

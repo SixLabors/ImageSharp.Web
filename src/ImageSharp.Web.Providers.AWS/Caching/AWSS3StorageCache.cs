@@ -13,11 +13,12 @@ namespace SixLabors.ImageSharp.Web.Caching.AWS;
 /// <summary>
 /// Implements an AWS S3 Storage based cache.
 /// </summary>
-public class AWSS3StorageCache : IImageCache
+public class AWSS3StorageCache : IImageCache, IDisposable
 {
     private readonly IAmazonS3 amazonS3Client;
     private readonly string bucketName;
     private readonly string cacheFolder;
+    private bool isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AWSS3StorageCache"/> class.
@@ -29,7 +30,11 @@ public class AWSS3StorageCache : IImageCache
         Guard.NotNull(cacheOptions, nameof(cacheOptions));
         AWSS3StorageCacheOptions options = cacheOptions.Value;
         this.bucketName = options.BucketName;
-        this.amazonS3Client = AmazonS3ClientFactory.CreateClient(options, serviceProvider);
+
+        this.amazonS3Client =
+            options.S3ClientFactory?.Invoke(options, serviceProvider)
+            ?? AmazonS3ClientFactory.CreateClient(options);
+
         this.cacheFolder = string.IsNullOrEmpty(options.CacheFolder)
             ? string.Empty
             : options.CacheFolder.Trim().Trim('/') + '/';
@@ -84,23 +89,41 @@ public class AWSS3StorageCache : IImageCache
     /// and object data. <see cref="S3CannedACL.Private"/> specifies that the bucket
     /// data is private to the account owner.
     /// </param>
-    /// <param name="serviceProvider">The current service provider.</param>
     /// <returns>
     /// If the bucket does not already exist, a <see cref="PutBucketResponse"/> describing the newly
     /// created bucket. If the container already exists, <see langword="null"/>.
     /// </returns>
-    public static PutBucketResponse? CreateIfNotExists(
-        AWSS3StorageCacheOptions options,
-        S3CannedACL acl,
-        IServiceProvider serviceProvider)
-        => AsyncHelper.RunSync(() => CreateIfNotExistsAsync(options, acl, serviceProvider));
+    public static PutBucketResponse? CreateIfNotExists(AWSS3StorageCacheOptions options, S3CannedACL acl)
+        => AsyncHelper.RunSync(() => CreateIfNotExistsAsync(options, acl));
 
-    private static async Task<PutBucketResponse?> CreateIfNotExistsAsync(
-        AWSS3StorageCacheOptions options,
-        S3CannedACL acl,
-        IServiceProvider serviceProvider)
+    /// <summary>
+    /// Releases the unmanaged resources used by the <see cref="AWSS3StorageCache"/> and optionally releases the managed resources.
+    /// </summary>
+    /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+    protected virtual void Dispose(bool disposing)
     {
-        AmazonS3Client client = AmazonS3ClientFactory.CreateClient(options, serviceProvider);
+        if (!this.isDisposed)
+        {
+            if (disposing)
+            {
+                this.amazonS3Client?.Dispose();
+            }
+
+            this.isDisposed = true;
+        }
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        this.Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    private static async Task<PutBucketResponse?> CreateIfNotExistsAsync(AWSS3StorageCacheOptions options, S3CannedACL acl)
+    {
+        AmazonS3Client client = AmazonS3ClientFactory.CreateClient(options);
 
         bool foundBucket = false;
         ListBucketsResponse listBucketsResponse = await client.ListBucketsAsync();

@@ -27,7 +27,7 @@ public static class AWSS3StorageImageProviderFactory
     {
         // Upload an image to the AWS Test Storage;
         AWSS3BucketClientOptions bucketOptions = options.S3Buckets.First();
-        AmazonS3Client amazonS3Client = AmazonS3ClientFactory.CreateClient(bucketOptions, services);
+        AmazonS3Client amazonS3Client = AmazonS3ClientFactory.CreateClient(bucketOptions);
         ListBucketsResponse listBucketsResponse = await amazonS3Client.ListBucketsAsync();
 
         bool foundBucket = false;
@@ -56,7 +56,7 @@ public static class AWSS3StorageImageProviderFactory
             catch (AmazonS3Exception e)
             {
                 // CI tests are run in parallel and can sometimes return a
-                // false negative for the existance of a bucket.
+                // false negative for the existence of a bucket.
                 if (string.Equals(e.ErrorCode, "BucketAlreadyExists", StringComparison.Ordinal))
                 {
                     return;

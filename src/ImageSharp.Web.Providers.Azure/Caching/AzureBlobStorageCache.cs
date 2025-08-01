@@ -28,10 +28,11 @@ public class AzureBlobStorageCache : IImageCache
         Guard.NotNull(cacheOptions, nameof(cacheOptions));
         AzureBlobStorageCacheOptions options = cacheOptions.Value;
 
-        this.container = options.BlobContainerClientProvider == null
-            ? new BlobContainerClient(options.ConnectionString, options.ContainerName)
-            : options.BlobContainerClientProvider(options, serviceProvider);
-        this.cacheFolder = string.IsNullOrEmpty(options.CacheFolder)
+        this.container =
+            options.BlobContainerClientFactory?.Invoke(options, serviceProvider)
+            ?? new BlobContainerClient(options.ConnectionString, options.ContainerName);
+
+        this.cacheFolder = string.IsNullOrWhiteSpace(options.CacheFolder)
             ? string.Empty
             : options.CacheFolder.Trim().Trim('/') + '/';
     }
