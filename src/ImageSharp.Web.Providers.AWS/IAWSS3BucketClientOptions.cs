@@ -1,8 +1,6 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
-using Amazon.S3;
-
 namespace SixLabors.ImageSharp.Web;
 
 /// <summary>
@@ -11,7 +9,7 @@ namespace SixLabors.ImageSharp.Web;
 public interface IAWSS3BucketClientOptions
 {
     /// <summary>
-    /// Gets or sets a custom a factory method to create an <see cref="AmazonS3Client"/>.
+    /// Gets or sets a custom factory method to create an <see cref="AmazonS3BucketClient"/>.
     /// </summary>
     public Func<IAWSS3BucketClientOptions, IServiceProvider, AmazonS3BucketClient>? S3ClientFactory { get; set; }
 
