@@ -29,7 +29,7 @@ public class HmacTokenTagHelper : UrlResolutionTagHelper
     /// <param name="options">The middleware configuration options.</param>
     /// <param name="authorizationUtilities">Contains helpers that allow authorization of image requests.</param>
     /// <param name="urlHelperFactory">The URL helper factory.</param>
-    /// <param name="htmlEncoder">The HTML encorder.</param>
+    /// <param name="htmlEncoder">The HTML encoder.</param>
     public HmacTokenTagHelper(
         IOptions<ImageSharpMiddlewareOptions> options,
         RequestAuthorizationUtilities authorizationUtilities,

@@ -49,9 +49,10 @@ public class AWSS3StorageImageResolver : IImageResolver
             }
         }
 
-        return new ImageMetadata(metadata.LastModified, maxAge, metadata.ContentLength);
+        return new ImageMetadata(metadata.LastModified ?? DateTime.UtcNow, maxAge, metadata.ContentLength);
     }
 
     /// <inheritdoc />
-    public Task<Stream> OpenReadAsync() => this.amazonS3.GetObjectStreamAsync(this.bucketName, this.imagePath, null);
+    public Task<Stream> OpenReadAsync()
+        => this.amazonS3.GetObjectStreamAsync(this.bucketName, this.imagePath, null);
 }

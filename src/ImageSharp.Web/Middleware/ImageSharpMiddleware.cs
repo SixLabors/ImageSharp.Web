@@ -342,7 +342,7 @@ public class ImageSharpMiddleware
                             maxAge = sourceImageMetadata.CacheControlMaxAge;
                         }
 
-                        using (Stream inStream = await sourceImageResolver.OpenReadAsync())
+                        await using (Stream inStream = await sourceImageResolver.OpenReadAsync())
                         {
                             // TODO: Do we need some way to set options based upon processors?
                             DecoderOptions decoderOptions = await this.options.OnBeforeLoadAsync.Invoke(imageCommandContext, this.options.Configuration)
@@ -524,7 +524,7 @@ public class ImageSharpMiddleware
                     {
                         Guard.NotNull(cacheResolver);
 
-                        using Stream cacheStream = await cacheResolver.OpenReadAsync();
+                        await using Stream cacheStream = await cacheResolver.OpenReadAsync();
                         await imageContext.SendAsync(cacheStream, metadata);
                     }
                     catch (Exception ex)

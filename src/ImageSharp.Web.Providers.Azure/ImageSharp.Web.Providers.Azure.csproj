@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AssemblyName>SixLabors.ImageSharp.Web.Providers.Azure</AssemblyName>
@@ -43,7 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.15.1" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" />
   </ItemGroup>
 
   <ItemGroup>

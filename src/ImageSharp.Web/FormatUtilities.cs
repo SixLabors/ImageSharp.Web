@@ -53,12 +53,19 @@ public sealed class FormatUtilities
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryGetExtensionFromUri(string uri, [NotNullWhen(true)] out string? extension)
     {
+        // Attempts to extract a valid image file extension from the URI.
+        // If the path contains a recognized extension, it is used.
+        // If the path lacks an extension and a query string is present,
+        // the method checks for a valid 'format' parameter as a fallback.
+        // Returns true if a supported extension is found in either location.
         extension = null;
         int query = uri.IndexOf('?');
         ReadOnlySpan<char> path;
 
         if (query > -1)
         {
+            path = uri.AsSpan(0, query);
+
             if (uri.Contains(FormatWebProcessor.Format, StringComparison.OrdinalIgnoreCase)
                 && QueryHelpers.ParseQuery(uri[query..]).TryGetValue(FormatWebProcessor.Format, out StringValues ext))
             {
@@ -68,15 +75,13 @@ public sealed class FormatUtilities
                 {
                     if (extSpan.Equals(e, StringComparison.OrdinalIgnoreCase))
                     {
+                        // We've found a valid extension in the query.
+                        // Now we need to check the path to see if there is a file extension and validate that.
                         extension = e;
-                        return true;
+                        break;
                     }
                 }
-
-                return false;
             }
-
-            path = uri.AsSpan(0, query);
         }
         else
         {
@@ -92,13 +97,17 @@ public sealed class FormatUtilities
             {
                 if (pathExtension.Equals(e, StringComparison.OrdinalIgnoreCase))
                 {
-                    extension = e;
+                    // We've found a valid extension in the path, however we do not
+                    // want to overwrite an existing extension.
+                    extension ??= e;
                     return true;
                 }
             }
+
+            return false;
         }
 
-        return false;
+        return extension != null;
     }
 
     /// <summary>
