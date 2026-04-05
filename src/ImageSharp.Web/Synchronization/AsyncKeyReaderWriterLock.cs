@@ -25,7 +25,7 @@ public class AsyncKeyReaderWriterLock<TKey>
     /// <param name="maxPoolSize">The maximum number of locks that should be pooled for reuse.</param>
     public AsyncKeyReaderWriterLock(int maxPoolSize = 64)
     {
-        this.pool = new ConcurrentBag<AsyncReaderWriterLock>();
+        this.pool = [];
         this.activeLocks = new RefCountedConcurrentDictionary<TKey, AsyncReaderWriterLock>(this.CreateLeasedLock, this.ReturnLeasedLock);
         this.maxPoolSize = maxPoolSize;
     }

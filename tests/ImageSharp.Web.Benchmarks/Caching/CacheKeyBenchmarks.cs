@@ -17,11 +17,11 @@ public class CacheKeyBenchmarks
         { "width", "400" }
     };
 
-    private static readonly ICacheKey LegacyV1CacheKey = new LegacyV1CacheKey();
-    private static readonly ICacheKey UriRelativeCacheKey = new UriRelativeCacheKey();
-    private static readonly ICacheKey UriAbsoluteCacheKey = new UriAbsoluteCacheKey();
-    private static readonly ICacheKey UriRelativeLowerInvariantCacheKey = new UriRelativeLowerInvariantCacheKey();
-    private static readonly ICacheKey UriAbsoluteLowerInvariantCacheKey = new UriAbsoluteLowerInvariantCacheKey();
+    private static readonly LegacyV1CacheKey LegacyV1CacheKey = new();
+    private static readonly UriRelativeCacheKey UriRelativeCacheKey = new();
+    private static readonly UriAbsoluteCacheKey UriAbsoluteCacheKey = new();
+    private static readonly UriRelativeLowerInvariantCacheKey UriRelativeLowerInvariantCacheKey = new();
+    private static readonly UriAbsoluteLowerInvariantCacheKey UriAbsoluteLowerInvariantCacheKey = new();
 
     [Benchmark(Baseline = true, Description = nameof(LegacyV1CacheKey))]
     public string CreateUsingBaseline() => LegacyV1CacheKey.Create(Context, Commands);
@@ -55,9 +55,9 @@ public class CacheKeyBenchmarks
     | UriAbsoluteLowerInvariantCacheKey | 475.4 ns |  4.18 ns |  3.71 ns |  0.71 |    0.02 | 0.0763 |     320 B |
     */
 
-    private static HttpContext CreateContext()
+    private static DefaultHttpContext CreateContext()
     {
-        var httpContext = new DefaultHttpContext();
+        DefaultHttpContext httpContext = new();
         httpContext.Request.Scheme = Uri.UriSchemeHttp;
         httpContext.Request.Host = new HostString("testwebsite.com");
         httpContext.Request.PathBase = "/images";

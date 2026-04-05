@@ -198,7 +198,7 @@ public class ImageTagHelper : UrlResolutionTagHelper
         output.CopyHtmlAttribute(SrcAttributeName, context);
         this.ProcessUrlAttribute(SrcAttributeName, output);
 
-        CommandCollection commands = new();
+        CommandCollection commands = [];
         this.AddProcessingCommands(context, output, commands, this.parserCulture);
 
         if (commands.Count > 0)

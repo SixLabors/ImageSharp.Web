@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Commands.Converters;
-using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
 
@@ -39,12 +38,12 @@ public class ServiceRegistrationExtensionsTests
            (descriptor.ImplementationFactory?.GetMethodInfo().ReturnType == typeof(TImplementation) ||
            descriptor.ImplementationFactory?.Invoke(null)?.GetType() == typeof(TImplementation)); // OK to invoke the factory in tests
 
-    private static IReadOnlyList<ServiceDescriptor> GetCollection<T>(IServiceCollection serviceDescriptors) => serviceDescriptors.Where(x => x.ServiceType == typeof(T)).ToList();
+    private static List<ServiceDescriptor> GetCollection<T>(IServiceCollection serviceDescriptors) => [.. serviceDescriptors.Where(x => x.ServiceType == typeof(T))];
 
     [Fact]
     public void DefaultServicesAreRegistered()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         services.AddImageSharp();
 
         Assert.Single(services, IsService<FormatUtilities>);
@@ -104,178 +103,178 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanSetRequestParser()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.SetRequestParser<MockRequestParser>();
+        builder.SetRequestParser<FakeRequestParser>();
         Assert.Single(services, IsService<IRequestParser>);
-        Assert.Single(services, IsServiceImplementationType<IRequestParser, MockRequestParser>);
+        Assert.Single(services, IsServiceImplementationType<IRequestParser, FakeRequestParser>);
 
-        builder.SetRequestParser(_ => new MockRequestParser());
+        builder.SetRequestParser(_ => new FakeRequestParser());
         Assert.Single(services, IsService<IRequestParser>);
-        Assert.Single(services, IsServiceImplementationFactory<IRequestParser, MockRequestParser>);
+        Assert.Single(services, IsServiceImplementationFactory<IRequestParser, FakeRequestParser>);
     }
 
     [Fact]
     public void CanSetCache()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.SetCache<MockImageCache>();
+        builder.SetCache<FakeImageCache>();
         Assert.Single(services, IsService<IImageCache>);
-        Assert.Single(services, IsServiceImplementationType<IImageCache, MockImageCache>);
+        Assert.Single(services, IsServiceImplementationType<IImageCache, FakeImageCache>);
 
-        builder.SetCache(_ => new MockImageCache());
+        builder.SetCache(_ => new FakeImageCache());
         Assert.Single(services, IsService<IImageCache>);
-        Assert.Single(services, IsServiceImplementationFactory<IImageCache, MockImageCache>);
+        Assert.Single(services, IsServiceImplementationFactory<IImageCache, FakeImageCache>);
     }
 
     [Fact]
     public void CanSetCacheKey()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.SetCacheKey<MockCacheKey>();
+        builder.SetCacheKey<FakeCacheKey>();
         Assert.Single(services, IsService<ICacheKey>);
-        Assert.Single(services, IsServiceImplementationType<ICacheKey, MockCacheKey>);
+        Assert.Single(services, IsServiceImplementationType<ICacheKey, FakeCacheKey>);
 
-        builder.SetCacheKey(_ => new MockCacheKey());
+        builder.SetCacheKey(_ => new FakeCacheKey());
         Assert.Single(services, IsService<ICacheKey>);
-        Assert.Single(services, IsServiceImplementationFactory<ICacheKey, MockCacheKey>);
+        Assert.Single(services, IsServiceImplementationFactory<ICacheKey, FakeCacheKey>);
     }
 
     [Fact]
     public void CanSetCacheHash()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.SetCacheHash<MockCacheHash>();
+        builder.SetCacheHash<FakeCacheHash>();
         Assert.Single(services, IsService<ICacheHash>);
-        Assert.Single(services, IsServiceImplementationType<ICacheHash, MockCacheHash>);
+        Assert.Single(services, IsServiceImplementationType<ICacheHash, FakeCacheHash>);
 
-        builder.SetCacheHash(_ => new MockCacheHash());
+        builder.SetCacheHash(_ => new FakeCacheHash());
         Assert.Single(services, IsService<ICacheHash>);
-        Assert.Single(services, IsServiceImplementationFactory<ICacheHash, MockCacheHash>);
+        Assert.Single(services, IsServiceImplementationFactory<ICacheHash, FakeCacheHash>);
     }
 
     [Fact]
     public void CanAddRemoveImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddProvider<MockImageProvider>();
-        Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
-        Assert.Single(services, IsServiceImplementationType<IImageProvider, MockImageProvider>);
+        builder.AddProvider<FakeImageProvider>();
+        Assert.Single(services, IsService<IImageProvider, FakeImageProvider>);
+        Assert.Single(services, IsServiceImplementationType<IImageProvider, FakeImageProvider>);
 
-        builder.RemoveProvider<MockImageProvider>();
-        Assert.DoesNotContain(services, IsService<IImageProvider, MockImageProvider>);
+        builder.RemoveProvider<FakeImageProvider>();
+        Assert.DoesNotContain(services, IsService<IImageProvider, FakeImageProvider>);
     }
 
     [Fact]
     public void CanInsertRemoveImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.InsertProvider<MockImageProvider>(0);
-        Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
-        Assert.Single(services, IsServiceImplementationType<IImageProvider, MockImageProvider>);
+        builder.InsertProvider<FakeImageProvider>(0);
+        Assert.Single(services, IsService<IImageProvider, FakeImageProvider>);
+        Assert.Single(services, IsServiceImplementationType<IImageProvider, FakeImageProvider>);
 
-        IReadOnlyList<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
+        List<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
         Assert.Equal(2, providers.Count);
-        Assert.True(IsService<IImageProvider, MockImageProvider>(providers[0]));
-        Assert.True(IsServiceImplementationType<IImageProvider, MockImageProvider>(providers[0]));
+        Assert.True(IsService<IImageProvider, FakeImageProvider>(providers[0]));
+        Assert.True(IsServiceImplementationType<IImageProvider, FakeImageProvider>(providers[0]));
 
-        builder.RemoveProvider<MockImageProvider>();
-        Assert.DoesNotContain(services, IsService<IImageProvider, MockImageProvider>);
+        builder.RemoveProvider<FakeImageProvider>();
+        Assert.DoesNotContain(services, IsService<IImageProvider, FakeImageProvider>);
     }
 
     [Fact]
     public void CanInsertIdempotentImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.InsertProvider<MockImageProvider>(0);
-        builder.InsertProvider<MockImageProvider>(1);
+        builder.InsertProvider<FakeImageProvider>(0);
+        builder.InsertProvider<FakeImageProvider>(1);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => builder.InsertProvider<MockImageProvider>(2));
+        Assert.Throws<ArgumentOutOfRangeException>(() => builder.InsertProvider<FakeImageProvider>(2));
 
-        Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
-        Assert.Single(services, IsServiceImplementationType<IImageProvider, MockImageProvider>);
+        Assert.Single(services, IsService<IImageProvider, FakeImageProvider>);
+        Assert.Single(services, IsServiceImplementationType<IImageProvider, FakeImageProvider>);
 
-        IReadOnlyList<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
+        List<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
         Assert.Equal(2, providers.Count);
-        Assert.True(IsService<IImageProvider, MockImageProvider>(providers[1]));
-        Assert.True(IsServiceImplementationType<IImageProvider, MockImageProvider>(providers[1]));
+        Assert.True(IsService<IImageProvider, FakeImageProvider>(providers[1]));
+        Assert.True(IsServiceImplementationType<IImageProvider, FakeImageProvider>(providers[1]));
     }
 
     [Fact]
     public void CanAddRemoveFactoryImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddProvider(_ => new MockImageProvider());
-        Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
-        Assert.Single(services, IsServiceImplementationFactory<IImageProvider, MockImageProvider>);
+        builder.AddProvider(_ => new FakeImageProvider());
+        Assert.Single(services, IsService<IImageProvider, FakeImageProvider>);
+        Assert.Single(services, IsServiceImplementationFactory<IImageProvider, FakeImageProvider>);
 
-        builder.RemoveProvider<MockImageProvider>();
-        Assert.DoesNotContain(services, IsService<IImageProvider, MockImageProvider>);
+        builder.RemoveProvider<FakeImageProvider>();
+        Assert.DoesNotContain(services, IsService<IImageProvider, FakeImageProvider>);
     }
 
     [Fact]
     public void CanInsertIdempotentFactoryImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.InsertProvider(0, _ => new MockImageProvider());
-        builder.InsertProvider(1, _ => new MockImageProvider());
+        builder.InsertProvider(0, _ => new FakeImageProvider());
+        builder.InsertProvider(1, _ => new FakeImageProvider());
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => builder.InsertProvider(2, _ => new MockImageProvider()));
+        Assert.Throws<ArgumentOutOfRangeException>(() => builder.InsertProvider(2, _ => new FakeImageProvider()));
 
-        Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
-        Assert.Single(services, IsServiceImplementationFactory<IImageProvider, MockImageProvider>);
+        Assert.Single(services, IsService<IImageProvider, FakeImageProvider>);
+        Assert.Single(services, IsServiceImplementationFactory<IImageProvider, FakeImageProvider>);
 
-        IReadOnlyList<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
+        List<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
         Assert.Equal(2, providers.Count);
-        Assert.True(IsService<IImageProvider, MockImageProvider>(providers[1]));
-        Assert.True(IsServiceImplementationFactory<IImageProvider, MockImageProvider>(providers[1]));
+        Assert.True(IsService<IImageProvider, FakeImageProvider>(providers[1]));
+        Assert.True(IsServiceImplementationFactory<IImageProvider, FakeImageProvider>(providers[1]));
     }
 
     [Fact]
     public void CanInsertRemoveFactoryImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.InsertProvider(0, _ => new MockImageProvider());
-        Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
-        Assert.Single(services, IsServiceImplementationFactory<IImageProvider, MockImageProvider>);
+        builder.InsertProvider(0, _ => new FakeImageProvider());
+        Assert.Single(services, IsService<IImageProvider, FakeImageProvider>);
+        Assert.Single(services, IsServiceImplementationFactory<IImageProvider, FakeImageProvider>);
 
-        IReadOnlyList<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
+        List<ServiceDescriptor> providers = GetCollection<IImageProvider>(services);
         Assert.Equal(2, providers.Count);
-        Assert.True(IsService<IImageProvider, MockImageProvider>(providers[0]));
-        Assert.True(IsServiceImplementationFactory<IImageProvider, MockImageProvider>(providers[0]));
+        Assert.True(IsService<IImageProvider, FakeImageProvider>(providers[0]));
+        Assert.True(IsServiceImplementationFactory<IImageProvider, FakeImageProvider>(providers[0]));
 
-        builder.RemoveProvider<MockImageProvider>();
-        Assert.DoesNotContain(services, IsService<IImageProvider, MockImageProvider>);
+        builder.RemoveProvider<FakeImageProvider>();
+        Assert.DoesNotContain(services, IsService<IImageProvider, FakeImageProvider>);
     }
 
     [Fact]
     public void CanAddRemoveAllImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddProvider<MockImageProvider>();
-        Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
-        Assert.Single(services, IsServiceImplementationType<IImageProvider, MockImageProvider>);
+        builder.AddProvider<FakeImageProvider>();
+        Assert.Single(services, IsService<IImageProvider, FakeImageProvider>);
+        Assert.Single(services, IsServiceImplementationType<IImageProvider, FakeImageProvider>);
 
         builder.ClearProviders();
         Assert.DoesNotContain(services, IsService<IImageProvider>);
@@ -284,12 +283,12 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveAllFactoryImageProviders()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddProvider(_ => new MockImageProvider());
-        Assert.Single(services, IsService<IImageProvider, MockImageProvider>);
-        Assert.Single(services, IsServiceImplementationFactory<IImageProvider, MockImageProvider>);
+        builder.AddProvider(_ => new FakeImageProvider());
+        Assert.Single(services, IsService<IImageProvider, FakeImageProvider>);
+        Assert.Single(services, IsServiceImplementationFactory<IImageProvider, FakeImageProvider>);
 
         builder.ClearProviders();
         Assert.DoesNotContain(services, IsService<IImageProvider>);
@@ -298,40 +297,40 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveImageProcessors()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddProcessor<MockWebProcessor>();
-        Assert.Single(services, IsService<IImageWebProcessor, MockWebProcessor>);
-        Assert.Single(services, IsServiceImplementationType<IImageWebProcessor, MockWebProcessor>);
+        builder.AddProcessor<FakeWebProcessor>();
+        Assert.Single(services, IsService<IImageWebProcessor, FakeWebProcessor>);
+        Assert.Single(services, IsServiceImplementationType<IImageWebProcessor, FakeWebProcessor>);
 
-        builder.RemoveProcessor<MockWebProcessor>();
-        Assert.DoesNotContain(services, IsService<IImageWebProcessor, MockWebProcessor>);
+        builder.RemoveProcessor<FakeWebProcessor>();
+        Assert.DoesNotContain(services, IsService<IImageWebProcessor, FakeWebProcessor>);
     }
 
     [Fact]
     public void CanAddRemoveFactoryImageProcessors()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddProcessor(_ => new MockWebProcessor());
-        Assert.Single(services, IsService<IImageWebProcessor, MockWebProcessor>);
-        Assert.Single(services, IsServiceImplementationFactory<IImageWebProcessor, MockWebProcessor>);
+        builder.AddProcessor(_ => new FakeWebProcessor());
+        Assert.Single(services, IsService<IImageWebProcessor, FakeWebProcessor>);
+        Assert.Single(services, IsServiceImplementationFactory<IImageWebProcessor, FakeWebProcessor>);
 
-        builder.RemoveProcessor<MockWebProcessor>();
-        Assert.DoesNotContain(services, IsService<IImageWebProcessor, MockWebProcessor>);
+        builder.RemoveProcessor<FakeWebProcessor>();
+        Assert.DoesNotContain(services, IsService<IImageWebProcessor, FakeWebProcessor>);
     }
 
     [Fact]
     public void CanAddRemoveAllImageProcessors()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddProcessor<MockWebProcessor>();
-        Assert.Single(services, IsService<IImageWebProcessor, MockWebProcessor>);
-        Assert.Single(services, IsServiceImplementationType<IImageWebProcessor, MockWebProcessor>);
+        builder.AddProcessor<FakeWebProcessor>();
+        Assert.Single(services, IsService<IImageWebProcessor, FakeWebProcessor>);
+        Assert.Single(services, IsServiceImplementationType<IImageWebProcessor, FakeWebProcessor>);
 
         builder.ClearProcessors();
         Assert.DoesNotContain(services, IsService<IImageWebProcessor>);
@@ -340,12 +339,12 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveAllFactoryImageProcessors()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddProcessor(_ => new MockWebProcessor());
-        Assert.Single(services, IsService<IImageWebProcessor, MockWebProcessor>);
-        Assert.Single(services, IsServiceImplementationFactory<IImageWebProcessor, MockWebProcessor>);
+        builder.AddProcessor(_ => new FakeWebProcessor());
+        Assert.Single(services, IsService<IImageWebProcessor, FakeWebProcessor>);
+        Assert.Single(services, IsServiceImplementationFactory<IImageWebProcessor, FakeWebProcessor>);
 
         builder.ClearProcessors();
         Assert.DoesNotContain(services, IsService<IImageWebProcessor>);
@@ -354,40 +353,40 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveCommandConverters()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddConverter<MockCommandConverter>();
-        Assert.Single(services, IsService<ICommandConverter, MockCommandConverter>);
-        Assert.Single(services, IsServiceImplementationType<ICommandConverter, MockCommandConverter>);
+        builder.AddConverter<FakeCommandConverter>();
+        Assert.Single(services, IsService<ICommandConverter, FakeCommandConverter>);
+        Assert.Single(services, IsServiceImplementationType<ICommandConverter, FakeCommandConverter>);
 
-        builder.RemoveConverter<MockCommandConverter>();
-        Assert.DoesNotContain(services, IsService<ICommandConverter, MockCommandConverter>);
+        builder.RemoveConverter<FakeCommandConverter>();
+        Assert.DoesNotContain(services, IsService<ICommandConverter, FakeCommandConverter>);
     }
 
     [Fact]
     public void CanAddRemoveFactoryCommandConverters()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddConverter(_ => new MockCommandConverter());
-        Assert.Single(services, IsService<ICommandConverter, MockCommandConverter>);
-        Assert.Single(services, IsServiceImplementationFactory<ICommandConverter, MockCommandConverter>);
+        builder.AddConverter(_ => new FakeCommandConverter());
+        Assert.Single(services, IsService<ICommandConverter, FakeCommandConverter>);
+        Assert.Single(services, IsServiceImplementationFactory<ICommandConverter, FakeCommandConverter>);
 
-        builder.RemoveConverter<MockCommandConverter>();
-        Assert.DoesNotContain(services, IsService<ICommandConverter, MockCommandConverter>);
+        builder.RemoveConverter<FakeCommandConverter>();
+        Assert.DoesNotContain(services, IsService<ICommandConverter, FakeCommandConverter>);
     }
 
     [Fact]
     public void CanAddRemoveAllCommandConverters()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddConverter<MockCommandConverter>();
-        Assert.Single(services, IsService<ICommandConverter, MockCommandConverter>);
-        Assert.Single(services, IsServiceImplementationType<ICommandConverter, MockCommandConverter>);
+        builder.AddConverter<FakeCommandConverter>();
+        Assert.Single(services, IsService<ICommandConverter, FakeCommandConverter>);
+        Assert.Single(services, IsServiceImplementationType<ICommandConverter, FakeCommandConverter>);
 
         builder.ClearConverters();
         Assert.DoesNotContain(services, IsService<ICommandConverter>);
@@ -396,12 +395,12 @@ public class ServiceRegistrationExtensionsTests
     [Fact]
     public void CanAddRemoveAllFactoryCommandConverters()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         IImageSharpBuilder builder = services.AddImageSharp();
 
-        builder.AddConverter(_ => new MockCommandConverter());
-        Assert.Single(services, IsService<ICommandConverter, MockCommandConverter>);
-        Assert.Single(services, IsServiceImplementationFactory<ICommandConverter, MockCommandConverter>);
+        builder.AddConverter(_ => new FakeCommandConverter());
+        Assert.Single(services, IsService<ICommandConverter, FakeCommandConverter>);
+        Assert.Single(services, IsServiceImplementationFactory<ICommandConverter, FakeCommandConverter>);
 
         builder.ClearConverters();
         Assert.DoesNotContain(services, IsService<ICommandConverter>);

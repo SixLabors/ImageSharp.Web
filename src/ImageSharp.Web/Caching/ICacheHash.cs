@@ -14,5 +14,5 @@ public interface ICacheHash
     /// <param name="value">The input value to hash.</param>
     /// <param name="length">The length of the returned hash without any extensions.</param>
     /// <returns>The <see cref="string"/>.</returns>
-    string Create(string value, uint length);
+    public string Create(string value, uint length);
 }

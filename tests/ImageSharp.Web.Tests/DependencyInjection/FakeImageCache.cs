@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.Web.Resolvers;
 
 namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection;
 
-public class MockImageCache : IImageCache
+public class FakeImageCache : IImageCache
 {
     public Task<IImageCacheResolver> GetAsync(string key) => Task.FromResult<IImageCacheResolver>(null);
 

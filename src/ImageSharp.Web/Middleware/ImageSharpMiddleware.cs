@@ -160,8 +160,8 @@ public class ImageSharpMiddleware
         this.next = next;
         this.options = options.Value;
         this.requestParser = requestParser;
-        this.providers = resolvers as IImageProvider[] ?? resolvers.ToArray();
-        this.processors = processors as IImageWebProcessor[] ?? processors.ToArray();
+        this.providers = resolvers as IImageProvider[] ?? [.. resolvers];
+        this.processors = processors as IImageWebProcessor[] ?? [.. processors];
         this.cache = cache;
         this.cacheKey = cacheKey;
         this.cacheHash = cacheHash;
@@ -344,7 +344,6 @@ public class ImageSharpMiddleware
 
                         await using (Stream inStream = await sourceImageResolver.OpenReadAsync())
                         {
-                            // TODO: Do we need some way to set options based upon processors?
                             DecoderOptions decoderOptions = await this.options.OnBeforeLoadAsync.Invoke(imageCommandContext, this.options.Configuration)
                                 ?? new() { Configuration = this.options.Configuration };
 
@@ -369,7 +368,7 @@ public class ImageSharpMiddleware
                                     image = await FormattedImage.LoadAsync(decoderOptions, inStream);
                                 }
 
-                                image.Process(
+                                _ = image.Process(
                                     this.logger,
                                     sortedProcessors,
                                     commands,
@@ -407,7 +406,7 @@ public class ImageSharpMiddleware
 
                         // Remove any resolver from the cache so we always resolve next request
                         // for the same key.
-                        CacheResolverLru.TryRemove(key);
+                        _ = CacheResolverLru.TryRemove(key);
 
                         readResult = new ImageWorkerResult(cachedImageMetadata, null);
                     }
@@ -469,7 +468,7 @@ public class ImageSharpMiddleware
         if (cachedImage.ImageCacheResolver is null)
         {
             // Remove the null resolver from the store.
-            CacheResolverLru.TryRemove(key);
+            _ = CacheResolverLru.TryRemove(key);
 
             return new ImageWorkerResult(sourceImageMetadata);
         }
@@ -481,7 +480,7 @@ public class ImageSharpMiddleware
             || cachedImage.ImageCacheMetadata.SourceLastWriteTimeUtc != sourceImageMetadata.LastWriteTimeUtc)
         {
             // We want to remove the resolver from the store so that the next check gets the updated file.
-            CacheResolverLru.TryRemove(key);
+            _ = CacheResolverLru.TryRemove(key);
             return new ImageWorkerResult(sourceImageMetadata);
         }
 
@@ -534,7 +533,7 @@ public class ImageSharpMiddleware
                             // The image has failed to be returned from the cache.
                             // This can happen if the cached image has been physically deleted but the item is still in the LRU cache.
                             // We'll retry running the request again in it's entirety. This ensures any changes to the source are tracked also.
-                            CacheResolverLru.TryRemove(key);
+                            _ = CacheResolverLru.TryRemove(key);
                             await this.Invoke(httpContext, true);
                             return;
                         }

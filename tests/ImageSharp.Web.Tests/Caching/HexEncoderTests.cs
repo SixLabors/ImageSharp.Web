@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using SixLabors.ImageSharp.Web.Caching;
@@ -13,10 +14,10 @@ public class HexEncoderTests
     public void HexEncoderOutputIsCorrect()
     {
         byte[] hash = Hash();
-        var sb = new StringBuilder(hash.Length * 2);
+        StringBuilder sb = new(hash.Length * 2);
         for (int i = 0; i < hash.Length; i++)
         {
-            sb.Append(hash[i].ToString("x2"));
+            sb.Append(hash[i].ToString("x2", CultureInfo.InvariantCulture));
         }
 
         string expected = sb.ToString();
@@ -27,14 +28,11 @@ public class HexEncoderTests
 
     private static byte[] Hash()
     {
-        using (var hashAlgorithm = SHA256.Create())
-        {
-            // Concatenate the hash bytes into one long string.
-            const string Value = "http://testwebsite.com/image-12345.jpeg?width=400";
-            int byteCount = Encoding.ASCII.GetByteCount(Value);
-            byte[] buffer = new byte[byteCount];
-            Encoding.ASCII.GetBytes(Value, 0, Value.Length, buffer, 0);
-            return hashAlgorithm.ComputeHash(buffer, 0, byteCount);
-        }
+        // Concatenate the hash bytes into one long string.
+        const string value = "http://testwebsite.com/image-12345.jpeg?width=400";
+        int byteCount = Encoding.ASCII.GetByteCount(value);
+        byte[] buffer = new byte[byteCount];
+        Encoding.ASCII.GetBytes(value, 0, value.Length, buffer, 0);
+        return SHA256.HashData(buffer.AsSpan(0, byteCount));
     }
 }

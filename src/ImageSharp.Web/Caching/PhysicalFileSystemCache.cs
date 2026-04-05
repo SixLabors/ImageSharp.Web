@@ -100,7 +100,7 @@ public class PhysicalFileSystemCache : IImageCache
         // Ensure cache directory is created before creating files
         if (!Directory.Exists(directory) && directory is not null)
         {
-            Directory.CreateDirectory(directory);
+            _ = Directory.CreateDirectory(directory);
         }
 
         using (FileStream fileStream = File.Create(imagePath))

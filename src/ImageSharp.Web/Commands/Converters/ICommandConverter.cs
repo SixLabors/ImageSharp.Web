@@ -14,7 +14,7 @@ public interface ICommandConverter
     /// <summary>
     /// Gets the type this converter returns.
     /// </summary>
-    Type Type { get; }
+    public Type Type { get; }
 }
 
 /// <inheritdoc/>
@@ -34,5 +34,5 @@ public interface ICommandConverter<T> : ICommandConverter
     /// <param name="value">The <see cref="string"/> to convert. </param>
     /// <param name="propertyType">The property type that the converter will convert to.</param>
     /// <exception cref="NotSupportedException">The conversion cannot be performed.</exception>
-    T? ConvertFrom(CommandParser parser, CultureInfo culture, string? value, Type propertyType);
+    public T? ConvertFrom(CommandParser parser, CultureInfo culture, string? value, Type propertyType);
 }

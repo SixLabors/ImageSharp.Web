@@ -7,7 +7,7 @@ using SixLabors.ImageSharp.Web.Resolvers;
 
 namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection;
 
-public class MockImageProvider : IImageProvider
+public class FakeImageProvider : IImageProvider
 {
     public ProcessingBehavior ProcessingBehavior { get; set; } = ProcessingBehavior.All;
 

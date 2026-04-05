@@ -12,11 +12,11 @@ public interface IImageResolver
     /// Asynchronously gets metadata associated with this image.
     /// </summary>
     /// <returns>The <see cref="ImageMetadata"/>.</returns>
-    Task<ImageMetadata> GetMetaDataAsync();
+    public Task<ImageMetadata> GetMetaDataAsync();
 
     /// <summary>
     /// Asynchronously gets the input image stream.
     /// </summary>
     /// <returns>The <see cref="Task{Stream}"/>.</returns>
-    Task<Stream> OpenReadAsync();
+    public Task<Stream> OpenReadAsync();
 }

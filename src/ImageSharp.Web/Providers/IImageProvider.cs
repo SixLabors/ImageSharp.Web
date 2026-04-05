@@ -14,12 +14,12 @@ public interface IImageProvider
     /// <summary>
     /// Gets the processing behavior.
     /// </summary>
-    ProcessingBehavior ProcessingBehavior { get; }
+    public ProcessingBehavior ProcessingBehavior { get; }
 
     /// <summary>
     /// Gets or sets the method used by the resolver to identify itself as the correct resolver to use.
     /// </summary>
-    Func<HttpContext, bool> Match { get; set; }
+    public Func<HttpContext, bool> Match { get; set; }
 
     /// <summary>
     /// Gets a value indicating whether the current request passes sanitizing rules.
@@ -28,12 +28,12 @@ public interface IImageProvider
     /// <returns>
     /// <returns>The <see cref="bool"/></returns>
     /// </returns>
-    bool IsValidRequest(HttpContext context);
+    public bool IsValidRequest(HttpContext context);
 
     /// <summary>
     /// Gets the image resolver associated with the context.
     /// </summary>
     /// <param name="context">The current HTTP request context.</param>
     /// <returns>The <see cref="IImageResolver"/>.</returns>
-    Task<IImageResolver?> GetAsync(HttpContext context);
+    public Task<IImageResolver?> GetAsync(HttpContext context);
 }

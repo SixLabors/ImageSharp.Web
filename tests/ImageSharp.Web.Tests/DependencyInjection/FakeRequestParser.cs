@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.Web.Commands;
 
 namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection;
 
-public class MockRequestParser : IRequestParser
+public class FakeRequestParser : IRequestParser
 {
     public CommandCollection ParseRequestCommands(HttpContext context) => null;
 }

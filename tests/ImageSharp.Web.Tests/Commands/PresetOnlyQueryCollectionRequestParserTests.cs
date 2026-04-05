@@ -85,9 +85,9 @@ public class PresetOnlyQueryCollectionRequestParserTests
         Assert.Equal(expected, actual);
     }
 
-    private static HttpContext CreateHttpContext(string query)
+    private static DefaultHttpContext CreateHttpContext(string query)
     {
-        var httpContext = new DefaultHttpContext();
+        DefaultHttpContext httpContext = new();
         httpContext.Request.Path = "/testwebsite.com/image-12345.jpeg";
         httpContext.Request.QueryString = new QueryString(query);
         return httpContext;

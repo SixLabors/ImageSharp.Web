@@ -22,16 +22,16 @@ public class LegacyV1CacheKey : ICacheKey
         string pathBase = context.Request.PathBase.ToString();
         if (!string.IsNullOrWhiteSpace(pathBase))
         {
-            sb.AppendFormat(CultureInfo.InvariantCulture, "{0}/", pathBase);
+            _ = sb.AppendFormat(CultureInfo.InvariantCulture, "{0}/", pathBase);
         }
 
         string path = context.Request.Path.ToString();
         if (!string.IsNullOrWhiteSpace(path))
         {
-            sb.Append(path);
+            _ = sb.Append(path);
         }
 
-        sb.Append(QueryString.Create(commands));
+        _ = sb.Append(QueryString.Create(commands));
 
         return sb.ToString().ToLowerInvariant();
     }

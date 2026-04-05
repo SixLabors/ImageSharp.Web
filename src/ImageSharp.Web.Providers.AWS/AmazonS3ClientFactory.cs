@@ -5,7 +5,7 @@ using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
 
-namespace SixLabors.ImageSharp.Web;
+namespace SixLabors.ImageSharp.Web.AWS;
 
 internal static class AmazonS3ClientFactory
 {

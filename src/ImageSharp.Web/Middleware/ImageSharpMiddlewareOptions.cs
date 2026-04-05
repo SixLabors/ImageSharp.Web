@@ -81,7 +81,7 @@ public class ImageSharpMiddlewareOptions
     /// <remarks>
     /// The key can be any length. However, the recommended size is at least 64 bytes. If the length is zero then no authentication is performed.
     /// </remarks>
-    public byte[] HMACSecretKey { get; set; } = Array.Empty<byte>();
+    public byte[] HMACSecretKey { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the method used to compute a Hash-based Message Authentication Code (HMAC) for request authentication.

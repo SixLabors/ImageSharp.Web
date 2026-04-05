@@ -36,17 +36,17 @@ public class ResizeWebProcessorTests
         const int width = 4;
         const int height = 6;
 
-        var converters = new List<ICommandConverter>
-        {
+        List<ICommandConverter> converters =
+        [
             new IntegralNumberConverter<uint>(),
             new ArrayConverter<float>(),
             new EnumConverter(),
             new SimpleCommandConverter<bool>(),
             new SimpleCommandConverter<float>(),
             new ColorConverter()
-        };
+        ];
 
-        var parser = new CommandParser(converters);
+        CommandParser parser = new(converters);
         CultureInfo culture = CultureInfo.InvariantCulture;
 
         CommandCollection commands = new()
@@ -54,14 +54,14 @@ public class ResizeWebProcessorTests
             // We only need to do this for the unit tests.
             // Commands generated via URL will automatically be converted to lowecase
             { new(ResizeWebProcessor.Sampler, resampler.ToLowerInvariant()) },
-            { new(ResizeWebProcessor.Width, width.ToString()) },
-            { new(ResizeWebProcessor.Height, height.ToString()) },
+            { new(ResizeWebProcessor.Width, width.ToString(CultureInfo.InvariantCulture)) },
+            { new(ResizeWebProcessor.Height, height.ToString(CultureInfo.InvariantCulture)) },
             { new(ResizeWebProcessor.Xy, "0,0") },
             { new(ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch)) }
         };
 
-        using var image = new Image<Rgba32>(1, 1);
-        using var formatted = new FormattedImage(image, PngFormat.Instance);
+        using Image<Rgba32> image = new(1, 1);
+        using FormattedImage formatted = new(image, PngFormat.Instance);
         new ResizeWebProcessor().Process(formatted, null, commands, parser, culture);
 
         Assert.Equal(width, image.Width);
@@ -83,31 +83,31 @@ public class ResizeWebProcessorTests
         const int width = 4;
         const int height = 6;
 
-        var converters = new List<ICommandConverter>
-        {
+        List<ICommandConverter> converters =
+        [
             new IntegralNumberConverter<uint>(),
             new ArrayConverter<float>(),
             new EnumConverter(),
             new SimpleCommandConverter<bool>(),
             new SimpleCommandConverter<float>(),
             new ColorConverter()
-        };
+        ];
 
-        var parser = new CommandParser(converters);
+        CommandParser parser = new(converters);
         CultureInfo culture = CultureInfo.InvariantCulture;
 
         CommandCollection commands = new()
         {
-            { new(ResizeWebProcessor.Width, width.ToString()) },
-            { new(ResizeWebProcessor.Height, height.ToString()) },
+            { new(ResizeWebProcessor.Width, width.ToString(CultureInfo.InvariantCulture)) },
+            { new(ResizeWebProcessor.Height, height.ToString(CultureInfo.InvariantCulture)) },
             { new(ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch)) }
         };
 
-        using var image = new Image<Rgba32>(1, 1);
+        using Image<Rgba32> image = new(1, 1);
         image.Metadata.ExifProfile = new();
         image.Metadata.ExifProfile.SetValue(ExifTag.Orientation, orientation);
 
-        using var formatted = new FormattedImage(image, PngFormat.Instance);
+        using FormattedImage formatted = new(image, PngFormat.Instance);
         new ResizeWebProcessor().Process(formatted, null, commands, parser, culture);
 
         if (rotated)
@@ -139,31 +139,31 @@ public class ResizeWebProcessorTests
         const float x = .25F;
         const float y = .5F;
 
-        var converters = new List<ICommandConverter>
-        {
+        List<ICommandConverter> converters =
+        [
             new IntegralNumberConverter<uint>(),
             new ArrayConverter<float>(),
             new EnumConverter(),
             new SimpleCommandConverter<bool>(),
             new SimpleCommandConverter<float>(),
             new ColorConverter()
-        };
+        ];
 
-        var parser = new CommandParser(converters);
+        CommandParser parser = new(converters);
         CultureInfo culture = CultureInfo.InvariantCulture;
 
         CommandCollection commands = new()
         {
-            { new(ResizeWebProcessor.Width, width.ToString()) },
-            { new(ResizeWebProcessor.Height, height.ToString()) },
+            { new(ResizeWebProcessor.Width, width.ToString(CultureInfo.InvariantCulture)) },
+            { new(ResizeWebProcessor.Height, height.ToString(CultureInfo.InvariantCulture)) },
             { new(ResizeWebProcessor.Xy, FormattableString.Invariant($"{x},{y}")) },
             { new(ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch)) }
         };
 
-        using var image = new Image<Rgba32>(3, 3);
+        using Image<Rgba32> image = new(3, 3);
         image.Metadata.ExifProfile = new();
         image.Metadata.ExifProfile.SetValue(ExifTag.Orientation, orientation);
-        using var formatted = new FormattedImage(image, PngFormat.Instance);
+        using FormattedImage formatted = new(image, PngFormat.Instance);
 
         PointF expected = ExifOrientationUtilities.Transform(new Vector2(x, y), Vector2.Zero, Vector2.One, orientation);
         ResizeOptions options = ResizeWebProcessor.GetResizeOptions(formatted, commands, parser, culture);
@@ -182,17 +182,17 @@ public class ResizeWebProcessorTests
     [InlineData(ExifOrientationMode.LeftBottom)]
     public void ResizeWebProcessor_RespectsOrientation_Anchor(ushort orientation)
     {
-        var converters = new List<ICommandConverter>
-        {
+        List<ICommandConverter> converters =
+        [
             new IntegralNumberConverter<uint>(),
             new ArrayConverter<float>(),
             new EnumConverter(),
             new SimpleCommandConverter<bool>(),
             new SimpleCommandConverter<float>(),
             new ColorConverter()
-        };
+        ];
 
-        var parser = new CommandParser(converters);
+        CommandParser parser = new(converters);
         CultureInfo culture = CultureInfo.InvariantCulture;
 
         using Image<Rgba32> image = new(1, 1);
@@ -204,8 +204,8 @@ public class ResizeWebProcessorTests
         {
             CommandCollection commands = new()
             {
-                { new(ResizeWebProcessor.Width, 4.ToString()) },
-                { new(ResizeWebProcessor.Height, 6.ToString()) },
+                { new(ResizeWebProcessor.Width, 4.ToString(CultureInfo.InvariantCulture)) },
+                { new(ResizeWebProcessor.Height, 6.ToString(CultureInfo.InvariantCulture)) },
                 { new(ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch)) },
                 { new(ResizeWebProcessor.Anchor, anchor.ToString()) },
             };
@@ -231,32 +231,32 @@ public class ResizeWebProcessorTests
         const int width = 4;
         const int height = 6;
 
-        var converters = new List<ICommandConverter>
-        {
+        List<ICommandConverter> converters =
+        [
             new IntegralNumberConverter<uint>(),
             new ArrayConverter<float>(),
             new EnumConverter(),
             new SimpleCommandConverter<bool>(),
             new SimpleCommandConverter<float>(),
             new ColorConverter()
-        };
+        ];
 
-        var parser = new CommandParser(converters);
+        CommandParser parser = new(converters);
         CultureInfo culture = CultureInfo.InvariantCulture;
 
         CommandCollection commands = new()
         {
-            { new(ResizeWebProcessor.Width, width.ToString()) },
-            { new(ResizeWebProcessor.Height, height.ToString()) },
+            { new(ResizeWebProcessor.Width, width.ToString(CultureInfo.InvariantCulture)) },
+            { new(ResizeWebProcessor.Height, height.ToString(CultureInfo.InvariantCulture)) },
             { new(ResizeWebProcessor.Mode, nameof(ResizeMode.Stretch)) },
             { new(ResizeWebProcessor.Orient, bool.FalseString) }
         };
 
-        using var image = new Image<Rgba32>(1, 1);
+        using Image<Rgba32> image = new(1, 1);
         image.Metadata.ExifProfile = new();
         image.Metadata.ExifProfile.SetValue(ExifTag.Orientation, orientation);
 
-        using var formatted = new FormattedImage(image, PngFormat.Instance);
+        using FormattedImage formatted = new(image, PngFormat.Instance);
         new ResizeWebProcessor().Process(formatted, null, commands, parser, culture);
 
         Assert.Equal(width, image.Width);
@@ -273,12 +273,12 @@ public class ResizeWebProcessorTests
     [InlineData(ResizeMode.Manual, false)]
     public void ResizeWebProcessor_CanReportAlphaRequirements(ResizeMode resizeMode, bool requiresAlpha)
     {
-        var converters = new List<ICommandConverter>
-        {
+        List<ICommandConverter> converters =
+        [
             new EnumConverter(),
-        };
+        ];
 
-        var parser = new CommandParser(converters);
+        CommandParser parser = new(converters);
         CultureInfo culture = CultureInfo.InvariantCulture;
 
         CommandCollection commands = new()

@@ -15,7 +15,7 @@ public interface IImageWebProcessor
     /// <summary>
     /// Gets the collection of recognized command keys.
     /// </summary>
-    IEnumerable<string> Commands { get; }
+    public IEnumerable<string> Commands { get; }
 
     /// <summary>
     /// Processes the image based on the given commands.
@@ -28,7 +28,7 @@ public interface IImageWebProcessor
     /// The <see cref="CultureInfo"/> to use as the current parsing culture.
     /// </param>
     /// <returns>The <see cref="FormattedImage"/>.</returns>
-    FormattedImage Process(
+    public FormattedImage Process(
         FormattedImage image,
         ILogger logger,
         CommandCollection commands,
@@ -48,5 +48,5 @@ public interface IImageWebProcessor
     /// The <see cref="CultureInfo"/> to use as the current parsing culture.
     /// </param>
     /// <returns>The <see cref="bool"/> indicating whether a 32 bit True Color pixel format is required.</returns>
-    bool RequiresTrueColorPixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture);
+    public bool RequiresTrueColorPixelFormat(CommandCollection commands, CommandParser parser, CultureInfo culture);
 }

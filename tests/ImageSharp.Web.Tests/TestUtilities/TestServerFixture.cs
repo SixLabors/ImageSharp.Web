@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.Web.DependencyInjection;
+using SixLabors.ImageSharp.Web;
 using SixLabors.ImageSharp.Web.Middleware;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities;
@@ -68,7 +68,7 @@ public abstract class TestServerFixture : IDisposable
                 return onParseCommandsAsync.Invoke(context);
             };
 
-            Func<ImageCommandContext, Configuration, Task<DecoderOptions?>> onBeforeLoadAsync = options.OnBeforeLoadAsync;
+            Func<ImageCommandContext, Configuration, Task<DecoderOptions>> onBeforeLoadAsync = options.OnBeforeLoadAsync;
 
             options.OnBeforeLoadAsync = (context, configuration) =>
             {

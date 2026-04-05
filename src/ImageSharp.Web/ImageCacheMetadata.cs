@@ -97,13 +97,13 @@ public readonly struct ImageCacheMetadata : IEquatable<ImageCacheMetadata>
     public static ImageCacheMetadata FromDictionary(IDictionary<string, string> dictionary)
     {
         // DateTime.TryParse(null) ==  DateTime.MinValue so no need for conditional;
-        dictionary.TryGetValue(SourceLastModifiedKey, out string? sourceLastWriteTimeUtcString);
-        DateTime.TryParse(sourceLastWriteTimeUtcString, null, DateTimeStyles.RoundtripKind, out DateTime sourceLastWriteTimeUtc);
+        _ = dictionary.TryGetValue(SourceLastModifiedKey, out string? sourceLastWriteTimeUtcString);
+        _ = DateTime.TryParse(sourceLastWriteTimeUtcString, null, DateTimeStyles.RoundtripKind, out DateTime sourceLastWriteTimeUtc);
 
-        dictionary.TryGetValue(CacheLastModifiedKey, out string? cacheLastWriteTimeUtcString);
-        DateTime.TryParse(cacheLastWriteTimeUtcString, null, DateTimeStyles.RoundtripKind, out DateTime cacheLastWriteTimeUtc);
+        _ = dictionary.TryGetValue(CacheLastModifiedKey, out string? cacheLastWriteTimeUtcString);
+        _ = DateTime.TryParse(cacheLastWriteTimeUtcString, null, DateTimeStyles.RoundtripKind, out DateTime cacheLastWriteTimeUtc);
 
-        dictionary.TryGetValue(ContentTypeKey, out string? contentType);
+        _ = dictionary.TryGetValue(ContentTypeKey, out string? contentType);
         Guard.NotNull(contentType);
 
         // int.TryParse(null) == 0 and we want to return TimeSpan.MinValue not TimeSpan.Zero
@@ -114,7 +114,7 @@ public readonly struct ImageCacheMetadata : IEquatable<ImageCacheMetadata>
             cacheControlMaxAge = TimeSpan.FromSeconds(maxAge);
         }
 
-        dictionary.TryGetValue(ContentLengthKey, out string? contentLengthString);
+        _ = dictionary.TryGetValue(ContentLengthKey, out string? contentLengthString);
         _ = long.TryParse(contentLengthString, out long contentLength);
 
         return new ImageCacheMetadata(
@@ -132,7 +132,7 @@ public readonly struct ImageCacheMetadata : IEquatable<ImageCacheMetadata>
     /// <returns>The <see cref="ImageCacheMetadata"/>.</returns>
     public static async Task<ImageCacheMetadata> ReadAsync(Stream stream)
     {
-        Dictionary<string, string> dictionary = new();
+        Dictionary<string, string> dictionary = [];
         using (StreamReader reader = new(stream, Encoding.UTF8))
         {
             string? line;
@@ -202,8 +202,17 @@ public readonly struct ImageCacheMetadata : IEquatable<ImageCacheMetadata>
         await using StreamWriter writer = new(stream, Encoding.UTF8);
         foreach (KeyValuePair<string, string> keyValuePair in dictionary)
         {
-            // TODO: string.Create
-            await writer.WriteLineAsync($"{keyValuePair.Key}:{keyValuePair.Value}");
+            string line = string.Create(
+                keyValuePair.Key.Length + keyValuePair.Value.Length + 1,
+                keyValuePair,
+                static (span, state) =>
+                {
+                    state.Key.AsSpan().CopyTo(span);
+                    span[state.Key.Length] = ':';
+                    state.Value.AsSpan().CopyTo(span[(state.Key.Length + 1)..]);
+                });
+
+            await writer.WriteLineAsync(line);
         }
 
         await writer.FlushAsync();

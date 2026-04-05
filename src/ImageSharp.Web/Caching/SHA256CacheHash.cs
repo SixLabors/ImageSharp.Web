@@ -55,11 +55,11 @@ public sealed class SHA256CacheHash : ICacheHash
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string HashValue(ReadOnlySpan<char> value, uint length, Span<byte> bufferSpan)
     {
-        Encoding.ASCII.GetBytes(value, bufferSpan);
+        _ = Encoding.ASCII.GetBytes(value, bufferSpan);
 
         // Hashed output maxes out at 32 bytes @ 256bit/8 so we're safe to use stackalloc
         Span<byte> hash = stackalloc byte[32];
-        SHA256.TryHashData(bufferSpan, hash, out int _);
+        _ = SHA256.TryHashData(bufferSpan, hash, out _);
 
         // Length maxes out at 64 since we throw if options is greater
         return HexEncoder.Encode(hash[..(int)(length / 2)]);

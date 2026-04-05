@@ -17,7 +17,7 @@ public class WebProcessingExtensionsTests
             new QualityWebProcessor(),
             new ResizeWebProcessor(),
             new BackgroundColorWebProcessor(),
-            new MockWebProcessor()
+            new FakeWebProcessor()
         };
 
         CommandCollection commands = new()
@@ -39,7 +39,7 @@ public class WebProcessingExtensionsTests
     {
         var processors = new IImageWebProcessor[]
         {
-            new MockWebProcessor()
+            new FakeWebProcessor()
         };
 
         CommandCollection commands = new();

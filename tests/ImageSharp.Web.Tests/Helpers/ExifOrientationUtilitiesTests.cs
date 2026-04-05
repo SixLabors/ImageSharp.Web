@@ -23,7 +23,7 @@ public class ExifOrientationUtilitiesTests
     // │     │    F│     │     │     │     │
     // │     │     │     │     │     │     │
     // └─────┴─────┴─────┴─────┴─────┴─────┘
-    public static TheoryData<Vector2, Vector2, Vector2, ushort, Vector2> TransformVectorData =
+    public static TheoryData<Vector2, Vector2, Vector2, ushort, Vector2> TransformVectorData { get; } =
         new()
         {
             { new Vector2(24F, 26F), Vector2.Zero, new Vector2(150, 100), ExifOrientationMode.Unknown, new Vector2(24F, 26F) },
@@ -47,7 +47,7 @@ public class ExifOrientationUtilitiesTests
         Assert.Equal(expected.Y, actual.Y, 4);
     }
 
-    public static TheoryData<Size, ushort, Size> TransformSizeData =
+    public static TheoryData<Size, ushort, Size> TransformSizeData { get; } =
         new()
         {
             { new Size(150, 100), ExifOrientationMode.Unknown, new Size(150, 100) },
@@ -70,7 +70,7 @@ public class ExifOrientationUtilitiesTests
         Assert.Equal(expected, actual);
     }
 
-    public static TheoryData<AnchorPositionMode, ushort, AnchorPositionMode> TransformAnchorData =
+    public static TheoryData<AnchorPositionMode, ushort, AnchorPositionMode> TransformAnchorData { get; } =
         new()
         {
             { AnchorPositionMode.Center, ExifOrientationMode.Unknown, AnchorPositionMode.Center },

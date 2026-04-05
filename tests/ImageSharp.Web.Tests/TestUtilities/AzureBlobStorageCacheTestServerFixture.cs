@@ -3,9 +3,8 @@
 
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.DependencyInjection;
-using SixLabors.ImageSharp.Web.Caching.Azure;
-using SixLabors.ImageSharp.Web.DependencyInjection;
-using SixLabors.ImageSharp.Web.Providers.Azure;
+using SixLabors.ImageSharp.Web.Azure.Caching;
+using SixLabors.ImageSharp.Web.Azure.Providers;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities;
 

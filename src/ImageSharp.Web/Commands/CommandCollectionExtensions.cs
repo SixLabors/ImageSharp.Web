@@ -16,7 +16,7 @@ public static class CommandCollectionExtensions
     /// <returns>The value associated with the specified key or the default value.</returns>
     public static string? GetValueOrDefault(this CommandCollection collection, string key)
     {
-        collection.TryGetValue(key, out KeyValuePair<string, string?> result);
+        _ = collection.TryGetValue(key, out KeyValuePair<string, string?> result);
         return result.Value;
     }
 }

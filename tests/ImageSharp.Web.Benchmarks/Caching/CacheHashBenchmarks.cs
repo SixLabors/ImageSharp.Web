@@ -13,8 +13,8 @@ public class CacheHashBenchmarks
 {
     private const string URL = "http://testwebsite.com/image-12345.jpeg?width=400";
     private static readonly IOptions<ImageSharpMiddlewareOptions> MWOptions = Options.Create(new ImageSharpMiddlewareOptions());
-    private static readonly SHA256CacheHash Sha256Hasher = new SHA256CacheHash(MWOptions);
-    private static readonly CacheHashBaseline NaiveSha256Hasher = new CacheHashBaseline();
+    private static readonly SHA256CacheHash Sha256Hasher = new(MWOptions);
+    private static readonly CacheHashBaseline NaiveSha256Hasher = new();
 
     [Benchmark(Baseline = true, Description = "Baseline Sha256Hasher")]
     public string HashUsingBaselineHash() => NaiveSha256Hasher.Create(URL, 12);

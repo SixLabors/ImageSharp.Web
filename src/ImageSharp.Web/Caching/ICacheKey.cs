@@ -19,5 +19,5 @@ public interface ICacheKey
     /// <returns>
     /// The cache key.
     /// </returns>
-    string Create(HttpContext context, CommandCollection commands);
+    public string Create(HttpContext context, CommandCollection commands);
 }
