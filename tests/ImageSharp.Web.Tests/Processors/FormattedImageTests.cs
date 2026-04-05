@@ -56,14 +56,14 @@ public class FormattedImageTests
         formatted.Format = JpegFormat.Instance;
         Assert.Equal(typeof(JpegEncoder), formatted.Encoder.GetType());
 
-        JpegEncodingColor current = ((JpegEncoder)formatted.Encoder).ColorType.GetValueOrDefault();
+        JpegColorType current = ((JpegEncoder)formatted.Encoder).ColorType.GetValueOrDefault();
 
-        Assert.Equal(JpegEncodingColor.YCbCrRatio420, current);
-        formatted.Encoder = new JpegEncoder { ColorType = JpegEncodingColor.YCbCrRatio444 };
+        Assert.Equal(JpegColorType.YCbCrRatio420, current);
+        formatted.Encoder = new JpegEncoder { ColorType = JpegColorType.YCbCrRatio444 };
 
-        JpegEncodingColor replacement = ((JpegEncoder)formatted.Encoder).ColorType.GetValueOrDefault();
+        JpegColorType replacement = ((JpegEncoder)formatted.Encoder).ColorType.GetValueOrDefault();
 
         Assert.NotEqual(current, replacement);
-        Assert.Equal(JpegEncodingColor.YCbCrRatio444, replacement);
+        Assert.Equal(JpegColorType.YCbCrRatio444, replacement);
     }
 }

@@ -23,7 +23,7 @@ public sealed class CommandParser
     public CommandParser(IEnumerable<ICommandConverter> converters)
     {
         Guard.NotNull(converters, nameof(converters));
-        this.converters = converters.ToArray();
+        this.converters = [.. converters];
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AssemblyTitle>SixLabors.ImageSharp.Web</AssemblyTitle>
@@ -20,19 +20,19 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!--Bump to V3 prior to tagged release.-->
-    <MinVerMinimumMajorMinor>3.0</MinVerMinimumMajorMinor>
+    <!--Bump to V4 prior to tagged release.-->
+    <MinVerMinimumMajorMinor>4.0</MinVerMinimumMajorMinor>
   </PropertyGroup>
 
   <Choose>
     <When Condition="$(SIXLABORS_TESTING_PREVIEW) == true">
       <PropertyGroup>
-        <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+        <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
       </PropertyGroup>
     </When>
     <Otherwise>
       <PropertyGroup>
-        <TargetFrameworks>net6.0</TargetFrameworks>
+        <TargetFrameworks>net8.0</TargetFrameworks>
       </PropertyGroup>
     </Otherwise>
   </Choose>
@@ -46,7 +46,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="4.0.0-alpha.0.88" />
   </ItemGroup>
 
   <Import Project="..\..\shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems" Label="Shared" />

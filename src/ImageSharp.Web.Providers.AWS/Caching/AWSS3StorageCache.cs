@@ -5,10 +5,11 @@ using System.Globalization;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Web.AWS.Resolvers;
+using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Resolvers;
-using SixLabors.ImageSharp.Web.Resolvers.AWS;
 
-namespace SixLabors.ImageSharp.Web.Caching.AWS;
+namespace SixLabors.ImageSharp.Web.AWS.Caching;
 
 /// <summary>
 /// Implements an AWS S3 Storage based cache.

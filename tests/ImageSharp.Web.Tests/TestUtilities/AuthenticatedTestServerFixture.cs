@@ -2,7 +2,6 @@
 // Licensed under the Six Labors Split License.
 
 using Microsoft.Extensions.DependencyInjection;
-using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities;

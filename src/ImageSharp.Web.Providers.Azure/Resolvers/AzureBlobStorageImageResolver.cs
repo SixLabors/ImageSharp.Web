@@ -4,8 +4,9 @@
 using System.Net.Http.Headers;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using SixLabors.ImageSharp.Web.Resolvers;
 
-namespace SixLabors.ImageSharp.Web.Resolvers.Azure;
+namespace SixLabors.ImageSharp.Web.Azure.Resolvers;
 
 /// <summary>
 /// Provides means to manage image buffers within the Azure Blob file system.

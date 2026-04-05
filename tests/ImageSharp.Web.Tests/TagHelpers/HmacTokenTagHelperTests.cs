@@ -20,7 +20,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Extensions.WebEncoders.Testing;
-using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.TagHelpers;
 
@@ -32,7 +31,7 @@ public sealed class HmacTokenTagHelperTests : IDisposable
     {
         ServiceCollection services = new();
         services.AddSingleton<IWebHostEnvironment, FakeWebHostEnvironment>();
-        services.AddImageSharp(options => options.HMACSecretKey = new byte[] { 1, 2, 3, 4, 5 });
+        services.AddImageSharp(options => options.HMACSecretKey = [1, 2, 3, 4, 5]);
         this.Provider = services.BuildServiceProvider();
     }
 
@@ -108,14 +107,14 @@ public sealed class HmacTokenTagHelperTests : IDisposable
 
     private static TagHelperOutput MakeImageTagHelperOutput(TagHelperAttributeList attributes)
     {
-        attributes ??= new TagHelperAttributeList();
+        attributes ??= [];
 
         return new TagHelperOutput(
             "img",
             attributes,
             getChildContentAsync: (useCachedResult, encoder) =>
             {
-                var tagHelperContent = new DefaultTagHelperContent();
+                DefaultTagHelperContent tagHelperContent = new();
                 tagHelperContent.SetContent(default);
                 return Task.FromResult<TagHelperContent>(tagHelperContent);
             });
@@ -123,14 +122,14 @@ public sealed class HmacTokenTagHelperTests : IDisposable
 
     private static ViewContext MakeViewContext(string requestPathBase = null)
     {
-        var actionContext = new ActionContext(new DefaultHttpContext(), new RouteData(), new ActionDescriptor());
+        ActionContext actionContext = new(new DefaultHttpContext(), new RouteData(), new ActionDescriptor());
         if (requestPathBase != null)
         {
             actionContext.HttpContext.Request.PathBase = new PathString(requestPathBase);
         }
 
-        var metadataProvider = new EmptyModelMetadataProvider();
-        var viewData = new ViewDataDictionary(metadataProvider, new ModelStateDictionary());
+        EmptyModelMetadataProvider metadataProvider = new();
+        ViewDataDictionary viewData = new(metadataProvider, new ModelStateDictionary());
         return new ViewContext(
             actionContext,
             new FakeView(),
@@ -142,14 +141,14 @@ public sealed class HmacTokenTagHelperTests : IDisposable
 
     public void Dispose() => this.Provider.Dispose();
 
-    private class FakeView : IView
+    private sealed class FakeView : IView
     {
         public string Path { get; }
 
         public Task RenderAsync(ViewContext context) => throw new NotSupportedException();
     }
 
-    private class FakeTempDataDictionary : Dictionary<string, object>, ITempDataDictionary
+    private sealed class FakeTempDataDictionary : Dictionary<string, object>, ITempDataDictionary
     {
         public void Keep() => throw new NotSupportedException();
 
@@ -162,7 +161,7 @@ public sealed class HmacTokenTagHelperTests : IDisposable
         public void Save() => throw new NotSupportedException();
     }
 
-    private class FakeWebHostEnvironment : IWebHostEnvironment
+    private sealed class FakeWebHostEnvironment : IWebHostEnvironment
     {
         public string WebRootPath { get; set; }
 
@@ -177,7 +176,7 @@ public sealed class HmacTokenTagHelperTests : IDisposable
         public string EnvironmentName { get; set; }
     }
 
-    private class FakeFileProvider : IFileProvider
+    private sealed class FakeFileProvider : IFileProvider
     {
         public IDirectoryContents GetDirectoryContents(string subpath) => new FakeDirectoryContents();
 
@@ -186,7 +185,7 @@ public sealed class HmacTokenTagHelperTests : IDisposable
         public IChangeToken Watch(string filter) => new FakeFileChangeToken();
     }
 
-    private class FakeFileChangeToken : IChangeToken
+    private sealed class FakeFileChangeToken : IChangeToken
     {
         public FakeFileChangeToken(string filter = "") => this.Filter = filter;
 
@@ -208,7 +207,7 @@ public sealed class HmacTokenTagHelperTests : IDisposable
         public override string ToString() => this.Filter;
     }
 
-    private class FakeDirectoryContents : IDirectoryContents
+    private sealed class FakeDirectoryContents : IDirectoryContents
     {
         public bool Exists { get; }
 
@@ -217,7 +216,7 @@ public sealed class HmacTokenTagHelperTests : IDisposable
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 
-    private class FakeFileInfo : IFileInfo
+    private sealed class FakeFileInfo : IFileInfo
     {
         public bool Exists { get; } = true;
 
@@ -234,12 +233,12 @@ public sealed class HmacTokenTagHelperTests : IDisposable
         public Stream CreateReadStream() => new MemoryStream(Encoding.UTF8.GetBytes("Hello World!"));
     }
 
-    private class FakeUrlHelperFactory : IUrlHelperFactory
+    private sealed class FakeUrlHelperFactory : IUrlHelperFactory
     {
         public IUrlHelper GetUrlHelper(ActionContext context) => new FakeUrlHelper() { ActionContext = context };
     }
 
-    private class FakeUrlHelper : IUrlHelper
+    private sealed class FakeUrlHelper : IUrlHelper
     {
         public ActionContext ActionContext { get; set; }
 
@@ -247,7 +246,7 @@ public sealed class HmacTokenTagHelperTests : IDisposable
 
         // Ensure expanded path does not look like an absolute path on Linux, avoiding
         // https://github.com/aspnet/External/issues/21
-        [return: NotNullIfNotNull("contentPath")]
+        [return: NotNullIfNotNull(nameof(contentPath))]
         public string Content(string contentPath) => contentPath.Replace("~/", "virtualRoot/");
 
         public bool IsLocalUrl([NotNullWhen(true)] string url) => throw new NotSupportedException();

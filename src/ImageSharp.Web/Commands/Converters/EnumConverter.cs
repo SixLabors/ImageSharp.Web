@@ -29,7 +29,7 @@ public sealed class EnumConverter : ICommandConverter<object>
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            return Activator.CreateInstance(propertyType);
+            return Enum.ToObject(propertyType, 0);
         }
 
         try
@@ -51,7 +51,7 @@ public sealed class EnumConverter : ICommandConverter<object>
         catch
         {
             // Just return the default value
-            return Activator.CreateInstance(propertyType);
+            return Enum.ToObject(propertyType, 0);
         }
     }
 
@@ -66,5 +66,5 @@ public sealed class EnumConverter : ICommandConverter<object>
 
         // TODO: Can we use StringSplit Enumerator here?
         // https://github.com/dotnet/runtime/issues/934
-        => input.Split(separator).Select(s => s.Trim()).ToArray();
+        => [.. input.Split(separator).Select(s => s.Trim())];
 }

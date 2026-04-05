@@ -1,9 +1,9 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
+using SixLabors.ImageSharp.Web;
 using SixLabors.ImageSharp.Web.Caching;
 using SixLabors.ImageSharp.Web.Commands;
-using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
 
@@ -27,7 +27,7 @@ public static class Program
         services.AddRazorPages();
 
         // TODO: Enable HMAC
-        services.AddImageSharp(options => options.HMACSecretKey = new byte[] { 1, 2, 3, 4, 5 })
+        services.AddImageSharp(options => options.HMACSecretKey = [1, 2, 3, 4, 5])
             .SetRequestParser<QueryCollectionRequestParser>()
             .Configure<PhysicalFileSystemCacheOptions>(options =>
             {

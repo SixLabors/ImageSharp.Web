@@ -22,7 +22,8 @@ internal static class TestEnvironment
             // try reading the environment directly.
             // https://docs.github.com/en/actions/learn-github-actions/environment-variables
             string variable = Environment.GetEnvironmentVariable("CI");
-            bool.TryParse(variable, out bool result);
+
+            _ = bool.TryParse(variable, out bool result);
             return result;
         }
     }

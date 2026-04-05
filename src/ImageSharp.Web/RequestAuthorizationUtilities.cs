@@ -62,7 +62,7 @@ public sealed class RequestAuthorizationUtilities
         {
             foreach (string command in processor.Commands)
             {
-                commands.Add(command);
+                _ = commands.Add(command);
             }
         }
 
@@ -78,7 +78,7 @@ public sealed class RequestAuthorizationUtilities
         if (commands?.Count > 0)
         {
             // Strip out any unknown commands, if needed.
-            List<string> keys = new(commands.Keys);
+            List<string> keys = [.. commands.Keys];
             for (int i = keys.Count - 1; i >= 0; i--)
             {
                 if (!this.knownCommands.Contains(keys[i]))
@@ -207,7 +207,7 @@ public sealed class RequestAuthorizationUtilities
         }
     }
 
-    private HttpContext ToHttpContext(HostString host, PathString path, QueryString queryString, QueryCollection query)
+    private DefaultHttpContext ToHttpContext(HostString host, PathString path, QueryString queryString, QueryCollection query)
     {
         DefaultHttpContext context = new() { RequestServices = this.serviceProvider };
         HttpRequest request = context.Request;

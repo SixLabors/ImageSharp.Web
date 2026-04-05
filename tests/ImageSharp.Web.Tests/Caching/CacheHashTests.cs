@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
+using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp.Web.Caching;
@@ -12,14 +13,14 @@ namespace SixLabors.ImageSharp.Web.Tests.Caching;
 public class CacheHashTests
 {
     private static readonly IOptions<ImageSharpMiddlewareOptions> Options = MSOptions.Create(new ImageSharpMiddlewareOptions());
-    private static readonly ICacheHash CacheHash = new SHA256CacheHash(Options);
+    private static readonly SHA256CacheHash CacheHash = new(Options);
 
     [Fact]
     public void CacheHashProducesIdenticalResults()
     {
-        const string Input = "http://testwebsite.com/image-12345.jpeg?width=400";
-        string expected = CacheHash.Create(Input, 8);
-        string actual = CacheHash.Create(Input, 8);
+        const string input = "http://testwebsite.com/image-12345.jpeg?width=400";
+        string expected = CacheHash.Create(input, 8);
+        string actual = CacheHash.Create(input, 8);
 
         Assert.Equal(expected, actual);
     }
@@ -27,10 +28,10 @@ public class CacheHashTests
     [Fact]
     public void CacheHashProducesDifferentResults()
     {
-        const string Input = "http://testwebsite.com/image-12345.jpeg?width=400";
-        const string Input2 = "http://testwebsite.com/image-23456.jpeg?width=400";
-        string expected = CacheHash.Create(Input, 8);
-        string actual = CacheHash.Create(Input2, 8);
+        const string input = "http://testwebsite.com/image-12345.jpeg?width=400";
+        const string input2 = "http://testwebsite.com/image-23456.jpeg?width=400";
+        string expected = CacheHash.Create(input, 8);
+        string actual = CacheHash.Create(input2, 8);
 
         Assert.NotEqual(expected, actual);
     }
@@ -38,28 +39,28 @@ public class CacheHashTests
     [Fact]
     public void CacheHashLengthIsIdentical()
     {
-        const int Length = 12;
-        const string Input = "http://testwebsite.com/image-12345.jpeg?width=400";
-        const string Input2 = "http://testwebsite.com/image-12345.jpeg";
+        const int length = 12;
+        const string input = "http://testwebsite.com/image-12345.jpeg?width=400";
+        const string input2 = "http://testwebsite.com/image-12345.jpeg";
         string input3 = CreateLongString();
 
-        int expected = CacheHash.Create(Input, Length).Length;
-        int actual = CacheHash.Create(Input2, Length).Length;
-        int actual2 = CacheHash.Create(input3, Length).Length;
+        int expected = CacheHash.Create(input, length).Length;
+        int actual = CacheHash.Create(input2, length).Length;
+        int actual2 = CacheHash.Create(input3, length).Length;
 
         Assert.Equal(expected, actual);
-        Assert.Equal(Length, actual);
-        Assert.Equal(Length, actual2);
+        Assert.Equal(length, actual);
+        Assert.Equal(length, actual2);
     }
 
     private static string CreateLongString()
     {
-        const int Length = 2048;
-        var sb = new StringBuilder(Length);
+        const int length = 2048;
+        StringBuilder sb = new(length);
 
-        for (int i = 0; i < Length; i++)
+        for (int i = 0; i < length; i++)
         {
-            sb.Append(i.ToString());
+            sb.Append(i.ToString(CultureInfo.InvariantCulture));
         }
 
         return sb.ToString();

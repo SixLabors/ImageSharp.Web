@@ -6,10 +6,11 @@ using Amazon.S3.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Web.AWS.Resolvers;
+using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.ImageSharp.Web.Resolvers;
-using SixLabors.ImageSharp.Web.Resolvers.AWS;
 
-namespace SixLabors.ImageSharp.Web.Providers.AWS;
+namespace SixLabors.ImageSharp.Web.AWS.Providers;
 
 /// <summary>
 /// Returns images stored in AWS S3.
@@ -19,13 +20,13 @@ public class AWSS3StorageImageProvider : IImageProvider, IDisposable
     /// <summary>
     /// Character array to remove from paths.
     /// </summary>
-    private static readonly char[] SlashChars = { '\\', '/' };
+    private static readonly char[] SlashChars = ['\\', '/'];
 
     /// <summary>
     /// The containers for the blob services.
     /// </summary>
     private readonly Dictionary<string, AmazonS3BucketClient> buckets
-        = new();
+        = [];
 
     private readonly AWSS3StorageImageProviderOptions storageOptions;
     private Func<HttpContext, bool>? match;
@@ -154,7 +155,7 @@ public class AWSS3StorageImageProvider : IImageProvider, IDisposable
     }
 
     // ref https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/S3/Custom/_bcl/IO/S3FileInfo.cs#L118
-    private static async Task<KeyExistsResult> KeyExists(IAmazonS3 s3Client, string bucketName, string key)
+    private static async Task<KeyExistsResult> KeyExists(AmazonS3Client s3Client, string bucketName, string key)
     {
         try
         {

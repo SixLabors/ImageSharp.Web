@@ -17,8 +17,8 @@ namespace SixLabors.ImageSharp.Web;
 /// </summary>
 public sealed class FormatUtilities
 {
-    private readonly List<string> extensions = new();
-    private readonly Dictionary<string, string> extensionsByMimeType = new();
+    private readonly List<string> extensions = [];
+    private readonly Dictionary<string, string> extensionsByMimeType = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FormatUtilities" /> class.
@@ -30,7 +30,7 @@ public sealed class FormatUtilities
 
         foreach (IImageFormat imageFormat in options.Value.Configuration.ImageFormats)
         {
-            string[] extensions = imageFormat.FileExtensions.ToArray();
+            string[] extensions = [.. imageFormat.FileExtensions];
 
             this.extensions.AddRange(extensions);
 

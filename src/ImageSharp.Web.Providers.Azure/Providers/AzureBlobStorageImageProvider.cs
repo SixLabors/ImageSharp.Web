@@ -5,10 +5,11 @@ using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp.Web.Azure.Resolvers;
+using SixLabors.ImageSharp.Web.Providers;
 using SixLabors.ImageSharp.Web.Resolvers;
-using SixLabors.ImageSharp.Web.Resolvers.Azure;
 
-namespace SixLabors.ImageSharp.Web.Providers.Azure;
+namespace SixLabors.ImageSharp.Web.Azure.Providers;
 
 /// <summary>
 /// Returns images stored in Azure Blob Storage.
@@ -18,13 +19,13 @@ public class AzureBlobStorageImageProvider : IImageProvider
     /// <summary>
     /// Character array to remove from paths.
     /// </summary>
-    private static readonly char[] SlashChars = { '\\', '/' };
+    private static readonly char[] SlashChars = ['\\', '/'];
 
     /// <summary>
     /// The containers for the blob services.
     /// </summary>
     private readonly Dictionary<string, BlobContainerClient> containers
-        = new();
+        = [];
 
     /// <summary>
     /// Contains various helper methods based on the current configuration.

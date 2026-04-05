@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
 using Microsoft.Extensions.Logging;
@@ -54,9 +54,7 @@ internal static class LoggerExtensions
     /// <param name="uri">The full request uri.</param>
     /// <param name="exception">The captured exception.</param>
     public static void LogImageProcessingFailed(this ILogger logger, string uri, Exception exception)
-    {
-        LogProcessingErrorAction(logger, uri, exception);
-    }
+        => LogProcessingErrorAction(logger, uri, exception);
 
     /// <summary>
     /// Logs that a given image could not be resolved.
@@ -64,9 +62,7 @@ internal static class LoggerExtensions
     /// <param name="logger">The type used to perform logging.</param>
     /// <param name="uri">The full request uri.</param>
     public static void LogImageResolveFailed(this ILogger logger, string uri)
-    {
-        LogResolveFailedAction(logger, uri, null);
-    }
+        => LogResolveFailedAction(logger, uri, null);
 
     /// <summary>
     /// Logs that a given image request has been served.
@@ -75,9 +71,7 @@ internal static class LoggerExtensions
     /// <param name="uri">The full request uri.</param>
     /// <param name="key">The cached image key.</param>
     public static void LogImageServed(this ILogger logger, string uri, string key)
-    {
-        LogServedAction(logger, uri, key, null);
-    }
+        => LogServedAction(logger, uri, key, null);
 
     /// <summary>
     /// Logs that a given image request has not been modified.
@@ -85,9 +79,7 @@ internal static class LoggerExtensions
     /// <param name="logger">The type used to perform logging.</param>
     /// <param name="uri">The full request uri.</param>
     public static void LogImageNotModified(this ILogger logger, string uri)
-    {
-        LogPathNotModifiedAction(logger, uri, null);
-    }
+        => LogPathNotModifiedAction(logger, uri, null);
 
     /// <summary>
     /// Logs that access to a given image request has been denied.
@@ -95,7 +87,5 @@ internal static class LoggerExtensions
     /// <param name="logger">The type used to perform logging.</param>
     /// <param name="uri">The full request uri.</param>
     public static void LogImagePreconditionFailed(this ILogger logger, string uri)
-    {
-        LogPreconditionFailedAction(logger, uri, null);
-    }
+        => LogPreconditionFailedAction(logger, uri, null);
 }

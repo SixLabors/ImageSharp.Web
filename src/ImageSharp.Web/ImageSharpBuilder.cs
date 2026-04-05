@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace SixLabors.ImageSharp.Web.DependencyInjection;
+namespace SixLabors.ImageSharp.Web;
 
 /// <summary>
 /// Allows fine grained configuration of ImageSharp services.

@@ -12,11 +12,11 @@ public interface IImageCacheResolver
     /// Asynchronously gets metadata associated with this image.
     /// </summary>
     /// <returns>The <see cref="ImageCacheMetadata"/>.</returns>
-    Task<ImageCacheMetadata> GetMetaDataAsync();
+    public Task<ImageCacheMetadata> GetMetaDataAsync();
 
     /// <summary>
     /// Asynchronously gets the input image stream.
     /// </summary>
     /// <returns>The <see cref="Task{Stream}"/>.</returns>
-    Task<Stream> OpenReadAsync();
+    public Task<Stream> OpenReadAsync();
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -18,10 +19,10 @@ public class ToHexBenchmarks
     public string StringBuilderToHex()
     {
         const int len = 12;
-        var sb = new StringBuilder(len);
+        StringBuilder sb = new(len);
         for (int i = 0; i < len / 2; i++)
         {
-            sb.Append(Bytes[i].ToString("x2"));
+            sb.Append(Bytes[i].ToString("x2", CultureInfo.InvariantCulture));
         }
 
         return sb.ToString();
@@ -52,19 +53,16 @@ public class ToHexBenchmarks
     }
 
     [Benchmark(Description = "HexEncoder.Encode with LUT")]
-    public string CustomToHexUnsafe() => HexEncoder.Encode(new Span<byte>(Bytes).Slice(0, 6));
+    public string CustomToHexUnsafe() => HexEncoder.Encode(new Span<byte>(Bytes)[..6]);
 
     private static byte[] Hash()
     {
-        using (var hashAlgorithm = SHA256.Create())
-        {
-            // Concatenate the hash bytes into one long string.
-            string value = "http://testwebsite.com/image-12345.jpeg?width=400";
-            int byteCount = Encoding.ASCII.GetByteCount(value);
-            byte[] buffer = new byte[byteCount];
-            Encoding.ASCII.GetBytes(value, 0, value.Length, buffer, 0);
-            return hashAlgorithm.ComputeHash(buffer, 0, byteCount);
-        }
+        // Concatenate the hash bytes into one long string.
+        string value = "http://testwebsite.com/image-12345.jpeg?width=400";
+        int byteCount = Encoding.ASCII.GetByteCount(value);
+        byte[] buffer = new byte[byteCount];
+        Encoding.ASCII.GetBytes(value, 0, value.Length, buffer, 0);
+        return SHA256.HashData(buffer.AsSpan(0, byteCount));
     }
 
     /*

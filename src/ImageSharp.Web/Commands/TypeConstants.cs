@@ -52,7 +52,7 @@ internal static class TypeConstants
     /// The collection of integral number types.
     /// </summary>
     public static readonly Type[] IntegralTypes =
-    {
+    [
         Sbyte,
         Byte,
         Short,
@@ -61,5 +61,5 @@ internal static class TypeConstants
         UInt,
         Long,
         ULong
-    };
+    ];
 }

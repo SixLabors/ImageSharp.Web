@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace SixLabors.ImageSharp.Web.Commands.Converters;
+
 internal static class ConverterUtility
 {
     /// <summary>

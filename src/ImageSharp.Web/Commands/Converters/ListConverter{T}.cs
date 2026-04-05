@@ -23,7 +23,7 @@ public sealed class ListConverter<T> : ICommandConverter<List<T>>
         string? value,
         Type propertyType)
     {
-        List<T> result = new();
+        List<T> result = [];
         if (string.IsNullOrWhiteSpace(value))
         {
             return result;
@@ -48,6 +48,6 @@ public sealed class ListConverter<T> : ICommandConverter<List<T>>
 
         // TODO: Can we use StringSplit Enumerator here?
         // https://github.com/dotnet/runtime/issues/934
-        return input.Split(separator).Select(s => s.Trim()).ToArray();
+        return [.. input.Split(separator).Select(s => s.Trim())];
     }
 }

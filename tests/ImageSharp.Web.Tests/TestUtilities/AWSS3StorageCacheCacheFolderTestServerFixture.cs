@@ -3,9 +3,8 @@
 
 using Amazon.S3;
 using Microsoft.Extensions.DependencyInjection;
-using SixLabors.ImageSharp.Web.Caching.AWS;
-using SixLabors.ImageSharp.Web.DependencyInjection;
-using SixLabors.ImageSharp.Web.Providers.AWS;
+using SixLabors.ImageSharp.Web.AWS.Caching;
+using SixLabors.ImageSharp.Web.AWS.Providers;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities;
 

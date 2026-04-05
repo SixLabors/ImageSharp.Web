@@ -1,7 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
-namespace SixLabors.ImageSharp.Web;
+namespace SixLabors.ImageSharp.Web.AWS;
 
 /// <summary>
 /// Provides a common interface for AWS S3 Bucket Client Options.

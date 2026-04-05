@@ -25,7 +25,7 @@ public sealed class AsyncKeyLock<TKey> : IDisposable
     /// <param name="maxPoolSize">The maximum number of locks that should be pooled for reuse.</param>
     public AsyncKeyLock(int maxPoolSize = 64)
     {
-        this.pool = new ConcurrentBag<AsyncLock>();
+        this.pool = [];
         this.activeLocks = new RefCountedConcurrentDictionary<TKey, AsyncLock>(this.CreateLeasedLock, this.ReturnLeasedLock);
         this.maxPoolSize = maxPoolSize;
     }

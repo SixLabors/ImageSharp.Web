@@ -3,7 +3,7 @@
 
 using Amazon.S3;
 
-namespace SixLabors.ImageSharp.Web;
+namespace SixLabors.ImageSharp.Web.AWS;
 
 /// <summary>
 /// Represents a scoped Amazon S3 client instance that is explicitly associated with a single S3 bucket.

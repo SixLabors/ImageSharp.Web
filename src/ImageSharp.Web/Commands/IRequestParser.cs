@@ -15,5 +15,5 @@ public interface IRequestParser
     /// </summary>
     /// <param name="context">Encapsulates all HTTP-specific information about an individual HTTP request.</param>
     /// <returns>The <see cref="IDictionary{TKey,TValue}"/>.</returns>
-    CommandCollection ParseRequestCommands(HttpContext context);
+    public CommandCollection ParseRequestCommands(HttpContext context);
 }

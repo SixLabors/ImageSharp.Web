@@ -1,6 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using SixLabors.ImageSharp.Web.Caching;
@@ -20,18 +21,15 @@ public class CacheHashBaseline : ICacheHash
         // {
         //    throw new ArgumentOutOfRangeException(nameof(length), $"Value must be greater than or equal to {2} and less than or equal to {64}.");
         // }
-        using (var hashAlgorithm = SHA256.Create())
+        // Concatenate the hash bytes into one long string.
+        int len = (int)length;
+        byte[] hash = SHA256.HashData(Encoding.ASCII.GetBytes(value));
+        StringBuilder sb = new(len);
+        for (int i = 0; i < len / 2; i++)
         {
-            // Concatenate the hash bytes into one long string.
-            int len = (int)length;
-            byte[] hash = hashAlgorithm.ComputeHash(Encoding.ASCII.GetBytes(value));
-            var sb = new StringBuilder(len);
-            for (int i = 0; i < len / 2; i++)
-            {
-                sb.Append(hash[i].ToString("X2"));
-            }
-
-            return sb.ToString();
+            sb.Append(hash[i].ToString("X2", CultureInfo.InvariantCulture));
         }
+
+        return sb.ToString();
     }
 }

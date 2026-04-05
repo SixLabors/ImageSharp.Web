@@ -50,11 +50,11 @@ internal static class WebProcessingExtensions
     /// </returns>
     public static IReadOnlyList<(int Index, IImageWebProcessor Processor)> OrderBySupportedCommands(this IEnumerable<IImageWebProcessor> processors, CommandCollection commands)
     {
-        List<(int Index, IImageWebProcessor Processor)> indexedProcessors = new();
+        List<(int Index, IImageWebProcessor Processor)> indexedProcessors = [];
         foreach (IImageWebProcessor processor in processors)
         {
             // Get index of first supported command
-            int index = commands.FindIndex(c => processor.IsSupportedCommand(c));
+            int index = commands.FindIndex(processor.IsSupportedCommand);
             if (index != -1)
             {
                 indexedProcessors.Add((index, processor));

@@ -13,7 +13,7 @@ namespace SixLabors.ImageSharp.Web.Commands;
 /// </summary>
 public class PresetOnlyQueryCollectionRequestParser : IRequestParser
 {
-    private readonly IDictionary<string, CommandCollection> presets;
+    private readonly Dictionary<string, CommandCollection> presets;
 
     /// <summary>
     /// The command constant for the preset query parameter.
@@ -36,7 +36,7 @@ public class PresetOnlyQueryCollectionRequestParser : IRequestParser
             || !queryCollection.ContainsKey(QueryKey))
         {
             // We return new here and below to ensure the collection is still mutable via events.
-            return new();
+            return [];
         }
 
         StringValues query = queryCollection[QueryKey];
@@ -46,10 +46,10 @@ public class PresetOnlyQueryCollectionRequestParser : IRequestParser
             return collection;
         }
 
-        return new();
+        return [];
     }
 
-    private static IDictionary<string, CommandCollection> ParsePresets(
+    private static Dictionary<string, CommandCollection> ParsePresets(
         IDictionary<string, string> unparsedPresets) =>
         unparsedPresets
             .Select(keyValue =>
@@ -58,7 +58,7 @@ public class PresetOnlyQueryCollectionRequestParser : IRequestParser
 
     private static CommandCollection ParsePreset(string unparsedPresetValue)
     {
-        CommandCollection transformed = new();
+        CommandCollection transformed = [];
         foreach (QueryStringEnumerable.EncodedNameValuePair pair in new QueryStringEnumerable(unparsedPresetValue))
         {
             // Last value wins.

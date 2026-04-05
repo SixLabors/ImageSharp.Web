@@ -264,7 +264,7 @@ public class ResizeWebProcessor : IImageWebProcessor
             return ExifOrientationMode.Unknown;
         }
 
-        image.TryGetExifOrientation(out ushort orientation);
+        _ = image.TryGetExifOrientation(out ushort orientation);
         return orientation;
     }
 

@@ -7,7 +7,7 @@ using SixLabors.ImageSharp.Web.Commands;
 
 namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection;
 
-public class MockCacheKey : ICacheKey
+public class FakeCacheKey : ICacheKey
 {
     public string Create(HttpContext context, CommandCollection commands) => null;
 }

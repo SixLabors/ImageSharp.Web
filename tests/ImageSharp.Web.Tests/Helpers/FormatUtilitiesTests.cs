@@ -8,7 +8,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Helpers;
 
 public class FormatUtilitiesTests
 {
-    public static IEnumerable<object[]> DefaultExtensions =
+    public static IEnumerable<object[]> DefaultExtensions { get; } =
         Configuration.Default.ImageFormats.SelectMany(f => f.FileExtensions.Select(e => new object[] { e, e }));
 
     private static readonly FormatUtilities FormatUtilities = new(Options.Create(new ImageSharpMiddlewareOptions()));

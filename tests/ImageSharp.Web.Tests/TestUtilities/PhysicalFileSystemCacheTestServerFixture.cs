@@ -3,7 +3,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Web.Caching;
-using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Providers;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities;

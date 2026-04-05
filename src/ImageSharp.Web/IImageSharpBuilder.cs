@@ -1,9 +1,9 @@
-﻿// Copyright (c) Six Labors.
+// Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace SixLabors.ImageSharp.Web.DependencyInjection;
+namespace SixLabors.ImageSharp.Web;
 
 /// <summary>
 /// Defines a contract for adding ImageSharp services.
@@ -13,5 +13,5 @@ public interface IImageSharpBuilder
     /// <summary>
     /// Gets the <see cref="IServiceCollection"/> where ImageSharp services are configured.
     /// </summary>
-    IServiceCollection Services { get; }
+    public IServiceCollection Services { get; }
 }

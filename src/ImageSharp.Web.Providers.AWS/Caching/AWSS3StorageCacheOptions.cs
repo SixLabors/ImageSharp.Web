@@ -1,7 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
-namespace SixLabors.ImageSharp.Web.Caching.AWS;
+namespace SixLabors.ImageSharp.Web.AWS.Caching;
 
 /// <summary>
 /// Configuration options for the <see cref="AWSS3StorageCache"/> provider.

@@ -4,7 +4,7 @@
 using Microsoft.AspNetCore.Builder;
 using SixLabors.ImageSharp.Web.Middleware;
 
-namespace SixLabors.ImageSharp.Web.DependencyInjection;
+namespace SixLabors.ImageSharp.Web;
 
 /// <summary>
 /// Extension methods for <see cref="IApplicationBuilder"/> to simplify middleware registration.

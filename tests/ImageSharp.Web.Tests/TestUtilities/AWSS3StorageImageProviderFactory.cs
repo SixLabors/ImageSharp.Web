@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Providers.AWS;
+using SixLabors.ImageSharp.Web.AWS;
+using SixLabors.ImageSharp.Web.AWS.Providers;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities;
 

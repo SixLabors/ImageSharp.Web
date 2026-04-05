@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Providers.Azure;
+using SixLabors.ImageSharp.Web.Azure.Providers;
 
 namespace SixLabors.ImageSharp.Web.Tests.TestUtilities;
 
@@ -27,7 +27,7 @@ public static class AzureBlobStorageImageProviderFactory
     {
         // Upload an image to the Azure Test Storage;
         AzureBlobContainerClientOptions containerOptions = options.BlobContainers.First();
-        var container = new BlobContainerClient(containerOptions.ConnectionString, containerOptions.ContainerName);
+        BlobContainerClient container = new(containerOptions.ConnectionString, containerOptions.ContainerName);
         container.CreateIfNotExists(PublicAccessType.Blob);
 
         IWebHostEnvironment environment = services.GetRequiredService<IWebHostEnvironment>();
@@ -40,14 +40,14 @@ public static class AzureBlobStorageImageProviderFactory
             using Stream stream = file.CreateReadStream();
 
             // Set the max-age property so we get coverage for testing is in our Azure provider.
-            var cacheControl = new CacheControlHeaderValue
+            CacheControlHeaderValue cacheControl = new()
             {
                 Public = true,
                 MaxAge = TimeSpan.FromDays(7),
                 MustRevalidate = true
             };
 
-            var headers = new BlobHttpHeaders
+            BlobHttpHeaders headers = new()
             {
                 CacheControl = cacheControl.ToString(),
             };

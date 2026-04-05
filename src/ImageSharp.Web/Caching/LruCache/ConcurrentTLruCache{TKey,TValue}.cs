@@ -148,7 +148,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
         if (this.dictionary.TryAdd(key, newItem))
         {
             this.hotQueue.Enqueue(newItem);
-            Interlocked.Increment(ref this.hotCount);
+            _ = Interlocked.Increment(ref this.hotCount);
             this.Cycle();
             return newItem.Value;
         }
@@ -177,7 +177,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
         if (this.dictionary.TryAdd(key, newItem))
         {
             this.hotQueue.Enqueue(newItem);
-            Interlocked.Increment(ref this.hotCount);
+            _ = Interlocked.Increment(ref this.hotCount);
             this.Cycle();
             return newItem.Value;
         }
@@ -260,7 +260,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
     {
         if (this.hotCount > this.hotCapacity)
         {
-            Interlocked.Decrement(ref this.hotCount);
+            _ = Interlocked.Decrement(ref this.hotCount);
 
             if (this.hotQueue.TryDequeue(out LongTickCountLruItem<TKey, TValue>? item))
             {
@@ -269,7 +269,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
             }
             else
             {
-                Interlocked.Increment(ref this.hotCount);
+                _ = Interlocked.Increment(ref this.hotCount);
             }
         }
     }
@@ -278,7 +278,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
     {
         if (this.warmCount > this.warmCapacity)
         {
-            Interlocked.Decrement(ref this.warmCount);
+            _ = Interlocked.Decrement(ref this.warmCount);
 
             if (this.warmQueue.TryDequeue(out LongTickCountLruItem<TKey, TValue>? item))
             {
@@ -298,7 +298,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
             }
             else
             {
-                Interlocked.Increment(ref this.warmCount);
+                _ = Interlocked.Increment(ref this.warmCount);
             }
         }
     }
@@ -307,7 +307,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
     {
         if (this.coldCount > this.coldCapacity)
         {
-            Interlocked.Decrement(ref this.coldCount);
+            _ = Interlocked.Decrement(ref this.coldCount);
 
             if (this.coldQueue.TryDequeue(out LongTickCountLruItem<TKey, TValue>? item))
             {
@@ -324,7 +324,7 @@ internal class ConcurrentTLruCache<TKey, TValue>
             }
             else
             {
-                Interlocked.Increment(ref this.coldCount);
+                _ = Interlocked.Increment(ref this.coldCount);
             }
         }
     }
@@ -338,11 +338,11 @@ internal class ConcurrentTLruCache<TKey, TValue>
         {
             case ItemDestination.Warm:
                 this.warmQueue.Enqueue(item);
-                Interlocked.Increment(ref this.warmCount);
+                _ = Interlocked.Increment(ref this.warmCount);
                 break;
             case ItemDestination.Cold:
                 this.coldQueue.Enqueue(item);
-                Interlocked.Increment(ref this.coldCount);
+                _ = Interlocked.Increment(ref this.coldCount);
                 break;
             case ItemDestination.Remove:
                 if (!item.WasRemoved)

@@ -28,7 +28,7 @@ public sealed class ArrayConverter<T> : ICommandConverter<T[]>
             return Array.Empty<T>();
         }
 
-        List<T> result = new();
+        List<T> result = [];
         foreach (string pill in GetStringArray(value, culture))
         {
             T? item = parser.ParseValue<T>(pill, culture);
@@ -38,7 +38,7 @@ public sealed class ArrayConverter<T> : ICommandConverter<T[]>
             }
         }
 
-        return result.ToArray();
+        return [.. result];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,6 +48,6 @@ public sealed class ArrayConverter<T> : ICommandConverter<T[]>
 
         // TODO: Can we use StringSplit Enumerator here?
         // https://github.com/dotnet/runtime/issues/934
-        return input.Split(separator).Select(s => s.Trim()).ToArray();
+        return [.. input.Split(separator).Select(s => s.Trim())];
     }
 }

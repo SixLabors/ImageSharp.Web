@@ -3,7 +3,7 @@
 
 using Azure.Storage.Blobs;
 
-namespace SixLabors.ImageSharp.Web.Caching.Azure;
+namespace SixLabors.ImageSharp.Web.Azure.Caching;
 
 /// <summary>
 /// Configuration options for the <see cref="AzureBlobStorageCache"/>.

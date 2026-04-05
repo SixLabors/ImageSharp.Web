@@ -3,8 +3,9 @@
 
 using Amazon.S3;
 using Amazon.S3.Model;
+using SixLabors.ImageSharp.Web.Resolvers;
 
-namespace SixLabors.ImageSharp.Web.Resolvers.AWS;
+namespace SixLabors.ImageSharp.Web.AWS.Resolvers;
 
 /// <summary>
 /// Provides means to manage image buffers within the <see cref="AWSS3StorageCacheResolver"/>.
@@ -34,7 +35,7 @@ public class AWSS3StorageCacheResolver : IImageCacheResolver
     /// <inheritdoc/>
     public Task<ImageCacheMetadata> GetMetaDataAsync()
     {
-        Dictionary<string, string> dict = new();
+        Dictionary<string, string> dict = [];
         foreach (string key in this.metadata.Keys)
         {
             // Trim automatically added x-amz-meta-

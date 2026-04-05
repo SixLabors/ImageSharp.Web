@@ -1,7 +1,7 @@
 // Copyright (c) Six Labors.
 // Licensed under the Six Labors Split License.
 
-namespace SixLabors.ImageSharp.Web.Providers.AWS;
+namespace SixLabors.ImageSharp.Web.AWS.Providers;
 
 /// <summary>
 /// Configuration options for the <see cref="AWSS3StorageImageProviderOptions"/> provider.

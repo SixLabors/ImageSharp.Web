@@ -4,8 +4,9 @@
 using System.Net.Http.Headers;
 using Amazon.S3;
 using Amazon.S3.Model;
+using SixLabors.ImageSharp.Web.Resolvers;
 
-namespace SixLabors.ImageSharp.Web.Resolvers.AWS;
+namespace SixLabors.ImageSharp.Web.AWS.Resolvers;
 
 /// <summary>
 /// Provides means to manage image buffers within the AWS S3 file system.

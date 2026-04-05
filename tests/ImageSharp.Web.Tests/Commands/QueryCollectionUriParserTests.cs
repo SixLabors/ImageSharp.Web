@@ -23,9 +23,9 @@ public class QueryCollectionUriParserTests
         Assert.Equal(expected, actual);
     }
 
-    private static HttpContext CreateHttpContext()
+    private static DefaultHttpContext CreateHttpContext()
     {
-        var httpContext = new DefaultHttpContext();
+        DefaultHttpContext httpContext = new();
         httpContext.Request.Path = "/testwebsite.com/image-12345.jpeg";
 
         // Duplicate height param to test replacements

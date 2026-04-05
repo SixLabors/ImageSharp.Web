@@ -22,7 +22,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Extensions.WebEncoders.Testing;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Web.DependencyInjection;
 using SixLabors.ImageSharp.Web.Middleware;
 using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.TagHelpers;
@@ -52,12 +51,16 @@ public sealed class ImageTagHelperTests : IDisposable
         string expectedSrcPrefix)
     {
         // Arrange
+#pragma warning disable IDE0028 // Simplify collection initialization
+#pragma warning disable IDE0306 // Simplify collection initialization
         TagHelperAttributeList allAttributes = new(
             new TagHelperAttributeList
             {
                 { "alt", new HtmlString("Testing") },
                 { "width", 100 },
             });
+#pragma warning restore IDE0306 // Simplify collection initialization
+#pragma warning restore IDE0028 // Simplify collection initialization
 
         TagHelperContext context = MakeTagHelperContext(allAttributes);
         TagHelperAttributeList outputAttributes = new()
@@ -727,7 +730,7 @@ public sealed class ImageTagHelperTests : IDisposable
 
     private static TagHelperOutput MakeImageTagHelperOutput(TagHelperAttributeList attributes)
     {
-        attributes ??= new TagHelperAttributeList();
+        attributes ??= [];
 
         return new TagHelperOutput(
             "img",
@@ -761,14 +764,14 @@ public sealed class ImageTagHelperTests : IDisposable
 
     public void Dispose() => this.Provider.Dispose();
 
-    private class FakeView : IView
+    private sealed class FakeView : IView
     {
         public string Path { get; }
 
         public Task RenderAsync(ViewContext context) => throw new NotSupportedException();
     }
 
-    private class FakeTempDataDictionary : Dictionary<string, object>, ITempDataDictionary
+    private sealed class FakeTempDataDictionary : Dictionary<string, object>, ITempDataDictionary
     {
         public void Keep() => throw new NotSupportedException();
 
@@ -781,7 +784,7 @@ public sealed class ImageTagHelperTests : IDisposable
         public void Save() => throw new NotSupportedException();
     }
 
-    private class FakeWebHostEnvironment : IWebHostEnvironment
+    private sealed class FakeWebHostEnvironment : IWebHostEnvironment
     {
         public string WebRootPath { get; set; }
 
@@ -796,7 +799,7 @@ public sealed class ImageTagHelperTests : IDisposable
         public string EnvironmentName { get; set; }
     }
 
-    private class FakeFileProvider : IFileProvider
+    private sealed class FakeFileProvider : IFileProvider
     {
         public IDirectoryContents GetDirectoryContents(string subpath) => new FakeDirectoryContents();
 
@@ -805,7 +808,7 @@ public sealed class ImageTagHelperTests : IDisposable
         public IChangeToken Watch(string filter) => new FakeFileChangeToken();
     }
 
-    private class FakeFileChangeToken : IChangeToken
+    private sealed class FakeFileChangeToken : IChangeToken
     {
         public FakeFileChangeToken(string filter = "") => this.Filter = filter;
 
@@ -827,7 +830,7 @@ public sealed class ImageTagHelperTests : IDisposable
         public override string ToString() => this.Filter;
     }
 
-    private class FakeDirectoryContents : IDirectoryContents
+    private sealed class FakeDirectoryContents : IDirectoryContents
     {
         public bool Exists { get; }
 
@@ -836,7 +839,7 @@ public sealed class ImageTagHelperTests : IDisposable
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 
-    private class FakeFileInfo : IFileInfo
+    private sealed class FakeFileInfo : IFileInfo
     {
         public bool Exists { get; } = true;
 
@@ -853,12 +856,12 @@ public sealed class ImageTagHelperTests : IDisposable
         public Stream CreateReadStream() => new MemoryStream(Encoding.UTF8.GetBytes("Hello World!"));
     }
 
-    private class FakeUrlHelperFactory : IUrlHelperFactory
+    private sealed class FakeUrlHelperFactory : IUrlHelperFactory
     {
         public IUrlHelper GetUrlHelper(ActionContext context) => new FakeUrlHelper() { ActionContext = context };
     }
 
-    private class FakeUrlHelper : IUrlHelper
+    private sealed class FakeUrlHelper : IUrlHelper
     {
         public ActionContext ActionContext { get; set; }
 
@@ -866,7 +869,7 @@ public sealed class ImageTagHelperTests : IDisposable
 
         // Ensure expanded path does not look like an absolute path on Linux, avoiding
         // https://github.com/aspnet/External/issues/21
-        [return: NotNullIfNotNull("contentPath")]
+        [return: NotNullIfNotNull(nameof(contentPath))]
         public string Content(string contentPath) => contentPath.Replace("~/", "virtualRoot/");
 
         public bool IsLocalUrl([NotNullWhen(true)] string url) => throw new NotSupportedException();

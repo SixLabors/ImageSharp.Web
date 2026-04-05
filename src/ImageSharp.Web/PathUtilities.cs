@@ -15,7 +15,7 @@ internal static class PathUtilities
     internal static string EnsureTrailingSlash(string path)
     {
         if (!string.IsNullOrEmpty(path) &&
-            path[path.Length - 1] != Path.DirectorySeparatorChar)
+            path[^1] != Path.DirectorySeparatorChar)
         {
             return path + Path.DirectorySeparatorChar;
         }

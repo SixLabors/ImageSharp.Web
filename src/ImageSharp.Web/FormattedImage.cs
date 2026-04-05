@@ -101,9 +101,6 @@ public sealed class FormattedImage : IDisposable
     internal static async Task<FormattedImage> LoadAsync<TPixel>(DecoderOptions options, Stream source)
         where TPixel : unmanaged, IPixel<TPixel>
     {
-        // TODO: We want to be able to apply decoder options per request.
-        // For example. If a resize command has been passed with no extra resampling options
-        // then we should apply those changes on decode. This will allow memory savings and performance improvements.
         Image<TPixel> image = await Image.LoadAsync<TPixel>(options, source);
         return new FormattedImage(image, image.Metadata.DecodedImageFormat!, false);
     }

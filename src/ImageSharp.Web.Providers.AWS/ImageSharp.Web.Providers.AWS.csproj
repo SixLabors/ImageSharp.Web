@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>SixLabors.ImageSharp.Web.Providers.AWS</AssemblyName>
     <AssemblyTitle>SixLabors.ImageSharp.Web.Providers.AWS</AssemblyTitle>
-    <RootNamespace>SixLabors.ImageSharp.Web</RootNamespace>
+    <RootNamespace>SixLabors.ImageSharp.Web.AWS</RootNamespace>
     <PackageId>SixLabors.ImageSharp.Web.Providers.AWS</PackageId>
     <PackageIcon>sixlabors.imagesharp.web.128.png</PackageIcon>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -20,19 +20,19 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!--Bump to V3 prior to tagged release.-->
-    <MinVerMinimumMajorMinor>3.0</MinVerMinimumMajorMinor>
+    <!--Bump to V4 prior to tagged release.-->
+    <MinVerMinimumMajorMinor>4.0</MinVerMinimumMajorMinor>
   </PropertyGroup>
 
   <Choose>
     <When Condition="$(SIXLABORS_TESTING_PREVIEW) == true">
       <PropertyGroup>
-        <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+        <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
       </PropertyGroup>
     </When>
     <Otherwise>
       <PropertyGroup>
-        <TargetFrameworks>net6.0</TargetFrameworks>
+        <TargetFrameworks>net8.0</TargetFrameworks>
       </PropertyGroup>
     </Otherwise>
   </Choose>

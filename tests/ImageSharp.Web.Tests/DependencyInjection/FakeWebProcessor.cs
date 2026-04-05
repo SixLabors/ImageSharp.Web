@@ -8,7 +8,7 @@ using SixLabors.ImageSharp.Web.Processors;
 
 namespace SixLabors.ImageSharp.Web.Tests.DependencyInjection;
 
-public class MockWebProcessor : IImageWebProcessor
+public class FakeWebProcessor : IImageWebProcessor
 {
     public IEnumerable<string> Commands => Array.Empty<string>();
 

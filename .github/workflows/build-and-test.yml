@@ -4,42 +4,90 @@ on:
   push:
     branches:
       - main
+      - release/*
     tags:
       - "v*"
   pull_request:
     branches:
       - main
+      - release/*
+    types: [ opened, synchronize, reopened ]
 
 jobs:
+  # Prime a single LFS cache and expose the exact key for the matrix
+  WarmLFS:
+    runs-on: ubuntu-latest
+    outputs:
+      lfs_key: ${{ steps.expose-key.outputs.lfs_key }}
+    steps:
+      - name: Git Config
+        shell: bash
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.longpaths true
+
+      - name: Git Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      # Deterministic list of LFS object IDs, then compute a portable key:
+      # - `git lfs ls-files -l` lists all tracked LFS objects with their SHA-256
+      # - `awk '{print $1}'` extracts just the SHA field
+      # - `sort` sorts in byte order (hex hashes sort the same everywhere)
+      # This ensures the file content is identical regardless of OS or locale
+      - name: Git Create LFS id list
+        shell: bash
+        run: git lfs ls-files -l | awk '{print $1}' | sort > .lfs-assets-id
+
+      - name: Git Expose LFS cache key
+        id: expose-key
+        shell: bash
+        env:
+          LFS_KEY: lfs-${{ hashFiles('.lfs-assets-id') }}-v1
+        run: echo "lfs_key=$LFS_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Git Setup LFS Cache
+        uses: actions/cache@v5
+        with:
+          path: .git/lfs
+          key: ${{ steps.expose-key.outputs.lfs_key }}
+
+      - name: Git Pull LFS
+        shell: bash
+        run: git lfs pull
+
   Build:
+    needs: WarmLFS
     strategy:
       matrix:
         options:
           - os: ubuntu-latest
-            framework: net7.0
+            framework: net10.0
             sdk-preview: true
             runtime: -x64
             codecov: false
           - os: macos-latest
-            framework: net7.0
+            framework: net10.0
             sdk-preview: true
             runtime: -x64
             codecov: false
           - os: windows-latest
-            framework: net7.0
+            framework: net10.0
             sdk-preview: true
             runtime: -x64
             codecov: true
           - os: ubuntu-latest
-            framework: net6.0
+            framework: net8.0
             runtime: -x64
             codecov: false
           - os: macos-latest
-            framework: net6.0
+            framework: net8.0
             runtime: -x64
             codecov: false
           - os: windows-latest
-            framework: net6.0
+            framework: net8.0
             runtime: -x64
             codecov: false
 
@@ -58,25 +106,22 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
-      # See https://github.com/actions/checkout/issues/165#issuecomment-657673315
-      - name: Git Create LFS FileList
-        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
-
+      # Use the warmed key from WarmLFS. Do not recompute or recreate .lfs-assets-id here.
       - name: Git Setup LFS Cache
-        uses: actions/cache@v4
-        id: lfs-cache
+        uses: actions/cache@v5
         with:
           path: .git/lfs
-          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}-v1
+          key: ${{ needs.WarmLFS.outputs.lfs_key }}
 
       - name: Git Pull LFS
+        shell: bash
         run: git lfs pull
 
       - name: NuGet Install
         uses: NuGet/setup-nuget@v2
 
       - name: NuGet Setup Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: nuget-cache
         with:
           path: ~/.nuget
@@ -112,11 +157,18 @@ jobs:
           s3rver -d . &
 
       - name: DotNet Setup
-        uses: actions/setup-dotnet@v4
+        if: ${{ matrix.options.sdk-preview != true }}
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: |
-            7.0.x
-            6.0.x
+            8.0.x
+
+      - name: DotNet Setup Preview
+        if: ${{ matrix.options.sdk-preview == true }}
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            10.0.x
 
       - name: DotNet Build
         if: ${{ matrix.options.sdk-preview != true }}
@@ -153,6 +205,7 @@ jobs:
         if: matrix.options.codecov == true && startsWith(github.repository, 'SixLabors')
         with:
           flags: unittests
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   Publish:
     needs: [Build]
@@ -178,7 +231,7 @@ jobs:
         uses: NuGet/setup-nuget@v2
 
       - name: NuGet Setup Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: nuget-cache
         with:
           path: ~/.nuget

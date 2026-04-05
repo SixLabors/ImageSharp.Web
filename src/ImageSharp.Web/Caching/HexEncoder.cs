@@ -12,13 +12,13 @@ namespace SixLabors.ImageSharp.Web.Caching;
 internal static class HexEncoder
 {
     // LUT's that provide the hexidecimal representation of each possible byte value.
-    private static readonly char[] HexLutBase = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+    private static readonly char[] HexLutBase = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
 
     // The base LUT arranged in 16x each item order. 0 * 16, 1 * 16, .... F * 16
-    private static readonly char[] HexLutHi = Enumerable.Range(0, 256).Select(x => HexLutBase[x / 0x10]).ToArray();
+    private static readonly char[] HexLutHi = [.. Enumerable.Range(0, 256).Select(x => HexLutBase[x / 0x10])];
 
     // The base LUT repeated 16x.
-    private static readonly char[] HexLutLo = Enumerable.Range(0, 256).Select(x => HexLutBase[x % 0x10]).ToArray();
+    private static readonly char[] HexLutLo = [.. Enumerable.Range(0, 256).Select(x => HexLutBase[x % 0x10])];
 
     /// <summary>
     /// Converts a <see cref="ReadOnlySpan{Byte}"/> to a hexidecimal formatted <see cref="string"/> padded to 2 digits.
@@ -32,7 +32,7 @@ internal static class HexEncoder
         {
             return string.Create(bytes.Length * 2, (Ptr: (IntPtr)bytesPtr, bytes.Length), (chars, args) =>
             {
-                var ros = new ReadOnlySpan<byte>((byte*)args.Ptr, args.Length);
+                ReadOnlySpan<byte> ros = new((byte*)args.Ptr, args.Length);
                 EncodeToUtf16(ros, chars);
             });
         }

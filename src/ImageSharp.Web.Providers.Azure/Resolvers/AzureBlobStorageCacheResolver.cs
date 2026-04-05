@@ -3,9 +3,10 @@
 
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using SixLabors.ImageSharp.Web.Caching.Azure;
+using SixLabors.ImageSharp.Web.Azure.Caching;
+using SixLabors.ImageSharp.Web.Resolvers;
 
-namespace SixLabors.ImageSharp.Web.Resolvers.Azure;
+namespace SixLabors.ImageSharp.Web.Azure.Resolvers;
 
 /// <summary>
 /// Provides means to manage image buffers within the <see cref="AzureBlobStorageCache"/>.

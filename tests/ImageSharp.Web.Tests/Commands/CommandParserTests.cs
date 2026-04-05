@@ -12,7 +12,7 @@ namespace SixLabors.ImageSharp.Web.Tests.Commands;
 public class CommandParserTests
 {
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
-    private static readonly CultureInfo Dk = new CultureInfo("da-DK");
+    private static readonly CultureInfo Dk = new("da-DK");
 
     private const double Pi = 3.14159265358979;
     private static readonly string PiStringInv = Pi.ToString(CultureInfo.InvariantCulture);
@@ -63,7 +63,7 @@ public class CommandParserTests
         { (long)RoundedPi, PiStringInv, Inv },
         { (ulong)RoundedPi, PiStringInv, Inv },
         { (float)Pi, PiStringInv, Inv },
-        { (double)Pi, PiStringInv, Inv },
+        { Pi, PiStringInv, Inv },
         { (decimal)Pi, PiStringInv, Inv },
     };
 
@@ -79,7 +79,7 @@ public class CommandParserTests
         { (long)RoundedPi, PiStringDk, Dk },
         { (ulong)RoundedPi, PiStringDk, Dk },
         { (float)Pi, PiStringDk, Dk },
-        { (double)Pi, PiStringDk, Dk },
+        { Pi, PiStringDk, Dk },
         { (decimal)Pi, PiStringDk, Dk },
     };
 
@@ -169,7 +169,7 @@ public class CommandParserTests
     [Fact]
     public void CommandParseThrowsCorrectly()
     {
-        var emptyParser = new CommandParser(Array.Empty<ICommandConverter>());
+        CommandParser emptyParser = new(Array.Empty<ICommandConverter>());
 
         Assert.Throws<NotSupportedException>(
             () => emptyParser.ParseValue<bool>("true", CultureInfo.InvariantCulture));
@@ -177,8 +177,8 @@ public class CommandParserTests
 
     private static CommandParser GetCommandParser()
     {
-        var converters = new List<ICommandConverter>
-        {
+        List<ICommandConverter> converters =
+        [
             new IntegralNumberConverter<sbyte>(),
             new IntegralNumberConverter<byte>(),
             new IntegralNumberConverter<short>(),
@@ -224,7 +224,7 @@ public class CommandParserTests
             new ListConverter<double>(),
             new ListConverter<string>(),
             new ListConverter<bool>()
-        };
+        ];
 
         return new CommandParser(converters);
     }
@@ -232,12 +232,14 @@ public class CommandParserTests
     private static string ToNumericList<T>(CultureInfo culture, params T[] values)
         where T : IConvertible
     {
-        var sb = new StringBuilder();
-        var ls = culture.TextInfo.ListSeparator[0];
+        StringBuilder sb = new();
+        char ls = culture.TextInfo.ListSeparator[0];
 
         for (int i = 0; i < values.Length; i++)
         {
+#pragma warning disable CA1305 // Specify IFormatProvider
             sb.AppendFormat(values[i].ToString(culture) + ls);
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
 
         return sb.ToString().TrimEnd(ls);
