@@ -23,13 +23,14 @@ public class BackgroundColorWebProcessorTests
             { new(BackgroundColorWebProcessor.Color, nameof(Color.Orange)) }
         };
 
-        using var image = new Image<Rgba32>(1, 1);
-        Assert.True(Color.Transparent.Equals(image[0, 0]));
+        using Image<Rgba32> image = new(1, 1);
 
-        using var formatted = new FormattedImage(image, PngFormat.Instance);
+        Assert.Equal(Color.Transparent.ToPixel<Rgba32>(), image[0, 0]);
+
+        using FormattedImage formatted = new(image, PngFormat.Instance);
         new BackgroundColorWebProcessor().Process(formatted, null, commands, parser, culture);
 
-        Assert.True(Color.Orange.Equals(image[0, 0]));
+        Assert.Equal(Color.Orange.ToPixel<Rgba32>(), image[0, 0]);
     }
 
     [Theory]
