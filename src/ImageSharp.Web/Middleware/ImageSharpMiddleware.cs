@@ -349,7 +349,7 @@ public class ImageSharpMiddleware
 
                                 // If custom decoder options have not been provided and we know our options are the
                                 // default options it is safe to configure the decoder options to convert color profiles
-                                // since we know tha the JPEG encder will always use YCbCr encoding instead of preserving the
+                                // since we know tha the JPEG encoder will always use YCbCr encoding instead of preserving the
                                 // original color encoding (potentially CMYK, Ycck) which can cause color loss.
                                 // Compaction is always safe as this simply removes sRGB color profile data from the image
                                 // metadata which is not required for correct processing.
