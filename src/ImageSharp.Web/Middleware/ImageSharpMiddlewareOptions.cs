@@ -9,6 +9,7 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Web.Commands;
+using SixLabors.ImageSharp.Web.Processors;
 using SixLabors.ImageSharp.Web.Providers;
 
 namespace SixLabors.ImageSharp.Web.Middleware;
@@ -31,7 +32,20 @@ public class ImageSharpMiddlewareOptions
         return HMACUtilities.ComputeHMACSHA256(uri, secret);
     };
 
-    private Func<ImageCommandContext, Task> onParseCommandsAsync = _ => Task.CompletedTask;
+    private Func<ImageCommandContext, Task> onParseCommandsAsync = context =>
+    {
+        // WEBP EXIF orientation is ignored by browsers.
+        // https://zpl.fi/exif-orientation-in-different-formats/
+        // To ensure that orientation is handled correctly for web use we transparently add the auto-orient command if it is not already present.
+        // See issues #304, #375, and #381 for more details.
+        if (!context.Commands.Contains(AutoOrientWebProcessor.AutoOrient))
+        {
+            context.Commands.Insert(0, new KeyValuePair<string, string?>(AutoOrientWebProcessor.AutoOrient, bool.TrueString));
+        }
+
+        return Task.CompletedTask;
+    };
+
     private Func<ImageCommandContext, Configuration, Task<DecoderOptions?>> onBeforeLoadAsync = (_, _) => Task.FromResult<DecoderOptions?>(null);
     private Func<FormattedImage, Task> onBeforeSaveAsync = _ => Task.CompletedTask;
     private Func<ImageProcessingContext, Task> onProcessedAsync = _ => Task.CompletedTask;

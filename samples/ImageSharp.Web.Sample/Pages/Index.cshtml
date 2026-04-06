@@ -125,20 +125,23 @@
     <hr />
     <section>
         <h2>ICC Profiles</h2>
+        <p>
+        Demonstrates that ICC Profiles are converted to sRGB by default ensuring correct display of images with embedded profiles.
+        </p>
     <div>
         <p>
-            <code>issue_2723.jpg?width=2000</code>
+            <code>issue_2723.jpg?width=1000</code>
         </p>
         <p>
-            <img src="issue_2723.jpg" imagesharp-width="2000" />
+            <img src="issue_2723.jpg" imagesharp-width="1000" />
         </p>
     </div>
     <div>
         <p>
-            <code>issue_2723.jpg?width=2000&format=webp</code>
+            <code>issue_2723.jpg?width=1000&format=webp</code>
         </p>
         <p>
-            <img src="issue_2723.jpg" imagesharp-width="2000" imagesharp-format="Format.WebP" />
+            <img src="issue_2723.jpg" imagesharp-width="1000" imagesharp-format="Format.WebP" />
         </p>
     </div>
     </section>
@@ -308,7 +311,20 @@
             </p>
         </div>
     </section>
-
+    <hr />
+    <section>
+        <h2>EXIF AutoOrientation</h2>
+        <p>Demonstrates that by default EXIF orientation is normalized enabling correct display of WEBP images.</p>
+    <div>
+        <p>
+            <code>Exif5-1x.webp?width=128</code>
+        </p>
+        <p>
+            <img src="Exif5-1x.webp" imagesharp-width="128"/>
+        </p>
+    </div>
+    </section>
+    <hr />
     <section>
         <h2>EXIF Handling Portrait</h2>
         <p>Demonstrates that the middleware handles EXIF orientation correctly for portrait images.</p>
