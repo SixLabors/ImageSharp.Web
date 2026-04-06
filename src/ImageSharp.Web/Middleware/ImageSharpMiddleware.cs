@@ -344,8 +344,22 @@ public class ImageSharpMiddleware
 
                         await using (Stream inStream = await sourceImageResolver.OpenReadAsync())
                         {
-                            DecoderOptions decoderOptions = await this.options.OnBeforeLoadAsync.Invoke(imageCommandContext, this.options.Configuration)
-                                ?? new() { Configuration = this.options.Configuration };
+                            DecoderOptions decoderOptions =
+                                await this.options.OnBeforeLoadAsync.Invoke(imageCommandContext, this.options.Configuration)
+
+                                // If custom decoder options have not been provided and we know our options are the
+                                // default options it is safe to configure the decoder options to convert color profiles
+                                // since we know tha the JPEG encoder will always use YCbCr encoding instead of preserving the
+                                // original color encoding (potentially CMYK, Ycck) which can cause color loss.
+                                // Compaction is always safe as this simply removes sRGB color profile data from the image
+                                // metadata which is not required for correct processing.
+                                ?? new()
+                                {
+                                    Configuration = this.options.Configuration,
+                                    ColorProfileHandling = this.options.HasDefaultConfiguration
+                                    ? ColorProfileHandling.Convert
+                                    : ColorProfileHandling.Compact
+                                };
 
                             FormattedImage? image = null;
                             try

@@ -5,6 +5,9 @@ using System.Globalization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Web.Commands;
 using SixLabors.ImageSharp.Web.Providers;
 
@@ -15,6 +18,8 @@ namespace SixLabors.ImageSharp.Web.Middleware;
 /// </summary>
 public class ImageSharpMiddlewareOptions
 {
+    private static readonly Configuration DefaultConfiguration = CreateDefaultConfiguration();
+
     private Func<ImageCommandContext, byte[], string> onComputeHMAC = (context, secret) =>
     {
         string uri = CaseHandlingUriBuilder.BuildRelative(
@@ -35,7 +40,12 @@ public class ImageSharpMiddlewareOptions
     /// <summary>
     /// Gets or sets the base library configuration.
     /// </summary>
-    public Configuration Configuration { get; set; } = Configuration.Default;
+    public Configuration Configuration { get; set; } = DefaultConfiguration;
+
+    /// <summary>
+    /// Gets a value indicating whether the current configuration is the default configuration.
+    /// </summary>
+    internal bool HasDefaultConfiguration => ReferenceEquals(this.Configuration, DefaultConfiguration);
 
     /// <summary>
     /// Gets or sets the recyclable memorystream manager used for managing pooled stream
@@ -175,5 +185,34 @@ public class ImageSharpMiddlewareOptions
             Guard.NotNull(value, nameof(this.OnPrepareResponseAsync));
             this.onPrepareResponseAsync = value;
         }
+    }
+
+    private static Configuration CreateDefaultConfiguration()
+    {
+        // Build a Configuration for the requests that replaces the default JPEG, PNG, and WebP encoders
+        // with ones with compression options that are more suitable for web use.
+        // We do not skip metadata as that can affect things like orientation.
+        Configuration configuration = Configuration.Default.Clone();
+        configuration.ImageFormatsManager.SetEncoder(JpegFormat.Instance, new JpegEncoder()
+        {
+            Quality = 75,
+            Progressive = true,
+            Interleaved = true,
+            ColorType = JpegColorType.YCbCrRatio420,
+        });
+
+        configuration.ImageFormatsManager.SetEncoder(PngFormat.Instance, new PngEncoder()
+        {
+            CompressionLevel = PngCompressionLevel.BestCompression,
+            FilterMethod = PngFilterMethod.Adaptive,
+        });
+
+        configuration.ImageFormatsManager.SetEncoder(WebpFormat.Instance, new WebpEncoder()
+        {
+            Quality = 75,
+            Method = WebpEncodingMethod.BestQuality,
+        });
+
+        return configuration;
     }
 }
