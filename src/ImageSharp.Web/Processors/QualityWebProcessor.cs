@@ -56,7 +56,10 @@ public class QualityWebProcessor : IImageWebProcessor
                         Quality = quality,
                         Interleaved = reference.Interleaved,
                         ColorType = reference.ColorType,
-                        SkipMetadata = reference.SkipMetadata
+                        Progressive = reference.Progressive,
+                        ProgressiveScans = reference.ProgressiveScans,
+                        SkipMetadata = reference.SkipMetadata,
+                        RestartInterval = reference.RestartInterval
                     };
                 }
             }
