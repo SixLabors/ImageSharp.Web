@@ -38,7 +38,7 @@ public class ImageSharpMiddlewareOptions
         // https://zpl.fi/exif-orientation-in-different-formats/
         // To ensure that orientation is handled correctly for web use we transparently add the auto-orient command if it is not already present.
         // See issues #304, #375, and #381 for more details.
-        if (!context.Commands.Contains(AutoOrientWebProcessor.AutoOrient))
+        if (context.Commands.Count > 0 && !context.Commands.Contains(AutoOrientWebProcessor.AutoOrient))
         {
             context.Commands.Insert(0, new KeyValuePair<string, string?>(AutoOrientWebProcessor.AutoOrient, bool.TrueString));
         }
