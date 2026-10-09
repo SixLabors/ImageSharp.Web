@@ -20,8 +20,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!--Bump to V3 prior to tagged release.-->
-    <MinVerMinimumMajorMinor>3.0</MinVerMinimumMajorMinor>
+    <!--Set the minimum version for the release branch.-->
+    <MinVerMinimumMajorMinor>3.3</MinVerMinimumMajorMinor>
   </PropertyGroup>
 
   <Choose>
