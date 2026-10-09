@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AssemblyTitle>SixLabors.ImageSharp.Web</AssemblyTitle>
@@ -20,8 +20,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!--Bump to V3 prior to tagged release.-->
-    <MinVerMinimumMajorMinor>3.0</MinVerMinimumMajorMinor>
+    <!--Set the minimum version for the release branch.-->
+    <MinVerMinimumMajorMinor>3.3</MinVerMinimumMajorMinor>
   </PropertyGroup>
 
   <Choose>
@@ -46,7 +46,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.2.0" />
   </ItemGroup>
 
   <Import Project="..\..\shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems" Label="Shared" />

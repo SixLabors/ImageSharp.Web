@@ -4,44 +4,31 @@ on:
   push:
     branches:
       - main
+      - release/*
     tags:
       - "v*"
   pull_request:
     branches:
       - main
+      - release/*
 
 jobs:
   Build:
     strategy:
       matrix:
         options:
-          - os: ubuntu-latest
-            framework: net7.0
-            sdk-preview: true
+          - os: ubuntu-22.04
+            framework: net6.0
             runtime: -x64
             codecov: false
-          - os: macos-latest
-            framework: net7.0
-            sdk-preview: true
+          - os: macos-26-intel
+            framework: net6.0
             runtime: -x64
             codecov: false
-          - os: windows-latest
-            framework: net7.0
-            sdk-preview: true
+          - os: windows-2022
+            framework: net6.0
             runtime: -x64
             codecov: true
-          - os: ubuntu-latest
-            framework: net6.0
-            runtime: -x64
-            codecov: false
-          - os: macos-latest
-            framework: net6.0
-            runtime: -x64
-            codecov: false
-          - os: windows-latest
-            framework: net6.0
-            runtime: -x64
-            codecov: false
 
     runs-on: ${{matrix.options.os}}
 
@@ -84,28 +71,28 @@ jobs:
           restore-keys: ${{ runner.os }}-nuget-
 
       - name: Azurite Setup
-        if: matrix.options.os != 'windows-latest'
+        if: matrix.options.os != 'windows-2022'
         shell: bash
         run: |
           sudo npm install -g azurite
           sudo azurite --loose --skipApiVersionCheck &
 
       - name: Azurite Setup Windows
-        if: matrix.options.os == 'windows-latest'
+        if: matrix.options.os == 'windows-2022'
         shell: bash
         run: |
           npm install -g azurite
           azurite --loose --skipApiVersionCheck &
 
       - name: S3rver Setup
-        if: matrix.options.os != 'windows-latest'
+        if: matrix.options.os != 'windows-2022'
         shell: bash
         run: |
           sudo npm install -g s3rver
           sudo s3rver -d . &
 
       - name: S3rver Setup Windows
-        if: matrix.options.os == 'windows-latest'
+        if: matrix.options.os == 'windows-2022'
         shell: bash
         run: |
           npm install -g s3rver
@@ -115,37 +102,19 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
-            7.0.x
             6.0.x
 
       - name: DotNet Build
-        if: ${{ matrix.options.sdk-preview != true }}
         shell: pwsh
         run: ./ci-build.ps1 "${{matrix.options.framework}}"
         env:
           SIXLABORS_TESTING: True
-
-      - name: DotNet Build Preview
-        if: ${{ matrix.options.sdk-preview == true }}
-        shell: pwsh
-        run: ./ci-build.ps1 "${{matrix.options.framework}}"
-        env:
-          SIXLABORS_TESTING_PREVIEW: True
 
       - name: DotNet Test
-        if: ${{ matrix.options.sdk-preview != true }}
         shell: pwsh
         run: ./ci-test.ps1 "${{matrix.options.os}}" "${{matrix.options.framework}}" "${{matrix.options.runtime}}" "${{matrix.options.codecov}}"
         env:
           SIXLABORS_TESTING: True
-          XUNIT_PATH: .\tests\ImageSharp.Web.Tests # Required for xunit
-
-      - name: DotNet Test Preview
-        if: ${{ matrix.options.sdk-preview == true }}
-        shell: pwsh
-        run: ./ci-test.ps1 "${{matrix.options.os}}" "${{matrix.options.framework}}" "${{matrix.options.runtime}}" "${{matrix.options.codecov}}"
-        env:
-          SIXLABORS_TESTING_PREVIEW: True
           XUNIT_PATH: .\tests\ImageSharp.Web.Tests # Required for xunit
 
       - name: Codecov Update
@@ -157,7 +126,7 @@ jobs:
   Publish:
     needs: [Build]
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     if: (github.event_name == 'push')
 
